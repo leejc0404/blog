@@ -1,0 +1,21 @@
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# ─────────────────────────────────────────────
+# 자격 증명 — 어떤 형태로도 커밋하지 않는다
+# 로컬 폴더(C:\Users\win\.claude\blog)에 저장소를 클론하면
+# pw.txt가 작업 트리 안에 놓이므로 반드시 여기서 막는다
+# ─────────────────────────────────────────────
+pw.txt
+pw.*.txt
+*password*
+*credential*
+.env
+.env.*
+*.key
+*.pem
+secrets/
