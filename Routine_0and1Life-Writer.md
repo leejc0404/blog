@@ -164,7 +164,7 @@ HTML 본문 → [가이드 HTML 템플릿]: GeneratePress 기반 구조 준수. 
 ⑤ ②③이 모두 실패하면 내부 링크를 1개로 줄이고 STEP 8에 그 사실을 기록한다 (추측 링크보다 낫다).
 테마 컬러 → [가이드 카테고리-페이지 ID 매핑]: 서브카테고리별 헥사코드 적용.
 💰 직장인 재테크 / 📊 업무에서 AI 활용법 / ⚙️ 실생활 AI 활용법 / 📈 핫한 AI 트렌드 / 🏠 Life·My Story / 💍 Wedding
-(✅ 2026-07-26 확인 완료 — WP 카테고리 등록 확정: 💼 대기업 직장인 생활 = WP ID 29, slug corporate-worker-life / ⏱️ 시간·돈 절약 시스템 = WP ID 30, slug time-money-saving. 0and1Life는 카테고리별 Notion 컨테이너 페이지를 쓰지 않으므로 두 카테고리에 바로 배정한다 — 舊 임시 배정 규칙 폐기. 디저트·핫플 공략 글은 Life 배정)
+(✅ 2026-07-26 확인 완료 — WP 카테고리 등록 확정: 💼 대기업 직장인 생활 = WP ID 29, slug corporate-worker-life / ⏱️ 시간·돈 절약 시스템 = WP ID 30, slug time-money-saving. 두 카테고리에 바로 배정한다 — 舊 임시 배정 규칙 폐기. 디저트·핫플 공략 글은 Life 배정. 확정된 카테고리에 대응하는 초안 보관 방은 STEP 6 표 참조 — 2026-07-26 신설)
 GAP_REPORT ⭐ 각도를 H2 1개에 반드시 반영.
 
 [5-2] Skill avoid-ai-writing 호출 — 최종 패스 (HTML 완성 직후, Notion 업로드 전)
@@ -176,11 +176,19 @@ GAP_REPORT ⭐ 각도를 H2 1개에 반드시 반영.
 
 STEP 6 — Create Notion Page
 ⚠️ parent는 반드시 tool call의 최상위 파라미터로 지정 (pages[] 배열 내부 금지).
-⚠️ 수정 2026-07-26: 0and1Life는 **카테고리별 Notion 컨테이너 페이지를 쓰지 않는다** (가이드 확정). 舊 "해당 서브카테고리 Notion 페이지 하위에 생성" 지시는 존재하지 않는 페이지를 가리키던 오류.
-parent는 카테고리 계열에 따라 아래 두 페이지 중 하나로 고정한다:
-- [0] 계열 (📊 업무 AI / ⚙️ 실생활 AI / 📈 AI 트렌드 / 💰 직장인 재테크 / 💼 대기업 직장인 생활 / ⏱️ 시간·돈 절약 시스템) → `⚙️ [0] 블로그 글 — 테크와 효율` page_id: 37cbfe4a-2ae1-819f-8664-ff3d38fffe56
-- [1] 계열 (🏠 Life·My Story / 💍 Wedding / 디저트·핫플 공략) → `🌱 [1] 블로그 글 — 나의 이야기·라이프` page_id: 37cbfe4a-2ae1-81b9-a9ce-d0b937edd344
-(이 parent 선택은 STEP 7에서 갱신할 현황표와 반드시 같은 계열이어야 한다 — 0and1life-wordpress-draft가 두 현황표에서 후보를 수집하기 때문.)
+⚠️ 수정 2026-07-26 (2차): 카테고리별 **초안 보관 방**을 신설했다. parent는 STEP 5-1에서 확정한 카테고리에 따라 아래 6개 방 중 하나로 지정한다. 방은 **WordPress 카테고리와 1:1**이라 AI 3종은 방 하나를 공유한다 (WP에서 모두 `18`).
+
+| 확정 카테고리 | parent 방 page_id | WP ID |
+|---|---|---|
+| 📊 업무에서 AI 활용법 / ⚙️ 실생활 AI 활용법 / 📈 핫한 AI 트렌드 | `3a9bfe4a-2ae1-8194-85db-cc0d029dbbd3` (📊 AI 활용) | 18 |
+| 💰 직장인 재테크 | `3a9bfe4a-2ae1-8144-93b1-c2b1cd50bc4d` | 23 |
+| 💼 대기업 직장인 생활 | `3a9bfe4a-2ae1-813d-b13b-cf2284c9f009` | 29 |
+| ⏱️ 시간·돈 절약 시스템 | `3a9bfe4a-2ae1-81fc-98e2-d1d55449ed41` | 30 |
+| 💍 Wedding | `3a9bfe4a-2ae1-817f-9b02-ceee29f98bff` | 1 |
+| 🏠 Life·My Story / 디저트·핫플 공략 | `3a9bfe4a-2ae1-8139-9c8a-e16c92bc081e` | 1 |
+
+⚠️ 방과 현황표는 **계열이 일치해야 한다** — 위 표의 앞 4개는 `[0]` 계열이므로 STEP 7에서 `[0]` 현황표(37cbfe4a-2ae1-819f-8664-ff3d38fffe56)를, 뒤 2개는 `[1]` 계열이므로 `[1]` 현황표(37cbfe4a-2ae1-81b9-a9ce-d0b937edd344)를 갱신한다. 계열이 어긋나면 0and1life-wordpress-draft가 글을 찾지 못한다.
+(배포 루틴 `[4a]`는 notion-search 우선 방식이라 방 구조와 무관하게 동작한다 — 2026-07-26 수정분.)
 제목: Blog #XX — {포스트 제목} (XX = MAX_NUM + 1)
 
 🗄️ **초안 서브페이지는 영구 보존한다 (신설 2026-07-26 — KoreaPlug와 동일 정책).**
