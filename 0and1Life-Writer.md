@@ -299,6 +299,12 @@ Sub Keywords (핵심 + 1단어, 자동완성 기준): 노션 자동화 기능 / 
   <!-- 본문 섹션 (H2 최소 5개, 각 소제목에 키워드 자연 배치) -->
   <h2 style="font-size:22px; font-weight:700; color:[THEME_COLOR]; border-left:4px solid [THEME_COLOR]; padding-left:14px; margin:38px 0 16px;">[H2_TITLE]</h2>
 
+  <!-- 자주 묻는 질문 (AEO FAQ 섹션, Q&A 3개 이상 — 마크업 고정, 임의 변경 금지) -->
+  <h2 style="font-size:22px; font-weight:700; color:[THEME_COLOR]; border-left:4px solid [THEME_COLOR]; padding-left:14px; margin:38px 0 16px;">자주 묻는 질문</h2>
+  <p><strong>Q. [질문 1]</strong><br>[답변 1]</p>
+  <p><strong>Q. [질문 2]</strong><br>[답변 2]</p>
+  <p><strong>Q. [질문 3]</strong><br>[답변 3]</p>
+
   <!-- 실전 핵심 정리 박스 (본문 하단) -->
   <div style="background:#f0fdf4; border:2px solid #86efac; border-radius:12px; padding:24px 28px; margin:36px 0;">
     <ul>
@@ -415,7 +421,7 @@ Sub Keywords (핵심 + 1단어, 자동완성 기준): 노션 자동화 기능 / 
 
 - [ ] **① [AEO] 첫 200단어 안에 직답**: 공감 유도 문단에 핵심 답 1문장을 반드시 포함 — AI가 발췌할 수 있는 요약이 글 초반에 있어야 한다
 - [ ] **② [AEO] 질문형 H2 + 직답 첫 문장**: H2 중 2개 이상을 실제 검색 질문 형태로 쓰고, 바로 아래 첫 문장에서 40~60자로 먼저 답한 뒤 설명을 이어간다
-- [ ] **③ [AEO] FAQ 섹션 필수화**: 자동완성·관련검색어에서 수집한 실제 질문 문구와 일치하는 Q&A 3개 이상 포함
+- [ ] **③ [AEO] FAQ 섹션 필수화**: 자동완성·관련검색어에서 수집한 실제 질문 문구와 일치하는 Q&A 3개 이상 포함. **반드시 2-3 HTML 템플릿의 FAQ 마크업(`<p><strong>Q. ...</strong><br>...</p>`)을 그대로 사용** — Cowork 배포 루틴(`Schd_0and1Life-Draft.md` [4e])이 이 정확한 형태만 정규식으로 인식해 FAQPage 스키마를 자동 생성한다. `<h3>`나 `<dl>` 등 다른 마크업을 쓰면 오류 없이 조용히 스키마가 누락된다.
 - [ ] **④ [GEO] 통계·수치 3개 이상 + 출처 병기**: 수치는 반드시 출처(공식 통계·기관·실측 데이터)와 함께 — 통계는 AI 인용률을 약 30% 높인다
 - [ ] **⑤ [GEO] 전문가·공식 인용 1개 이상**: 공식 발표·기관 문서·전문가 발언을 인용 부호와 출처 링크로 명시 — 인용률 약 41% 상승 요인
 - [ ] **⑥ [AEO·GEO 공통] 구조화 유지**: 3줄 스니펫 박스(기존 [GEO] 박스) + 비교표·리스트 구조 포함, Rank Math에서 Article + FAQ 스키마 설정, 수정일(dateModified) 90일 이내 유지(오래된 글은 월간 루프에서 갱신)
