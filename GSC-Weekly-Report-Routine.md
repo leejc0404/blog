@@ -39,6 +39,42 @@ koreaplug.com과 0and1life.com 두 블로그의 SEO 상태를 주간 점검하�
 - 네이버 상위 글: https://analytics.google.com/analytics/web/?hl=ko#/a393066616p540835629/reports/explorer?params=_u..nav%3Dmaui%26_r.explorerCard..seldim%3D%5B%22unifiedPagePathScreen%22,%22sessionSourceMedium%22%5D%26_r.explorerCard..rowsPerPage%3D50&r=all-pages-and-screens 에서 naver 포함 행 추출 (주요 추적 슬러그: propose-necklace-ring-bag-guide, employee-welfare-fund-loan, ai-counseling-guide-workers, signiel-hotel-proposal-guide — 이 외 새로 상위권에 진입한 글이 있으면 함께 기록)
 - 위 모든 수치를 STEP 0에서 읽은 0and1Life 최신 기준치와 비교해 증감을 계산한다
 
+=== STEP 3: 키워드 수확 → 백로그 기록 (2026-07-26 신설 — 전부 Chrome, WebSearch 미사용) ===
+
+수확한 후보는 아래 두 백로그 페이지의 표에 행으로 추가한다 (상태=대기, 수확일=오늘):
+- KoreaPlug 백로그: 페이지 ID 3a9bfe4a-2ae1-818f-911b-f852981d5018
+- 0and1Life 백로그: 페이지 ID 3a9bfe4a-2ae1-81e0-8fc9-dc8e035388af
+
+공통 규칙:
+- 추가 전 중복 제거 2중: ① 백로그 기존 행과 대조 ② 각 블로그 발행 목록(KoreaPlug 33cbfe4a-2ae1-81b9-a743-cb7c194dea7f / 0and1Life EFFICIENCY 37cbfe4a-2ae1-819f-8664-ff3d38fffe56 + LIFESTYLE 37cbfe4a-2ae1-81b9-a9ce-d0b937edd344)의 제목·포커스 키워드와 대조 — 단어가 겹쳐도 각도가 다르면 중복 아님(각도 기준)
+- 주당 신규 후보는 블로그당 5~10개면 충분 — 양보다 증거의 질
+- 수확 전에 정리 먼저: 백로그의 '대기' 항목 중 수확일이 4주 이상 지난 것은 상태를 '만료'로 변경
+
+[3-A] GSC 쿼리 수확 (두 블로그 각각 — 최우선 소스)
+STEP 1·2에서 쓴 실적 화면의 breakdown을 페이지 → 검색어로 전환:
+- KoreaPlug: https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION
+- 0and1Life: https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2F0and1life.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION
+javascript_tool로 상위 30개 쿼리의 노출·클릭·순위를 추출한 뒤 선별:
+- 노출 ≥10이면서 그 쿼리를 정면으로 다루는 전용 글이 없는 것 → 백로그 후보 (출처=GSC쿼리, 수요 증거="노출N·순위P")
+- 순위 8~20 구간을 최우선 표기 — 전용 글 신설 시 1페이지 진입 확률이 가장 높은 구간
+- 이미 전용 글이 있는 쿼리는 백로그가 아니라 주간 리포트 '다음 조치'(기존 글 개선 대상)에 기재
+
+[3-B] 네이버 수확 (0and1Life 전용 — 이 블로그의 실제 유입 주전장)
+① 네이버 데이터랩(https://datalab.naver.com)에서 승자 클러스터 시드(백로그·최신 리포트의 클러스터 칸 참조, 예: 프로포즈/스드메/결혼 비용)의 연관 급상승 확인
+② naver.com 검색창에 승자 클러스터 시드 2~3개 입력 → 자동완성·연관검색어 수확 (실존 문구만, 임의 조합 금지)
+→ 후보화 (출처=네이버AC 또는 데이터랩)
+
+[3-C] 구글 Rising + PAA (KoreaPlug 전용)
+① https://trends.google.com/trends/explore?date=now%207-d&geo=US&q=korea 의 Related queries Rising/Breakout 수확 (JS 렌더링 페이지 — Chrome에서만 가능, writer 환경에선 불가한 소스)
+② google.com에서 GSC 승자 쿼리 1~2개 검색 → People Also Ask 질문 수확
+→ 후보화 (출처=TrendsRising 또는 PAA)
+
+[3-D] 백로그 기록
+각 후보를 해당 블로그 백로그 표 맨 아래에 행으로 추가:
+| {다음 번호} | {키워드} | {출처} | {증거 요약} | {클러스터} | {순위 또는 —} | {오늘 YYYY-MM-DD} | 대기 |
+⚠️ 표 갱신 전 페이지 re-fetch로 마지막 행 원문 확인 후 old_str 구성 (기존 Notion 갱신 규칙과 동일).
+주간 리포트 본문 끝에 "이번 주 수확: N건 (GSC n / 네이버 n / Trends·PAA n) · 만료 처리 m건" 한 줄을 추가한다.
+
 === 결과 저장 (필수) ===
 
 Notion MCP의 update-page(insert 또는 update_content)로 STEP 0의 두 페이지 "## 리포트 (최신순)" 제목 바로 아래에 "### YYYY-MM-DD 주간 리포트" 섹션을 추가하라 (최신이 위):
