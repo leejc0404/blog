@@ -140,7 +140,7 @@ HTML 본문 → [가이드 HTML 템플릿]: GeneratePress 기반 구조 준수. 
 분량·밀도·링크 → 1,500~2,500자, 키워드 밀도 1.0~1.5%, 외부 권위 링크 최소 2개, 내부 링크 포함.
 테마 컬러 → [가이드 카테고리-페이지 ID 매핑]: 서브카테고리별 헥사코드 적용.
 💰 직장인 재테크 / 📊 업무에서 AI 활용법 / ⚙️ 실생활 AI 활용법 / 📈 핫한 AI 트렌드 / 🏠 Life·My Story / 💍 Wedding
-(v1.17 신설 — WP 카테고리 생성 완료: 💼 대기업 직장인 생활 = WP ID 29, slug corporate-worker-life / ⏱️ 시간·돈 절약 시스템 = WP ID 30, slug time-money-saving. ⚠️ Notion 카테고리 페이지 생성 + 가이드 매핑 ID 등록 전까지 Notion 등록만 임시 배정: 대기업 직장인 생활→재테크, 절약 시스템→실생활 AI 활용법. 디저트·핫플 공략 글은 Life 배정)
+(✅ 2026-07-26 확인 완료 — WP 카테고리 등록 확정: 💼 대기업 직장인 생활 = WP ID 29, slug corporate-worker-life / ⏱️ 시간·돈 절약 시스템 = WP ID 30, slug time-money-saving. 0and1Life는 카테고리별 Notion 컨테이너 페이지를 쓰지 않으므로 두 카테고리에 바로 배정한다 — 舊 임시 배정 규칙 폐기. 디저트·핫플 공략 글은 Life 배정)
 GAP_REPORT ⭐ 각도를 H2 1개에 반드시 반영.
 
 [5-2] Skill avoid-ai-writing 호출 — 최종 패스 (HTML 완성 직후, Notion 업로드 전)
