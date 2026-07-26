@@ -55,14 +55,21 @@ STEP 1·2에서 쓴 실적 화면의 breakdown을 페이지 → 검색어로 전
 - KoreaPlug: https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION
 - 0and1Life: https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2F0and1life.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION
 javascript_tool로 상위 30개 쿼리의 노출·클릭·순위를 추출한 뒤 선별:
-- 노출 ≥10이면서 그 쿼리를 정면으로 다루는 전용 글이 없는 것 → 백로그 후보 (출처=GSC쿼리, 수요 증거="노출N·순위P")
+- **노출 기준은 블로그별로 다르다** (⚠️ 수정 2026-07-27 — 舊 공통 기준 '노출 ≥10'은 사이트 규모를 무시해 0and1Life에서 0건을 냈다. 이 블로그는 사이트 전체 28일 노출이 33 수준이라 ≥10을 넘는 쿼리가 구조적으로 나올 수 없다):
+  - **KoreaPlug**: 노출 ≥10 (사이트 전체 노출 4,000+ 규모)
+  - **0and1Life**: 노출 ≥2. 그래도 후보가 3건 미만이면 **노출 상위 10개 쿼리 전체**로 검토 대상을 넓힌다
+- 위 기준을 넘으면서 그 쿼리를 정면으로 다루는 전용 글이 없는 것 → 백로그 후보 (출처=GSC쿼리, 수요 증거="노출N·순위P")
 - 순위 8~20 구간을 최우선 표기 — 전용 글 신설 시 1페이지 진입 확률이 가장 높은 구간
-- 이미 전용 글이 있는 쿼리는 백로그가 아니라 주간 리포트 '다음 조치'(기존 글 개선 대상)에 기재
+- 이미 전용 글이 있는 쿼리는 백로그가 아니라 주간 리포트 '다음 조치'(기존 글 개선 대상)에 기재.
+  ⭐ **전용 글이 있는데도 순위가 50위 밖인 클러스터는 '최우선 개선 대상'으로 별도 명시**한다 (2026-07-27 신설) — 노출은 이미 있는데 회수를 못 하는 구간이라 신규 글보다 수익률이 높다. 실제 사례: '한국 나이' 클러스터 합산 노출 90인데 전용 글 #5가 있음에도 전부 50위 밖.
 
 [3-B] 네이버 수확 (0and1Life 전용 — 이 블로그의 실제 유입 주전장)
 ① 네이버 데이터랩(https://datalab.naver.com)에서 승자 클러스터 시드(백로그·최신 리포트의 클러스터 칸 참조, 예: 프로포즈/스드메/결혼 비용)의 연관 급상승 확인
 ② naver.com 검색창에 승자 클러스터 시드 2~3개 입력 → 자동완성·연관검색어 수확 (실존 문구만, 임의 조합 금지)
 → 후보화 (출처=네이버AC 또는 데이터랩)
+
+⚠️ **차단 시 처리 (2026-07-27 확인)**: datalab·search.naver가 브라우저 안전 정책으로 막히는 경우가 있다. 이때 **추측 후보를 만들지 말고** 3-B를 생략한 뒤, 백로그 페이지에 "3-B 네이버 차단 — 생략"만 기록한다.
+이는 0and1Life의 공급 공백으로 남지 않는다 — **daily writer 루틴(STEP 7-B)이 매일 4-A 통과 낙선 후보를 백로그에 적재**하기 때문이다. writer 환경은 WebFetch로 네이버 자동완성 API에 접근할 수 있어(2026-07-26 #66 실행에서 교차 확인 성공) Chrome이 막혀도 네이버 근거 후보가 계속 들어온다. 즉 0and1Life의 주 공급원은 이 주간 루틴이 아니라 daily writer다.
 
 [3-C] 구글 Rising + PAA (KoreaPlug 전용)
 ① https://trends.google.com/trends/explore?date=now%207-d&geo=US&q=korea 의 Related queries Rising/Breakout 수확 (JS 렌더링 페이지 — Chrome에서만 가능, writer 환경에선 불가한 소스)
