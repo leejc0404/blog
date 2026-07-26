@@ -53,8 +53,14 @@ STEP 4 — Notion 서브페이지 콘텐츠 읽기 → 필드 추출
 
 CANDIDATE_POSTS 각 포스트에 대해:
 
-[4a] 서브페이지 로드
-STEP 2에서 읽은 메인 페이지 내 서브페이지 링크로 notion-fetch 호출.
+[4a] 서브페이지 URL 확인 (⚠️ 수정 2026-07-26 — 위치 의존 제거, KoreaPlug [4a]와 동일 방식)
+① notion-search로 포스트 제목(`Blog #{번호}` 또는 제목 앞부분)을 검색 → 서브페이지 page_id·URL 확인.
+② 검색 결과가 없을 때만 SOURCE_PAGE에 해당하는 현황표 페이지를 fetch해 자식 페이지 목록에서 찾는다:
+- EFFICIENCY → https://app.notion.com/p/37cbfe4a2ae1819f8664ff3d38fffe56
+- LIFESTYLE → https://app.notion.com/p/37cbfe4a2ae181b9a9ced0b937edd344
+③ 둘 다 실패 → 오류 로그에 "서브페이지 없음 #{번호}" 기록 후 다음 포스트로 진행. **Draft일은 공란 유지** — 다음 실행에서 재시도한다.
+
+⚠️ 舊 방식("메인 페이지 내 서브페이지 링크로 fetch")은 초안이 현황표 페이지의 직계 자식일 때만 동작했다. 위 방식은 초안이 현황표 바로 아래에 있든, 나중에 카테고리 방을 만들어 그 안으로 옮기든 **위치와 무관하게** 찾는다.
 
 [4b] 필드 추출
 "기본 정보" 표에서 추출:
