@@ -39,6 +39,21 @@ koreaplug.com과 0and1life.com 두 블로그의 SEO 상태를 주간 점검하�
 - 네이버 상위 글: https://analytics.google.com/analytics/web/?hl=ko#/a393066616p540835629/reports/explorer?params=_u..nav%3Dmaui%26_r.explorerCard..seldim%3D%5B%22unifiedPagePathScreen%22,%22sessionSourceMedium%22%5D%26_r.explorerCard..rowsPerPage%3D50&r=all-pages-and-screens 에서 naver 포함 행 추출 (주요 추적 슬러그: propose-necklace-ring-bag-guide, employee-welfare-fund-loan, ai-counseling-guide-workers, signiel-hotel-proposal-guide — 이 외 새로 상위권에 진입한 글이 있으면 함께 기록)
 - 위 모든 수치를 STEP 0에서 읽은 0and1Life 최신 기준치와 비교해 증감을 계산한다
 
+=== STEP 2-B: 색인 거부(F등급) 수집 — 2026-07-29 신설, 매주 필수 ===
+
+배경: 기존 STEP 1·2는 **실적(클릭/노출)** 만 본다. 구글이 크롤링한 뒤 색인을 거부한 페이지는 노출이 0이라 실적 탭에 아예 나타나지 않아, 몇 달간 누적되어도 아무도 모른다. 2026-07-29 최초 실측에서 koreaplug 46건 / 0and1life 23건이 방치 상태로 발견되었다. 이 글들은 사이트 전체 평가를 끌어내려 애드센스 심사에 직접 영향을 준다.
+
+실행 (두 사이트 각각):
+- https://search.google.com/search-console/index?resource_id=<RESOURCE_ID> 접속
+- "페이지 색인이 생성되지 않는 이유" 표에서 **`크롤링됨 - 현재 색인이 생성되지 않음`** 행을 클릭해 URL 목록 전체를 추출한다
+- 함께 기록: `발견됨 - 현재 색인이 생성되지 않음`, `찾을 수 없음(404)`, `리디렉션이 포함된 페이지` 각 건수
+- 색인됨 / 색인 안 됨 총계를 기준치와 비교해 증감 기록
+
+판정·조치 (Writer 지침 1-6 F등급 참조):
+- 신규로 F등급에 들어온 URL은 리포트에 **목록 전체**를 적는다 (건수만 적지 말 것 — 조치 대상을 특정할 수 없다)
+- F등급 누적이 색인됨 대비 30%를 넘으면 **신규 발행을 중단하고 기존 글 정리를 우선**한다고 리포트에 명시한다
+- 각 URL은 ① 원본 자료 추가 후 전면 재작성 ② 유사 글과 병합 ③ 삭제(410) 중 하나로 분류해 제안한다
+
 === STEP 3: 키워드 수확 → 백로그 기록 (2026-07-26 신설 — 전부 Chrome, WebSearch 미사용) ===
 
 수확한 후보는 아래 두 백로그 페이지의 표에 행으로 추가한다 (상태=대기, 수확일=오늘):

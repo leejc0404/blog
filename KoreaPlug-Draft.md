@@ -82,6 +82,11 @@ wp.data.dispatch('rank-math').updateKeywords('korea business registration,korea 
 
 ## 5-4. 피드백 체크리스트
 
+> ⛔ **(v10.17 신설) 발행 차단 관문 — 아래 2개는 하나라도 No면 워드프레스 업로드를 중단하고 Writer 단계로 반려한다.** 나머지 항목보다 우선 판정한다.
+
+- [ ] **(Originality Gate)** 이 글에 **이 사이트에만 존재하는 자료**가 최소 1개 있는가? — 직접 만든 비교표·계산표(과정 공개) / 직접 캡처한 화면·양식 / 직접 확인한 현장 가격·정보(확인 날짜 명기) / 직접 촬영한 사진 / 여러 출처를 처음 통합 정리한 표. **공식 홈페이지 링크만 있으면 No.** → No면 업로드 중단
+- [ ] **(Fabricated Experience Gate)** 실제로 하지 않은 일을 1인칭(I, My)으로 서술한 문장이 **한 개도 없는가?** — "When I first…", "my group chat…", 지어낸 개인 이력·일화 전부 해당. → No면 해당 문장을 3인칭/2인칭으로 고치기 전까지 업로드 중단
+
 - [ ] (Native Speech Check) 미국인 친구에게 자연스럽게 말할 수 있는가? → **Yes여야 함.**
 - [ ] (Authenticity Check) 한국인이 읽었을 때 로컬 문화를 왜곡하지 않았는가? → **Yes여야 함.**
 - [ ] (Curiosity Gap Check) 도입부 읽고 "왓? 진짜?" 호기심으로 스크롤을 내릴 수밖에 없는가? → **Yes여야 함.**

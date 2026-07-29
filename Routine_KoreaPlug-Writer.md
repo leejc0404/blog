@@ -135,7 +135,7 @@ H2/H3 헤딩 전체 / 도입부 접근 각도 / 수치·출처·경험 서술 �
 - GAP_REPORT ⭐ 각도를 H2 1개에 반드시 반영.
 
 **[5-2] Skill `avoid-ai-writing` 호출 — 최종 패스 (HTML 완성 직후, Notion 업로드 전)**
-- voice profile: casual~warm, 1인칭 경험 문체(bar test) 유지
+- voice profile: casual~warm, 구어체(bar test) 유지 — 단 **1인칭(I/My)은 실제 수행한 행위에만** 사용한다 (v10.17, 작성 가이드 2-5 문체 규칙). 겪지 않은 일화를 문체 장치로 지어내지 않는다
 - 균일 문장 길이·기계적 전환어(Furthermore/Moreover)·과잉 열정 표현·engagement bait 제거
 - 수치·고유명사·링크·HTML 구조는 보존하고 문체만 교정
 
