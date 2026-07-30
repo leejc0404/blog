@@ -18,6 +18,8 @@ WebFetch → https://raw.githubusercontent.com/leejc0404/blog/main/KoreaPlug-Dra
 2. 그래도 실패하면 STOP하지 않는다 — 오류 로그에 "GitHub 지침서 조회 실패 → 인라인 폴백"을 기록하고, STEP 6j의 인라인 SEO 보정 체크리스트를 그대로 사용해 배포를 계속 진행한다.
 ⚠️ 어떤 경우에도 지침 내용을 추측으로 생성하지 않는다.
 
+⚠️ (2026-07-30 신설) 지침서의 Phase 5-4 ⛔ 발행 차단 관문(원본자료·가짜경험·이미지출처)은 **SEO 점수와 무관하게** 아래 [4f]에서 항상 판정한다 — 관문은 보정 절차가 아니라 업로드 전제 조건이다.
+
 STEP 1 — 날짜 확인 (KST)
 
 오늘(TODAY), 어제(TODAY_MINUS_1) 날짜를 기록한다.
@@ -97,6 +99,18 @@ GET https://koreaplug.com/wp-json/wp/v2/posts?slug={SLUG}&status=any&_fields=id,
 5) 교체한 URL을 Chrome으로 실제 navigate해 404가 아닌지 1회 육안 확인(스크린샷)한다.
 
 실패 시 → 오류 로그 기록, 포스트 업로드는 계속 진행
+
+[4f] 발행 차단 관문 판정 (Phase 5-4 ⛔ — 업로드 전 필수, 2026-07-30 신설)
+
+HTML_CONTENT와 기본 정보 표를 대상으로 판정한다:
+① 원본자료: 1급 원본 자료(직접 조작한 화면 캡처·실측 수치·실제 영수증 등) 최소 1개 — 비교표·통합표·공식 수치 재정리만 있으면 불통과. 단, 기본 정보 표에 "1급 자료 조달 계획: 루틴가능 {화면·경로}"가 명시돼 있으면 **로그인 없이 접근 가능한 공개 페이지에 한해** Chrome으로 그 화면을 직접 조작·캡처 → WP 미디어 업로드 → 본문 해당 위치에 삽입해 관문을 스스로 충족시킨다 (캡처 실행 주체는 브라우저가 있는 이 루틴 — 지침서 v10.22).
+② 가짜경험: 하지 않은 일의 1인칭(I/My) 서술·지어낸 개인 일화 0건 ("When I first…", "my group chat…" 류).
+③ 이미지출처: 모든 <img>가 자체 업로드(koreaplug.com) 또는 images.unsplash.com — gstatic·pstatic 등 타 사이트 핫링크 0건.
+
+①~③ 중 하나라도 불통과 → 이 포스트는 STEP 5~6을 건너뛴다 (draft 일자 공란 유지). 그리고 발행 반려 로그에 행 1개를 추가한다:
+https://www.notion.so/3adbfe4a2ae18167880ecbe3c73b90cc
+행 형식: | {TODAY} | {SLUG} | {사유 코드} | {무엇을} | {어디에} | {왜} | {어떻게} | {루틴 또는 사용자} | 대기 |
+⚠️ "1급 자료 없음"만 적는 보고는 무효 — 무엇을·어디에·왜·어떻게 4항목을 반드시 채운다 (지침서 v10.21). 같은 슬러그의 '대기' 행이 이미 있으면 중복 추가하지 않는다. 기록 후 다음 후보로 진행.
 
 STEP 5 — WordPress Draft 업로드 + Notion 메인 테이블 업데이트
 
@@ -232,9 +246,18 @@ old_str: "<td>{작성일자}</td>\n<td>—</td>\n</tr>" (실행 전 원문 재�
 new_str: "<td>{작성일자}</td>\n<td>{TODAY}</td>\n</tr>"
 작성일자 중복 시 SEO_TITLE 포함으로 old_str 범위 확장.
 
+[6m] 들어오는 내부 링크 추가 (지침서 v10.19 — STEP 6 성공 시 필수)
+
+발행 목록(메인 테이블)에서 이번 글과 주제가 인접한 기존 발행 글 2개를 고른다 (내부 링크를 이미 받고 있는 글 우선 — 고아 글에서 걸면 무효).
+각 글에 REST API로 신규 글 링크를 추가한다:
+1) GET /wp-json/wp/v2/posts?slug={기존슬러그}&_fields=id → id 확인
+2) GET /wp-json/wp/v2/posts/{id}?context=edit → content.raw 확보
+3) content 끝의 "Related reading" <ul>에 <li><a href="/{신규슬러그}/">{신규 SEO_TITLE}</a></li> 추가 (섹션이 없으면 <p><strong>Related reading</strong></p>\n<ul>...</ul> 신설)
+4) 저장 전 <ul>/<li> 여닫이 짝 검증 → POST로 저장. 실패 시 오류 로그만 남기고 발행 자체는 유지 (반려 아님).
+
 STEP 7 — 완료 알림 출력 (200자 이내, 이전 단계의 성공 여부와 무관하게 반드시 실행)
 
-신규 포스트 있음: "KoreaPlug 발행완료 ✅ draft {N}개 | SEO평균 {점수}점 | 오류 {E}개 ({TODAY_KST})"
+신규 포스트 있음: "KoreaPlug 발행완료 ✅ draft {N}개 | 관문반려 {R}건(로그 기록) | 인바운드링크 {L}건 | SEO평균 {점수}점 | 오류 {E}개 ({TODAY_KST})"
 신규 포스트 없음: "KoreaPlug 자동 체크 완료 — 신규 글 없음 ({TODAY_KST})"
 [4d]에서 미완성 draft를 복구 완료 처리한 경우: "KoreaPlug 미완성 draft {M}개 복구완료 (SEO/이미지) | ({TODAY_KST})" 를 함께 기록.
 ⚠️ STEP 0에서 GitHub 지침서 조회에 실패했거나 지침서-루틴 상충을 발견한 경우 해당 사실을 한 줄로 함께 기록한다.
@@ -249,4 +272,5 @@ pw.txt 접근 실패 | 오류 로그 기록 후 STEP 7로 건너뜀 (전체 중�
 Chrome 로그인 실패 | Astra/Rank Math 미설정 로그, 포스트 업로드 유지, draft 일자 공란 유지(다음 실행에서 재시도)
 Rank Math 78점 미달 | 체크리스트 기준 수정 후 재시도 1회
 이미지 처리 실패 | [4e] 4) 재시도 1회, 실패 시 플레이스홀더 유지 + 오류 로그 기록
+관문 반려 ([4f] 불통과) | 반려 로그 행 추가 + draft 일자 공란 유지 + 다음 포스트 진행 (STEP 7 알림에 관문반려 건수 표기)
 SEO 설정이 새로고침 후 사라짐 | [6d] 참조 — JS dispatch 금지, UI 클릭 방식([6e]~[6g])만 사용 + [6h]에서 새로고침 재검증 필수

@@ -171,7 +171,6 @@ new_str: old_str + 아래 새 행:
 ✅ 자동 발행 실행: {today_kst}
 신규 draft: #{XX} {Post Title} (Notion 등록 완료, WP 배포 대기)
 SEO 개선: 없음 | 오류: 없음
-다음 실행: {tomorrow} 07:00 KST
 
 ## STEP 8 — Report
 ✅ KoreaPlug Daily Automation — {today_kst} 완료
