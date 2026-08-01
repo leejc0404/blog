@@ -37,7 +37,14 @@ CANDIDATE_POSTS가 비어 있으면 → STEP 7로 건너뜀.
 STEP 3 — WordPress 인증 정보 및 카테고리 ID (API 호출 없음)
 
 인증: Basic Auth — leejcfo@gmail.com / {pw.txt 참조 — KOREAPLUG_WP_APP_PASSWORD}
-(로컬 C:\Users\win\.claude\blog\pw.txt 의 KOREAPLUG_WP_APP_PASSWORD 값을 사용한다. 파일을 읽을 수 없으면 오류 로그에 "pw.txt 접근 실패"를 기록하고 STEP 7로 건너뛴다.)
+(로컬 C:\Users\win\.claude\blog\pw.txt 의 KOREAPLUG_WP_APP_PASSWORD 값을 사용한다.)
+
+⚠️ [폴백 — 2026-08-01 0and1Life 수동 배포에서 검증된 방식] pw.txt를 읽을 수 없으면 즉시 중단하지 말고 **브라우저 nonce 인증**으로 전환한다 (Chrome은 어차피 STEP 6 필수 의존성이므로 새 의존성이 아니다):
+1) Chrome으로 https://koreaplug.com/wp-admin/index.php 접속 → `document.body.classList.contains('wp-admin')`으로 로그인 확인
+2) javascript_tool로 nonce 발급:
+   `const nonce = (await fetch('/wp-admin/admin-ajax.php?action=rest-nonce', {credentials:'same-origin'}).then(r=>r.text())).trim();`
+3) 이후 STEP 4~6의 모든 REST 호출을 Basic Auth 대신 wp-admin 탭의 javascript_tool에서 `credentials:'same-origin'` + `'X-WP-Nonce': nonce` 헤더로 수행한다.
+4) Chrome까지 불가할 때만 오류 로그에 "pw.txt 접근 실패 + Chrome 미연결"을 기록하고 STEP 7로 건너뛴다.
 
 카테고리 ID:
 🍜 Food & Drink → 3
@@ -104,6 +111,14 @@ GET https://koreaplug.com/wp-json/wp/v2/posts?slug={SLUG}&status=any&_fields=id,
 
 HTML_CONTENT와 기본 정보 표를 대상으로 판정한다:
 ① 원본자료: 1급 원본 자료(직접 조작한 화면 캡처·실측 수치·실제 영수증 등) 최소 1개 — 비교표·통합표·공식 수치 재정리만 있으면 불통과. 단, 기본 정보 표에 "1급 자료 조달 계획: 루틴가능 {화면·경로}"가 명시돼 있으면 **로그인 없이 접근 가능한 공개 페이지에 한해** Chrome으로 그 화면을 직접 조작·캡처 → WP 미디어 업로드 → 본문 해당 위치에 삽입해 관문을 스스로 충족시킨다 (캡처 실행 주체는 브라우저가 있는 이 루틴 — 지침서 v10.22).
+
+**캡처 품질·마크업 규칙 (2026-08-01 — "캡처가 어색하다" 피드백 반영. 예: KOSIS 표 캡처는 깔끔, 국립국어원 조문 캡처는 어색):**
+- 전체 화면·전체 페이지 캡처 금지. **결과·표·조문 영역만** `zoom`(region 지정)으로 잘라 찍는다 — 사이트 헤더·메뉴·배너가 프레임에 들어가면 실패.
+- 캡처 프레임에 **스크롤바·마우스 커서·드래그 핸들·쿠키 배너·팝업 잔재**가 보이면 재캡처한다 (스크린샷 육안 검증 필수). 우측 스크롤바는 region 우측 경계를 콘텐츠 폭 기준 ~20px 안쪽으로 잡아 배제한다.
+- 표·조문처럼 사각형으로 떨어지는 콘텐츠는 그 사각형에 딱 맞춰 자른다. 문장 중간·행 중간에서 잘리거나 좌우 여백이 비대칭이면 재캡처. 조문류는 해당 조항 블록만(제목 줄 포함) 잡는다.
+- 삽입 마크업 표준 (증빙은 '자료 카드'로 보이게 — 데코 이미지와 시각적으로 구분):
+  `<figure class="evidence-capture" style="margin:26px 0; border:1px solid #e2e8f0; border-radius:12px; padding:10px; background:#fafafa;"><img style="width:100%;display:block;height:auto;border-radius:8px;" src="{URL}" alt="{Focus Keyword 포함 설명}" /><figcaption style="font-size:13px; color:#64748b; margin-top:8px;">{출처 기관 — 화면명 · Captured YYYY-MM-DD}</figcaption></figure>`
+- 업로드 파일명: `evidence-{SLUG}-{n}.webp` — **Image 루틴이 증빙을 생성 이미지와 구분하는 근거이므로 반드시 이 규칙을 따른다** (class="evidence-capture"와 파일명 prefix 둘 다).
 ② 가짜경험: 하지 않은 일의 1인칭(I/My) 서술·지어낸 개인 일화 0건 ("When I first…", "my group chat…" 류).
 ③ 이미지출처: 모든 <img>가 자체 업로드(koreaplug.com) 또는 images.unsplash.com — gstatic·pstatic 등 타 사이트 핫링크 0건.
 
@@ -115,6 +130,8 @@ https://www.notion.so/3adbfe4a2ae18167880ecbe3c73b90cc
 STEP 5 — WordPress Draft 업로드 + Notion 메인 테이블 업데이트
 
 (⚠️ [4d]에서 기존 WP_POST_ID로 복구 처리한 경우 이 STEP은 건너뛰고 STEP 6으로 직행)
+
+날짜 갱신 (2026-08-01 추가): HTML_CONTENT 상단 메타 라인의 `Last updated: {Month} {YYYY}` 표기가 있으면 업로드 시점 월로 갱신한다 (첫 번째 매치 1개만 — 본문 속 다른 날짜는 건드리지 않음).
 
 POST https://koreaplug.com/wp-json/wp/v2/posts
 인증: STEP 3과 동일 | Content-Type: application/json
@@ -268,7 +285,7 @@ STEP 7 — 완료 알림 출력 (200자 이내, 이전 단계의 성공 여부�
 GitHub 지침서 조회 실패 | 저장소 루트 1회 재확인 → 실패 시 오류 로그 기록 + 인라인 체크리스트 폴백으로 계속 진행 (STOP 아님, 지침 추측 생성 금지)
 WordPress API 실패 | 로그 기록 후 다음 포스트 진행
 Notion 페이지 없음 | 로그 기록 후 다음 포스트 진행
-pw.txt 접근 실패 | 오류 로그 기록 후 STEP 7로 건너뜀 (전체 중단)
+pw.txt 접근 실패 | 브라우저 nonce 폴백(STEP 3)으로 전환. Chrome도 불가하면 오류 로그 기록 후 STEP 7로 건너뜀 (전체 중단)
 Chrome 로그인 실패 | Astra/Rank Math 미설정 로그, 포스트 업로드 유지, draft 일자 공란 유지(다음 실행에서 재시도)
 Rank Math 78점 미달 | 체크리스트 기준 수정 후 재시도 1회
 이미지 처리 실패 | [4e] 4) 재시도 1회, 실패 시 플레이스홀더 유지 + 오류 로그 기록

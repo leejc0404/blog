@@ -37,7 +37,14 @@ EFFICIENCY: notion-fetch → https://app.notion.com/p/37cbfe4a2ae1819f8664ff3d38
 STEP 3 — WordPress 인증 정보 및 카테고리 ID (API 호출 없음)
 
 인증: Basic Auth — leejcfo@gmail.com / {pw.txt 참조 — ONEANDZERO_WP_APP_PASSWORD}
-(로컬 C:\Users\win\.claude\blog\pw.txt 의 ONEANDZERO_WP_APP_PASSWORD 값을 사용한다. 파일을 읽을 수 없으면 오류 로그에 "pw.txt 접근 실패"를 기록하고 STEP 7로 건너뛴다.)
+(로컬 C:\Users\win\.claude\blog\pw.txt 의 ONEANDZERO_WP_APP_PASSWORD 값을 사용한다.)
+
+⚠️ [폴백 — v1.28, 2026-08-01 수동 배포에서 검증] pw.txt를 읽을 수 없으면 즉시 중단하지 말고 **브라우저 nonce 인증**으로 전환한다 (Chrome은 어차피 STEP 6 필수 의존성이므로 새 의존성이 아니다):
+1) Chrome으로 https://0and1life.com/wp-admin/index.php 접속 → `document.body.classList.contains('wp-admin')`으로 로그인 확인
+2) javascript_tool로 nonce 발급:
+   `const nonce = (await fetch('/wp-admin/admin-ajax.php?action=rest-nonce', {credentials:'same-origin'}).then(r=>r.text())).trim();`
+3) 이후 [4c]/STEP 5/[6i]/[6m]의 모든 REST 호출을 Basic Auth 대신 wp-admin 탭의 javascript_tool에서 `credentials:'same-origin'` + `'X-WP-Nonce': nonce` 헤더로 수행한다 (Post 901 생성에 실사용된 방식).
+4) Chrome까지 불가할 때만 오류 로그에 "pw.txt 접근 실패 + Chrome 미연결"을 기록하고 STEP 7로 건너뛴다.
 
 서브카테고리 → WP Category ID:
 💰 직장인 재태크 → 23
@@ -111,6 +118,14 @@ Q/A가 1쌍 이하면 FAQ_SCHEMA_JSON = null (건너뜀).
 
 HTML_CONTENT와 기본 정보 표를 대상으로 판정한다:
 ① 원본자료: 1급 원본 자료(직접 조작한 화면 캡처·실측 수치·실제 고지서 등) 최소 1개 — 계산표·통합표·공식 수치 재정리만 있으면 불통과. 단, 기본 정보 표에 "1급 자료 조달 계획: 루틴가능 {화면·경로}"가 명시돼 있으면 **로그인 없이 접근 가능한 공개 페이지에 한해** Chrome으로 그 화면을 직접 조작·캡처 → WP 미디어 업로드 → 본문 해당 위치에 삽입해 관문을 스스로 충족시킨다 (캡처 실행 주체는 브라우저가 있는 이 루틴 — 가이드 v1.26).
+
+**캡처 품질·마크업 규칙 (v1.28 — "캡처가 어색하다" 피드백 반영, 2026-08-01):**
+- 전체 화면·전체 페이지 캡처 금지. **결과·조문 영역만** `zoom`(region 지정)으로 잘라 찍는다 — 사이트 헤더·메뉴·배너가 프레임에 들어가면 실패.
+- 캡처 프레임에 **스크롤바·마우스 커서·드래그 핸들·쿠키 배너·팝업 잔재**가 보이면 재캡처한다 (스크린샷 육안 검증 필수). 우측 스크롤바는 region 우측 경계를 콘텐츠 폭 기준 ~20px 안쪽으로 잡아 배제한다.
+- 표·조문처럼 사각형으로 떨어지는 콘텐츠는 그 사각형에 딱 맞춰 자른다. 문장 중간·행 중간에서 잘리면 재캡처.
+- 삽입 마크업 표준 (증빙은 '자료 카드'로 보이게 — 데코 이미지와 시각적으로 구분):
+  `<figure class="evidence-capture" style="margin:26px 0; border:1px solid #e2e8f0; border-radius:12px; padding:10px; background:#fafafa;"><img style="width:100%;display:block;height:auto;border-radius:8px;" src="{URL}" alt="{Focus Keyword 포함 설명}" /><figcaption style="font-size:13px; color:#64748b; margin-top:8px;">{출처 기관 — 화면명 · Captured YYYY-MM-DD}</figcaption></figure>`
+- 업로드 파일명: `evidence-{SLUG}-{n}.webp` — **Image 루틴이 증빙을 생성 이미지와 구분하는 근거이므로 반드시 이 규칙을 따른다** (class="evidence-capture"와 파일명 prefix 둘 다).
 ② 가짜경험: 하지 않은 일의 1인칭 서술·가공된 신상 문장 0건.
 ③ 이미지출처: 모든 <img>가 자체 업로드(0and1life.com) 또는 images.unsplash.com — gstatic·pstatic 등 타 사이트 핫링크 0건.
 
@@ -122,6 +137,9 @@ https://www.notion.so/3adbfe4a2ae1817994f0f901de5c8dec
 STEP 5 — WordPress Draft 업로드 + Notion 메인 테이블 업데이트
 
 [4c]에서 "비어있음(재개 필요)"으로 판정된 경우 이 STEP은 건너뛰고 STEP 6으로 바로 이동한다 (WP_POST_ID는 이미 설정됨).
+
+날짜 치환 (v1.28): HTML_CONTENT 상단 메타 라인의 날짜 문자열(정규식 `\d{4}년 \d{1,2}월 \d{1,2}일` — **첫 번째 매치 1개만**)을 TODAY(KST)로 치환한다. 본문 속 다른 날짜(제도 시행일 등)는 건드리지 않는다.
+근거: #64 에너지캐시백이 작성일 7/25 표기를 단 채 8/1에 발행됨 — 독자·구글 모두에게 신선도 신호 손실.
 
 HTML_BODY 조립 (FAQ 스키마 삽입):
 FAQ_SCHEMA_JSON이 null이 아니면 HTML_CONTENT의 마지막 `</div>` 바로 뒤에 아래를 삽입한다:
@@ -325,6 +343,18 @@ new_str: "<td>{작성일 YYYY-MM-DD}</td>\n<td>{TODAY}</td>\n</tr>"
 3) content 끝의 "함께 읽으면 좋은 글" <ul>에 <li><a href="/{신규슬러그}/">{신규 제목}</a></li> 추가 (섹션이 없으면 <p><strong>함께 읽으면 좋은 글</strong></p>\n<ul>...</ul> 신설)
 4) 저장 전 <ul>/<li> 여닫이 짝 검증 → POST로 저장. 실패 시 오류 로그만 남기고 발행 자체는 유지 (반려 아님).
 
+[6n] 트랙 S 빠른 발행 알림 (v1.28 — 선점 시의성 보존)
+
+⛔ **이 루틴의 권한은 draft 작성·수정까지다. 발행(publish)·예약발행(future) 상태 변경은 어떤 경우에도 하지 않는다 — 발행 결정은 항상 사용자 몫이다 (2026-08-01 사용자 지시).**
+
+기본 정보 표의 Track 행이 "S"로 시작하는 글은 발행이 늦어지면 선점 의미가 사라지므로, **정보만** 정리해 사용자에게 알린다:
+1) GET /wp-json/wp/v2/posts?status=future&per_page=20&_fields=id,date 로 현재 예약 발행 목록 확보 (읽기 전용)
+2) 내일부터 하루씩 09:00 KST 슬롯을 훑어 비어 있는 첫 날짜를 찾는다
+3) Notion 실행 로그와 STEP 7 완료 알림에 다음 형식으로 기재한다 (글 상태는 draft 그대로 유지):
+   "⚡ 트랙 S 글 — 시의성 소재({헤드 요약}). 빠른 발행 권장, 현재 빈 슬롯: {날짜} 09:00 (예약은 사용자가 직접)"
+트랙 L 글은 이 알림 없이 기존 수동 예약 흐름을 따른다.
+근거: 트랙 S는 급상승 헤드 기반이라 작성→발행 지연이 2일을 넘으면 선점 의미가 소멸 (#71 우리사주: 코스피 폭등 당일 작성, 기존 큐 순서면 8/11 발행 — 10일 지연).
+
 STEP 7 — 완료 알림 출력 (이전 단계의 성공 여부와 무관하게 반드시 실행)
 
 신규 포스트 있음: "0and1Life 발행완료 ✅ draft {N}개 | 관문반려 {R}건(로그 기록) | 인바운드링크 {L}건 | SEO평균 {점수}점 | FAQ스키마 {F}건 | 오류 {E}개 ({TODAY_KST})"
@@ -335,7 +365,7 @@ STEP 7 — 완료 알림 출력 (이전 단계의 성공 여부와 무관하게 
 상황 | 조치
 WordPress API 실패 | 로그 기록 후 다음 포스트 진행
 Notion 페이지 없음 | 로그 기록 후 다음 포스트 진행
-pw.txt 접근 실패 | 오류 로그 기록 후 STEP 7로 건너뜀 (전체 중단)
+pw.txt 접근 실패 | 브라우저 nonce 폴백(STEP 3 v1.28)으로 전환. Chrome도 불가하면 오류 로그 기록 후 STEP 7로 건너뜀 (전체 중단)
 Chrome 로그인 실패 (WordPress) | GP/Rank Math 미설정 로그, 포스트 업로드 유지, Draft일 공란 유지(다음 실행에서 재시도)
 GitHub 지침 페이지 fetch 실패 (네트워크 차단·404 등) | [폴백 체크리스트] 사용 + 오류 로그 기록, 포스트 업로드는 유지
 Rank Math store 미등록 | 3초 대기 재시도 → 실패 시 클릭 폴백

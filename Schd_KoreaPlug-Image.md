@@ -1,8 +1,10 @@
-# KoreaPlug 자동 이미지 삽입 태스크 (v2 — 피사체 정확성 강화)
+# KoreaPlug 자동 이미지 삽입 태스크 (v3 — 증빙 캡처 구분·총량 상한)
 
 ### 목적
 
-Notion 글 현황 테이블에서 오늘 날짜에 작성된 WordPress 글을 찾아, 이미지가 3장 미만인 글에 Gemini로 생성한 이미지 3장을 WebP 형식으로 삽입한다. 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다.
+Notion 글 현황 테이블에서 오늘 날짜에 작성된 WordPress 글을 찾아, **데코(생성) 이미지가 3장 미만인 글**에 Gemini로 생성한 이미지를 WebP 형식으로 삽입한다 — 단, **증빙+데코 합계가 5장을 넘지 않는 범위**에서만 (생성 수를 3→2→1장으로 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다.
+
+> ⚠️ v3 변경 (2026-08-01): Draft 루틴이 발행 관문용 **증빙 캡처**(`figure class="evidence-capture"`, 파일명 `evidence-*`)를 본문에 넣기 시작하면서, 총 이미지 수 기준(舊 imgCount ≥ 3 → skip)으로는 모든 글이 스킵되어 이 루틴이 돌지 않았다. 판정은 **데코 개수**로 하되, 글이 이미지로 과밀해지지 않도록 **총량 상한 5장**(증빙+데코, 히어로 교체는 총량 불변이라 제외)을 함께 둔다. 증빙 캡처는 어떤 단계에서도 교체·이동·삭제하지 않는다.
 
 ---
 
@@ -33,20 +35,36 @@ fetch('/wp-json/wp/v2/posts?search=TITLE_KEYWORD&per_page=5&status=any&_fields=i
 // 2~3초 대기 후 window._postData 확인
 ```
 
-일치하는 글의 **Post ID**, **이미지 수**, **기존 스톡 이미지 여부**를 확인한다:
+일치하는 글의 **Post ID**와 **이미지 3종 분류(증빙/스톡/데코)**를 확인한다 (v3):
 
 ```javascript
-window._postData.map(p => ({
-  id: p.id,
-  title: p.title.rendered,
-  status: p.status,
-  imgCount: (p.content.rendered.match(/<img/g) || []).length,
-  // 무관한 외부 스톡 이미지가 히어로로 들어가 있는 경우가 많음 — 교체 대상
-  hasStockImg: /unsplash\.com|pexels\.com|pixabay\.com|FEATURED_IMAGE/.test(p.content.rendered)
-}))
+window._postData.map(p => {
+  const html = p.content.rendered;
+  const imgTags = html.match(/<img[^>]*>/g) || [];
+  const evRe = /\/evidence-|evidence-capture/i;                      // 증빙 마커: 파일명·클래스
+  const evLegacyRe = /alt="[^"]*(캡처|캡쳐|스크린샷|Captured|Screenshot)[^"]*"/i; // 마커 없는 기존 글 폴백
+  const stockRe = /unsplash\.com|pexels\.com|pixabay\.com|FEATURED_IMAGE/;
+  let evidence = 0, stock = 0, deco = 0;
+  for (const t of imgTags) {
+    if (evRe.test(t) || evLegacyRe.test(t)) evidence++;
+    else if (stockRe.test(t)) stock++;
+    else deco++;
+  }
+  // img 태그에 마커가 없어도 감싼 figure에 evidence-capture 클래스가 있으면 증빙으로 재분류
+  const figEv = (html.match(/<figure[^>]*class="[^"]*evidence-capture[^"]*"[\s\S]{0,800}?<img/gi) || []).length;
+  const move = Math.max(0, figEv - evidence);
+  evidence += move; deco = Math.max(0, deco - move);
+  const genCount = deco >= 3 ? 0 : Math.max(0, Math.min(3 - deco, 5 - evidence - deco)); // 총량 상한 5장
+  return {id: p.id, title: p.title.rendered, status: p.status,
+          evidence, stock, deco, genCount, hasStockImg: stock > 0};
+})
 ```
 
-- **imgCount가 3장 이상이면 skip하고 종료** (단, `hasStockImg: true`면 본문 삽입은 건너뛰고 스톡 이미지 교체만 수행).
+분류가 애매한 자체 업로드 이미지(마커·alt 단서가 모두 없는 경우)는 본문에서 해당 `<figure>`를 직접 열어 figcaption에 출처 기관·`Captured YYYY-MM-DD`가 있는지 확인한다 — 있으면 증빙, 없으면 데코.
+
+- **genCount가 0이면 본문 삽입을 skip하고 종료** (단, `hasStockImg: true`면 스톡 이미지 교체만 수행 — 교체는 총량을 늘리지 않으므로 상한과 무관).
+- genCount가 1~2장이면 그 수만큼만 생성·삽입한다. 우선순위: **이미지 1(도입 훅) → 이미지 3(결론 시각화) → 이미지 2(중반 클로즈업)** — 증빙 캡처가 이미 있는 글에서는 중반 클로즈업의 역할을 증빙이 대신한다.
+- **증빙 캡처는 절대 건드리지 않는다**: 교체·이동·삭제 금지, 삽입 위치가 증빙 figure 내부에 떨어지면 직전 헤딩 바로 앞으로 옮긴다.
 - `hasStockImg: true`면 **히어로 교체용 이미지 1장을 추가 생성**한다 (총 4장). 이 히어로 이미지는 STEP 7-4에서 기존 스톡 이미지의 src/alt를 교체하는 데 사용하고, 대표이미지로도 설정한다.
 
 ---
@@ -176,6 +194,8 @@ window._insertPoints = [
 ];
 window._insertPoints; // 확인
 ```
+
+(v3) `genCount`가 3 미만이면 `window._insertPoints`에서 앞의 genCount개 위치만 사용한다 — 우선순위는 STEP 2의 이미지 1→3→2 순서를 따른다 (2장이면 1/4·3/4 지점, 1장이면 1/4 지점).
 
 ---
 
@@ -414,4 +434,5 @@ if (featuredId) {
 - **이미지 생성 실패·부정확 시 재시도는 반드시 '수정된 프롬프트'로** (동일 프롬프트 재시도 금지, 새 채팅에서). 수정 재시도 1회 후에도 부정확하면 해당 이미지 건너뜀
 - **프롬프트 작성 전 본문을 반드시 읽고, 피사체 형태가 불확실하면 웹 검색으로 확인**
 - 글 제목(title)은 수정하지 않음
-- 이미지 삽입 후 글 상태(publish/draft)는 변경하지 않음
+- 이미지 삽입 후 글 상태(publish/draft)는 변경하지 않음 — **발행·예약발행 전환은 어떤 경우에도 금지 (발행 결정은 항상 사용자 몫, 2026-08-01 사용자 지시)**
+- (v3) **증빙 캡처(`evidence-capture` figure) 불가침**: 삽입·스톡 교체 어느 단계에서도 증빙 figure의 마크업·src·alt·figcaption을 수정하지 않는다. 저장 전 `window._newContent`의 `evidence-capture` 등장 횟수가 원본과 동일한지 확인한다
