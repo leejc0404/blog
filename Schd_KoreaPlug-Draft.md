@@ -37,7 +37,7 @@ CANDIDATE_POSTS가 비어 있으면 → STEP 7로 건너뜀.
 STEP 3 — WordPress 인증 정보 및 카테고리 ID (API 호출 없음)
 
 인증: Basic Auth — leejcfo@gmail.com / {pw.txt 참조 — KOREAPLUG_WP_APP_PASSWORD}
-(로컬 C:\Users\win\.claude\blog\pw.txt 의 KOREAPLUG_WP_APP_PASSWORD 값을 사용한다.)
+(로컬 **C:\Users\win\Documents\Claude\pw.txt** 의 KOREAPLUG_WP_APP_PASSWORD 값을 사용한다. — v1.29: `.claude` 폴더는 보호 경로라 세션에 연결 불가하여 Documents\Claude로 이전. 구 위치 `.claude\blog\pw.txt`는 폴백으로만 시도)
 
 ⚠️ [폴백 — 2026-08-01 0and1Life 수동 배포에서 검증된 방식] pw.txt를 읽을 수 없으면 즉시 중단하지 말고 **브라우저 nonce 인증**으로 전환한다 (Chrome은 어차피 STEP 6 필수 의존성이므로 새 의존성이 아니다):
 1) Chrome으로 https://koreaplug.com/wp-admin/index.php 접속 → `document.body.classList.contains('wp-admin')`으로 로그인 확인
