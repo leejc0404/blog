@@ -1,4 +1,4 @@
-koreaplug.com과 0and1life.com 두 블로그의 SEO 상태를 주간 점검하고, 결과를 한국어로 정리해 Notion 리포트 페이지 2곳에 저장하라. 읽기 전용 분석 작업이며 WordPress/GA4/GSC의 설정이나 글은 수정하지 말 것 (예외: 아래 명시된 Notion 리포트 페이지 기록은 허용). GSC 로그인 계정: leejc0404@gmail.com.
+koreaplug.com과 0and1life.com 두 블로그의 SEO 상태를 주간 점검하고, 결과를 한국어로 정리해 Notion 리포트 페이지 2곳에 저장하라. 읽기 전용 분석 작업이며 WordPress/GA4/GSC의 설정이나 글은 수정하지 말 것 (예외: 아래 명시된 Notion 리포트 페이지 기록은 허용). GSC 로그인 계정: {ACCOUNT_EMAIL}.
 
 === STEP 0: 직전 기준치 읽기 (필수 — 매번 이 STEP부터 시작) ===
 

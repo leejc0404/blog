@@ -4,7 +4,7 @@
 
 ⚠️ 역할 분담: 이 루틴은 **운영 절차(언제·무엇을·몇 회·어떤 도구로)** 만 정의한다. **배포·SEO·관문 판정 기준의 단일 기준(SSOT)은 GitHub 지침서**다 — 이 루틴과 지침서가 상충하면 지침서를 따르고, 상충 발견 시 STEP 7 알림에 기록한다.
 
-**v10.23(2026-08-03) 정비**: 지침서에 「5-4 ⛔ 발행 차단 관문」·「5-4B 캡처 품질·마크업 규칙」이 정식 조항으로 신설됨. 이 루틴에 중복 기술돼 있던 관문·캡처 규칙 원문은 삭제하고 **지침서 참조**로 대체했다(3일간 이어진 지침서-루틴 상충 해소). 대신 실측으로 검증된 **실행 방법**(미디어 업로드 경로, Astra meta 설정, 세션 만료 대응)을 절차로 추가했다.
+**v10.23(2026-08-03) 정비**: 지침서에 「5-4 ⛔ 발행 차단 관문」·「5-4B 캡처 품질·마크업 규칙」이 정식 조항으로 신설됨. 이 루틴에 중복 기술돼 있던 관문·캡처 규칙 원문은 삭제하고 **지침서 참조**로 대체했다(3일간 이어진 지침서-루틴 상충 해소). 대신 오늘 실측으로 검증된 **실행 방법**(미디어 업로드 경로, Astra meta 설정, 세션 만료 대응)을 절차로 추가했다.
 
 ---
 
@@ -59,39 +59,26 @@ CANDIDATE_POSTS가 비어 있으면 → STEP 7로 건너뜀.
 
 **인증 순서 — 위에서부터 시도**
 
-**⓪ 폴더 연결 (⭐ 2026-08-03 신설 — 이 단계를 빠뜨리면 ①이 항상 실패한다)**
-스케줄 실행 세션은 **연결된 폴더가 0개**인 상태로 시작한다. pw.txt를 읽기 전에 먼저 실행한다:
-`mcp__cowork__request_cowork_directory { path: "C:\Users\win\Documents\Claude" }`
-연결 응답에 안내되는 `/sessions/{세션명}/mnt/Claude/` 경로로 접근한다.
-> 배경: 2026-08-01~03 0and1Life 배포가 3일 연속 중단된 실제 원인이 이것이다. 경로만 고치고 폴더 연결을 넣지 않아 Read가 계속 실패했다.
-
 **① pw.txt (Basic Auth)**
-`C:\Users\win\Documents\Claude\pw.txt` 의 `KOREAPLUG_WP_APP_PASSWORD` 값으로 Basic Auth (`{WP_USER — pw.txt 참조}`).
-⚠️ 비밀번호 값을 응답·로그·Notion에 출력하지 않는다. bash 안에서 변수로만 다룬다:
-```
-cd /sessions/{세션명}/mnt/Claude
-U=$(grep '^KOREAPLUG_WP_USER' pw.txt | cut -d'=' -f2- | tr -d ' \r\n')
-P=$(grep '^KOREAPLUG_WP_APP_PASSWORD' pw.txt | cut -d'=' -f2- | tr -d '\r\n' | sed 's/^ *//')
-curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/users/me?context=edit"
-```
-200이면 인증 정상. ※ 샌드박스 네트워크는 자체 도메인만 열려 있다 — unsplash·pexels·github raw 는 curl 접근 불가(코드 000).
-(舊 경로 `C:\Users\win\.claude\blog\pw.txt` 는 보호 경로라 마운트 불가 — v1.29에서 위 경로로 이전했다.)
-⚠️ 이 경로도 **해당 폴더가 Cowork 세션에 연결돼 있을 때만** 읽힌다. 연결돼 있지 않으면 실패하는 것이 정상이므로, 중단하지 말고 곧바로 ②로 넘어간다.
+`C:\Users\win\.claude\blog\pw.txt` 의 `KOREAPLUG_WP_APP_PASSWORD` 값으로 Basic Auth (`{WP_USER — pw.txt 참조}`).
+⚠️ 실측: `.claude` 는 보호 경로라 Cowork 세션에 마운트되지 않아 **상시 실패**한다. 실패해도 중단하지 말고 곧바로 ②로.
 
 **② Chrome 세션 nonce (현재 표준 경로)**
 1. `list_connected_browsers` → `select_browser`
 2. navigate → `https://koreaplug.com/wp-admin/index.php`
 3. `document.body?.classList.contains('wp-admin')` 로 로그인 확인
 4. 로그인 상태면 nonce 발급:
-   `const nonce = (await fetch('/wp-admin/admin-ajax.php?action=rest-nonce', {credentials:'same-origin'}).then(r=>r.text())).trim();`
+   ```javascript
+   const nonce = (await fetch('/wp-admin/admin-ajax.php?action=rest-nonce', {credentials:'same-origin'}).then(r=>r.text())).trim();
+   ```
 5. 이후 모든 REST 호출은 wp-admin 탭의 javascript_tool에서 `credentials:'same-origin'` + `'X-WP-Nonce': nonce` 헤더로 수행한다.
 
 **③ 세션 만료 시 (2026-08-03 신설)**
 `wp-login.php?...&reauth=1` 로 리다이렉트되면 세션이 만료된 것이다.
-- ⛔ **(2026-08-03 정정) 루틴은 로그인 폼을 대신 제출하지 않는다.** 자격증명 입력과 인증 폼 제출은 AI 금지 동작이며, **아이디·비밀번호가 자동완성돼 있어도 '로그인' 버튼을 클릭하지 않는다.** (舊 조항은 자동완성 시 클릭을 허용했으나, 2026-08-03 실행에서 이 동작이 거부되어 조항을 정정했다.)
-- 로그인 화면이 확인되면 오류 로그에 "WP 세션 만료 — 사용자 직접 로그인 필요"를 기록하고 STEP 7로 건너뛴다. draft 일자는 공란 유지.
-- 사용자 조치 안내를 함께 남긴다: "Chrome에서 https://koreaplug.com/wp-admin 에 직접 로그인하고 '기억하기'를 체크해 주세요."
-- 사용자가 로그인한 뒤 재실행하면 ②의 nonce 발급부터 정상 재개된다.
+- 로그인 화면을 스크린샷으로 확인한다.
+- **아이디·비밀번호가 브라우저에 이미 자동완성돼 있으면** '로그인' 버튼만 클릭해 세션을 복구한다.
+- ⚠️ 루틴은 **비밀번호를 직접 입력하지도, 열람하지도 않는다.** 자동완성이 비어 있으면 로그인 시도 금지 → 오류 로그에 "WP 세션 만료 + 자격증명 미자동완성"을 기록하고 STEP 7로 건너뛴다.
+- 로그인 후 4번 nonce 발급부터 재개.
 
 **④ 위 모두 실패**
 오류 로그 기록 후 STEP 7로 건너뜀 (전체 중단, draft 일자 공란 유지).
@@ -124,12 +111,17 @@ notion-fetch로 서브페이지 URL 호출.
 
 ### [4d] 슬러그 중복 확인 + 미완성 draft 복구
 
-`GET /wp-json/wp/v2/posts?slug={SLUG}&status=any&_fields=id,slug,status` (status=any 필수)
+```
+GET /wp-json/wp/v2/posts?slug={SLUG}&status=any&_fields=id,slug,status
+```
+`status=any` 필수.
 
 - **응답이 비어 있으면** → 중복 없음, [4e]로 진행.
 - **응답에 데이터가 있으면**(기존 WP_POST_ID 확보) 곧바로 건너뛰지 말고 아래를 확인한다:
-  1. Rank Math 키워드·점수가 실제로 설정돼 있는가 → 편집 화면에서 `wp.data.select('rank-math').getKeywords()` 확인, 또는 draft 목록의 "SEO 상세" 칼럼
-  2. 콘텐츠에 스톡/깨진 이미지 패턴(`unsplash.com/pexels.com/pixabay.com/FEATURED_IMAGE`)이 남아 있는가 → `GET /wp-json/wp/v2/posts/{id}?context=edit&_fields=content`
+  1. Rank Math 키워드·점수가 실제로 설정돼 있는가
+     → 편집 화면에서 `wp.data.select('rank-math').getKeywords()` 확인, 또는 draft 목록의 "SEO 상세" 칼럼
+  2. 콘텐츠에 스톡/깨진 이미지 패턴(`unsplash.com/pexels.com/pixabay.com/FEATURED_IMAGE`)이 남아 있는가
+     → `GET /wp-json/wp/v2/posts/{id}?context=edit&_fields=content`
 
   판정:
   - 키워드·점수 정상 + 이미지 정상 → 정상 완료된 글. Notion "draft 일자"를 TODAY로 채우고 건너뜀.
@@ -160,7 +152,9 @@ notion-fetch로 서브페이지 URL 호출.
 
 **불통과 시**: STEP 5~6을 건너뛰고 draft 일자 공란 유지. 발행 반려 로그(`https://www.notion.so/3adbfe4a2ae18167880ecbe3c73b90cc`)에 행 추가:
 
-`| {TODAY} | {SLUG} | {사유 코드} | {무엇을} | {어디에} | {왜} | {어떻게} | {루틴 또는 사용자} | 대기 |`
+```
+| {TODAY} | {SLUG} | {사유 코드} | {무엇을} | {어디에} | {왜} | {어떻게} | {루틴 또는 사용자} | 대기 |
+```
 
 ⚠️ "1급 자료 없음"만 적는 보고는 무효 — 무엇을·어디에·왜·어떻게·누가를 채운다(지침서 5-4). 같은 슬러그의 '대기' 행이 이미 있으면 중복 추가하지 않는다. 기록 후 다음 후보로 진행.
 
@@ -181,22 +175,20 @@ notion-fetch로 서브페이지 URL 호출.
 2. `find` 로 파일 input(`#async-upload`) ref 확보
 3. `upload_image` 로 **전체 화면 screenshot(ss_… ID)** 을 그 input에 주입 — 이 단계는 업로드가 아니라 **픽셀을 페이지 컨텍스트로 옮기는 것**이다
 4. javascript_tool에서 크롭 + webp 변환 + REST 업로드를 한 번에:
-
-```javascript
-const f = document.getElementById('async-upload').files[0];
-const bmp = await createImageBitmap(f);
-const S = bmp.width / 958;                 // 좌표계 보정 (스크린샷 폭 기준)
-const [x,y,w,h] = [X1,Y1,W,H].map(v=>Math.round(v*S));
-const c = document.createElement('canvas'); c.width=w; c.height=h;
-c.getContext('2d').drawImage(bmp, x, y, w, h, 0, 0, w, h);
-const blob = await new Promise(r=>c.toBlob(r,'image/webp',0.88));
-const fd = new FormData();
-fd.append('file', blob, 'evidence-{SLUG}-{n}.webp');
-fd.append('alt_text', '{Focus Keyword 포함 설명}');
-const r = await fetch('/wp-json/wp/v2/media', {method:'POST', credentials:'same-origin',
-  headers:{'X-WP-Nonce': nonce}, body: fd});
-```
-
+   ```javascript
+   const f = document.getElementById('async-upload').files[0];
+   const bmp = await createImageBitmap(f);
+   const S = bmp.width / 958;                 // 좌표계 보정 (스크린샷 폭 기준)
+   const [x,y,w,h] = [X1,Y1,W,H].map(v=>Math.round(v*S));
+   const c = document.createElement('canvas'); c.width=w; c.height=h;
+   c.getContext('2d').drawImage(bmp, x, y, w, h, 0, 0, w, h);
+   const blob = await new Promise(r=>c.toBlob(r,'image/webp',0.88));
+   const fd = new FormData();
+   fd.append('file', blob, 'evidence-{SLUG}-{n}.webp');
+   fd.append('alt_text', '{Focus Keyword 포함 설명}');
+   const r = await fetch('/wp-json/wp/v2/media', {method:'POST', credentials:'same-origin',
+     headers:{'X-WP-Nonce': nonce}, body: fd});
+   ```
 5. 응답의 `source_url` 을 기록. 파일명은 반드시 `evidence-{SLUG}-{n}.webp` (지침서 5-4B).
 
 **3) 본문 삽입**
@@ -215,9 +207,8 @@ const r = await fetch('/wp-json/wp/v2/media', {method:'POST', credentials:'same-
 
 **날짜 갱신**: HTML_CONTENT 상단 메타 라인의 `Last updated: {Month} {YYYY}` 표기가 있으면 업로드 시점 월로 갱신한다(첫 번째 매치 1개만).
 
-POST `/wp-json/wp/v2/posts`
-
-```json
+```
+POST /wp-json/wp/v2/posts
 {
   "title":      "{SEO_TITLE}",
   "content":    "<!-- wp:freeform -->\n{HTML_CONTENT}\n<!-- /wp:freeform -->",
@@ -226,7 +217,6 @@ POST `/wp-json/wp/v2/posts`
   "categories": [{WP_CAT_ID}]
 }
 ```
-
 응답에서 WP_POST_ID 기록.
 
 > HTML_CONTENT가 길면(1만 자 이상) javascript_tool 한 번에 넣지 말고 `window.__A`, `window.__B` … 로 나눠 담은 뒤 이어붙여 POST한다. 템플릿 리터럴 안에 백틱·`${` 이 없는지 확인.
@@ -253,9 +243,8 @@ wait 4초 후 `document.body?.classList.contains('wp-admin')` 로 로그인 확�
 
 사이드바 클릭 대신 REST로 postmeta를 지정한다. Astra meta는 `show_in_rest` 로 등록돼 있어 정상 저장되며, 새로고침 후 검증도 가능하다(Rank Math와 달리 이 방식이 실제로 반영됨).
 
-POST `/wp-json/wp/v2/posts/{WP_POST_ID}`
-
-```json
+```
+POST /wp-json/wp/v2/posts/{WP_POST_ID}
 {"meta": {
   "ast-site-content-layout": "full-width-container",
   "site-content-style": "unboxed",
@@ -267,12 +256,10 @@ POST `/wp-json/wp/v2/posts/{WP_POST_ID}`
 ```
 
 **[6b-검증]** 편집 URL로 새로고침(navigate) → wait 4초 →
-
 ```javascript
 const m = wp.data.select('core/editor').getEditedPostAttribute('meta');
 m['site-content-style']==='unboxed' && m['ast-banner-title-visibility']==='disabled' && m['ast-site-content-layout']==='full-width-container'
 ```
-
 `false` 면 1회 재시도. 그래도 false면 오류 로그에 "Astra 설정 미반영" 명시 기록 — "완료"로 보고 금지.
 
 > 콘텐츠는 STEP 5에서 freeform 래퍼로 저장돼 에디터가 자동 로딩한다. `resetBlocks`·`core/heading` 추가 금지. 본문이 비어 있을 때만 [6i] 폴백.
@@ -292,7 +279,10 @@ m['site-content-style']==='unboxed' && m['ast-banner-title-visibility']==='disab
 - 창 닫기(X)
 
 **[6g] 저장 + 재검증**
-Ctrl+S → 저장 확인 → 편집 URL로 다시 navigate → wait 5초 → `wp.data.select('rank-math').getKeywords()` 에 쉼표 항목 5개가 남아 있어야 한다.
+Ctrl+S → 저장 확인 → 편집 URL로 다시 navigate → wait 5초 →
+```javascript
+wp.data.select('rank-math').getKeywords()   // 쉼표 항목 5개가 남아 있어야 함
+```
 비어 있으면 [6d]부터 1회 재시도. 재시도 후에도 비면 오류 로그에 "SEO 설정 미반영" 명시 — "완료"로 보고 금지.
 
 **[6h] 점수 확인 및 보정**
@@ -301,11 +291,14 @@ Rank Math 배지 숫자 확인. 목표 **78점 이상**.
 (지침서 조회 실패 시에만 [부록 A] 사용.)
 
 **[6i] 콘텐츠 재업로드 폴백** (에디터 본문이 비어 있을 때만)
-POST `/wp-json/wp/v2/posts/{WP_POST_ID}` — `{"content": "<!-- wp:freeform -->\n{HTML_CONTENT}\n<!-- /wp:freeform -->"}`
+```
+POST /wp-json/wp/v2/posts/{WP_POST_ID}
+{"content": "<!-- wp:freeform -->\n{HTML_CONTENT}\n<!-- /wp:freeform -->"}
+```
 
 ### [6k] Notion SEO 점수 업데이트
 메인 테이블 해당 행의 SEO 셀 `—` → 실제 점수.
-⚠️ `<td>—</td>` + 카테고리 셀 같은 짧은 old_str은 다른 행과 중복된다. **제목 또는 한줄 요약 셀부터 포함해** 유일한 범위로 잡는다.
+⚠️ `<td>—</td>\n<td>🎭 Culture</td>` 같은 짧은 old_str은 다른 행과 중복된다. **제목 또는 한줄 요약 셀부터 포함해** 유일한 범위로 잡는다.
 
 ### [6l] draft 일자 기록 — 전 과정 성공 시에만
 
@@ -323,7 +316,8 @@ POST `/wp-json/wp/v2/posts/{WP_POST_ID}` — `{"content": "<!-- wp:freeform -->\
 1. `GET /wp-json/wp/v2/posts?slug={기존슬러그}&_fields=id` → id 확인
 2. `GET /wp-json/wp/v2/posts/{id}?context=edit` → `content.raw` 확보
 3. 이미 신규 슬러그가 들어 있으면 건너뜀(중복 방지)
-4. 마지막 `</ul>` 직전에 `<li><a href="/{신규슬러그}/">{신규 SEO_TITLE}</a></li>` 삽입 — 삽입 전 `lastIndexOf('Related reading') < lastIndexOf('<ul')` 인지 확인해 엉뚱한 리스트에 들어가지 않게 한다. Related reading 섹션이 없으면 신설.
+4. 마지막 `</ul>` 직전에 `<li><a href="/{신규슬러그}/">{신규 SEO_TITLE}</a></li>` 삽입
+   — 삽입 전 `lastIndexOf('Related reading') < lastIndexOf('<ul')` 인지 확인해 엉뚱한 리스트에 들어가지 않게 한다. Related reading 섹션이 없으면 `<p><strong>Related reading</strong></p>\n<ul>…</ul>` 신설.
 5. `<ul>/<li>` 여닫이 개수 검증 → POST 저장. 실패 시 오류 로그만 남기고 발행은 유지(반려 아님).
 
 ⚠️ **슬러그 실재 확인**: koreaplug.com은 존재하지 않는 슬러그에도 HTTP 200 + "Page Not Found"(소프트404)를 반환한다. 상태코드로 판단하지 말고 **REST 조회 결과(id 존재) 또는 title 문자열**로 확인한다.
@@ -332,9 +326,12 @@ POST `/wp-json/wp/v2/posts/{WP_POST_ID}` — `{"content": "<!-- wp:freeform -->\
 
 ## STEP 7 — 완료 알림 출력 (200자 이내, 이전 단계 성공 여부와 무관하게 반드시 실행)
 
-- 신규 포스트 있음: `KoreaPlug 발행완료 ✅ draft {N}개 | 관문반려 {R}건(로그 기록) | 인바운드링크 {L}건 | SEO평균 {점수}점 | 오류 {E}개 ({TODAY_KST})`
-- 신규 포스트 없음: `KoreaPlug 자동 체크 완료 — 신규 글 없음 ({TODAY_KST})`
-- [4d]에서 미완성 draft를 복구했으면 함께 기록: `KoreaPlug 미완성 draft {M}개 복구완료 (SEO/이미지) | ({TODAY_KST})`
+- 신규 포스트 있음:
+  `KoreaPlug 발행완료 ✅ draft {N}개 | 관문반려 {R}건(로그 기록) | 인바운드링크 {L}건 | SEO평균 {점수}점 | 오류 {E}개 ({TODAY_KST})`
+- 신규 포스트 없음:
+  `KoreaPlug 자동 체크 완료 — 신규 글 없음 ({TODAY_KST})`
+- [4d]에서 미완성 draft를 복구했으면 함께 기록:
+  `KoreaPlug 미완성 draft {M}개 복구완료 (SEO/이미지) | ({TODAY_KST})`
 
 ⚠️ STEP 0에서 지침서 조회에 실패했거나 지침서-루틴 상충을 발견한 경우 그 사실을 한 줄로 함께 기록한다.
 ⚠️ Notion 메인 페이지 하단에 이번 회차 실행 로그를 append한다 (신규 draft·1급 자료·관문 결과·인바운드 링크·오류·다음 실행 시각).
@@ -346,7 +343,7 @@ POST `/wp-json/wp/v2/posts/{WP_POST_ID}` — `{"content": "<!-- wp:freeform -->\
 | 상황 | 조치 |
 |---|---|
 | GitHub 지침서 조회 실패 | 저장소 루트 1회 재확인 → 실패 시 오류 로그 + [부록 A] 폴백으로 계속 진행 (STOP 아님, 추측 생성 금지) |
-| pw.txt 접근 실패 | 폴더 미연결이면 정상. Chrome 세션 nonce(STEP 3 ②)로 전환 |
+| pw.txt 접근 실패 | 정상 경로. Chrome 세션 nonce(STEP 3 ②)로 전환 |
 | WP 세션 만료(reauth) | 자동완성된 자격증명이 있으면 로그인 버튼만 클릭. 비어 있으면 중단 후 STEP 7 |
 | Chrome 미연결 | 오류 로그 기록 후 STEP 7로 (전체 중단, draft 일자 공란 유지) |
 | WordPress API 실패 | 로그 기록 후 다음 포스트 진행 |
