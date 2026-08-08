@@ -60,7 +60,7 @@ koreaplug.com과 0and1life.com의 **고장 여부만** 매일 점검하고, 이�
 - https://search.google.com/search-console/ownership?resource_id=https%3A%2F%2Fkoreaplug.com%2F
 - https://search.google.com/search-console/ownership?resource_id=https%3A%2F%2F0and1life.com%2F
 
-⚠️ **0and1Life는 2026-07-11에 실제로 인증이 풀린 이력이 있고, 2026-08-06 확인 결과 여전히 `Google 애널리틱스` 단일 방법에만 의존한다**(HTML 파일·HTML 태그·태그 관리자·DNS 전부 미설정). gtag.js가 빠지거나 GA 속성이 바뀌면 재발한다. KoreaPlug도 `HTML 태그` 1개 단일 의존이다.
+⚠️ **0and1Life는 2026-07-11에 실제로 인증이 풀린 이력이 있고, 2026-08-08 확인 결과 여전히 `Google 애널리틱스` 단일 방법에만 의존한다**(HTML 파일·HTML 태그·태그 관리자·DNS 전부 미설정). gtag.js가 빠지거나 GA 속성이 바뀌면 재발한다. KoreaPlug도 `HTML 태그` 1개 단일 의존이다.
 
 **해결책**: 풀려 있으면 그 화면의 [소유권 확인] 버튼을 눌러 재검증한다(설정 변경 아님 — 이 루틴에 허용된 유일한 쓰기 동작). 재검증 후에는 **반드시 이중화를 권고**한다: 같은 화면 "추가 확인 방법" > HTML 태그 > 메타태그 복사 → wp-admin > Rank Math > 일반 설정 > 웹마스터 도구 > Google Search Console 칸에 붙여넣기 > 저장 → GSC로 돌아와 [확인]. 5분이면 끝나고 재발이 막힌다. → 재검증은 `루틴가능`, 이중화는 `사용자필요`
 
@@ -88,7 +88,7 @@ koreaplug.com과 0and1life.com의 **고장 여부만** 매일 점검하고, 이�
 
 **확인**: https://search.google.com/search-console/index?resource_id=<RESOURCE_ID> 의 `색인 생성됨` 숫자를, 직전 주간 리포트(Notion 최신 `### YYYY-MM-DD 주간 리포트`)의 색인 수와 비교. **10% 이상 감소**만 알람.
 
-**참고치 (2026-08-06 확인)**: koreaplug 102 (미색인 107) / 0and1life 30 (미색인 45)
+**참고치 (2026-08-08 확인)**: koreaplug 113 (미색인 172) / 0and1life 42 (미색인 61)
 
 **해결책**: 급감 원인은 순서대로 확인한다. ① 항목 2(noindex)와 항목 4(수동조치)를 먼저 재확인 — 이 둘이면 그쪽 플레이북을 따른다 ② 아니면 robots.txt를 열어(https://도메인/robots.txt) `Disallow: /` 가 들어갔는지 확인 ③ 그것도 아니면 색인 제외 사유 표에서 어느 사유가 늘었는지 짚어 보고한다(사유별 건수 비교). → 원인 파악은 `루틴가능`, 수정은 `사용자필요`
 
@@ -98,14 +98,25 @@ koreaplug.com과 0and1life.com의 **고장 여부만** 매일 점검하고, 이�
 - https://koreaplug.com/wp-admin/edit.php?post_status=all
 - https://0and1life.com/wp-admin/edit.php?post_status=all
 
-**해결책**: **2026-08-01에 두 사이트 모두 실패한 전례가 있다.** 원인 2개를 이 순서로 확인한다:
+⚠️ **발행일(예약 발행일)과 생성일을 혼동하지 말 것.** 예약된 글의 날짜 칸은 미래 발행일이라 어제 루틴이 돌았는지를 알려주지 않는다. 판정은 **어제 새로 생긴 초안** 또는 **해당 Notion 서브페이지의 `상태`·`WordPress Post ID` 기재 여부**로 한다.
 
-① **워드프레스 앱 비밀번호(`pw.txt`) 접근 경로** — 배포 루틴이 이 파일을 못 읽으면 배포가 통째로 중단된다.
-  ⚠️ **2026-08-06 확인: `C:\Users\win\.claude\` 는 보호된 호스트 경로라 Cowork 폴더로 마운트할 수 없다.** 따라서 舊 해결책 "그 폴더를 세션에 연결"은 **불가능하며 시도하지 말 것.** 유효한 해결책은 둘뿐이다 — ⓐ `pw.txt`를 마운트 가능한 경로(예: `C:\Users\win\Documents\blog\`)로 복사 ⓑ `blog` 폴더 전체를 마운트 가능한 경로로 옮기고 원래 자리에 디렉터리 정션을 남긴다.
+**해결책**: **2026-08-01에 두 사이트 모두 배포 실패, 2026-08-07에 두 사이트 모두 하루 지연된 전례가 있다.** 원인을 이 순서로 확인한다:
+
+① **폴더 마운트 여부 (2026-08-08 기준 최우선 후보)** — 배포 루틴은 `pw.txt`에서 WordPress 앱 비밀번호를 읽는다. 먼저 bash로 접근을 시도한다:
+  ```
+  ls /sessions/*/mnt/Claude/pw.txt
+  ```
+  ✅ **2026-08-08 확인: `pw.txt`는 `C:\Users\win\Documents\Claude\pw.txt` 에 정상 존재하며, 이 경로는 마운트 가능하다.** 키 4종(`KOREAPLUG_WP_USER`/`KOREAPLUG_WP_APP_PASSWORD`/`ONEANDZERO_WP_USER`/`ONEANDZERO_WP_APP_PASSWORD`)과 `PEXELS_API_KEY`가 들어 있다.
+  ⚠️ **따라서 舊 진단 "pw.txt를 마운트 가능한 경로로 복사"는 이미 완료된 조치이며, 다시 권고하지 말 것.** 舊 경로 `C:\Users\win\.claude\` 는 더 이상 관련 없다.
+  → 위 `ls`가 실패하면 원인은 파일이 아니라 **그 실행 세션에 폴더가 마운트되지 않은 것**이다. 무인 예약 실행에서는 `request_cowork_directory` 승인 창을 띄울 사람이 없어 여기서 멈춘다. 이때는 `request_cowork_directory`(path=`C:\Users\win\Documents\Claude`)를 1회만 시도하고, 실패하면 ②의 nonce 폴백으로 넘어간다.
 
 ② **Chrome 확장 로그인 상태** — 끊기면 nonce 대체 인증 경로도 막힌다. 해결: Chrome 사이드패널에서 재로그인.
 
-둘 다 정상인데 글이 없으면 해당 writer 루틴의 마지막 실행 로그를 확인해 보고한다. → `사용자필요`
+③ **자격증명 유효성** — 위 둘이 정상인데 REST 호출이 401이면 앱 비밀번호가 폐기·재발급된 것이다. wp-admin > 사용자 > 프로필 > 응용 프로그램 비밀번호에서 새로 발급해 `pw.txt`를 갱신한다.
+
+셋 다 정상인데 글이 없으면 해당 writer 루틴의 마지막 실행 로그를 확인해 보고한다. → `사용자필요`
+
+**보조 확인 (알람 조건 아님 — 발견 시에만 🔴로 보고)**: 예약 작업 본문이나 `C:\Users\win\Documents\Claude\Scheduled\*/SKILL.md` 에 **평문 앱 비밀번호가 적혀 있으면 즉시 보고**한다. 자격증명은 `pw.txt` 한 곳에만 있어야 한다. (2026-08-08에 구버전 사본 2개에서 발견되어 제거함. 노출됐던 비밀번호는 재발급 전까지 유효하다.)
 
 ### 8. 신규 사용자 / 스팸 흔적 🔴(신규 관리자) / 🟡(신규 일반 사용자)
 
