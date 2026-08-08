@@ -1,10 +1,19 @@
-# KoreaPlug 자동 이미지 삽입 태스크 (v3.1 — 증빙 구분·총량 상한·2일 소급)
+---
+name: koreaplug-auto-image-insert
+description: 오늘 작성된 KoreaPlug WP 글에 Gemini 이미지 3장 자동 생성·WebP 변환·삽입 (v3.3 탭 그룹 등록 수정)
+---
+
+# KoreaPlug 자동 이미지 삽입 태스크 (v3.3 — 레거시 증빙 인식·미분류 skip 금지·탭 그룹 등록 수정)
 
 ### 목적
 
 Notion 글 현황 테이블에서 오늘 날짜에 작성된 WordPress 글을 찾아, **데코(생성) 이미지가 3장 미만인 글**에 Gemini로 생성한 이미지를 WebP 형식으로 삽입한다 — 단, **증빙+데코 합계가 5장을 넘지 않는 범위**에서만 (생성 수를 3→2→1장으로 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다.
 
 > ⚠️ v3 변경 (2026-08-01): Draft 루틴이 발행 관문용 **증빙 캡처**(`figure class="evidence-capture"`, 파일명 `evidence-*`)를 본문에 넣기 시작하면서, 총 이미지 수 기준(舊 imgCount ≥ 3 → skip)으로는 모든 글이 스킵되어 이 루틴이 돌지 않았다. 판정은 **데코 개수**로 하되, 글이 이미지로 과밀해지지 않도록 **총량 상한 5장**(증빙+데코, 히어로 교체는 총량 불변이라 제외)을 함께 둔다. 증빙 캡처는 어떤 단계에서도 교체·이동·삭제하지 않는다.
+
+> ⚠️ v3.2 변경 (2026-08-04): 舊 정규식 분류기는 **v1.28 이전에 작성된 레거시 글의 증빙 캡처를 인식하지 못했다.** Draft 루틴이 `evidence-` 파일명·`evidence-capture` 클래스를 붙이기 시작한 것은 v1.28(2026-08-02)부터라, 그 이전 글의 증빙은 마커가 없어 **데코로 오분류**된다. 0and1Life에서 먼저 실측된 사례: #70 결혼식 보증인원(Post 894)은 공공 출처(price.go.kr) 조회 캡처 2장이 데코로 잡혀 deco=4 → genCount 0 → skip. 이미지가 필요한 글인데 루틴이 3일 내내 그냥 지나쳤다. KoreaPlug도 v1.28 이전 글은 동일한 구멍이 있으므로 같은 수정을 적용한다. STEP 2를 **DOM 기반 8단계 우선순위 분류기**로 교체하고, **미분류(unknown)가 있으면 skip 금지** 가드를 신설한다.
+
+> ⚠️ v3.3 변경 (2026-08-08): STEP 6-1의 `window.open(url, '_blank')` 로 연 WP admin 탭이 **Chrome MCP 탭 그룹 밖에 생성돼** `tabs_context_mcp` 목록에 나타나지 않았고, 그 결과 6-2의 postMessage 리스너를 주입할 수 없어 업로드 경로 전체가 막혔다 (2026-08-08 #129 실측). 두 번째 인자 `'_blank'` 를 **제거**하면 탭이 그룹에 정상 등록된다. 이미 `'_blank'` 로 열어버린 경우의 복구 절차도 6-1에 명시한다.
 
 ---
 
@@ -42,34 +51,65 @@ fetch('/wp-json/wp/v2/posts?search=TITLE_KEYWORD&per_page=5&status=any&_fields=i
 // 2~3초 대기 후 window._postData 확인
 ```
 
-일치하는 글의 **Post ID**와 **이미지 3종 분류(증빙/스톡/데코)**를 확인한다 (v3):
+일치하는 글의 **Post ID**와 **이미지 3종 분류(증빙/스톡/데코)**를 확인한다.
+
+(v3.2) 분류는 정규식을 본문 전체에 훑는 방식이 아니라, **이미지 하나씩 DOM으로 열어 8단계 우선순위**로 판정한다. 판정 근거(`why`)를 이미지별로 남겨 오분류를 사후 추적할 수 있게 한다.
 
 ```javascript
-window._postData.map(p => {
-  const html = p.content.rendered;
-  const imgTags = html.match(/<img[^>]*>/g) || [];
-  const evRe = /\/evidence-|evidence-capture/i;                      // 증빙 마커: 파일명·클래스
-  const evLegacyRe = /alt="[^"]*(캡처|캡쳐|스크린샷|Captured|Screenshot)[^"]*"/i; // 마커 없는 기존 글 폴백
-  const stockRe = /unsplash\.com|pexels\.com|pixabay\.com|FEATURED_IMAGE/;
+window._cls = window._postData.map(p => {
+  const html = p.content.raw || p.content.rendered;
+  const div = document.createElement('div'); div.innerHTML = html;
+
+  const evClassRe = /evidence-capture/i;                                      // ① figure 클래스 (v1.28 표준)
+  const evNameRe  = /^evidence-/i;                                            // ② 파일명 prefix (v1.28 표준)
+  const stockRe   = /unsplash\.com|pexels\.com|pixabay\.com|FEATURED_IMAGE/i;  // ③ 스톡·플레이스홀더
+  const genNameRe = /^(koreaplug|0and1life)-/i;                               // ④ 이 루틴이 만든 생성 이미지
+  const evCapRe   = /Captured\s*\d{4}\s*[-.\/]\s*\d{1,2}\s*[-.\/]\s*\d{1,2}/i; // ⑤ figcaption 촬영일 (레거시)
+  const evSrcRe   = /(go[-_.]kr|korea[-_.]kr|kosis|hometax|work24)/i;         // ⑥ 공공 출처 도메인 흔적 (레거시)
+  const evAltRe   = /(캡처|캡쳐|스크린샷|Captured|Screenshot|조회한|조회 결과|확인한|고지서|명세서|모의계산)/i; // ⑦ alt 단서 (레거시)
+
   let evidence = 0, stock = 0, deco = 0;
-  for (const t of imgTags) {
-    if (evRe.test(t) || evLegacyRe.test(t)) evidence++;
-    else if (stockRe.test(t)) stock++;
-    else deco++;
+  const detail = [], unknown = [];
+
+  for (const img of Array.from(div.querySelectorAll('img'))) {
+    const src  = img.getAttribute('src') || '';
+    const base = src.split('/').pop() || '';
+    const alt  = img.getAttribute('alt') || '';
+    const fig  = img.closest('figure');
+    const capEl = fig ? fig.querySelector('figcaption') : null;
+    const cap  = capEl ? capEl.textContent : '';
+    const cl   = fig ? (fig.getAttribute('class') || '') : '';
+
+    let k, why;
+    if      (evClassRe.test(cl))   { k = 'evidence'; why = 'figure.class'; }
+    else if (evNameRe.test(base))  { k = 'evidence'; why = 'filename'; }
+    else if (stockRe.test(src))    { k = 'stock';    why = 'stock'; }
+    else if (genNameRe.test(base)) { k = 'deco';     why = 'gen-prefix'; }
+    else if (evCapRe.test(cap))    { k = 'evidence'; why = 'figcaption'; }
+    else if (evSrcRe.test(base))   { k = 'evidence'; why = 'public-src'; }
+    else if (evAltRe.test(alt))    { k = 'evidence'; why = 'alt-cue'; }
+    else                           { k = 'deco';     why = 'UNKNOWN'; unknown.push(base); }
+
+    if (k === 'evidence') evidence++; else if (k === 'stock') stock++; else deco++;
+    detail.push(base.slice(0, 52) + ' => ' + k + ' [' + why + ']');
   }
-  // img 태그에 마커가 없어도 감싼 figure에 evidence-capture 클래스가 있으면 증빙으로 재분류
-  const figEv = (html.match(/<figure[^>]*class="[^"]*evidence-capture[^"]*"[\s\S]{0,800}?<img/gi) || []).length;
-  const move = Math.max(0, figEv - evidence);
-  evidence += move; deco = Math.max(0, deco - move);
+
   const genCount = deco >= 3 ? 0 : Math.max(0, Math.min(3 - deco, 5 - evidence - deco)); // 총량 상한 5장
   return {id: p.id, title: p.title.rendered, status: p.status,
-          evidence, stock, deco, genCount, hasStockImg: stock > 0};
-})
+          evidence, stock, deco, genCount, hasStockImg: stock > 0, unknown, detail};
+});
+window._cls
 ```
 
-분류가 애매한 자체 업로드 이미지(마커·alt 단서가 모두 없는 경우)는 본문에서 해당 `<figure>`를 직접 열어 figcaption에 출처 기관·`Captured YYYY-MM-DD`가 있는지 확인한다 — 있으면 증빙, 없으면 데코.
+⚠️ (v3.3 / 2026-08-08 실측) `javascript_tool` 의 반환 문자열에 이미지 URL·쿼리스트링이 그대로 섞이면 **`[BLOCKED: Cookie/query string data]`** 로 출력 전체가 막힌다. 결과를 읽을 때는 한 번에 전부 찍지 말고 ⓐ 집계값만(`ev/st/deco/gen/unk`) 먼저, ⓑ `detail` 은 글 단위로 나눠서, ⓒ 파일명에서 `?&=` 를 치환하거나 공통 prefix를 축약해 출력한다.
 
-- **genCount가 0이면 본문 삽입을 skip하고 종료** (단, `hasStockImg: true`면 스톡 이미지 교체만 수행 — 교체는 총량을 늘리지 않으므로 상한과 무관).
+우선순위를 이 순서로 고정한 이유: 표준 마커(①②)가 있으면 그것이 가장 확실한 근거이므로 먼저 본다. 스톡(③)은 호스트로 확정된다. 이 루틴이 직접 만든 이미지(④)는 파일명 prefix로 확실히 데코이므로, 레거시 추정 규칙(⑤⑥⑦)이 이를 잘못 증빙으로 끌고 가지 않도록 **레거시 규칙보다 먼저** 판정한다. ⑤⑥⑦은 마커가 없는 옛 글에만 적용되는 폴백이다.
+
+⛔ **(v3.2 신설) `unknown`이 비어 있지 않으면 genCount 값과 무관하게 즉시 skip하지 않는다.** `unknown`에 잡힌 이미지는 자동 판정이 실패한 것이다. 본문에서 해당 `<figure>`를 직접 열어 figcaption에 출처 기관·`Captured YYYY-MM-DD`가 있는지, 화면 캡처처럼 보이는지 눈으로 확인한 뒤 증빙/데코를 손으로 확정하고 **genCount를 다시 계산한 다음** 진행 여부를 정한다. 확인 결과는 STEP 8 보고에 이미지별로 남긴다.
+
+> 이 가드가 필요한 이유 (2026-08-04 실측): 0and1Life #70(Post 894)은 증빙 2장이 데코로 오분류돼 genCount 0으로 계산됐고, 그 자리에서 종료되는 바람에 "애매하면 사람이 확인한다"는 아래 단계까지 **도달조차 하지 못했다.** 자동 분류가 틀렸다고 말할 기회 없이 skip된 것이 문제의 핵심이었다.
+
+- **genCount가 0이면 본문 삽입을 skip하고 종료** (단, `hasStockImg: true`면 스톡 이미지 교체만 수행 — 교체는 총량을 늘리지 않으므로 상한과 무관). `unknown`이 있으면 위 가드를 먼저 수행한 뒤 판단한다.
 - genCount가 1~2장이면 그 수만큼만 생성·삽입한다. 우선순위: **이미지 1(도입 훅) → 이미지 3(결론 시각화) → 이미지 2(중반 클로즈업)** — 증빙 캡처가 이미 있는 글에서는 중반 클로즈업의 역할을 증빙이 대신한다.
 - **증빙 캡처는 절대 건드리지 않는다**: 교체·이동·삭제 금지, 삽입 위치가 증빙 figure 내부에 떨어지면 직전 헤딩 바로 앞으로 옮긴다.
 - `hasStockImg: true`면 **히어로 교체용 이미지 1장을 추가 생성**한다 (총 4장). 이 히어로 이미지는 STEP 7-4에서 기존 스톡 이미지의 src/alt를 교체하는 데 사용하고, 대표이미지로도 설정한다.
@@ -117,6 +157,8 @@ integrated into the lower section of the same panel, absolutely no separate roun
 
 이 원칙은 도어락에 한정되지 않는다. 밥솥·정수기·무인 키오스크·찜질방 시설·지하철 좌석·분리수거장 등 **글의 핵심 피사체가 무엇이든 동일하게 적용**한다.
 
+**(v3.3 보강) 화면·디스플레이가 피사체인 글**: 한국 방송의 가림 처리는 서구식 가우시안 블러가 아니라 **각진 픽셀 블록(모자이크)**이다. `soft grey pixelated mosaic patch`, `the individual mosaic squares clearly larger and coarser than the surrounding picture detail` 처럼 **블록 형태와 거칠기를 명시**해야 의도한 결과가 나온다. 화면 안 장면까지 지정할 때는 `no readable text` 를 반드시 붙인다 (화면 속 자막·UI 텍스트가 깨진 글자로 생성됨).
+
 #### 3-3. 분위기·라이팅 원칙 (2순위)
 
 피사체 정확성이 확보된 뒤, 아래 순서로 조합해 사실감을 높인다. 추상적 표현보다 구체적인 물리 조건으로 묘사한다. 외국인에게 '진짜 한국(Real Korea)'의 매력을 직관적으로 전달할 수 있도록 로컬 고유의 질감과 분위기를 극대화한다.
@@ -156,6 +198,14 @@ An elaborate and colorful Doljanchi (Korean first birthday) celebration table se
 
 ```
 A close-to-medium shot of a beige steel apartment entrance door in Seoul, fitted with an authentic modern Korean digital door lock (Gateman/Samsung SDS style) — a tall vertical rectangular brushed-silver metal panel mounted flush on the door, a touch-sensitive numeric keypad glowing faintly blue in the upper section, a slim horizontal push-down lever handle integrated into the lower section of the same panel, absolutely no separate round doorknob, soft afternoon window light casting gentle shadows across the door, shot on Sony A7R V with 50mm f/1.8 lens, eye-level straight-on composition centered on the lock panel, crisp texture of brushed metal and matte painted steel door, no people, no text, no watermark, no logos
+```
+
+**프롬프트 예시 (v3.3 신설 — 두 상태 비교형 히어로):**
+
+글의 핵심이 'A일 때와 B일 때가 다르다'인 경우, 히어로는 **두 상태를 한 프레임에 나란히** 넣으면 썸네일만으로 주제가 읽힌다.
+
+```
+A clean straight-on wide photograph of two screens side by side on a light oak table in a bright modern Korean living room. On the left, a flat-screen television shows a Korean drama scene in which one object is covered by a grey pixelated mosaic patch. On the right, a tablet propped on a stand shows the exact same scene completely sharp and clear with no mosaic at all. Identical framing and identical colours on both screens so the single difference is obvious at a glance, soft diffused daylight from a large window, shot on Canon EOS R5 with 50mm f/1.2 lens, symmetrical eye-level composition, crisp screen glass and matte table textures, no people in the room, no readable text, no watermark, no logos, no anime style, no 3d render
 ```
 
 **이미지 3장의 역할 분담:**
@@ -202,7 +252,20 @@ window._insertPoints = [
 window._insertPoints; // 확인
 ```
 
+⚠️ (v3.3 / 2026-08-08 실측) **FAQ 섹션이 h3로 여러 개 붙어 있는 글에서는 위 `h[23]` 계산이 이미지 3장을 전부 글 끝 FAQ 구간에 몰아넣는다.** (#129: h2 6개 + FAQ h3 5개 → 2/4·3/4 지점이 둘 다 FAQ 안으로 떨어짐.) 헤딩 목록을 뽑은 뒤 **h2와 h3의 개수·위치를 먼저 눈으로 확인하고**, h3가 문서 후반에 몰려 있으면 **h2만으로 분위를 계산한다**:
+
+```javascript
+const c = window._rawContent;
+const h2 = []; const re2 = /<h2[^>]*>/g; let m2;
+while ((m2 = re2.exec(c)) !== null) h2.push(m2.index);
+const n = h2.length;
+window._insertPoints = [h2[Math.floor(n*1/4)], h2[Math.floor(n*2/4)], h2[Math.floor(n*3/4)]];
+window._insertPoints;
+```
+
 (v3) `genCount`가 3 미만이면 `window._insertPoints`에서 앞의 genCount개 위치만 사용한다 — 우선순위는 STEP 2의 이미지 1→3→2 순서를 따른다 (2장이면 1/4·3/4 지점, 1장이면 1/4 지점).
+
+(v3.2) 다만 **이미 이미지가 있는 글에 1~2장을 보충하는 경우**에는 기계적으로 1/4 지점을 쓰지 말고, 기존 이미지들의 본문 내 위치(index)를 먼저 구해 **이미지가 가장 오래 비어 있는 구간**의 헤딩을 고른다. 보충의 목적은 개수 채우기가 아니라 공백 메우기다.
 
 ---
 
@@ -214,6 +277,10 @@ Chrome MCP로 새 탭을 열고 `https://gemini.google.com` 으로 이동한다.
 
 1. 입력창 클릭 → 프롬프트 1 입력 → Enter
 2. 대기 후 스크린샷으로 이미지 생성 완료 확인 (Chrome MCP의 wait는 1회 최대 10초 — 10초 대기 → 스크린샷 → 미완성이면 추가 대기 반복)
+
+⚠️ 입력 후 화면이 초기 상태로 돌아가 있으면 전송이 안 된 것이다. 스크린샷으로 입력창에 프롬프트가 남아 있는지 확인하고, 남아 있으면 전송 버튼을 직접 클릭한다.
+
+⚠️ (v3.3 / 2026-08-08 실측) **긴 프롬프트에서는 Enter 키가 거의 전송되지 않는다.** 처음부터 Enter를 생략하고 **전송 버튼(입력창 우측 원형 ↑, 대략 x=1048 / y=입력창 하단줄)을 클릭**하는 편이 빠르다. 타이핑 직후 곧바로 클릭하면 씹히는 경우가 있으므로 **타이핑 → 2~3초 대기 → 클릭 → 스크린샷으로 전송 여부 확인**의 순서를 지킨다. 스크린샷에 프롬프트가 그대로 남아 있으면 클릭을 1회 더 한다.
 
 **생성 결과 검증 (필수 — 캡처 전에 스크린샷으로 확인):**
 
@@ -246,7 +313,11 @@ Chrome MCP로 새 탭을 열고 `https://gemini.google.com` 으로 이동한다.
 'fired'
 ```
 
+⚠️ 워터마크 덮개 색은 바로 왼쪽 1픽셀에서 뽑는다. 밝고 균일하지 않은 배경에서는 덮개 사각형이 눈에 띌 수 있다 — STEP 7.5 육안 검증에서 확인하고, 눈에 띄면 STEP 8 보고에 명시한다.
+
 **이미지 2, 3 (및 hasStockImg 시 히어로):** "새 채팅" 버튼 클릭 → 프롬프트 입력 → 동일하게 검증 → `window._img2`, `window._img3`, `window._imgHero`에 저장.
+
+⚠️ (v3.3) "새 채팅"은 사이드바 버튼 클릭(SPA 전환)으로만 한다. **주소창 navigate로 새 채팅을 열면 탭이 리로드되어 앞서 저장한 `window._img1` 등이 전부 날아간다.** 새 채팅 전환 후 `window._img1 ? 'yes' : 'NO'` 로 보존 여부를 한 번 확인하면 안전하다.
 
 ---
 
@@ -256,43 +327,67 @@ Chrome MCP로 새 탭을 열고 `https://gemini.google.com` 으로 이동한다.
 
 **6-1. Gemini 탭에서 새 WP admin 창 열기:**
 
+⛔ **(v3.3 / 2026-08-08 실측) 두 번째 인자 `'_blank'` 를 넘기지 않는다.** `'_blank'` 로 열린 탭은 Chrome MCP 탭 그룹 **밖에** 생성되어 `tabs_context_mcp` 목록에 나타나지 않고, 그 결과 6-2의 리스너 주입(`javascript_tool`)이 불가능해져 업로드 경로 전체가 막힌다. 인자 없이 `window.open(url)` 로 호출하면 그룹에 정상 등록된다.
+
 ```javascript
 // Gemini 탭에서 실행 — 새 tabId가 생성됨
-window._wpWin = window.open('https://koreaplug.com/wp-admin/media-new.php', '_blank');
+// ⚠️ '_blank' 를 넘기지 말 것 — 그룹 밖에 열려 리스너 주입 불가
+window._wpWin = window.open('https://koreaplug.com/wp-admin/media-new.php');
 window._wpWin ? 'window opened' : 'blocked'
-// 4초 대기 후 새 탭 tabId 확인 (tabs_context_mcp로 확인)
+// 6~8초 대기 후 새 탭 tabId 확인 (tabs_context_mcp로 확인)
+```
+
+**복구 절차** — 이미 `'_blank'` 로 열어 탭이 목록에 없다면, Gemini 탭에서 아래를 실행해 닫고 위 코드로 다시 연다. `window._img*` 는 Gemini 탭 heap에 그대로 남아 있으므로 **이미지 재생성은 필요 없다.**
+
+```javascript
+window._wpWin.close();
+window._wpWin = window.open('https://koreaplug.com/wp-admin/media-new.php');
+'reopened:' + !!window._wpWin
 ```
 
 **6-2. 새 WP admin 탭에 postMessage 리스너 주입:**
+
+⚠️ (2026-08-04 실측) `media-new.php` 에는 **`wpApiSettings` 가 정의되어 있지 않다.** 리스너를 붙이기 전에 REST nonce를 먼저 확보해 `window._nonce` 에 담고, 리스너 안에서는 `wpApiSettings.nonce` 대신 `window._nonce` 를 쓴다:
+
+```javascript
+const s = Array.from(document.querySelectorAll('script:not([src])')).map(x => x.textContent).join('\n');
+const m = s.match(/apiFetch\.createNonceMiddleware\(\s*["']([a-f0-9]+)["']/);
+window._nonce = m ? m[1] : (window.wpApiSettings ? wpApiSettings.nonce : null);
+'nonce: ' + (window._nonce ? 'ok' : 'MISSING')
+```
 
 새로 열린 WP admin 탭에서 실행:
 
 ```javascript
 window._uploadedIds = [];
+window._upErrors = [];
 window.addEventListener('message', async (e) => {
   if (!e.data || !e.data.dataUrl) return;
   const {dataUrl, filename, altText} = e.data;
-  const arr = dataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  const u8 = new Uint8Array(bstr.length);
-  for (let i = 0; i < bstr.length; i++) u8[i] = bstr.charCodeAt(i);
-  const fd = new FormData();
-  fd.append('file', new Blob([u8], {type: mime}), filename);
-  const res = await fetch('/wp-json/wp/v2/media', {
-    method: 'POST',
-    headers: {'X-WP-Nonce': wpApiSettings.nonce},
-    body: fd
-  });
-  const json = await res.json();
-  if (json.id) {
-    await fetch('/wp-json/wp/v2/media/' + json.id, {
+  try {
+    const arr = dataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    const u8 = new Uint8Array(bstr.length);
+    for (let i = 0; i < bstr.length; i++) u8[i] = bstr.charCodeAt(i);
+    const fd = new FormData();
+    fd.append('file', new Blob([u8], {type: mime}), filename);
+    const res = await fetch('/wp-json/wp/v2/media', {
       method: 'POST',
-      headers: {'X-WP-Nonce': wpApiSettings.nonce, 'Content-Type': 'application/json'},
-      body: JSON.stringify({alt_text: altText})
+      headers: {'X-WP-Nonce': window._nonce},
+      body: fd
     });
-    window._uploadedIds.push({id: json.id, url: json.source_url, alt: altText, tag: filename});
-    console.log('Uploaded: ' + json.id);
-  }
+    const json = await res.json();
+    if (json.id) {
+      await fetch('/wp-json/wp/v2/media/' + json.id, {
+        method: 'POST',
+        headers: {'X-WP-Nonce': window._nonce, 'Content-Type': 'application/json'},
+        body: JSON.stringify({alt_text: altText})
+      });
+      window._uploadedIds.push({id: json.id, url: json.source_url, alt: altText, tag: filename});
+    } else {
+      window._upErrors.push(filename + ' >> ' + JSON.stringify(json).slice(0, 150));
+    }
+  } catch (err) { window._upErrors.push(filename + ' >> ' + err.message); }
 });
 'listener ready'
 ```
@@ -313,6 +408,8 @@ window._wpWin.postMessage({dataUrl: window._imgHero, filename: 'koreaplug-SLUG-h
 // 6~8초 대기 후 window._uploadedIds.length가 전송한 수와 같은지 확인
 ```
 
+⚠️ 생성 이미지 파일명은 반드시 `koreaplug-` prefix를 유지한다 — STEP 2 분류기 ④단계가 이 prefix로 데코를 확정하므로, 규칙을 어기면 다음 실행에서 그 이미지가 미분류(unknown)로 떨어진다.
+
 ---
 
 ### STEP 7: 글에 이미지 삽입·교체 및 저장
@@ -324,12 +421,14 @@ WP admin 탭(6-2에서 연 탭)에서 `/wp-admin/post.php?post=POST_ID&action=ed
 ```javascript
 // 1) 최신 content 가져오기
 window._finalContent = null;
-fetch('/wp-json/wp/v2/posts/POST_ID?status=any&_fields=content', {
-  headers: {'X-WP-Nonce': wpApiSettings.nonce}
+fetch('/wp-json/wp/v2/posts/POST_ID?status=any&_fields=content,featured_media', {
+  headers: {'X-WP-Nonce': window._nonce}
 }).then(r => r.json())
-  .then(d => { window._finalContent = d.content.raw || d.content.rendered; });
+  .then(d => { window._finalContent = d.content.raw || d.content.rendered; window._curFeatured = d.featured_media; });
 // 3~4초 대기 후 window._finalContent?.length 확인
 ```
+
+⚠️ 삽입 위치(`window._insertPoints`)는 **이 시점의 `window._finalContent` 기준으로 다시 계산한다.** STEP 4에서 구한 인덱스는 그 사이 본문이 바뀌면 어긋난다. (계산식은 STEP 4의 h2 전용 버전을 그대로 쓴다.)
 
 ```javascript
 // 2) 역순으로 이미지 삽입 (뒤→앞 순서로 삽입해야 인덱스가 밀리지 않음)
@@ -367,11 +466,25 @@ if (hero) {
 ```
 
 ```javascript
+// 2.9) 저장 전 증빙 불가침 검증 (v3.2 — 필수)
+// evidence-capture 클래스 수와 증빙 파일명·공공 출처 흔적이 모두 그대로 남아 있어야 한다
+const before = window._finalContent, after = window._newContent;
+const cnt = (s, re) => (s.match(re) || []).length;
+window._evGuard = {
+  evClass: cnt(before, /evidence-capture/g) + '->' + cnt(after, /evidence-capture/g),
+  evName:  cnt(before, /\/evidence-/g)      + '->' + cnt(after, /\/evidence-/g),
+  pubSrc:  cnt(before, /go[-_.]kr/g)        + '->' + cnt(after, /go[-_.]kr/g),
+  imgTags: cnt(before, /<img/g)             + '->' + cnt(after, /<img/g)   // (v3.3) 증감 확인용
+};
+window._evGuard // 앞 세 항목은 좌우 값이 같아야 저장 진행
+```
+
+```javascript
 // 3) content 저장 (featured_media는 별도 단계에서 처리)
 window._saveResult = null;
 fetch('/wp-json/wp/v2/posts/POST_ID', {
   method: 'POST',
-  headers: {'X-WP-Nonce': wpApiSettings.nonce, 'Content-Type': 'application/json'},
+  headers: {'X-WP-Nonce': window._nonce, 'Content-Type': 'application/json'},
   body: JSON.stringify({content: window._newContent})
 }).then(r => r.json())
   .then(d => { window._saveResult = {id: d.id, status: d.status, imgCount: (d.content?.rendered?.match(/<img/g)||[]).length}; });
@@ -387,7 +500,7 @@ const featuredId = heroUp ? heroUp.id : window._uploadedIds[window._featuredImgI
 if (featuredId) {
   fetch('/wp-json/wp/v2/posts/POST_ID', {
     method: 'POST',
-    headers: {'X-WP-Nonce': wpApiSettings.nonce, 'Content-Type': 'application/json'},
+    headers: {'X-WP-Nonce': window._nonce, 'Content-Type': 'application/json'},
     body: JSON.stringify({featured_media: featuredId})
   }).then(r => r.json())
     .then(d => {
@@ -405,15 +518,23 @@ if (featuredId) {
 // 'ok' 이외의 결과는 STEP 8 보고에 기록하고 계속 진행
 ```
 
+⚠️ 이미 대표이미지가 지정된 글(`featured_media !== 0`)에 본문 이미지만 보충하는 경우에는 **대표이미지를 덮어쓰지 않는다.** (7-1에서 확보한 `window._curFeatured` 로 판정한다.)
+
 ---
 
 ### STEP 7.5: 최종 육안 검증 (필수)
 
-저장 후 편집 화면을 새로고침하고 **스크롤하며 삽입된 이미지 전부를 스크린샷으로 확인**한다:
+저장 후 **프론트엔드 프리뷰**(`https://koreaplug.com/?p=POST_ID&preview=true`)를 열고 **스크롤하며 삽입된 이미지 전부를 스크린샷으로 확인**한다. (v3.3: 편집 화면보다 프리뷰가 실제 렌더 결과·이미지 배치 확인에 정확하다.)
 
 - 각 이미지의 피사체가 글 내용·주변 섹션과 맞는가?
+- 이미지 3장이 **본문 전체에 고르게 퍼져 있는가?** (FAQ 구간에 몰려 있으면 STEP 4 h2 전용 계산으로 다시 삽입)
 - 히어로/대표이미지가 정상 반영됐는가?
+- 증빙 캡처가 원래 자리에 그대로 있는가? (`window._evGuard` 세 항목 좌우 일치 확인)
+- 워터마크 덮개 사각형이 눈에 띄지 않는가?
+- 표·TOC·내부링크 등 기존 요소가 삽입으로 깨지지 않았는가?
 - 어긋난 이미지가 발견되면 해당 이미지만 STEP 5부터 재생성해 교체하고, 불가하면 STEP 8 보고에 명시한다.
+
+**뒷정리 (v3.3 신설):** 검증이 끝나면 이 루틴이 만든 탭(Gemini 탭, media-new 탭)을 `tabs_close_mcp` 로 닫는다. 사용자가 결과를 바로 볼 수 있도록 **프리뷰 탭 1개만 남긴다.**
 
 ---
 
@@ -422,11 +543,14 @@ if (featuredId) {
 완료 후 아래 내용을 출력:
 
 - 처리한 글 제목 및 Post ID
+- **STEP 2 분류 결과 표**: 이미지별 `파일명 => 증빙/스톡/데코 [판정근거]`, 그리고 evidence/stock/deco/genCount
+- `unknown`이 있었다면 수동 확인 결과와 재계산된 genCount
 - 삽입·교체된 이미지 URL (본문 3장 + 히어로 교체 여부)
-- 최종 imgCount
+- 최종 imgCount, 증빙 불가침 검증(`window._evGuard`) 결과
 - 대표이미지: 선정된 이미지, 선정 이유, 설정 결과 (`window._featuredResult`)
 - 피사체 정확성 검증: 각 이미지별 통과/재시도/건너뜀 여부
 - Skip된 경우 그 이유
+- (v3.3) 루틴 자체의 오류·개선점이 발견됐다면 **수정할 조항 번호와 교체용 전문(前文)**을 함께 제시한다 — 사용자가 붙여넣기만 하면 되도록.
 
 ---
 
@@ -441,5 +565,10 @@ if (featuredId) {
 - **이미지 생성 실패·부정확 시 재시도는 반드시 '수정된 프롬프트'로** (동일 프롬프트 재시도 금지, 새 채팅에서). 수정 재시도 1회 후에도 부정확하면 해당 이미지 건너뜀
 - **프롬프트 작성 전 본문을 반드시 읽고, 피사체 형태가 불확실하면 웹 검색으로 확인**
 - 글 제목(title)은 수정하지 않음
-- 이미지 삽입 후 글 상태(publish/draft)는 변경하지 않음 — **발행·예약발행 전환은 어떤 경우에도 금지 (발행 결정은 항상 사용자 몫, 2026-08-01 사용자 지시)**
-- (v3) **증빙 캡처(`evidence-capture` figure) 불가침**: 삽입·스톡 교체 어느 단계에서도 증빙 figure의 마크업·src·alt·figcaption을 수정하지 않는다. 저장 전 `window._newContent`의 `evidence-capture` 등장 횟수가 원본과 동일한지 확인한다
+- 이미지 삽입 후 글 상태(publish/draft/future)는 변경하지 않음 — **발행·예약발행 전환은 어떤 경우에도 금지 (발행 결정은 항상 사용자 몫, 2026-08-01 사용자 지시)**
+- (v3) **증빙 캡처 불가침**: 삽입·스톡 교체 어느 단계에서도 증빙 figure의 마크업·src·alt·figcaption을 수정하지 않는다. 저장 전 STEP 7-2.9의 `window._evGuard` 로 확인한다
+- (v3.2) **증빙 판정은 `evidence-capture` 클래스·`evidence-` 파일명만으로 하지 않는다.** v1.28(2026-08-02) 이전 글에는 이 마커가 없다. figcaption의 `Captured YYYY-MM-DD`, 공공 출처 도메인 파일명(`*-go-kr`, `korea-kr`, `kosis`, `hometax`, `work24`), alt의 조회·확인·캡처 단서까지 폴백으로 본다
+- (v3.3) **`window.open` 에 `'_blank'` 금지** — 탭이 Chrome MCP 그룹 밖에 열려 리스너 주입이 불가능해진다 (STEP 6-1)
+- (v3.3) **Gemini 새 채팅은 사이드바 버튼 클릭으로만** — 주소창 navigate는 탭을 리로드해 `window._img*` 를 날린다
+- (v3.3) **javascript_tool 반환값에 이미지 URL·쿼리스트링을 그대로 담지 않는다** — `[BLOCKED: Cookie/query string data]` 로 출력 전체가 막힌다. 집계값 먼저, 파일명은 축약·치환해서 출력
+- (v3.3) **삽입 위치는 h2 기준으로 계산** — FAQ h3가 많은 글에서 `h[23]` 분위는 이미지를 글 끝에 몰아넣는다 (STEP 4)
