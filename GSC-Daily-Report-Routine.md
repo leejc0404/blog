@@ -1,3 +1,8 @@
+---
+name: daily-blog-health-check
+description: koreaplug.com·0and1life.com 일간 고장 감지 10항목 + 등급별 해결책 제시 (v3 — 항목10 발행 순서·당김 판정 신설, 항목7 pw.txt 오진단 정정, 항목9에 두 사이트 버전 대조표 추가). 이상 없으면 한 줄만 보고
+---
+
 # 🩺 GSC-Daily-Report-Routine (일간 고장 점검)
 
 > **이 문서는 Cowork 예약 작업 `daily-blog-health-check`의 본문이다.**
