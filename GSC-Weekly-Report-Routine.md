@@ -1,84 +1,177 @@
-koreaplug.com과 0and1life.com 두 블로그의 SEO 상태를 주간 점검하고, 결과를 한국어로 정리해 Notion 리포트 페이지 2곳에 저장하라. 읽기 전용 분석 작업이며 WordPress/GA4/GSC의 설정이나 글은 수정하지 말 것 (예외: 아래 명시된 Notion 리포트 페이지 기록은 허용). GSC 로그인 계정: {ACCOUNT_EMAIL}.
+# 📊 GSC-Weekly-Report-Routine (주간 성과 점검) — v3
 
-=== STEP 0: 직전 기준치 읽기 (필수 — 매번 이 STEP부터 시작) ===
+> **이 문서는 Cowork 예약 작업 `weekly-koreaplug-seo-check`의 본문이다.**
+> ⚠️ 이 파일은 **기록용 사본**이다. 실제 실행되는 것은 Cowork 예약 작업에 저장된 본문이므로, 이 문서를 고치면 **예약 작업 본문도 같이 교체**해야 반영된다.
+> 짝이 되는 일간 루틴은 `GSC-Daily-Report-Routine.md`(고장 점검)다. 성과 지표는 이 주간 루틴만 본다.
+> GSC 계정: {ACCOUNT_EMAIL}
+>
+> **변경 이력**
+> - `v3` (2026-08-08): STEP 2-B에 **301/WP 존재 선확인** 신설(삭제된 글의 처리 방안을 3주간 논의한 사고 재발 방지) · STEP 3에 **[3-E] 404 모니터 수확** 신설 · 3-A ⭐ 규칙에 **AI Overview 판정** 추가 · STEP 1 추적 글 6개로 확대
+> - `v2` (2026-08-08): STEP 3-B 네이버 수확 삭제, F등급 발행량 가드 연동, 매월 첫 토요일 STEP 4 전략 재검토 신설
+> - `v1` (2026-07-26): 최초 작성
 
-⚠️ [수정 2026-07-26] 기준치를 프롬프트에 고정 텍스트로 넣지 않는다. 아래 두 페이지를 notion-fetch로 열어, 각 페이지의 "## 리포트 (최신순)" 아래 **가장 위에 있는(=가장 최근 날짜의) "### YYYY-MM-DD 주간 리포트"** 섹션을 그대로 이번 주 비교의 기준치로 삼는다.
+koreaplug.com과 0and1life.com 두 블로그의 SEO 상태를 주간 점검하고, 결과와 **실행 가능한 해결책**을 한국어로 정리해 Notion 리포트 페이지 2곳에 저장한다. 읽기 전용 분석 작업이며 WordPress/GA4/GSC의 설정이나 글은 수정하지 않는다 (예외: 아래 명시된 Notion 리포트·백로그 페이지 기록은 허용).
 
-- KoreaPlug: 페이지 ID 398bfe4a-2ae1-8150-93c4-fb98977c64bf
-- 0and1Life: 페이지 ID 398bfe4a-2ae1-81ba-9ec6-fdae2acd6b2d
+⚠️ **오늘이 그 달의 1~7일이면(=매월 첫 토요일) 맨 끝의 STEP 4(월간 전략 재검토)까지 수행한다.** 그 외의 주에는 STEP 4를 건너뛴다.
+
+---
+
+## STEP 0: 직전 기준치 읽기 (필수 — 매번 이 STEP부터 시작)
+
+기준치를 프롬프트에 고정 텍스트로 넣지 않는다. 아래 두 페이지를 notion-fetch로 열어, 각 페이지의 "## 리포트 (최신순)" 아래 **가장 위에 있는(=가장 최근 날짜의) "### YYYY-MM-DD 주간 리포트"** 섹션을 그대로 이번 주 비교의 기준치로 삼는다.
+
+- KoreaPlug: 페이지 ID `398bfe4a-2ae1-8150-93c4-fb98977c64bf`
+- 0and1Life: 페이지 ID `398bfe4a-2ae1-81ba-9ec6-fdae2acd6b2d`
 
 각 최신 섹션에서 추출할 값:
-- KoreaPlug: 사이트 전체(클릭/노출/CTR/순위) + 추적 중인 개별 글 5개의 클릭/노출/CTR/순위
+- KoreaPlug: 사이트 전체(클릭/노출/CTR/순위) + 추적 중인 개별 글의 클릭/노출/CTR/순위
 - 0and1Life: GSC(클릭/노출/CTR/순위) + 색인 페이지 수 + 네이버 유입 세션·참여율 + 네이버 상위 글 조회수
 
-이 값을 STEP 1·2의 "직전 기준치"로 사용한다. **아래 STEP 1·2에 나오는 과거 수치(7-11 기준 등)는 이 루틴을 처음 설계할 때의 예시일 뿐이며, 실제 비교에는 절대 쓰지 않는다** — 항상 이 STEP 0에서 방금 읽은 최신 섹션의 수치를 쓴다.
+이 값을 STEP 1·2의 "직전 기준치"로 사용한다. **STEP 1·2에 나오는 과거 수치는 설계 당시의 예시일 뿐이며 실제 비교에는 절대 쓰지 않는다.**
 
-=== STEP 1: koreaplug.com (영어 블로그, 구글 중심) ===
+페이지 상단에 `> 🚨 일간 알람` 인용문이 있으면 함께 읽고, **아직 해결되지 않은 알람은 이번 주 조치 목록 최상단에 올린다**(일간 루틴 `daily-blog-health-check`가 남긴 것).
 
-추적 대상 5개 글 (2026-07-08 SEO 타이틀/메타 수정 + 재색인 요청분 — 슬러그는 고정, 수치는 STEP 0에서 읽은 최신 기준치를 사용):
+⚠️ **일간 알람도 오진단일 수 있다.** 2026-08-08 알람은 "chuseok 글이 초안·예약·휴지통 전부 없음"이라고 보고했으나, wp-admin 글 목록을 직접 열어보니 **임시글 ID 3301로 멀쩡히 존재**했다. 알람을 조치 목록에 올리기 전에 **대상을 한 번 직접 확인**한다.
 
-1. https://koreaplug.com/jjimjilbang-guide/ (재타겟 키워드 "jjimjilbang tattoo rules")
-2. https://koreaplug.com/seoul-apartment-prices-explained/
-3. https://koreaplug.com/korean-chamoe-melon-guide/
-4. https://koreaplug.com/korean-address-terms-etiquette/
-5. https://koreaplug.com/no-trash-cans-seoul/
+---
 
-실행:
-- https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&num_of_days=28&breakdown=page&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION 접속
-- javascript_tool로 테이블(table tr, 첫 셀 innerText에 슬러그 포함 여부로 매칭)에서 5개 글의 클릭/노출/CTR/순위 추출 + 상단 카드의 사이트 전체 합계 기록
-- STEP 0에서 읽은 KoreaPlug 최신 기준치와 비교해 증감을 계산한다
+## STEP 0-B: 지난주 예측 검증 (매주 필수)
 
-=== STEP 2: 0and1life.com (한국어 블로그, 네이버 중심) ===
-
-주의: 과거 GSC 소유권 인증이 풀린 이력이 있다(최초 발생 2026-07-11). "이 속성에 액세스할 수 없습니다"가 뜨면 [소유권 확인] 버튼을 눌러 재검증하고(설정 변경 아님), 결과를 리포트에 기록하라.
+배경: 이 루틴은 매주 "다음 조치"를 제안하지만 그 제안이 맞았는지 되짚지 않았다. 그 결과 2026-07-19·07-27·08-01 세 주 연속으로 "#5 한국 나이 글 전면 개편"을 최우선으로 권고했는데, 8/2에 SERP를 직접 열어보니 **전제 자체가 틀렸다**(검색의도가 계산기이고 AI Overview가 답을 선점해, 노출 75는 구조적으로 회수 불가능했다). 같은 날 최우선이던 "포럼 스팸 삭제"도 열어보니 **이미 해결된 상태**였다.
 
 실행:
-- https://search.google.com/search-console/index?resource_id=https%3A%2F%2F0and1life.com%2F 에서 색인 페이지 수 확인
-- https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2F0and1life.com%2F&num_of_days=28&breakdown=page&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION 에서 지표 추출
-- GA4 세션 소스: https://analytics.google.com/analytics/web/?hl=ko#/a393066616p540835629/reports/explorer?params=_u..nav%3Dmaui%26_r.explorerCard..seldim%3D%5B%22sessionSourceMedium%22%5D&r=lifecycle-traffic-acquisition-v2 에서 네이버 유입(m.search.naver.com referral + naver organic) 합계·참여율
-- 네이버 상위 글: https://analytics.google.com/analytics/web/?hl=ko#/a393066616p540835629/reports/explorer?params=_u..nav%3Dmaui%26_r.explorerCard..seldim%3D%5B%22unifiedPagePathScreen%22,%22sessionSourceMedium%22%5D%26_r.explorerCard..rowsPerPage%3D50&r=all-pages-and-screens 에서 naver 포함 행 추출 (주요 추적 슬러그: propose-necklace-ring-bag-guide, employee-welfare-fund-loan, ai-counseling-guide-workers, signiel-hotel-proposal-guide — 이 외 새로 상위권에 진입한 글이 있으면 함께 기록)
-- 위 모든 수치를 STEP 0에서 읽은 0and1Life 최신 기준치와 비교해 증감을 계산한다
 
-=== STEP 2-B: 색인 거부(F등급) 수집 — 2026-07-29 신설, 매주 필수 ===
+1. 두 페이지에서 **"## 🎯 YYYY-MM-DD 검증 예약"** 블록을 찾는다. 없으면 건너뛴다.
+2. 각 행을 이번 주 실측치로 **합격 / 불합격 / 애매**로 판정한다.
+   - ⛔ **판정 기준을 사후에 바꾸지 말 것.** 지난주 임계값 그대로 판정한다.
+   - ⛔ **불합격을 "더 기다려보자"로 무한 연장하지 말 것.** 블록에 적힌 후속 판단을 그대로 실행 권고로 올린다.
+3. 판정 결과를 리포트 맨 앞에 **"지난주 예측 검증"** 표로 기록한다 (항목 / 기준치 / 이번 주 실측 / 판정 / 후속 판단).
+4. 불합격 항목은 원인을 **① 조치가 효과 없었다 ② 진단 전제가 틀렸다 ③ 관찰 기간이 짧았다** 중 무엇인지 명시한다.
+5. 판정이 끝난 옛 블록은 제목을 `## ✅ [판정 완료] YYYY-MM-DD 검증 예약`으로 바꾸고 결과 요약 한 줄을 붙여 아카이브한다 — 다음 주에 옛 블록을 최신으로 착각하지 않도록.
 
-배경: 기존 STEP 1·2는 **실적(클릭/노출)** 만 본다. 구글이 크롤링한 뒤 색인을 거부한 페이지는 노출이 0이라 실적 탭에 아예 나타나지 않아, 몇 달간 누적되어도 아무도 모른다. 2026-07-29 최초 실측에서 koreaplug 46건 / 0and1life 23건이 방치 상태로 발견되었다. 이 글들은 사이트 전체 평가를 끌어내려 애드센스 심사에 직접 영향을 준다.
+---
+
+## STEP 1: koreaplug.com (영어 블로그, 구글 중심)
+
+추적 대상 글:
+
+1. `https://koreaplug.com/jjimjilbang-guide/` (재타겟 키워드 "jjimjilbang tattoo rules")
+2. `https://koreaplug.com/seoul-apartment-prices-explained/`
+3. `https://koreaplug.com/korean-chamoe-melon-guide/`
+4. `https://koreaplug.com/korean-address-terms-etiquette/`
+5. `https://koreaplug.com/no-trash-cans-seoul/`
+6. `https://koreaplug.com/korean-age-system-explained/` (2026-08-02 각도 재타겟 — 포커스 "is korean age still used". ⚠️ 성공 지표는 `korean age` 헤드 순위가 아니라 **재타겟 계열 신규 쿼리의 노출 발생 여부**다)
+7. `https://koreaplug.com/korean-ondol-floor-heating-explained/` (2026-08-08 타이틀·메타에 금액 삽입 — 성공 지표는 CTR)
+
+실행:
+- `https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&num_of_days=28&breakdown=page&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION` 접속
+- javascript_tool로 테이블(`table tr`, 첫 셀 innerText에 슬러그 포함 여부로 매칭)에서 위 글들의 클릭/노출/CTR/순위 추출 + 상단 카드의 사이트 전체 합계 기록
+- STEP 0의 기준치와 비교해 증감 계산
+
+---
+
+## STEP 2: 0and1life.com (한국어 블로그, 네이버 중심)
+
+주의: 과거 GSC 소유권 인증이 풀린 이력이 있다(2026-07-11). "이 속성에 액세스할 수 없습니다"가 뜨면 [소유권 확인] 버튼으로 재검증하고 결과를 기록한다.
+
+실행:
+- `https://search.google.com/search-console/index?resource_id=https%3A%2F%2F0and1life.com%2F` 에서 색인 페이지 수
+- `https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2F0and1life.com%2F&num_of_days=28&breakdown=page&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION` 에서 지표
+- GA4 세션 소스: `https://analytics.google.com/analytics/web/?hl=ko#/a393066616p540835629/reports/explorer?params=_u..nav%3Dmaui%26_r.explorerCard..seldim%3D%5B%22sessionSourceMedium%22%5D&r=lifecycle-traffic-acquisition-v2` 에서 네이버 유입(m.search.naver.com referral + naver organic) 합계·참여율
+- 네이버 상위 글: `https://analytics.google.com/analytics/web/?hl=ko#/a393066616p540835629/reports/explorer?params=_u..nav%3Dmaui%26_r.explorerCard..seldim%3D%5B%22unifiedPagePathScreen%22,%22sessionSourceMedium%22%5D%26_r.explorerCard..rowsPerPage%3D50&r=all-pages-and-screens` 에서 naver 포함 행 추출 (추적 슬러그: `propose-necklace-ring-bag-guide`, `employee-welfare-fund-loan`, `ai-counseling-guide-workers`, `signiel-hotel-proposal-guide` — 새로 상위권 진입 글이 있으면 함께 기록)
+- 위 수치를 STEP 0 기준치와 비교
+
+---
+
+## STEP 2-B: 색인 거부(F등급) 수집 — 매주 필수
+
+배경: STEP 1·2는 실적(클릭/노출)만 본다. 구글이 크롤링 후 색인을 거부한 페이지는 노출이 0이라 실적 탭에 안 나타나 몇 달간 누적돼도 아무도 모른다.
 
 실행 (두 사이트 각각):
-- https://search.google.com/search-console/index?resource_id=<RESOURCE_ID> 접속
-- "페이지 색인이 생성되지 않는 이유" 표에서 **`크롤링됨 - 현재 색인이 생성되지 않음`** 행을 클릭해 URL 목록 전체를 추출한다
+- `https://search.google.com/search-console/index?resource_id=<RESOURCE_ID>` 접속
+- "페이지 색인이 생성되지 않는 이유" 표에서 **`크롤링됨 - 현재 색인이 생성되지 않음`** 행을 클릭해 URL 목록 전체 추출
 - 함께 기록: `발견됨 - 현재 색인이 생성되지 않음`, `찾을 수 없음(404)`, `리디렉션이 포함된 페이지` 각 건수
-- 색인됨 / 색인 안 됨 총계를 기준치와 비교해 증감 기록
+- 색인됨 / 색인 안 됨 총계를 기준치와 비교
 
-판정·조치 (Writer 지침 1-6 F등급 참조):
-- 신규로 F등급에 들어온 URL은 리포트에 **목록 전체**를 적는다 (건수만 적지 말 것 — 조치 대상을 특정할 수 없다)
-- F등급 누적이 색인됨 대비 30%를 넘으면 **신규 발행을 중단하고 기존 글 정리를 우선**한다고 리포트에 명시한다
-- 각 URL은 ① 원본 자료 추가 후 전면 재작성 ② 유사 글과 병합 ③ 삭제(410) 중 하나로 분류해 제안한다
+### ⛔ 분류 전 필수 선확인 2가지 (2026-08-08 신설 — 이 STEP에서 가장 중요)
 
-=== STEP 3: 키워드 수확 → 백로그 기록 (2026-07-26 신설 — 전부 Chrome, WebSearch 미사용) ===
+**GSC는 이미 삭제된 글과 이미 301을 건 URL을 몇 주간 계속 보여준다.** 이걸 모르고 분류하면 존재하지도 않는 글의 처리 방안을 논의하게 된다.
 
-수확한 후보는 아래 두 백로그 페이지의 표에 행으로 추가한다 (상태=대기, 수확일=오늘):
-- KoreaPlug 백로그: 페이지 ID 3a9bfe4a-2ae1-818f-911b-f852981d5018
-- 0and1Life 백로그: 페이지 ID 3a9bfe4a-2ae1-81e0-8fc9-dc8e035388af
+> **실측 사고**: 2026-08-01 리포트는 0and1Life의 색인 거부 실제 글 13건 중 8건이 `○○ 활용법 직장인` AI 툴 시리즈라며 "구글이 유형 단위로 거부했다"고 진단했고, **3주간 '재작성이냐 병합이냐 410 삭제냐'를 논의**했다. 8/8에 실제로 열어보니 그중 6편은 **2026-07-17에 이미 병합이 끝난 글**이었다 — WP에서 삭제됐고 301도 걸려 히트 70·61회를 기록 중이었다. GSC에만 잔상이 남아 있었던 것이다. 이 6편을 빼면 F등급 비율은 40.5% → 26.2%로 임계선 아래였고, 걸려 있던 "신규 발행 중단" 권고 자체가 불필요했다.
+
+따라서 각 URL을 분류하기 **전에** 아래를 먼저 돌린다:
+
+```js
+// ① 301 여부 — opaqueredirect면 이미 처리된 URL이다
+const r = await fetch(url, {redirect:'manual', cache:'no-store'});   // r.type === 'opaqueredirect' → 처리 완료
+const f = await fetch(url, {redirect:'follow',  cache:'no-store'});   // f.url = 최종 도착지
+
+// ② WP 존재 여부 — 빈 배열이면 글 자체가 없다
+await fetch('/wp-json/wp/v2/posts?slug=<슬러그>&status=any',
+            {headers:{'X-WP-Nonce': wpApiSettings.nonce}, credentials:'include'});
+```
+
+- ①이 리디렉트이거나 ②가 빈 배열이면 → **`처리 완료(잔상)`** 으로 분류하고 **F등급 카운트에서 제외**한다. 조치 목록에 올리지 않는다.
+- 리포트에는 "F등급 N건 중 잔상 M건 제외 → 실질 K건"으로 적는다.
+
+### 판정·조치
+
+- 신규 F등급 URL은 **목록 전체**를 적는다
+- URL을 **① 실제 본문 글 ② `/feed/`·`wp-includes` 등 색인 대상 아님 ③ 스팸·정크 ④ 처리 완료(잔상)** 로 분류하고 **①의 건수만으로 비율을 계산**한다
+- **실제 글** F등급이 색인됨 대비 30%를 넘으면 **신규 발행을 중단하고 기존 글 정리를 우선**한다고 명시한다
+- 각 URL은 ① 원본 자료 추가 후 전면 재작성 ② 유사 글과 병합 ③ 삭제(410) 중 하나로 분류
+- **패턴을 찾을 것**: 제목·카테고리의 공통점이 있으면 구글이 유형 단위로 거부한 신호일 수 있다 (단, 위 선확인을 통과한 URL에 한해서만 패턴을 논한다)
+
+> **KoreaPlug 실측 참고(2026-08-08)**: 48건 = `/feed/` RSS 33 + `wp-includes` 2 + 포럼 스팸 3 + **실제 글 10**. 실제 글 10 ÷ 색인됨 113 = 8.8%로 임계 미만. 건수만 보면 위기로 보이지만 분류하면 아니다.
+
+---
+
+## STEP 3: 키워드 수확 → 백로그 기록 (전부 Chrome, WebSearch 미사용)
+
+수확 후보는 아래 백로그 표에 행으로 추가 (상태=대기, 수확일=오늘):
+- KoreaPlug 백로그: `3a9bfe4a-2ae1-818f-911b-f852981d5018`
+- 0and1Life 백로그: `3a9bfe4a-2ae1-81e0-8fc9-dc8e035388af`
 
 공통 규칙:
-- 추가 전 중복 제거 2중: ① 백로그 기존 행과 대조 ② 각 블로그 발행 목록(KoreaPlug 33cbfe4a-2ae1-81b9-a743-cb7c194dea7f / 0and1Life EFFICIENCY 37cbfe4a-2ae1-819f-8664-ff3d38fffe56 + LIFESTYLE 37cbfe4a-2ae1-81b9-a9ce-d0b937edd344)의 제목·포커스 키워드와 대조 — 단어가 겹쳐도 각도가 다르면 중복 아님(각도 기준)
-- 주당 신규 후보는 블로그당 5~10개면 충분 — 양보다 증거의 질
-- 수확 전에 정리 먼저: 백로그의 '대기' 항목 중 수확일이 4주 이상 지난 것은 상태를 '만료'로 변경
+- 중복 제거 2중: ① 백로그 기존 행과 대조(**'탈락' 처리된 항목을 다시 넣지 말 것**) ② 발행 목록(KoreaPlug `33cbfe4a-2ae1-81b9-a743-cb7c194dea7f` / 0and1Life EFFICIENCY `37cbfe4a-2ae1-819f-8664-ff3d38fffe56` + LIFESTYLE `37cbfe4a-2ae1-81b9-a9ce-d0b937edd344`)의 제목·포커스 키워드와 대조 — 단어가 겹쳐도 각도가 다르면 중복 아님
+- 주당 신규 후보는 블로그당 5~10개면 충분
+- 수확 전 정리 먼저: '대기' 중 수확일 4주 경과분은 '만료'로 변경
+- ⚠️ **공급보다 소비를 먼저 볼 것**: '대기'가 10건을 넘고 daily writer가 3일 이상 연속 소비 0건이면 후보를 더 넣어도 백로그만 길어진다. 이 경우 신규 수확을 **블로그당 3건 이하로 줄이고**, 조치 목록에 "소비 정체 — 대기 항목 중 무엇을 왜 못 쓰는지"를 적는다
 
-[3-A] GSC 쿼리 수확 (두 블로그 각각 — 최우선 소스)
-STEP 1·2에서 쓴 실적 화면의 breakdown을 페이지 → 검색어로 전환:
-- KoreaPlug: https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION
-- 0and1Life: https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2F0and1life.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION
-javascript_tool로 상위 30개 쿼리의 노출·클릭·순위를 추출한 뒤 선별:
-- **노출 기준은 블로그별로 다르다** (⚠️ 수정 2026-07-27 — 舊 공통 기준 '노출 ≥10'은 사이트 규모를 무시해 0and1Life에서 0건을 냈다. 이 블로그는 사이트 전체 28일 노출이 33 수준이라 ≥10을 넘는 쿼리가 구조적으로 나올 수 없다):
-  - **KoreaPlug**: 노출 ≥10 (사이트 전체 노출 4,000+ 규모)
-  - **0and1Life**: 노출 ≥2. 그래도 후보가 3건 미만이면 **노출 상위 10개 쿼리 전체**로 검토 대상을 넓힌다
-- 위 기준을 넘으면서 그 쿼리를 정면으로 다루는 전용 글이 없는 것 → 백로그 후보 (출처=GSC쿼리, 수요 증거="노출N·순위P")
-- 순위 8~20 구간을 최우선 표기 — 전용 글 신설 시 1페이지 진입 확률이 가장 높은 구간
-- 이미 전용 글이 있는 쿼리는 백로그가 아니라 주간 리포트 '다음 조치'(기존 글 개선 대상)에 기재.
-  ⭐ **전용 글이 있는데도 순위가 50위 밖인 클러스터는 '최우선 개선 대상'으로 별도 명시**한다 (2026-07-27 신설) — 노출은 이미 있는데 회수를 못 하는 구간이라 신규 글보다 수익률이 높다. 실제 사례: '한국 나이' 클러스터 합산 노출 90인데 전용 글 #5가 있음에도 전부 50위 밖.
+### [3-A] GSC 쿼리 수확 (최우선 소스)
 
-[3-B] ~~네이버 수확 (0and1Life 전용)~~ — **⛔ 2026-08-08 삭제. 실행하지 않는다.**
+breakdown을 페이지 → 검색어로 전환:
+- KoreaPlug: `https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION`
+- 0and1Life: `https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2F0and1life.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION`
+
+상위 30개 쿼리를 추출 후 선별:
+- **노출 기준**: KoreaPlug ≥10 / 0and1Life ≥2 (후보 3건 미만이면 상위 10개 전체로 확대)
+- 기준을 넘고 전용 글이 없는 것 → 백로그 후보 (출처=GSC쿼리, 증거="노출N·순위P")
+- 순위 8~20 구간 최우선 표기
+- 이미 전용 글이 있는 쿼리는 백로그가 아니라 조치 목록에 기재
+
+#### ⭐ 전용 글이 있는데 순위가 안 나오는 클러스터 — 조치를 정하기 전에 SERP를 직접 열어볼 것
+
+舊 규칙은 무조건 '최우선 개선 대상'으로 올렸고 그것이 "#5 개편" 3주 반복 오진단의 원인이었다. google.com에서 실제로 검색한 뒤 판정한다:
+
+- 1페이지 상위가 **계산기·도구·표·매물 리스팅**인가? → 설명글로는 못 이긴다. **각도 재타겟 또는 포기**
+- **AI Overview가 그 글의 핵심을 이미 답하는가?** → 클릭이 구조적으로 안 나온다. 같은 각도 리라이팅은 무의미
+- 1페이지가 Wikipedia·대형 언론·공식기관·로컬 맵팩으로 채워졌는가? → 신생 도메인이 들어갈 자리가 없다
+- 하나라도 해당하면 **"개선 대상 아님 — 사유"**로 적고 대안(각도 재타겟 / 유지 / 기회비용을 승자 틈새로 전환)을 제시한다
+
+#### ⚠️ 순위가 높은데 클릭이 0인 글도 같은 검사를 한다 (2026-08-08 신설)
+
+**순위는 클릭을 보장하지 않는다. 클릭을 결정하는 것은 순위가 아니라 쿼리 유형이다.**
+
+> **실측(2026-08-08 KoreaPlug)** — 상위권인데 클릭 0: `ondol floor` 81노출 **3.9위** 0클릭(AI Overview가 정의를 통째로 답하고 1페이지가 Wikipedia×2·Asia Society·UNFCCC) · `sogeting` 33노출 3.8위 0클릭 · `donggung` 57노출 8.2위 0클릭.
+> 반대로 클릭이 나온 건 전부 노출 1~5짜리 초니치였다: `pc bang food korea` 3.0위 CTR **100%** · `sajangnim means` 17.5위 CTR **50%** · `why do people wear masks in korea` **24.0위** CTR **50%**.
+> → **24위에서도 클릭이 나오고 3.9위에서 안 나온다.** 구글이 직접 답하는 정의형 헤드는 몇 위가 돼도 0이고, 구글이 못 답하는 상황형 초니치는 24위에서도 나온다.
+
+따라서 노출 상위인데 CTR이 0인 글은 **"CTR 개선 대상"으로 올리기 전에 SERP를 열어 AI Overview 유무를 먼저 본다.** AI Overview가 답을 선점하고 있으면 타이틀·메타 수정으로 회수되지 않으므로 **"개선 대상 아님 — AIO 선점"**으로 적고, 예산을 그 주제의 *판단·비용·현장* 각도 신규 글로 돌린다.
+
+⛔ **GEO/AEO(AI에 인용되게 하는 최적화)를 이 블로그의 처방으로 제안하지 말 것.** 애드센스는 사람이 클릭해 들어와야 수익이 나는데, AI Overview에 인용되면 독자는 거기서 답을 얻고 오지 않는다. 목표와 방향이 반대다.
+
+### [3-B] ~~네이버 수확 (0and1Life 전용)~~ — ⛔ 2026-08-08 삭제. 실행하지 않는다.
 
 > **삭제 근거**: datalab.naver.com·search.naver.com이 브라우저 안전 정책으로 **3주 연속 차단**(7/27 · 8/2 · 8/8)됐다. 8/8 주간 리포트의 검증 항목 Z4가 "3주 연속 차단 → 일시적 장애가 아닌 **영구 제약으로 확정**"으로 합격 판정을 냈다. 매주 '차단 — 생략'만 기록하는 STEP을 유지할 이유가 없다.
 >
@@ -86,21 +179,125 @@ javascript_tool로 상위 30개 쿼리의 노출·클릭·순위를 추출한 �
 >
 > ⚠️ 이 STEP을 되살리려면 먼저 네이버 접근이 복구됐는지 실측하고, 복구가 확인된 주의 리포트에 근거를 남긴 뒤에 한다. 추측으로 재개하지 않는다.
 
-[3-C] 구글 Rising + PAA (KoreaPlug 전용)
-① https://trends.google.com/trends/explore?date=now%207-d&geo=US&q=korea 의 Related queries Rising/Breakout 수확 (JS 렌더링 페이지 — Chrome에서만 가능, writer 환경에선 불가한 소스)
-② google.com에서 GSC 승자 쿼리 1~2개 검색 → People Also Ask 질문 수확
-→ 후보화 (출처=TrendsRising 또는 PAA)
+### [3-C] 구글 Rising + PAA (KoreaPlug 전용)
 
-[3-D] 백로그 기록
-각 후보를 해당 블로그 백로그 표 맨 아래에 행으로 추가:
+① `https://trends.google.com/trends/explore?date=now%207-d&geo=US&q=korea` 의 Rising 수확
+  - ⚠️ 'korea' 시드는 뉴스·크로스워드 노이즈가 대부분이다(2026-08-02 실측 5/5 무관, 08-08도 0건). 니치 교차가 없으면 **0건 처리, 억지로 채우지 말 것**
+② google.com에서 GSC 승자 쿼리 1~2개 검색 → PAA 수확
+  - **이쪽 수율이 압도적으로 높다.** 2026-08-08 실측: Trends 0건 / PAA 5건. 승자 쿼리(`ondol floor`·`sogeting`·`hoesik`·`gwangjang market`) 각각에서 1건씩 나왔다
+
+### [3-E] 404 모니터 수확 (2026-08-08 신설 — GSC가 못 보는 수요)
+
+**GSC는 '구글이 아는 URL'만 보여주지만, Rank Math 404 모니터는 사람·봇이 실제로 치고 들어온 존재하지 않는 URL을 보여준다.** 우리가 만들지도 않은 URL에 히트가 찍힌다면 수요가 있는데 공급이 없다는 직접 증거다.
+
+- 경로: wp-admin → Rank Math SEO → **404 모니터**
+- 정크 제외: `wp-content` · `wp-admin` · `wp-includes` · `.well-known` · `.php` · `.env` · `favicon` · 루트 도메인 · `old`/`new`/`backup`/`wp`/`wordpress` 같은 취약점 스캔 경로
+- 남은 **본문성 슬러그**만 후보화 (출처=404모니터, 증거="히트N")
+- 부수 효과로 **살아있는 글의 오타·구 URL**이 잡히면 즉시 301 대상으로 조치 목록에 올린다
+
+> **실측(2026-08-08 KoreaPlug)**: 41항목 중 `can-you-vape-in-korea` **3히트**(전용 글 없음 → 백로그 #16) + 오타 URL 2건(`wowpass-vs-tmoney-korea`·`jjimjilbang-guide-foreigners` → 301 등록 완료).
+> ⚠️ **자기 히트 주의**: 이 루틴이 검증용으로 fetch한 URL도 히트로 기록된다. 접속 시각이 방금 전이면 자기 흔적일 수 있으니 시각을 함께 본다.
+
+### [3-D] 백로그 기록
+
 | {다음 번호} | {키워드} | {출처} | {증거 요약} | {클러스터} | {순위 또는 —} | {오늘 YYYY-MM-DD} | 대기 |
-⚠️ 표 갱신 전 페이지 re-fetch로 마지막 행 원문 확인 후 old_str 구성 (기존 Notion 갱신 규칙과 동일).
-주간 리포트 본문 끝에 "이번 주 수확: N건 (GSC n / 네이버 n / Trends·PAA n) · 만료 처리 m건" 한 줄을 추가한다.
 
-=== 결과 저장 (필수) ===
+⚠️ 표 갱신 전 re-fetch로 마지막 행 원문 확인 후 old_str 구성.
+리포트 끝에 "이번 주 수확: N건 (GSC n / 404모니터 n / Trends·PAA n) · 만료 처리 m건" 한 줄 추가.
 
-Notion MCP의 update-page(insert 또는 update_content)로 STEP 0의 두 페이지 "## 리포트 (최신순)" 제목 바로 아래에 "### YYYY-MM-DD 주간 리포트" 섹션을 추가하라 (최신이 위):
+---
 
-각 리포트 내용: 지표 변화표(STEP 0 기준치 대비 증감) + 특이사항(색인/인증 문제 등) + 다음 조치 제안 1~2줄.
+## STEP 3-B: 해결책 작성 규칙 (2026-08-04 신설 — 이 루틴에서 가장 중요)
 
-주의: GA4 이탈률·참여시간 단독으로 판단하지 말 것(봇 왜곡). direct 트래픽은 본인+AI크롤러 포함이므로 무시. GA4 표는 로딩이 느리므로 navigate 후 wait 10초 뒤 추출. 접근 불가 시 그 사실을 Notion 리포트에 기록하고 중단.
+**진단만 적고 끝내는 리포트는 무효다.** 지난 3개월간 조치 목록은 길었지만 실제 착수된 건 거의 없었다. 원인은 조치가 **실행 가능한 형태가 아니었기 때문**이다("#5 전면 개편", "CTR 집중 개선" 같은 문구는 무엇부터 해야 할지 알 수 없다).
+
+이번 주 '다음 조치'는 **최대 3개**만 적고, 각각을 아래 6칸 표로 쓴다. 6칸이 안 채워지는 조치는 아직 조치가 아니므로 리포트에 넣지 않는다.
+
+| 칸 | 규칙 |
+|---|---|
+| **대상** | URL 또는 슬러그. "사이트 전체" 금지 |
+| **무엇을** | 바꿀 대상을 구체적으로: 타이틀 문구 / 메타 설명 / H2 구조 / 포커스 키워드 / 내부링크 / 설정 항목. **바꿀 문구의 예시 초안까지 적을 것** |
+| **왜** | 근거 숫자 한 줄 (노출·순위·CTR·색인 상태 중 실측치) |
+| **예상 소요** | 10분 / 30분 / 2시간 중 하나 |
+| **실행 주체** | `루틴가능`(다음 daily writer나 이 루틴이 처리) / `사용자필요`(사람이 눌러야 함). 후자면 **최단 경로를 사이트→메뉴→버튼까지** 적을 것 |
+| **성공 판정** | 다음 주 무엇이 어떻게 되면 성공인가 — 숫자 임계값. 이 칸은 그대로 아래 '검증 예약' 블록으로 옮긴다 |
+
+금지 표현: "개선하라" "점검하라" "강화하라" "최적화하라" — 무엇을 어떻게 바꾸는지 쓰지 않은 동사다.
+
+우선순위 규칙: ① 일간 알람 미해결 건 ② 색인·인증 등 구조 문제 ③ 이미 노출이 있는 글의 회수 ④ 신규 발행. **③이 ④보다 항상 위다** — 노출 5,000이 있는데 CTR이 0.8%면 새 글보다 기존 글 회수가 싸다.
+
+⚠️ **단, ③을 올리기 전에 [3-A]의 SERP·AIO 검사를 통과했는지 확인한다.** 통과 못 한 글은 회수 대상이 아니라 포기 대상이다.
+
+⚠️ **"타이틀을 고쳐라"를 적기 전에 현재 타이틀을 반드시 fetch해서 읽을 것.** 2026-08-08에 `seoul-apartment-prices-explained`와 `korean-chamoe-melon-guide` 두 건 모두 "타이틀에 연도/시즌을 넣어라"를 조치로 올렸다가, 실제로 열어보니 **이미 들어 있어서** 둘 다 철회했다.
+
+---
+
+## STEP 4: 월간 전략 재검토 — ⚠️ 오늘이 그 달의 1~7일일 때만 수행
+
+주간 점검이 "지표가 어떻게 변했나"라면 이 STEP은 **"이걸 계속하는 게 맞나"**를 본다. 결론에 '중단'과 '축소'가 포함될 수 있어야 하며 그 선택지를 배제하지 않는다.
+
+두 Notion 페이지에서 최근 4~5개 주간 리포트와 발행 목록·백로그를 읽어 한 달 추이를 모은 뒤, 4개 질문에 **숫자로** 답한다.
+
+**Q1. 발행이 성과로 이어지는가?**
+- `이번 달 총 클릭 ÷ 누적 발행 편수` = 편당 클릭. 지난달과 비교
+- **상위 2편이 전체 클릭에서 차지하는 비율**. 30% 초과면 포트폴리오가 아니라 소수 히트 의존
+- 실측 참고(2026-08-01): KoreaPlug 122편·39클릭인데 상위 2편(pc-bang 8 / head-spa 7)이 38%. 나머지 120편이 24클릭
+- 편당 클릭 **2개월 연속 하락** → 신규 발행 축소 권고
+
+**Q2. 노출과 클릭이 같은 방향인가?**
+- 노출은 느는데 클릭이 줄면 = 덜 관련된 쿼리로 희석되는 것. 필요한 건 새 글이 아니라 CTR 개선
+- 실측 참고: KoreaPlug 7/11→8/1 노출 1,870→5,120(+174%)인데 클릭 44→39(-11%), CTR 2.4%→0.8%
+- ⚠️ **2026-08-08 단서**: 위 권고("신규 발행 예산의 절반을 기존 글 CTR 개선으로 전환")는 **재판정이 필요하다.** 8/8 실측에서 추적 글들의 타이틀·메타는 이미 최적화돼 있었고, 남은 CTR 미달은 전부 구조적 제약(AI Overview·매물 리스팅·Wikipedia 도배)이었다. 기존 글을 더 손봐도 회수가 안 되는 구간이라면 예산은 **니치 신규 발행**으로 가는 것이 맞다. 9월 재검토에서 이 전제를 숫자로 다시 판정할 것
+
+**Q3. 색인 거부가 특정 유형에 몰려 있는가?**
+- STEP 2-B의 ①(실제 글) 목록에서 제목·카테고리 공통 패턴을 찾는다
+- 패턴이 있으면 → **그 카테고리 신규 발행 중단** + 기존 글 정리 권고
+- ⚠️ STEP 2-B의 선확인(301·WP 존재)을 통과한 URL로만 패턴을 논할 것
+
+**Q4. 지난달 예측은 맞았는가?**
+- STEP 0-B 판정을 한 달치 모아 **합격/불합격 비율**을 낸다
+- 불합격이 절반 초과면 → 진단 방식 자체에 문제가 있다. 무엇을 잘못 보고 있는지 한 단락으로 쓴다
+
+**결론**: 두 블로그 각각에 대해 **유지 / 전환 / 중단** 중 하나를 고르고 근거 숫자를 붙인다. 얼버무리지 말 것.
+- **유지** — 우상향이거나 판단하기 이르다(사이트 나이 6개월 미만 + 노출 증가 중)
+- **전환** — 발행량을 줄이고 기존 자산 개선·카테고리 정리로 예산 이동. 얼마나 줄이고 어디로 옮길지 숫자로
+- **중단** — 신규 발행을 멈춘다. 재개 조건을 함께 쓴다
+
+⚠️ **사이트 나이를 감안한다.** 두 사이트 모두 2026년 4~6월 개설로 초기이며 SEO는 6~12개월 무반응이 흔하다. "성과 없음"을 이유로 중단을 권고할 때는 노출 추세가 **정체 또는 하락**인 경우에 한한다 — 노출이 자라는 중이면 '유지' 또는 '전환'이 맞다.
+
+---
+
+## 결과 저장 (필수)
+
+Notion update-page로 두 페이지 "## 리포트 (최신순)" 바로 아래에 "### YYYY-MM-DD 주간 리포트" 섹션을 추가한다 (최신이 위):
+
+1. **지난주 예측 검증** 표 (STEP 0-B 결과)
+2. 지표 변화표 (STEP 0 기준치 대비 증감)
+3. 특이사항 (색인·인증 문제, 미해결 일간 알람 등)
+4. **다음 조치 — STEP 3-B의 6칸 표로 최대 3개**
+5. **STEP 4를 수행한 주에만** — `#### 📊 YYYY-MM 월간 전략 재검토` 소제목으로 Q1~Q4 답변(전부 숫자) + **결론: 유지/전환/중단** + 이번 달 실행할 것 3가지 이내
+6. **"## 🎯 YYYY-MM-DD 검증 예약"** 블록 — 다음 주 점검일 날짜로. 4번 조치들의 '성공 판정' 칸을 그대로 옮겨 온다. 표: 항목 / 검증 대상 / 기준치 / ✅ 합격 조건 / ❌ 불합격 시 후속 판단
+   - 합격·불합격 조건은 **숫자 임계값**. "개선되면 성공" 같은 판정 불가능한 문구 금지
+   - 불합격 시 후속 판단에는 **철회·전환·포기 중 무엇을 할지**를 미리 적는다. "더 관찰"만 적지 말 것
+
+사용자에게 보고할 때는 **이번 주 조치 3개와 그 근거만** 5문장 이내로 요약하고 표는 Notion 링크로 대신한다.
+
+---
+
+## ⚠️ 주의
+
+- GA4 이탈률·참여시간 단독 판단 금지(봇 왜곡). direct 트래픽은 본인+AI크롤러 포함이므로 무시. GA4 표는 로딩이 느리므로 navigate 후 wait 10초 뒤 추출
+- 접근 불가 시 그 사실을 Notion 리포트에 기록하고 중단
+- ⚠️ **조치를 권고하기 전에 대상을 실제로 열어볼 것 (이 루틴의 핵심 교훈)**
+
+  GSC 숫자만 보고 "무엇을 고쳐라"를 적으면 오진단이 반복된다. 누적 실측 사례:
+
+  | 날짜 | 진단 | 실제로 열어본 결과 |
+  |---|---|---|
+  | 08-02 | "#5 한국 나이 글 전면 개편"(3주 연속 최우선) | SERP가 계산기+AI Overview — 전제가 틀렸음 |
+  | 08-02 | "포럼 스팸 3건 삭제" | bbPress 이미 제거·전부 404 — 이미 해결됨 |
+  | 08-08 | "#94 타이틀에 연도·통화 삽입" | 타이틀에 이미 `2026`이 있었음 — 철회 |
+  | 08-08 | "AI 툴 8편 재작성·병합·삭제 결정"(3주 연속) | 6편은 07-17에 이미 병합 완료·WP에서 삭제됨 |
+  | 08-08 | 일간 알람 "chuseok 글 배포 실패" | 임시글 ID 3301로 존재 — 오탐 |
+
+  확인하지 못했으면 **"미확인 — 전제 검증 필요"**라고 명시한다.
