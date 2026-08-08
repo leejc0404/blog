@@ -109,6 +109,7 @@
 | 봄 황금연휴 (어린이날·석가탄신일) | 5월 초 | 03-05 ~ 04-10 | `may holidays korea` · `golden week crowds` |
 | 장마 | 6월 말~7월 | 04-25 ~ 06-05 | `rainy season korea` · `monsoon indoor spots` |
 | 폭염·휴가철 | 7~8월 | 05-20 ~ 06-30 | `korea heatwave` · `beach season rules` |
+| 복날 (삼복) | 초복·중복·말복 (**절기+천간 기준, 매년 실제 날짜 확인 필수** — 2026: 7/15·7/25·**8/14**) | 초복 기준 D-60 ~ 말복 D-3 | `boknal meaning` · `samgyetang queues` · `boknal restaurant hours` |
 | 비자·K-ETA 등 제도 시행일 | 수시 | **시행일 확정 즉시** (창 규칙 미적용) | `k-eta new rules` · `visa fee change` |
 
 **운용 규칙**
