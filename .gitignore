@@ -1,2 +1,19 @@
-# Claude Code 로컬 설정 (PC마다 다름 - 공유 불필요)
+# ── Claude Code 로컬 설정 (PC마다 달라 공유 불필요) ──
 .claude/
+
+# ── 비밀정보 (공개 저장소이므로 절대 커밋 금지) ──
+pw.txt
+*.env
+.env*
+*.key
+*.pem
+credentials*.json
+token*.json
+client_secret*.json
+
+# ── 임시/시스템 파일 ──
+Thumbs.db
+desktop.ini
+*.tmp
+*.bak
+~$*
