@@ -1,8 +1,3 @@
----
-name: koreaplug-auto-image-insert
-description: 오늘 작성된 KoreaPlug WP 글에 Gemini 이미지 3장 자동 생성·WebP 변환·삽입 (v3.3 탭 그룹 등록 수정)
----
-
 # KoreaPlug 자동 이미지 삽입 태스크 (v3.3 — 레거시 증빙 인식·미분류 skip 금지·탭 그룹 등록 수정)
 
 ### 목적
