@@ -1,8 +1,3 @@
----
-name: daily-blog-health-check
-description: koreaplug.com·0and1life.com 일간 고장 감지 12항목 + 등급별 해결책 제시 (v3 — 항목12 이미지 파이프라인 신설, 글 식별은 Notion Blog #N 기준, 항목7 REST 우선·Chrome 폴백, 항목11 Notion 503 폴백). 이상 없으면 한 줄만 보고
----
-
 # 🩺 GSC-Daily-Report-Routine (일간 고장 점검) — v3
 
 > **이 문서는 Cowork 예약 작업 `daily-blog-health-check`의 본문이다.**
