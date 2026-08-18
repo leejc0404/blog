@@ -1,4 +1,9 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v4.0 — Flow 생성처 교체 + v3.2~v3.4 일괄 백포트)
+# 0and1Life 자동 이미지 삽입 태스크 (v5.2 — 큐잉 확정 · fire-and-read 폐기 + v5.0 프롬프트 철학)
+
+> ⚡ **v5.2 변경 (2026-08-18) — KoreaPlug에서 역백포트한 효율 규칙 2건.**
+> ① **`fire-and-read` 2회 호출 패턴 폐기.** `javascript_tool` 이 최상위 `await` 를 지원하고 마지막 표현식 값을 반환한다는 것이 실측으로 확인됐다. 舊 주의사항은 "async 결과는 window에 저장 후 별도 호출로 읽는다"를 규칙으로 박아 두어, STEP 2·3·5·7의 모든 비동기 작업이 **매번 2~3회로 쪼개져** 호출됐다. 폴링(5-3)·일괄 캡처(5-5)를 각각 1회 호출로 합쳤다.
+> ② **큐잉 조건 분기 삭제.** v5.1이 "1회차 검증 항목"으로 남겨 둔 큐잉 가능 여부는 2026-08-18 KoreaPlug 프로젝트에서 **실측 확인**됐다 (1차 74% 진행 중 2차 투입 → 13%로 병렬 시작, 4장 60초 완료). 폴백 절차를 삭제하고 **연속 투입을 확정 동작**으로 바꿨다.
+> 함께 정리: 5-4의 '밋밋함 판정' 항목이 두 번 중복돼 있던 것을 1개로 합쳤다.
 
 ### 목적
 
@@ -28,11 +33,70 @@ Notion 글 현황 테이블에서 오늘 날짜에 draft된 WordPress 글을 찾
 >
 > 결정적 이점은 속도가 아니라 **구조적 안정성**이다. Flow는 이미지를 `labs.google` **동일 출처**로 서빙하므로 `SecurityError: canvas has been tainted` 가 **원천적으로 발생하지 않는다.** 또 x2로 2장을 받아 **좋은 쪽을 고르는 구조**라 舊 "수정 재시도 1회" 규정이 실제로 발동할 일이 거의 없다.
 
+> ⚡ **v5.1 변경 (2026-08-18) — 실행 시간 단축. 병목은 이미지 생성이 아니라 화면 왕복이었다.**
+> 2026-08-18 회차는 2편·5장에 약 95회의 도구 호출이 들었다. 원인을 재보니 생성(장당 50~56초)보다 **UI 왕복과 대기 방식**이 더 컸다.
+>
+> | # | 조치 | 근거 (2026-08-18 실측) | 절감 |
+> |---|---|---|---|
+> | 1 | **에디터 진입 폐지 · 그리드에서 판정·캡처** | 그리드 썸네일이 이미 원본 해상도 `naturalWidth 1376×768`(표시 318px). 에디터에 갈 이유가 없었다 | 호출 **~30회** |
+> | 2 | **프롬프트 N개 연속 투입 후 일괄 수확** | 진행률 87%·99% 중에도 입력창이 비어 있고 활성 (**1회차 큐잉 검증 필요**) | 55초×N 직렬 → **1회 대기** |
+> | 3 | **진행 확인을 스크린샷 → JS 문자열 폴링** | 진행률 확인 스크린샷 12장 중 절반이 "아직 99%" | 호출 ~10회 + 토큰 |
+> | 4 | **`browser_batch` 로 클릭·입력·전송 묶기** | 95회 전부 단발 호출이었다 | 왕복 지연 절반 이하 |
+> | 5 | **업로드 5건 연속 전송 후 1회 폴링** | 건별 8초 대기 ×5 = 40초, 업로드는 서로 독립 | ~35초 + 호출 4회 |
+> | 6 | **대상 탐색을 WP REST 우선으로** | Notion fetch 98,515자 → 한도 초과 → grep 차단 → python 우회로 호출 4회 | 호출 4~5회 + 대용량 덤프 |
+>
+> ⛔ **가장 중요한 한 줄: 캡처가 끝날 때까지 Flow 그리드를 떠나지 않는다.** 콜드/복귀 로드 실측이 6초 0개 · 14초 0개 · **26초 18개**였다. 그리드를 한 번 떠날 때마다 이 20여 초를 다시 낸다.
+> 예상 효과: 5장 기준 **약 25~30분 → 8~10분**, 평상시 1편 3~4장은 **5분 안쪽**.
+
+> 🎯 **v5.0 변경 (2026-08-18) — 프롬프트 철학을 '정확한 그림'에서 '읽게 만드는 그림'으로 바꾼다.**
+> v4.0 첫 실전(2026-08-18, Post 1153·1160)에서 5장 전부가 **기술적으로는 통과했는데 사용자 평가는 "무난하고 추상적"** 이었다. 원인을 뜯어보니 프롬프트 규칙 자체에 있었다.
+>
+> | 결함 | v4.0 규칙이 유도한 것 | v5.0의 교정 |
+> |---|---|---|
+> | **사건이 없다** | "장소·사물을 정확히 묘사하라"만 있고 **무슨 일이 벌어지는지**에 대한 요구가 없음 → 빈 로비·정리된 책상만 나옴 | 3-2 ① **한 문장 테스트**: "지금 무슨 일이 벌어지는가"를 말할 수 없으면 재설계 |
+> | **글의 숫자가 안 보인다** | 본문의 30배·100만↔50만 같은 **충돌하는 수치**를 프롬프트에 안 넣음 | 3-2 ③ 숫자를 **높이·길이·개수·두께**로 번역해 반드시 화면에 넣는다 |
+> | **사람을 과하게 뺐다** | "인물 최대 1장" → 실무에서 항상 0명 → 온기·긴장 소멸 | 3-4 **손·팔·부분 컷 권장**. 금지 대상은 '카메라 보고 웃는 모델'뿐 |
+> | **범용 은유 남발** | 모래시계·저울·전구가 어느 글에나 붙음 | 3-2 ⑥ **범용 은유 금지 목록** 신설 |
+> | **밋밋해도 채택** | 5-3 채택 기준이 '정확성'뿐 | 5-3에 **밋밋함 탈락 사유** 추가 |
+>
+> 함께 고친 기능 결함: **`[FEATURED_IMAGE_URL]` 플레이스홀더가 2곳인 글에서 v4.0 코드가 같은 히어로를 2번 박아 넣었다** (STEP 7-2.5). 2026-08-18 #88에서 수동 회피했고, v5.0에서 정식 조항으로 고쳤다 — 첫 번째만 히어로, 나머지는 본문 이미지로 순차 교체하고 그만큼 STEP 4의 삽입 개수를 줄인다.
+
 > ⚠️ v3 변경 (2026-08-01): Draft 루틴이 발행 관문용 **증빙 캡처**(`figure class="evidence-capture"`, 파일명 `evidence-*`)를 본문에 넣기 시작하면서, 총 이미지 수 기준(舊 imgCount ≥ 3 → skip)으로는 모든 글이 스킵되어 이 루틴이 돌지 않았다. 판정은 **데코 개수**로 하되, 글이 이미지로 과밀해지지 않도록 **총량 상한 5장**(증빙+데코, 히어로 교체는 총량 불변이라 제외)을 함께 둔다. 증빙 캡처는 어떤 단계에서도 교체·이동·삭제하지 않는다.
 
 ---
 
-### STEP 1: Notion에서 오늘 날짜 글 찾기
+### STEP 1: 대상 글 찾기 (v5.1 — WP 우선, Notion은 보조)
+
+> 🚀 **(v5.1) 탐색 순서를 뒤집는다.** 이 루틴이 실제로 필요한 건 **WP의 draft 글**이지 Notion 행이 아니다.
+> 2026-08-18 실측: EFFICIENCY 페이지 `notion-fetch` 가 **98,515자로 토큰 한도를 초과** → 파일 저장 → `grep` 은 "Omitted long matching line" 으로 차단 → bash python 슬라이스로 우회. **대상 2건을 찾는 데만 호출 4회와 대용량 덤프**가 들었다.
+> 아래 WP 질의 **1회**로 같은 결과가 나온다. Notion은 결과가 0건이거나 제목·서브카테고리 확인이 필요할 때만 연다.
+
+**1-A. WP REST로 최근 2일 draft를 직접 조회한다 (1순위 · 호출 1회)**
+
+`media-new.php` 에서 nonce를 확보한 뒤(STEP 2 상단 코드) 실행한다.
+
+```javascript
+window._targets = null;
+const since = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 19);   // 어제~오늘
+fetch('/wp-json/wp/v2/posts?status=draft,future&modified_after=' + since
+      + '&per_page=20&context=edit&orderby=modified&order=asc'
+      + '&_fields=id,title,status,content,date,modified,featured_media,slug',
+      {headers: {'X-WP-Nonce': window._nonce}})
+  .then(r => r.json()).then(d => { window._targets = d; });
+'fired'
+```
+
+```javascript
+(window._targets || []).map(p => p.id + ' | ' + p.status + ' | ' + p.modified.slice(0, 10)
+  + ' | fm:' + p.featured_media + ' | ' + p.slug
+  + ' | raw:' + (p.content && typeof p.content.raw === 'string' ? 'ok len' + p.content.raw.length : 'RAW-MISSING')).join('\n')
+```
+
+- 결과를 그대로 STEP 2 분류기(`window._postData`)에 넘긴다 — **검색·재조회 불필요**
+- `orderby=modified&order=asc` 라서 **오래된 것부터** 처리되어 기존 규칙(오래된 날짜 우선)과 일치한다
+- 0건이면 1-B로 넘어간다
+
+**1-B. Notion 확인 (0건일 때 · 또는 제목·서브카테고리가 필요할 때만)**
 
 **두 페이지 모두** `notion-fetch`로 확인한다.
 
@@ -215,52 +279,112 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 
 본문에서 파악할 것:
 
+- 🆕 **(v5.0) 훅 문장 3~4개 (최우선)**: 독자가 가장 놀랄 문장을 **원문 그대로** 뽑는다. 대개 숫자가 충돌하는 문장(“의원은 6,868원이고 응급실은 22만원입니다”), 통념이 깨지는 문장, 손해가 확정되는 문장이다. 이미지 1장당 훅 1개를 배정하며, 이것이 프롬프트의 출발점이다
+- 🆕 **(v5.0) 충돌하는 수치 쌍**: A와 B의 배수·차액. 3-2 ③의 물리량 번역 재료가 된다
 - **핵심 피사체**: 글이 실제로 다루는 도구·앱·기기·장면이 무엇인가 (제목의 추상 키워드가 아니라 본문이 묘사하는 구체적 실물). 예: 글이 ChatGPT 화면 활용법을 다루면 이미지도 노트북 위 대화형 AI 화면이어야지, 막연한 '미래적 AI 그래픽'이면 안 된다.
 - 본문이 언급하는 **구체적 도구·화면·환경·상황** (앱 이름, 작업 환경, 시간대, 감정선) — 그대로 프롬프트 재료가 됨
 - 헤딩(h2/h3) 텍스트 — 각 이미지가 들어갈 위치 주변 섹션의 주제
 
-#### 3-2. 피사체 정확성 원칙 (최우선 — 분위기보다 먼저)
+#### 3-2. 장면 설계 원칙 (v5.0 — 최우선. 정확성보다도 먼저 통과해야 한다)
 
-> 프롬프트의 1순위는 '분위기'가 아니라 **'피사체 정확성'**이다. 핵심 피사체가 글 내용과 다르게 생성되면 아무리 분위기가 좋아도 그 이미지는 실패다.
+> 이 루틴의 이미지는 '글을 설명하는 삽화'가 아니라 **'글을 계속 읽게 만드는 장치'**다.
+> 정확하기만 한 이미지는 실패다. **정확하면서 사건이 있는** 이미지만 채택한다.
 
-1. **한국의 실제 환경·사물을 물리적으로 상세 묘사한다.** "Korean office"라고만 쓰면 생성 모델은 서구식 사무실을 만들기 쉽다. 한국 직장·주거·카페의 실제 디테일(파티션 책상, 스터디카페 좌석, 아파트 거실, 이케아식 홈오피스, 스타벅스 리저브 등)을 명시한다.
-2. **기기·도구는 실물 형태로 묘사한다.** 예: 갤럭시/아이폰, 맥북/그램, 듀얼 모니터, 기계식 키보드 등 본문이 언급한 실제 기기를 그대로 쓴다. AI 관련 글이라도 추상적 홀로그램·로봇 그래픽이 아니라 **실제 화면·실제 작업 장면**으로 표현한다.
+**① 한 문장 테스트 (필수 · 프롬프트 작성 직후 스스로 물어본다)**
+"이 이미지를 처음 보는 사람이 **지금 무슨 일이 벌어지는지** 한 문장으로 말할 수 있는가?"
+- ❌ "응급실 입구가 있다" · "책상에 서류가 놓여 있다" → **상태 서술 = 탈락**
+- ✅ "영수증 한 장이 카운터에서 흘러내려 바닥까지 늘어져 있다" · "봉투 하나가 타서 재만 남았다" → **사건 서술 = 통과**
+한 문장이 '있다/놓여 있다'로 끝나면 그 프롬프트는 버리고 다시 쓴다.
+
+**② 본문에서 '훅 문장' 1개를 먼저 뽑는다 (필수 · 기록 대상)**
+프롬프트를 쓰기 전에, 본문에서 독자가 가장 놀랄 문장 한 줄을 그대로 인용해 적어둔다. 그 문장 **한 줄만**을 그림으로 옮긴다. 이미지마다 훅 문장이 다르면 3장이 자동으로 달라진다.
+> 예(#87): "의원은 6,868원이고 응급실은 22만원입니다. 서른 배가 넘어요."
+> 예(#88): "외벌이 부부의 결혼세액공제는 100만원이 아니라 50만원입니다."
+훅 문장은 STEP 8 보고에 이미지별로 **반드시 남긴다.**
+
+**③ 숫자를 사물의 물리량으로 번역한다 (문자로 쓰지 않는다)**
+글의 핵심 수치는 화면에서 **눈으로 세지거나 비교되는 형태**여야 한다. 글자는 어차피 깨지므로 절대 쓰지 않는다.
+| 본문 수치 | 번역 |
+|---|---|
+| 30배 차이 | 영수증 **길이** (손바닥 한 장 vs 바닥까지 늘어진 한 장) |
+| 100만 ↔ 50만 | 지폐 다발 **두께** / 동전 더미 **높이** 정확히 2배 |
+| 4일 중 1일만 다름 | 같은 물건 4개 중 **하나만 색·방향이 다름** |
+| 7년 유예 | 같은 물건이 **한참 뒤로 밀려 원근상 작게** |
+| 90% 본인부담 | 10등분된 것 중 **9조각이 한쪽으로** |
+
+**④ 긴장 요소를 최소 1개 넣는다 (정적 배치 금지)**
+다음 중 하나 이상이 프롬프트에 명시돼야 한다 — 기울어짐 / 떨어지는 중 / 반쯤 열림·찢김 / 한쪽만 켜짐 / 넘치기 직전 / 손이 막 놓거나 집는 순간 / 그림자가 물체보다 큼 / 한 개만 줄에서 이탈.
+
+**⑤ 시선 유도점은 1개만 둔다**
+화면에서 가장 밝은 곳(또는 가장 채도가 높은 곳)이 **훅 문장의 주어와 일치**해야 한다. 밝은 곳이 두 군데면 주제가 흐려진다. `the only bright accent in the frame is X` 처럼 못 박는다.
+
+**⑥ 범용 은유 금지 목록 (글이 그 물건 자체를 다루지 않는 한 사용 금지)**
+⛔ 모래시계 · 저울 · 전구 · 퍼즐 조각 · 체스말 · 화살표 그래픽 · 돼지저금통 · 악수 · 계산기와 안경 플랫레이 · 창밖 도시야경 단독 컷 · 텅 빈 사무실/로비 · 정렬된 문구류 톱뷰.
+이 목록은 **어느 글에 붙여도 말이 되기 때문에** 금지한다. 어느 글에나 어울린다는 건 이 글의 이미지가 아니라는 뜻이다.
+
+**⑦ 썸네일 3초 테스트**
+완성된 이미지를 폭 320px로 줄였다고 상상한다. 그 크기에서 주제가 안 읽히면 피사체가 너무 작거나 배경이 복잡한 것이다 — 피사체를 화면의 **1/3 이상** 차지하게 다시 잡는다.
+
+#### 3-3. 피사체 정확성 원칙 (2순위 — 사건이 있어야 그다음이다)
+
+> 사건 설계를 통과했더라도 피사체가 글과 다르면 그 이미지는 실패다. 둘 다 만족해야 채택한다.
+
+1. **한국의 실제 환경·사물을 물리적으로 상세 묘사한다.** "Korean office"라고만 쓰면 생성 모델은 서구식 사무실을 만들기 쉽다. 한국 직장·주거·병원·관공서의 실제 디테일(파티션 책상, 스터디카페 좌석, 아파트 거실, 구청 민원실 번호표기, 종합병원 접수 창구 등)을 명시한다.
+2. **기기·도구·서류는 실물 형태로 묘사한다.** 갤럭시/아이폰, 맥북/그램, 듀얼 모니터, A4 고지서, 감열지 영수증 등 본문이 언급한 실물을 그대로 쓴다. AI 관련 글이라도 홀로그램·로봇이 아니라 **실제 화면·실제 작업 장면**으로 표현한다.
 3. **형태를 정확히 모르면 웹 검색으로 실제 사진을 확인한 뒤** 프롬프트를 작성한다. 추측으로 쓰지 않는다.
 4. **잘못 나오기 쉬운 형태를 명시적으로 배제한다.** 예: "no futuristic hologram, no robot, no sci-fi interface", "no Western-style cubicle office".
-5. **(v4.0 보강) 화면 안의 글자는 반드시 배제한다.** UI·자막·문서 텍스트는 깨진 글자로 생성되므로 `no readable text on the screen`, `interface reduced to plain blocks and lines` 처럼 **글자 없는 형태로 지정**한다.
+5. **글자는 배제한다.** UI·자막·문서 텍스트는 깨진 글자로 생성되므로 `no readable text`, `the form is blank with printed rule lines only`, `interface reduced to plain blocks and lines` 처럼 **글자 없는 형태로 지정**한다. 단 ③의 물리량 번역은 글자가 아니므로 제한 없이 쓴다.
 
-#### 3-3. 분위기·라이팅 원칙 (2순위)
+#### 3-4. 인물 사용 규칙 (v5.0 완화 — 사람 흔적은 오히려 권장)
 
-0and1Life는 AI·효율·라이프스타일 한국 블로그다. 이미지는 글의 핵심 개념을 가장 흥미롭게 시각화하는 장면을 담는다. 사실적(photorealistic)이되, 뻔하지 않아야 한다.
+v4.0의 "인물 최대 1장" 규칙이 실무에서 "항상 0명"으로 굳어져 장면이 차가워졌다. **개입의 흔적이 있으면 사건이 생긴다.**
 
-장면 핵심: 글의 핵심 소재·개념 그 자체를 주인공으로 삼는다. 인물은 기본값이 아니라 선택지 중 하나이며, 3장 중 최대 1장까지만 허용한다.
+- ✅ **권장**: 손·팔뚝·어깨 일부, 뒷모습, 실루엣, 화면 밖으로 나가는 신체 일부. "막 놓는 손", "집으려는 손", "카운터 너머로 내미는 손"
+- ✅ 3장 중 **1~2장까지** 신체 부분 컷 허용 (기존 '최대 1장' 폐지)
+- ⛔ **금지**: 카메라를 보고 웃는 정면 모델, 전신이 또렷한 연출 인물, 스톡 사진식 팀 회의 장면
+- ⛔ 얼굴이 프레임에 들어와야 한다면 초점을 빼거나 프레임 밖으로 잘라낸다
 
-예: 개념의 시각적 은유: "five subscription app cards arranged like a hand of playing cards on a desk, one card being pulled out" (구독 정리)
-소재 정물: "a passport, boarding pass and smartphone showing a glowing route map, laid flat on a world map" (AI 여행)
-극적 대비·과장: "a tiny desk lamp illuminating one neat stack of coins beside a towering messy pile of receipts" (절약)
+#### 3-5. 조명·카메라·기법
 
-인물을 쓸 경우에도 얼굴 정면의 '번듯한 모델' 구도 금지 — 손·뒷모습·실루엣 등 부분 컷 우선
+- **시간·빛**: 단순 낮/밤이 아니라 분위기를 명시. "soft morning light from floor-to-ceiling windows", "evening blue hour with city lights reflection", "single overhead fluorescent with hard shadows"
+- **카메라·렌즈**: "shot on Sony A7R V with 35mm f/1.8 lens", "Fujifilm X-T5 with 56mm f/1.2"
+- **구도·깊이감**: "shallow depth of field", "eye-level", "over-the-shoulder", "worm's eye view"
+- **제외 조건 세트**(항상 말미에 부착): `no readable text, no watermark, no logos, no anime style, no generic stock photo look, no posed corporate model smiling at camera, photorealistic`
+- 창의적 실사 기법 적극 허용: 미니어처/틸트시프트, 극단적 매크로, 톱뷰 플랫레이, 장노출 빛궤적, 강한 색 대비 조명, 얕은 초점의 전경 가림(foreground occlusion)
 
-- **시간·빛**: 단순 낮/밤 대신 분위기 명시. 예: "soft morning light from floor-to-ceiling windows", "evening blue hour with city lights reflection"
-- **카메라·렌즈**: "shot on Sony A7R V with 35mm f/1.8 lens", "Fujifilm X-T5 with 23mm cinematic lens"
-- **구도·깊이감**: "shallow depth of field", "eye-level perspective", "over-the-shoulder angle"
-- **제외 조건**: "no text, no watermark, no logos, no anime style, photorealistic" + "no generic stock photo look, no posed corporate model smiling at camera"
+**두 상태 비교형**: 글의 핵심이 'A일 때와 B일 때가 다르다'면 **같은 평면 위 두 개의 사물**로 놓는다. 조명·프레이밍 동일 지정이 핵심이다 (`Identical lighting and identical framing on both items so the contrast is obvious at a glance`). 다만 v5.0에서는 여기에 **③ 물리량 번역**과 **④ 긴장 요소**를 반드시 얹는다 — 두 물건을 그냥 나란히 놓기만 하면 그게 바로 '무난함'이다.
 
-사실성은 유지하되, 창의적 실사 기법은 적극 허용: 미니어처/틸트시프트, 극단적 매크로, 톱뷰 플랫레이, 장노출 빛궤적, 강한 색 대비 조명 등
+#### 3-6. 나쁜 예 → 좋은 예 (2026-08-18 실전 자기비판)
 
-**(v4.0 신설) 두 상태 비교형 히어로**: 글의 핵심이 'A일 때와 B일 때가 다르다'인 경우, 두 상태를 **같은 평면 위 두 개의 사물**로 놓으면 썸네일에서 주제가 즉시 읽힌다. 조명·프레이밍을 동일하게 지정하는 것이 핵심이다 (`Identical lighting and identical framing on both items so the contrast is obvious at a glance`). KoreaPlug 2026-08-18 실측에서 2장 모두 통과한 구조다.
+| 글 | v4.0 산출 (통과했지만 무난) | v5.0 재설계 |
+|---|---|---|
+| #87 의원 6,868원 vs 응급실 22만원 | 야간 응급실 입구, 사람 없음, 붉은 조명 — **상태 서술** | 응급실 접수 창구 위 감열지 영수증 한 장이 카운터 끝으로 흘러내려 **바닥까지 길게 늘어져 있고**, 그 옆에 손바닥만 한 의원 영수증. 붉은 응급 사인이 긴 쪽만 비춘다 → 30배를 **길이**로 |
+| #88 결혼세액공제 100만 vs 50만 | 동전 두 더미 (높이는 2배지만 **아무 일도 안 일어남**) | 봉투에서 지폐 다발이 반쯤 빠져나오다 멈췄고, 옆 봉투는 **정확히 절반 두께에서 잘린 단면**을 보인다. 잘린 절반이 책상 밖으로 떨어지는 중 |
+| #88 소멸형 vs 지연형 | 봉투 두 개 (재 + 달력 뒤) — **v5.0 기준으로도 통과**. 타버린 재와 밀려난 위치라는 사건이 있음 | 유지. 이 컷이 v5.0이 원하는 수준의 하한선이다 |
+| #88 12월 31일 기한 | 창가 모래시계 — **⑥ 범용 은유 위반** | 12월 마지막 주 달력장이 **한 장 뜯겨 나가 공중에 떠 있고**, 그 아래 접수 도장이 찍히다 만 서류. 또는 구청 창구 셔터가 **반쯤 내려온 틈**으로 서류를 밀어 넣는 손 |
 
-**이미지 3장의 역할 분담:**
+#### 3-7. 이미지 역할 분담과 다양성
 
-이미지 1 (도입부): 글 주제를 한눈에 읽히게 하는 시각적 훅 — 썸네일로 봤을 때 "뭐지?" 하고 클릭하고 싶어지는 구도. 은유·대비·의외성 중 하나를 반드시 포함
-이미지 2 (중반): 핵심 소재의 클로즈업 (유지하되, 화면·기기 반복 금지 — 글마다 다른 각도·재질·구도)
-이미지 3 (후반): 글의 결론·효용을 시각화 — '만족한 사람' 공식 금지. 결과물·변화·before/after를 사물로 표현
+- **이미지 1 (도입부)**: 훅 문장 중 가장 충격적인 것 1개를 그대로 시각화. 썸네일에서 "뭐지?" 가 나와야 한다
+- **이미지 2 (중반)**: 판단이 갈리는 지점의 클로즈업. 두 상태 비교형이 잘 맞는 자리
+- **이미지 3 (후반)**: 결론·행동을 사물로. '만족한 사람' 공식 금지, **결과물·변화·잔여물**로 표현
+- **(hasStockImg) 히어로**: 제목 한 줄을 그대로 그림으로. 대표이미지로도 쓰이므로 ⑦ 3초 테스트를 가장 엄격히 적용
 
-3장의 다양성 규칙 (필수): 3장이 같은 스타일·같은 구도·같은 피사체 유형이면 실패. 최소 1장은 인물 없는 정물/은유 컷, 3장의 카메라 거리(원경/중경/접사)를 서로 다르게 한다
+**다양성 규칙(필수)**: ⓐ 3장의 카메라 거리(원경/중경/접사)를 서로 다르게 ⓑ 최소 1장은 인물 흔적 없는 정물 ⓒ 최소 1장은 신체 부분 컷 ⓓ 같은 소재(달력·영수증·동전 등)를 두 장에서 주인공으로 쓰지 않는다.
 
-- **(hasStockImg인 경우) 히어로 이미지**: 제목을 가장 직관적으로 시각화한 장면 — 썸네일로 봤을 때 글 주제가 한눈에 읽히는 구도
+⚠️ **히어로와 본문 이미지의 소재가 겹치지 않게 배분한다.** 히어로가 A를 다뤘다면 본문은 B·C·D를 맡는다.
 
-⚠️ **(v3.4 백포트) 히어로와 본문 이미지의 소재가 겹치지 않게 배분한다.** 히어로가 이미 A를 다뤘다면 본문 3장은 B·C·D를 맡는다. 같은 피사체가 두 번 나오면 글이 단조로워진다.
+#### 3-8. 프롬프트 조립 체크리스트 (전송 전 7항목 자가 점검)
+
+전송 직전 아래 7개가 프롬프트 문장 안에 실제로 들어 있는지 센다. **하나라도 비면 전송하지 않는다.**
+
+1. 훅 문장(한국어 주석으로 상단에 기록)
+2. 사건 동사 — 흘러내리는 / 떨어지는 / 잘린 / 타버린 / 밀어 넣는
+3. 물리량 번역 — 길이·높이·두께·개수의 구체적 배수
+4. 한국 실물 디테일 — 장소·기물의 실제 형태
+5. 시선 유도점 1개 — `the only bright accent is ...`
+6. 카메라·렌즈·빛
+7. 제외 조건 세트(3-5 말미 문장 그대로)
 
 각 이미지에 대한 **한국어·영문 alt text** (60자 내외)도 미리 작성해 둔다.
 
@@ -308,13 +432,27 @@ h2.map((x, n) => n + ' ' + Math.round(x.i / L * 100) + '% @' + x.i + ' :: ' + x.
 
 (v3) `genCount`가 3 미만이면 `window._insertPoints`에서 앞의 genCount개 위치만 사용한다 — 우선순위는 STEP 2의 이미지 1→3→2 순서를 따른다.
 
+🆕 **(v5.0) 스톡 플레이스홀더가 2개 이상이면 삽입 개수를 그만큼 줄인다.**
+`[FEATURED_IMAGE_URL]`·Unsplash 태그가 본문에 **N개** 있으면, 첫 번째는 히어로가 가져가고 **나머지 (N−1)개 자리는 본문 이미지가 교체로 소비**한다 (STEP 7-2.5). 따라서 실제로 **새로 삽입할 위치는 `genCount − (N−1)` 개**다. 이 값을 무시하고 genCount개를 그대로 삽입하면 총량 상한 5장을 넘긴다.
+
+```javascript
+// 삽입 위치 개수 확정 — STEP 2의 stock 수(window._cls[i].stock)를 그대로 쓴다
+const stockN = window._cls[0].stock;                       // 예: 2
+window._replaceSlots = Math.max(0, stockN - 1);            // 본문 이미지가 교체로 소비할 개수 (예: 1)
+window._insertN = Math.max(0, window._insertPoints.length - window._replaceSlots);
+window._insertPoints = window._insertPoints.slice(0, window._insertN);
+'stock:' + stockN + ' replaceSlots:' + window._replaceSlots + ' insertN:' + window._insertN
+```
+
+> 2026-08-18 #88 실측: stock 2 · genCount 3 → 교체 소비 1장(45% 자리) + 신규 삽입 2장(20%·71%) + 히어로 1 + 증빙 1 = **정확히 5장**. 교체 자리는 이미 본문 흐름에 맞게 배치돼 있으므로 **삽입 목표 비율 계산에서 그 구간은 빼고 잡는다.**
+
 (v3.2 백포트) 다만 **이미 이미지가 있는 글에 1~2장을 보충하는 경우**에는 기계적으로 도입부를 쓰지 말고, 기존 이미지들의 본문 내 위치(index)를 먼저 구해 **이미지가 가장 오래 비어 있는 구간**의 헤딩을 고른다. 보충의 목적은 개수 채우기가 아니라 공백 메우기다.
 
 ℹ️ **(v3.4 백포트) raw 위치와 렌더 후 화면 위치는 다르다.** ez-toc 목차는 렌더 시점에 첫 h2 앞으로 삽입되므로, raw에서 첫 h2 바로 앞에 넣은 이미지는 화면에서 **본문 도입 → 이미지 → 목차** 순으로 보인다. 이 배치는 정상이며 문제가 아니다. 최종 위치는 STEP 7.5에서 렌더 기준으로 실측한다.
 
 ---
 
-### STEP 5: Google Flow에서 이미지 생성 및 캡처 (v4.0)
+### STEP 5: Google Flow에서 이미지 생성 및 캡처 (v5.1 — 그리드 상주 · 일괄 처리)
 
 Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
@@ -333,55 +471,109 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 ⛔ **`에이전트` 버튼은 사용하지 않는다.** 켜면 프롬프트를 재해석해 의도와 다른 결과가 나온다.
 
-#### 5-2. 프롬프트 투입
+#### 5-2. 프롬프트 일괄 투입 (v5.1 — 한 장씩 기다리지 않는다)
 
-입력창 클릭 → 프롬프트 입력 → **우측 화살표(→) 버튼 클릭**.
-프롬프트 작성 원칙(STEP 3-2 피사체 정확성, 3-3 분위기)은 **그대로 유지**한다.
+> 🚀 **v5.1 핵심: 그리드를 떠나지 않고, 필요한 프롬프트를 전부 먼저 넣는다.**
+> v4.0/v5.0은 `투입 → 55초 대기 → 에디터 진입 → 캡처 → 그리드 복귀` 를 이미지마다 반복했다. 2026-08-18 실측에서 이 왕복이 전체 시간의 대부분을 먹었다.
 
-⏱ 그리드 상단에 진행률(%)이 실시간 표시되며 **약 20초**에 2장이 완료된다. Chrome MCP의 wait 10초를 2~3회 반복하면 충분하다. **60초를 넘기면 지연으로 보고 재전송**한다.
+**투입 절차 (이미지 N장 = N회 반복, 사이에 대기 없음):**
 
-ℹ️ Gemini와 달리 **첫 클릭이 씹히지 않는다.** 그래도 전송 직후 스크린샷으로 그리드에 진행률 카드 2장이 생겼는지 한 번 확인한다.
+1. 입력창 클릭 → 프롬프트 입력 → **우측 화살표(→)** 클릭
+2. **완료를 기다리지 않고 곧바로** 다음 프롬프트를 같은 방식으로 투입한다
+3. 클릭·입력·전송은 `browser_batch` 로 묶어 1회 호출로 처리한다
 
-#### 5-3. 2장 중 채택본 선택 (필수)
+**(v5.0) 전송 전에 STEP 3-8의 7항목 체크리스트를 반드시 센다.** 하나라도 비면 전송하지 않고 프롬프트를 고친다.
 
-그리드에서 새로 생성된 2장의 썸네일을 각각 클릭해 **에디터 뷰에서 육안 검증**한다.
+✅ **(v5.2 확정 — 큐잉은 실측으로 검증됐다. 조건 분기·폴백은 삭제한다.)**
+2026-08-18 KoreaPlug 프로젝트에서 직접 측정: **1차 제출분이 74%로 진행 중일 때 2차 프롬프트를 넣자 13%로 함께 시작**했고, 4장(2쌍)이 **약 60초에 모두 완료**됐다. 제출 직후 입력창은 비워지고 즉시 활성이다.
+→ **남은 프롬프트를 전부 연속 투입하는 것이 확정 동작이다.** 큐잉 가능 여부를 확인하거나 직렬로 되돌리는 분기는 더 이상 두지 않는다.
+확인이 필요하면 2번째 전송 직후 스크린샷 1장에서 **진행 카드가 4장(=2쌍)** 잡히는지만 보면 된다.
 
-- 핵심 피사체가 **글 내용·실제 한국 환경**과 일치하는가 (STEP 3-2 기준)
+⏱ 한 쌍당 **약 20~55초**(2026-08-18 실측 50~56초), 4장 병렬 시 **약 60초**. **한 쌍이 90초를 넘기면 그 건만 재전송**한다 (나머지는 그대로 둔다).
+
+#### 5-3. 완료 대기 — 스크린샷이 아니라 JS 폴링으로 (v5.1)
+
+⛔ **진행 상태 확인에 스크린샷을 쓰지 않는다.** 2026-08-18 회차는 진행률 확인용 스크린샷만 12장을 찍었고 그중 절반이 "아직 99%"였다. 스크린샷은 호출·토큰 모두 비싸다. 아래 **문자열 반환 폴링**으로 대체한다.
+
+✅ **(v5.2) 최상위 `await` 로 폴링과 결과 읽기를 한 호출에 합친다.** `javascript_tool` 은 최상위 `await` 를 지원하고 마지막 표현식 값을 그대로 반환한다 (2026-08-18 실측). 舊 fire-and-read 2회 호출은 불필요하다.
+
+```javascript
+// 완료 판정: 원본 해상도(1376) 이미지 개수가 목표치에 도달했는가
+// 기대치 = (기존 그리드 이미지 수) + (투입한 프롬프트 수 × 2)
+window._expect = BASE_COUNT + N_PROMPTS * 2;
+const big = () => Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000);
+let res = 'timeout';
+for (let t = 0; t < 24; t++) {                       // 최대 약 120초
+  if (big().length >= window._expect) { res = 'done ' + big().length + ' @' + (t * 5) + 's'; break; }
+  await new Promise(r => setTimeout(r, 5000));
+}
+window._poll = (res === 'timeout') ? 'timeout ' + big().length + '/' + window._expect : res;
+window._poll
+```
+
+⚠️ 이 호출은 최대 120초까지 블로킹된다. **Chrome MCP의 10초 wait 상한을 우회하는 것이 이 방식의 핵심 이점**이므로, 도중에 스크린샷을 끼워 넣지 않는다.
+
+ℹ️ **(v5.1 실측) 그리드 이미지는 지연 로딩된다.** 2026-08-18 콜드 로드 측정: 6초·14초 시점 `img 0개`, **26초에 18개**. 그래서 ⓐ 폴링 상한을 넉넉히 두고 ⓑ **그리드를 떠났다가 돌아오는 동작 자체를 피한다**(돌아오면 이 20여 초를 다시 낸다).
+
+#### 5-4. 채택 판정 — 그리드에서 끝낸다 (v5.1 · 에디터 진입 폐지)
+
+> 🚀 **(v5.1 실측) Flow 그리드 썸네일은 원본 해상도다.** 2026-08-18 확인: `naturalWidth 1376×768`, 화면 표시 폭만 318px. **캡처도 판정도 그리드에서 전부 가능하므로 에디터 뷰에 들어갈 이유가 없다.**
+> 舊 절차(썸네일 클릭 → 로딩 → 스크린샷 → ← 클릭 → 그리드 재로딩 → 재클릭 → 스크린샷)는 이미지당 6~7회 호출이었고, 5장이면 30회를 넘겼다. **전부 삭제한다.**
+
+판정 절차:
+
+1. **그리드 전체 스크린샷 1장**을 찍는다 (전 이미지 후보가 한 화면에 들어온다)
+2. 각 쌍에서 아래 기준으로 채택본을 고른다
+3. 손 왜곡·글자 잔존처럼 세밀한 확인이 필요한 카드만 **`zoom` 으로 해당 영역만** 확대한다 — 페이지 이동 없음
+
+- 🆕 **(v5.0) 밋밋함 판정 — 이 항목을 가장 먼저 본다.** 이미지를 보고 **"지금 무슨 일이 벌어지는가"를 한 문장으로 말할 수 있는가**(3-2 ①). 말할 수 없거나 문장이 '있다/놓여 있다'로 끝나면 **정확해도 탈락**이다
+- 🆕 **(v5.0) 훅 문장이 화면에 실제로 구현됐는가** — ③ 물리량(길이·높이·두께 배수)이 눈으로 비교되는가. 배수가 애매하면 탈락
+- 핵심 피사체가 **글 내용·실제 한국 환경**과 일치하는가 (STEP 3-3 기준)
 - 글 제목을 아는 독자가 봤을 때 "글 내용과 맞는 이미지"라고 느낄 것인가
 - 왜곡된 손·어색한 텍스트·SF풍 그래픽·서구식 환경 등 이상 요소가 없는가
-- 3장 다양성 규칙(3-3)을 해치지 않는가 — 앞서 채택한 이미지와 카메라 거리·피사체 유형이 겹치면 다른 쪽을 고른다
-- **둘 다 부적합할 때만** 잘못된 부분을 물리적으로 더 명시한 **수정 프롬프트**로 재생성한다 (동일 프롬프트 재전송 금지). 수정 1회 후에도 어긋나면 해당 이미지 건너뜀.
+- 다양성 규칙(3-7)을 해치지 않는가 — 앞서 채택한 이미지와 카메라 거리·피사체 유형·주인공 소재가 겹치면 다른 쪽을 고른다
+- 🆕 **(v5.0) 썸네일 3초 테스트** — 그리드 썸네일 크기(318px)에서 주제가 읽히는가. 안 읽히면 피사체를 더 크게 잡아 재생성. **그리드 판정은 이 테스트를 자동으로 수행하는 셈**이라 v5.1에서 오히려 정확해졌다
+- **둘 다 부적합할 때만** 재생성한다. 이때 **밋밋함이 사유면 '더 정확하게'가 아니라 '사건을 추가'하는 방향으로** 고친다 — 동사(흘러내리는·잘린·떨어지는)와 배수를 문장에 넣는다. 동일 프롬프트 재전송 금지. 수정 1회 후에도 어긋나면 해당 이미지 건너뜀.
 
-#### 5-4. 캡처 (채택본을 에디터 뷰에 띄운 상태에서 실행)
+#### 5-5. 캡처 — 그리드에서 일괄 (v5.1)
 
 Flow 워터마크(✦)는 이미지 **모서리가 아니라 안쪽**, 상대좌표 **(0.925W, 0.875H)** 에 고정돼 있다 (2026-08-18 실측: 1376×768 기준 중심 ≈ (1273, 672), 크기 ≈ 56×56). 따라서 **`cropRight = 150` 으로 우측만 잘라내면 세로 해상도 손실 없이 제거된다** → 1226×768.
 
+그리드에서는 **채택본들을 인덱스로 지정해 한 번에 캡처**한다. 이미지당 호출 1회가 아니라 **회차당 호출 1회**다.
+
 ```javascript
-// 실행 → 2~3초 대기 → window._img1dims 로 확인
-(async () => {
- try {
-  const imgs = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 400);
-  const main = imgs.sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width)[0];
-  const cropRight = 150, cropBottom = 0;   // (v4.0) Flow 워터마크는 우측 크롭으로 제거
+// PICK = 그리드에서 고른 채택본의 인덱스 배열 (좌상단 0부터, 최신이 앞)
+// KEYS = 저장할 window 변수명 (본문 순서와 무관하게 이름으로 관리)
+const PICK = [1, 2, 5, 6];
+const KEYS = ['_imgHero', '_img1', '_img2', '_img3'];
+// (v5.2) 최상위 await — 캡처와 결과 확인을 1회 호출로 끝낸다 (2026-08-18 실측 4장 439ms)
+const grid = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000);
+const out = [];
+for (let k = 0; k < PICK.length; k++) {
+  const src = grid[PICK[k]];
+  if (!src) { out.push(KEYS[k] + ':MISSING'); continue; }
   const c = document.createElement('canvas');
-  c.width  = main.naturalWidth  - cropRight;
-  c.height = main.naturalHeight - cropBottom;
-  c.getContext('2d').drawImage(main, 0, 0, c.width, c.height, 0, 0, c.width, c.height);
+  c.width = src.naturalWidth - 150;      // 워터마크 우측 크롭
+  c.height = src.naturalHeight;
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height, 0, 0, c.width, c.height);
   const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.85));
-  window._img1 = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
-  window._img1dims = c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB';
- } catch (e) { window._img1dims = 'FAIL: ' + e.message; }
-})();
-'fired'
+  window[KEYS[k]] = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
+  out.push(KEYS[k] + ':' + c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB');
+}
+window._capDims = out.join(' | ');
+window._capDims   // 전부 1226x768 이어야 정상
 ```
 
-⚠️ **에디터 뷰에는 사이드바 썸네일·히스토리 이미지도 함께 존재하므로 `naturalWidth` 만으로 고르면 안 된다.** 반드시 **화면상 표시 폭(`getBoundingClientRect().width`)이 가장 큰 img** 를 채택한다.
+⚠️ **인덱스 확인 필수.** 캡처 전에 아래로 그리드 순서를 한 번 찍어 **어느 인덱스가 어느 프롬프트의 산출인지** 대조한다 (새 이미지가 앞쪽에 쌓인다).
+
+```javascript
+Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000)
+  .slice(0, 12).map((i, n) => n + ':' + i.naturalWidth + 'x' + i.naturalHeight).join(' ')
+```
 
 ✅ **(v4.0 실측) Flow는 이미지를 `labs.google` 동일 출처로 서빙하므로 canvas taint가 발생하지 않는다.** 舊 Gemini 경로의 `SecurityError: canvas has been tainted` 복구 절차는 **전부 불필요하며 삭제됐다.**
 
-✅ **(v4.0 실측) 그리드 ↔ 에디터 이동은 SPA 라우팅이라 `window._img*` 가 보존된다.** URL이 `/edit/...` 로 바뀌어도 리로드가 아니므로 이미지 4장을 순차 캡처해도 안전하다. 단 **주소창 navigate·새로고침은 여전히 금지** — 변수가 날아간다.
-
-이미지 2·3·히어로는 좌상단 **←** 로 그리드에 돌아가 5-2부터 반복하고, 각각 `window._img2`, `window._img3`, `window._imgHero` 에 저장한다. 매 캡처 후 `'1:' + !!window._img1 + ' 2:' + !!window._img2 + ...` 로 보존 여부를 확인한다.
+⛔ **(v5.1) 캡처가 끝날 때까지 그리드를 떠나지 않는다.** 주소창 navigate·새로고침은 `window._img*` 를 날린다. 에디터 진입은 SPA라 변수는 보존되지만 **복귀 시 그리드 재로딩 20여 초를 다시 내므로 금지**한다.
 
 ---
 
@@ -455,28 +647,51 @@ window.addEventListener('message', async (e) => {
 'listener ready'
 ```
 
-**6-3. Flow 탭에서 이미지 순서대로 전송 (본문용 1→2→3, 히어로가 있으면 마지막):**
+**6-3. Flow 탭에서 전 이미지를 한 번에 전송 (v5.1 — 건별 대기 폐지):**
 
-각 전송 후 6~8초 대기. 전송 사이에 WP admin 탭에서 `window._uploadedIds.length` 로 업로드 완료 확인 후 다음 전송.
+⛔ **(v5.1) 전송 사이에 6~8초씩 기다리지 않는다.** 업로드는 서로 독립적이고 리스너가 비동기라 **연속 전송해도 안전**하다. v4.0 방식(건별 8초 대기 + 건별 확인)은 5장 기준 약 40초와 호출 8회를 그냥 버렸다.
 
 ```javascript
-// Flow 탭에서 순서대로 실행
-window._wpWin.postMessage({dataUrl: window._img1, filename: '0and1life-SLUG-1.webp', altText: 'ALT_TEXT_1'}, 'https://0and1life.com');
-// 6~8초 대기
-window._wpWin.postMessage({dataUrl: window._img2, filename: '0and1life-SLUG-2.webp', altText: 'ALT_TEXT_2'}, 'https://0and1life.com');
-// 6~8초 대기
-window._wpWin.postMessage({dataUrl: window._img3, filename: '0and1life-SLUG-3.webp', altText: 'ALT_TEXT_3'}, 'https://0and1life.com');
-// (hasStockImg인 경우)
-window._wpWin.postMessage({dataUrl: window._imgHero, filename: '0and1life-SLUG-hero.webp', altText: 'ALT_TEXT_HERO'}, 'https://0and1life.com');
-// 6~8초 대기 후 window._uploadedIds.length가 전송한 수와 같은지 확인
+// Flow 탭에서 1회 실행 — 전 이미지를 연속 전송
+const SLUG = 'SLUG';
+const SEND = [
+  ['_imgHero', 'hero', 'ALT_HERO'],   // hasStockImg인 경우만
+  ['_img1',    '1',    'ALT_1'],
+  ['_img2',    '2',    'ALT_2'],
+  ['_img3',    '3',    'ALT_3']
+];
+let sent = 0;
+for (const [key, n, alt] of SEND) {
+  if (!window[key]) continue;
+  window._wpWin.postMessage({
+    dataUrl: window[key],
+    filename: '0and1life-' + SLUG + '-' + n + '.webp',
+    altText: alt
+  }, 'https://0and1life.com');
+  sent++;
+}
+'sent:' + sent
 ```
 
-확인용 (WP admin 탭에서):
+전송 후 WP admin 탭에서 **1회만 폴링**한다 (건별 확인 폐지):
 
 ```javascript
-'up:' + window._uploadedIds.length + ' err:' + window._upErrors.length
- + ' ids:' + window._uploadedIds.map(u => u.id).join(',')
- + ' tags:' + window._uploadedIds.map(u => u.tag.replace('0and1life-SLUG', '')).join(',')
+// 목표 개수에 도달할 때까지 최대 40초 폴링 — 호출 1회로 끝난다
+window._upPoll = null;
+(async () => {
+  for (let t = 0; t < 20; t++) {
+    if (window._uploadedIds.length + window._upErrors.length >= N_SENT) break;
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  window._upPoll = 'up:' + window._uploadedIds.length + ' err:' + window._upErrors.length
+    + ' ids:' + window._uploadedIds.map(u => u.id).join(',')
+    + ' tags:' + window._uploadedIds.map(u => u.tag.replace('0and1life-' + 'SLUG', '')).join(',');
+})();
+'polling'
+```
+
+```javascript
+window._upPoll + (window._upErrors.length ? '\nERR: ' + window._upErrors.join(' | ') : '')
 ```
 
 ⚠️ 생성 이미지 파일명은 반드시 `0and1life-` prefix를 유지한다 — STEP 2 분류기 ④단계가 이 prefix로 데코를 확정하므로, 규칙을 어기면 다음 실행에서 그 이미지가 미분류(unknown)로 떨어진다.
@@ -539,24 +754,30 @@ window._newContent = c;
 ```
 
 ```javascript
-// 2.5) (hasStockImg인 경우) 기존 스톡 이미지의 src/alt를 히어로 이미지로 교체
+// 2.5) (v5.0) 기존 스톡 이미지 교체 — 첫 번째만 히어로, 나머지는 본문 이미지로 순차 교체
+// ⛔ v4.0처럼 전부 히어로로 바꾸면 스톡이 2개인 글에서 같은 이미지가 본문에 두 번 박힌다
+//    (2026-08-18 #88 Post 1160에서 실측 — [FEATURED_IMAGE_URL] 2곳)
 // img 태그의 src와 alt만 바꾸고 나머지 마크업(제목 오버레이 등)은 유지한다
 const hero = window._uploadedIds.find(u => u.tag && u.tag.includes('hero'));
+const body = window._uploadedIds.filter(u => u.tag && !u.tag.includes('hero'));
 if (hero) {
-  let replaced = 0;
+  let n = 0;
   window._newContent = window._newContent.replace(/<img[^>]*>/g, (tag) => {
-    if (/unsplash\.com|pexels\.com|pixabay\.com|FEATURED_IMAGE/.test(tag)) {
-      replaced++;
-      let t = tag.replace(/src="[^"]*"/, 'src="' + hero.url + '"');
-      t = t.match(/alt="[^"]*"/) ? t.replace(/alt="[^"]*"/, 'alt="' + hero.alt + '"')
-                                 : t.replace('<img', '<img alt="' + hero.alt + '"');
-      return t;
-    }
-    return tag;
+    if (!/unsplash\.com|pexels\.com|pixabay\.com|FEATURED_IMAGE/.test(tag)) return tag;
+    n++;
+    const pick = (n === 1) ? hero : body[n - 2];   // 2번째부터는 본문 이미지를 순서대로 소비
+    if (!pick) return tag;                          // 남는 이미지가 없으면 원본 유지 (플레이스홀더는 STEP 8에 보고)
+    let t = tag.replace(/src="[^"]*"/, 'src="' + pick.url + '"');
+    t = t.match(/alt="[^"]*"/) ? t.replace(/alt="[^"]*"/, 'alt="' + pick.alt + '"')
+                               : t.replace('<img', '<img alt="' + pick.alt + '"');
+    return t;
   });
-  window._heroReplaced = replaced; // 확인용
+  window._stockReplaced = n;
+  window._bodyUsedInReplace = Math.max(0, n - 1);  // STEP 4에서 삽입 대상에서 제외한 개수와 일치해야 한다
 }
-'heroReplaced:' + window._heroReplaced + ' newLen:' + window._newContent.length
+'stockReplaced:' + window._stockReplaced + ' (hero 1 + body ' + window._bodyUsedInReplace + ')'
+ + ' newLen:' + window._newContent.length
+ + ' leftover:' + (window._newContent.match(/FEATURED_IMAGE|unsplash\.com/g) || []).length
 ```
 
 ```javascript
@@ -574,13 +795,15 @@ window._evGuard = {
   table:   cnt(before, /<table/g)           + '->' + cnt(after, /<table/g),            // 좌우 같아야 함
   figPair: cnt(after, /<figure/g)           + '/'  + cnt(after, /<\/figure>/g),        // 짝이 맞아야 함
   imgTags: cnt(before, /<img/g)             + '->' + cnt(after, /<img/g),
-  stock:   cnt(before, /unsplash\.com/g)    + '->' + cnt(after, /unsplash\.com/g),      // 히어로 교체 시 →0
+  stock:   cnt(before, /unsplash\.com|FEATURED_IMAGE/g) + '->' + cnt(after, /unsplash\.com|FEATURED_IMAGE/g), // (v5.0) 교체 시 →0
+  dupImg:  (() => { const s = (after.match(/src="[^"]*"/g) || []); return s.length - new Set(s).size; })(),   // (v5.0) 0이어야 함
   noAlt:   cnt(after, /<img(?![^>]*alt=)/g)                                            // 0이어야 함
 };
 Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ```
 
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
+🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
 
 ```javascript
 // 3) content 저장 — (v3.4) status를 명시 동봉해 상태 전환을 막는다
@@ -659,8 +882,10 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('0and1life-SLUG', 'OL
 
 **이어서 육안으로 확인한다:**
 
+- 🆕 **(v5.0) 이미지마다 "무슨 일이 벌어지는가"를 한 문장으로 말할 수 있는가?** 전부 '있다/놓여 있다'로 끝나면 그 회차는 프롬프트 설계가 실패한 것이다 — 보고에 명시하고 다음 회차 개선안을 남긴다
+- 🆕 **(v5.0) 같은 이미지가 두 번 나오지 않는가?** (스톡 2개 교체 시 특히 확인 — `dupImg` 와 육안 둘 다)
 - 각 이미지의 피사체가 글 내용·주변 섹션과 맞는가?
-- 3장 다양성 규칙(3-3)이 지켜졌는가 — 같은 구도·같은 피사체 유형이 반복되지 않는가?
+- 다양성 규칙(3-7)이 지켜졌는가 — 같은 구도·같은 피사체 유형·같은 주인공 소재가 반복되지 않는가?
 - 히어로/대표이미지가 정상 반영됐는가?
 - 증빙 캡처가 원래 자리에 그대로 있는가? (`window._evGuard` 확인)
 - **워터마크 흔적(✦)이 남아 있지 않은가?** — 남아 있으면 STEP 5-4의 `cropRight` 값을 늘려 재캡처하거나, 이미 업로드된 파일을 0and1life.com **동일 출처**에서 canvas로 다시 읽어 재크롭·재업로드한다.
@@ -683,9 +908,14 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('0and1life-SLUG', 'OL
 - **(v3.4) 글 상태**: 시작 시 status → 종료 시 status. 전환이 발생했다면 복구 여부까지 명시
 - **(v4.0) raw 오염 점검 결과**: v3.1 이하로 처리된 글에서 `ezToc>0` 또는 `blocks=0` 이 발견되면 해당 Post ID를 모두 나열하고 **사용자 확인 후 복구**를 제안한다
 - 대표이미지: 선정된 이미지, 선정 이유, 설정 결과 (`window._featuredResult`)
+- 🆕 **(v5.0) 이미지별 훅 문장**: 본문에서 뽑은 인용 한 줄과, 그것을 어떤 물리량(길이·높이·두께 배수)으로 번역했는지
+- 🆕 **(v5.0) 장면 설계 검증**: 이미지별 "무슨 일이 벌어지는가" 한 문장. 상태 서술이면 그 이유와 재생성 여부
+- 🆕 **(v5.0) 스톡 교체 내역**: 스톡 N개 중 히어로 1 + 본문 (N−1), `dupImg` 값, 남은 플레이스홀더 수
 - 피사체 정확성 검증: 각 이미지별 통과/재시도/건너뜀 여부, **2장 중 어느 쪽을 채택했는지**
 - Skip된 경우 그 이유
-- **(v4.0) 생성 소요시간**: 이미지별 생성 대기 시간을 기록한다. 60초를 넘긴 건이 있으면 Flow 지연으로 보고한다
+- **(v4.0) 생성 소요시간**: 이미지별 생성 대기 시간을 기록한다. 한 쌍이 90초를 넘긴 건이 있으면 Flow 지연으로 보고한다
+- 🆕 **(v5.1) 큐잉 검증 결과**: 생성 중 추가 프롬프트 전송이 **큐잉 가능/불가** 였는지. 다음 회차부터 확정 동작으로 삼는다
+- 🆕 **(v5.1) 실행 효율**: 총 도구 호출 수와 Flow 구간 소요시간. 그리드 이탈 횟수(**0이어야 정상**), 대상 탐색 경로(WP 1회 / Notion 폴백)
 - **삭제 대기 미디어**: 재크롭 등으로 남은 원본 미디어 ID를 나열하고 **사용자 확인을 요청**한다 (임의 삭제 금지)
 - 루틴 자체의 오류·개선점이 발견됐다면 **수정할 조항 번호와 교체용 전문(前文)**을 함께 제시한다 — 사용자가 붙여넣기만 하면 되도록
 
@@ -701,10 +931,22 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('0and1life-SLUG', 'OL
 - **(v3.4) 본문을 읽는 모든 REST 요청에 `context=edit` 필수. `content.raw` 가 없으면 중단한다 — `|| content.rendered` 폴백은 원본을 파괴한다**
 - **(v3.4) 모든 저장 POST에 `status: window._origStatus` 를 동봉한다. 저장 후 status가 바뀌었으면 즉시 되돌리고 보고한다**
 - REST API 검색 시 `status=any` 파라미터 필수 (없으면 draft 글이 검색되지 않음)
-- async JavaScript 결과는 항상 window 변수에 저장 후 별도 호출로 읽는다 (fire-and-read 패턴)
-- Chrome MCP의 wait는 1회 최대 10초, scroll_amount는 최대 10 — 긴 대기는 나눠서 반복
+- ⚡ **(v5.2) `fire-and-read` 2회 호출 패턴 폐기** — `javascript_tool` 은 최상위 `await` 를 지원하고 마지막 표현식 값을 그대로 반환한다 (2026-08-18 실측: `await new Promise(...)` 가 2.2초 뒤 값 반환). `const d = await fetch(...).then(r=>r.json()); window._x = d; '요약'` 처럼 **fetch·폴링·캡처와 그 검증을 한 호출에 합친다.** window 변수 저장은 계속 하되, '읽기 위한 추가 호출'만 없앤다. STEP 2·3·5·7에서 호출이 절반으로 준다
+- ⚡ **(v5.2) 긴 대기는 JS 내부 루프로 처리한다** — Chrome MCP의 wait 10초 상한을 우회할 수 있는 유일한 방법이다 (STEP 5-3 폴링). 대기 중 스크린샷을 끼워 넣지 않는다
+- Chrome MCP의 wait는 1회 최대 10초, scroll_amount는 최대 10 — **다만 v5.1에서는 `wait` 반복 대신 JS 내부 `setTimeout` 루프 폴링을 쓴다**(STEP 5-3). JS 안에서는 10초 제한이 없다
+- 🆕 **(v5.1) 캡처 완료 전까지 Flow 그리드를 떠나지 않는다** — 에디터 진입·새로고침·주소창 이동 모두 금지. 복귀 시 그리드 재로딩에 20여 초가 든다 (실측 6s·14s 0개 → 26s 18개)
+- 🆕 **(v5.1) 에디터 뷰는 쓰지 않는다.** 그리드 썸네일이 원본 해상도(1376×768)이므로 판정·캡처 모두 그리드에서 끝낸다. 세밀 확인은 `zoom` 으로 해당 영역만
+- 🆕 **(v5.1) 진행 상태 확인에 스크린샷을 쓰지 않는다.** JS 폴링이 반환하는 짧은 문자열로 판단한다. 스크린샷은 ⓐ 그리드 채택 판정 1장 ⓑ 최종 육안 검증에만 쓴다
+- 🆕 **(v5.1) 클릭·입력·전송·대기는 `browser_batch` 로 묶어 1회 호출로 처리한다**
+- 🆕 **(v5.1) 업로드 postMessage는 연속 전송 후 1회만 폴링**한다. 건별 대기 금지
+- 🆕 **(v5.1) 대상 탐색은 WP REST(`status=draft,future&modified_after=`)가 1순위**, Notion은 0건이거나 제목·서브카테고리가 필요할 때만
 - **이미지 생성 실패·부정확 시 재시도는 반드시 '수정된 프롬프트'로** (동일 프롬프트 재시도 금지). Flow는 1회에 2장을 주므로 먼저 **2장 중 채택**을 시도하고, 둘 다 부적합할 때만 수정 재시도한다. 수정 1회 후에도 부정확하면 해당 이미지 건너뜀
 - **프롬프트 작성 전 본문을 반드시 읽고, 피사체 형태가 불확실하면 웹 검색으로 확인**
+- 🆕 **(v5.0) 프롬프트는 '정확한 묘사'가 아니라 '사건 묘사'다.** 한 문장 테스트(3-2 ①)를 통과하지 못한 프롬프트는 전송하지 않는다. 전송 전 3-8의 7항목을 센다
+- 🆕 **(v5.0) 본문 훅 문장 1개를 인용해 적고 그 한 줄만 그린다.** 훅 문장 없이 제목만 보고 만든 프롬프트는 무효
+- 🆕 **(v5.0) 범용 은유 금지**(모래시계·저울·전구·퍼즐·돼지저금통·악수·빈 사무실·창밖 야경 단독 등) — 어느 글에나 어울리는 이미지는 이 글의 이미지가 아니다
+- 🆕 **(v5.0) 손·팔 등 신체 부분 컷은 권장**(3장 중 1~2장). 금지 대상은 카메라 보고 웃는 정면 모델뿐
+- 🆕 **(v5.0) 스톡 플레이스홀더가 2개 이상이면 첫 번째만 히어로, 나머지는 본문 이미지로 교체**하고 그만큼 삽입 개수를 줄인다 (STEP 4 · 7-2.5). 저장 전 `dupImg` 0 확인 필수
 - 글 제목(title)은 수정하지 않음
 - 이미지 삽입 후 글 상태(publish/draft/future)는 변경하지 않음 — **발행·예약발행 전환은 어떤 경우에도 금지 (발행 결정은 항상 사용자 몫, 2026-08-01 사용자 지시)**
 - **미디어 삭제는 어떤 경우에도 사용자 확인 후에만 수행한다** (2026-08-01 사용자 지시)

@@ -1,4 +1,21 @@
-# KoreaPlug 자동 이미지 삽입 태스크 (v4.0 — 생성처를 Google Flow로 교체·워터마크 우측 크롭·taint 원천 제거)
+# KoreaPlug 자동 이미지 삽입 태스크 (v5.2 — 사건 설계 + 한국성 + 실행 효율 + Google Flow)
+
+> 🎯 **v5.2 변경 (2026-08-18) — 0and1Life v5.0/v5.1에서 역백포트한 2건.**
+> ① **프롬프트 철학이 한 세대 뒤처져 있었다.** v4.1은 '어디에서 찍었는가'(한국성)를 고쳤지만 **'무슨 일이 벌어지는가'(사건)** 는 비어 있어, 규칙을 다 지켜도 *"한국이 배경인, 아무 일도 일어나지 않는 사진"* 이 나왔다. 2026-08-18 #137 채택본 4장의 한 문장이 **전부 "…가 있다"** 였다. → **STEP 3-2를 「장면 설계 원칙」으로 교체**하고(한 문장 테스트·훅 문장·물리량 번역·긴장 요소·시선 유도점·범용 은유 금지·3초 테스트), 기존 피사체 정확성은 3-2B, 한국성은 3-3으로 내렸다. **3-3B 자기비판 표**와 **3-3C 8항목 체크리스트**를 신설했다. 최종 통과 조건은 **사건 + 한국성 + 썸네일** 3중 게이트다.
+> ② **다중 스톡 버그가 남아 있었다.** 舊 7-2.5는 스톡 태그 전부를 같은 히어로로 치환해, `[FEATURED_IMAGE_URL]` 이 2곳인 글에서 **같은 이미지를 본문에 두 번** 박았다 (0and1Life #88 Post 1160 실측). → **순차 교체**(첫 번째만 히어로, 나머지는 본문 이미지)로 바꾸고 `_evGuard` 에 **`dupImg` 가드**를 추가했다.
+> 함께 정리: 5-4 제목이 "에디터 뷰에 띄운 상태에서 실행"인데 본문은 "에디터에 들어가지 않는다"였던 모순을 제거하고, 오해를 부르던 SPA 안전 문단을 **"그리드를 떠나지 않는다"**로 교체했다 (재진입 시 지연 로딩 20초+ 재발생).
+
+> ⚡ **v4.2 변경 (2026-08-18) — 실행 시간을 25분에서 8~10분으로 줄인다.**
+> 2026-08-18 #137 실행이 **약 130회 도구 호출 / 25분**이 걸렸다. 정작 이미지 생성 자체는 4장 × 20초 = **80초**면 되는 일이었고, 나머지는 전부 **직렬 대기와 왕복 낭비**였다. 원인 4개를 실측으로 확인하고 「⚡ 실행 효율 원칙」 절을 신설해 STEP 5·6에 반영했다.
+> ① Flow는 **생성 중에도 다음 프롬프트를 받는다** → 4장 연속 제출 후 대기 1회 (실측: 4장 60초)
+> ② `javascript_tool` 은 **최상위 `await` 반환을 지원한다** → `fire-and-read` 2회 호출 패턴 폐기
+> ③ 그리드 썸네일이 **원본 1376×768을 그대로 갖고 있다** → 에디터 진입 없이 4장 일괄 캡처 (실측 439ms)
+> ④ `browser_batch` 로 `click→type→click→wait→screenshot` 을 1회로 묶는다
+
+> 🇰🇷 **v4.1 변경 (2026-08-18) — 이미지가 "어디에나 있을 법한" 문제를 고친다.**
+> 2026-08-18 #137 실측: 생성한 4장 중 **3장이 한국 요소를 지우면 다른 나라 사진과 구분되지 않았다** (빈 지하철 통로, 스테인리스 좌석 위 정물, KTX 트레이). 사실적이지만 **아무 데도 아닌 곳**의 사진이었고, "한국이 궁금한 외국인"이라는 독자에게 아무 매력도 주지 못했다.
+> 원인은 프롬프트 실력이 아니라 **루틴이 강제한 제외 조건**이었다. 舊 STEP 3-3은 `no people, no text` 를 기본값으로 못 박았는데, 이 두 줄이 ① 생활감·스케일·이야기를 지우고 ② **한글 간판이라는 가장 강력한 '한국' 신호**를 통째로 차단했다.
+> → v4.1은 STEP 3-3을 **「한국성(Korean-ness) 원칙」**으로 전면 교체한다: **Nowhere 테스트**(한국 요소를 지우면 다른 나라 사진이 되는가) 필수 적용, **한국 지표 표 7개 영역**에서 이미지마다 2개 이상 물리적 묘사, **인물 정책 전환**(부분 인물 적극 허용, 3장 중 1장은 사람 흔적 필수), **텍스트 정책 전환**(아웃포커스 한글 간판 허용, 읽히는 문단만 금지). 프롬프트 예시 5종도 전부 다시 썼고, STEP 5-3 채택 기준·STEP 7.5 검증·STEP 8 보고에 한국성 게이트를 연결했다.
 
 ### 목적
 
@@ -33,6 +50,44 @@ Notion 글 현황 테이블에서 오늘 날짜에 작성된 WordPress 글을 �
 > - 2026-08-12 실측: #128(3301) ez-toc 59개 · #129(3341) 40개 · #130(3352) 50개 · #131(3363) 66개 — **이미 4편이 오염된 상태로 발행·예약됨**
 > 또한 같은 날 #132(3376)에서 **content만 POST했는데 글 상태가 `draft` → `future`(예약발행)로 자동 전환**되는 사고가 났다. 글의 `post_date` 가 미래면 WP가 업데이트 시 스스로 예약 상태로 승격시킨다. 이는 루틴의 절대 금지사항(발행·예약 전환 금지)을 위반한다.
 > → v3.4는 ① 모든 본문 fetch에 **`context=edit` 필수**, raw 없으면 **중단** ② 모든 저장 POST에 **원래 status 명시 동봉** ③ 저장 후 **raw 오염·상태 검증**을 신설한다. 아울러 삽입 위치를 헤딩 개수가 아닌 **문자 위치** 기준으로 잡는다(STEP 4).
+
+---
+
+### ⚡ 실행 효율 원칙 (v4.2 — 모든 STEP에 우선 적용)
+
+> 🚨 **v4.2 개정 사유 (2026-08-18)**: 2026-08-18 #137 실행이 **약 130회 도구 호출 / 25분**이 걸렸다. 이미지 생성 자체는 4장 × 20초 = **80초**면 끝나는 일인데, 나머지 시간은 전부 **직렬 대기와 왕복 낭비**였다. 아래 4개 규칙으로 같은 작업이 **약 30회 호출 / 8~10분**으로 줄어든다. 실측 근거는 각 항목에 붙였다.
+
+**① 이미지는 '전부 제출 → 한 번 대기 → 한 번에 캡처' 순서로 한다 (최대 효과)**
+
+舊 방식은 `프롬프트1 → 90초 대기 → 검증 → 캡처 → 프롬프트2 → 90초 대기 → …` 로 **4번 직렬 대기**했다.
+✅ **(2026-08-18 실측) Flow는 앞 이미지가 생성 중일 때 다음 프롬프트를 그대로 받는다.** 제출 직후 입력창이 비워지므로 곧바로 다음 것을 넣으면 된다. 4장이 **병렬로** 진행된다 (실측: 13%·13%·74%·74% 동시 진행 → 약 60초에 4장 완료).
+→ **프롬프트 4개를 STEP 3에서 모두 완성한 뒤, STEP 5에서 연속 제출하고 대기는 1회만 한다.**
+
+**② `browser_batch` 로 왕복을 묶는다**
+
+`click → type → click → wait → screenshot` 은 **1회 호출**로 처리한다. 10초 `wait` 를 3번 반복해야 하면 그것도 한 배치에 넣는다. 舊 실행은 이 시퀀스를 매번 5회로 나눠 불렀다.
+
+**③ `fire-and-read` 2회 호출 패턴을 폐기한다**
+
+✅ **(2026-08-18 실측) `javascript_tool` 은 최상위 `await` 를 지원하고 마지막 표현식 값을 그대로 반환한다** (`await new Promise(...)` → 2.2초 뒤 값 반환 확인).
+→ 舊 규칙이던 "async는 window 변수에 담고 다음 호출에서 읽는다"는 **더 이상 필요 없다.** `const d = await fetch(...).then(r=>r.json()); '요약문'` 형태로 **fetch와 검증을 한 호출에 합친다.** STEP 2·3·7에서만 호출이 절반으로 준다.
+⚠️ 단, **window 변수 저장 자체는 계속 한다** — 뒤 단계에서 재사용해야 하기 때문이다. 없애는 것은 '읽기 위한 추가 호출'뿐이다.
+
+**④ 캡처는 그리드에서 일괄로 한다 — 에디터 뷰에 들어가지 않는다**
+
+✅ **(2026-08-18 실측) Flow 그리드 썸네일은 표시폭이 318px여도 `naturalWidth` 는 원본 1376×768 그대로다.** 따라서 에디터를 열 필요가 전혀 없다.
+→ **4장을 한 번의 `javascript_tool` 호출로 캡처한다. 실측 439ms.** 舊 방식은 이미지마다 `클릭 → 스크린샷 → 캡처 → 확인 → 뒤로가기` 5회씩, 총 20회를 썼다.
+
+**시간 예산 (이 4개를 지켰을 때)**
+
+| 단계 | 舊 (2026-08-18 실측) | 新 목표 |
+|---|---|---|
+| STEP 1 Notion | 6회 호출 (오버플로+실패 grep 3회) | 2~3회 |
+| STEP 2~4 판정·프롬프트·위치 | 약 20회 | 7~8회 |
+| **STEP 5 생성·캡처** | **약 70회 / 25분** | **6~8회 / 2~3분** |
+| STEP 6 업로드 | 약 12회 | 4회 |
+| STEP 7~7.5 삽입·검증 | 약 20회 | 6~8회 |
+| **합계** | **약 130회 / 25분+** | **약 30회 / 8~10분** |
 
 ---
 
@@ -218,9 +273,54 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 - 본문이 언급하는 **브랜드·형태·색·재질·사용 장면** (예: "black or silver rectangle with a numeric keypad", "Gateman, Samsung SDS" 같은 서술은 그대로 프롬프트 재료가 됨)
 - 헤딩(h2/h3) 텍스트 — 각 이미지가 들어갈 위치 주변 섹션의 주제
 
-#### 3-2. 피사체 정확성 원칙 (최우선 — 분위기보다 먼저)
+#### 3-2. 장면 설계 원칙 (v5.0 — 최우선. 정확성보다도 먼저 통과해야 한다)
 
-> 프롬프트의 1순위는 '분위기'가 아니라 **'피사체 정확성'**이다. 핵심 피사체가 실물과 다르게 생성되면 아무리 분위기가 좋아도 그 이미지는 실패다.
+> 🎯 **v5.0 이식 사유 (2026-08-18)**: KoreaPlug은 v4.1에서 **'어디에서 찍었는가'(한국성)** 를 고쳤지만, **'무슨 일이 벌어지는가'(사건)** 는 여전히 비어 있었다. 그래서 v4.1 규칙을 지켜도 *"한국이 배경인, 아무 일도 일어나지 않는 사진"* 이 나온다. 0and1Life v5.0이 먼저 도달한 사건 설계 원칙을 이식하되, **한국성 원칙(3-3)은 그 위에 그대로 얹는다.** KoreaPlug의 이미지는 **사건 + 한국성**을 둘 다 통과해야 채택된다.
+
+> 이 루틴의 이미지는 '글을 설명하는 삽화'가 아니라 **'글을 계속 읽게 만드는 장치'**다.
+> 정확하기만 한 이미지는 실패다. **정확하면서 사건이 있는** 이미지만 채택한다.
+
+**① 한 문장 테스트 (필수 · 프롬프트 작성 직후 스스로 물어본다)**
+"이 이미지를 처음 보는 사람이 **지금 무슨 일이 벌어지는지** 한 문장으로 말할 수 있는가?"
+- ❌ "빈 지하철 객실이 있다" · "좌석 위에 커피와 치킨 봉투가 놓여 있다" → **상태 서술 = 탈락**
+- ✅ "치킨 봉투에서 김이 올라오는 순간 옆자리 승객이 고개를 돌린다" · "영수증 한 장이 개찰구에서 흘러내려 바닥까지 늘어져 있다" → **사건 서술 = 통과**
+한 문장이 '있다/놓여 있다'로 끝나면 그 프롬프트는 버리고 다시 쓴다.
+
+> 2026-08-18 #137 자기비판: 채택했던 4장의 한 문장이 전부 "…가 있다"였다. 한국성 이전에 **사건이 없었다.**
+
+**② 본문에서 '훅 문장' 1개를 먼저 뽑는다 (필수 · 기록 대상)**
+프롬프트를 쓰기 전에, 본문에서 외국인 독자가 가장 놀랄 문장 한 줄을 그대로 인용해 적어둔다. 그 문장 **한 줄만**을 그림으로 옮긴다. 이미지마다 훅 문장이 다르면 3장이 자동으로 달라진다.
+> 예(#137): "No law bans eating. Article 34 lets staff stop you for smell."
+> 예(#137): "The cost of eating on the subway is an audience, not a penalty."
+훅 문장은 STEP 8 보고에 이미지별로 **반드시 남긴다.**
+
+**③ 숫자를 사물의 물리량으로 번역한다 (문자로 쓰지 않는다)**
+글의 핵심 수치는 화면에서 **눈으로 세지거나 비교되는 형태**여야 한다. 글자는 어차피 깨지므로 절대 쓰지 않는다.
+
+| 본문 수치 | 번역 |
+|---|---|
+| 30배 차이 | 영수증 **길이** (손바닥 한 장 vs 바닥까지 늘어진 한 장) |
+| 6,868원 vs 22만원 | 동전 몇 개 vs 지폐 다발 **부피** |
+| 40분 소요 | 노선도 위 **정거장 점의 개수** |
+| 670,000 views | 들어 올려진 **휴대폰 화면의 수** (한 대 vs 객실 가득) |
+| 1/4만 해당 | 같은 물건 4개 중 **하나만 색·방향이 다름** |
+
+**④ 긴장 요소를 최소 1개 넣는다 (정적 배치 금지)**
+다음 중 하나 이상이 프롬프트에 명시돼야 한다 — 기울어짐 / 떨어지는 중 / 반쯤 열림·찢김 / 김이 막 오르는 / 한쪽만 켜짐 / 넘치기 직전 / 손이 막 놓거나 집는 순간 / 고개가 막 돌아가는 / 문이 닫히는 중.
+
+**⑤ 시선 유도점은 1개만 둔다**
+화면에서 가장 밝은 곳(또는 가장 채도가 높은 곳)이 **훅 문장의 주어와 일치**해야 한다. `the only bright accent in the frame is X` 처럼 못 박는다.
+
+**⑥ 범용 은유 금지 목록 (글이 그 물건 자체를 다루지 않는 한 사용 금지)**
+⛔ 모래시계 · 저울 · 전구 · 퍼즐 조각 · 체스말 · 화살표 그래픽 · 돼지저금통 · 악수 · 계산기와 안경 플랫레이 · 창밖 도시야경 단독 컷 · **텅 빈 지하철/거리/로비** · 정렬된 문구류 톱뷰 · 여권과 지도 플랫레이.
+이 목록은 **어느 글에 붙여도 말이 되기 때문에** 금지한다. 어느 글에나 어울린다는 건 이 글의 이미지가 아니라는 뜻이다.
+
+**⑦ 썸네일 3초 테스트**
+완성된 이미지를 폭 320px로 줄였다고 상상한다. 그 크기에서 주제가 안 읽히면 피사체가 너무 작거나 배경이 복잡한 것이다 — 피사체를 화면의 **1/3 이상** 차지하게 다시 잡는다. **한국 지표(3-3)도 이 크기에서 읽혀야 한다.**
+
+#### 3-2B. 피사체 정확성 원칙 (2순위 — 사건이 있어야 그다음이다)
+
+> 사건 설계를 통과했더라도 핵심 피사체가 실물과 다르면 그 이미지는 실패다. 셋(사건·정확성·한국성)을 모두 만족해야 채택한다.
 
 1. **한국 고유 형태를 가진 피사체는 실제 형태를 물리적으로 상세 묘사한다.** 한국의 가전·기기·시설·음식·소품은 서구식 일반형과 형태가 다른 경우가 많다. "Korean digital door lock"처럼 이름만 쓰면 생성 모델은 서구식 형태(둥근 도어노브 + 소형 사각 키패드)를 생성한다.
 2. **형태를 정확히 모르면 웹 검색으로 실제 제품·장소 사진을 확인한 뒤** 프롬프트를 작성한다. 추측으로 쓰지 않는다.
@@ -244,45 +344,103 @@ integrated into the lower section of the same panel, absolutely no separate roun
 
 **(v4.0 보강) 지하철 내부가 피사체인 글**: 서울 지하철 객실은 ⓐ **브러시드 스테인리스 롱벤치 좌석**과 좌석 사이 **얇은 세로 칸막이 바**, ⓑ **파란색 삼각 손잡이**가 줄지어 달린 스트랩, ⓒ 세로 스테인리스 봉, ⓓ **노약자석 노란 표시**, ⓔ 차가운 백색 LED 천장등, ⓕ 짙게 틴팅된 창이 특징이다. 이 6가지를 나열하면 실제와 거의 일치하는 결과가 나온다 (2026-08-18 #137 실측, 2장 모두 통과).
 
-#### 3-3. 분위기·라이팅 원칙 (2순위)
+#### 3-3. 한국성(Korean-ness) 원칙 — v4.1 전면 개정 (3순위 · KoreaPlug 고유. 0and1Life에는 없는 절이다)
 
-피사체 정확성이 확보된 뒤, 아래 순서로 조합해 사실감을 높인다. 추상적 표현보다 구체적인 물리 조건으로 묘사한다. 외국인에게 '진짜 한국(Real Korea)'의 매력을 직관적으로 전달할 수 있도록 로컬 고유의 질감과 분위기를 극대화한다.
+> **적용 순서**: 3-2 사건 설계(무슨 일이 벌어지는가) → 3-2B 피사체 정확성(실물이 맞는가) → **3-3 한국성(한국임이 읽히는가)**. 앞 두 개를 통과해도 이 절에서 떨어지면 채택하지 않는다. KoreaPlug 독자는 "한국이 궁금한 외국인"이므로 이 절이 사이트의 정체성이다.
 
-- **장면 핵심** — 외국인이 흥미를 느끼는 구체적인 한국의 장소·사물·행위. 예: "a bubbling stone pot of kimchi-jjigae on a scratched stainless steel table", "a narrow alleyway in Euljiro lined with retro neon signs and stacked plastic stools"
-- **시간·날씨·빛** — 단순한 낮/밤 대신 한국 특유의 서정적이거나 화려한 빛 명시. 예: "late afternoon cinematic side lighting", "rain-slicked asphalt reflecting colorful neon lights at night", "soft overcast daylight hitting traditional architecture"
-- **카메라·렌즈 명시** — 예: "shot on Leica M11 with 35mm f/1.4 lens", "Sony A7R V with 90mm macro lens", "shot on Fujifilm X-T5 with 23mm cinematic lens"
-- **구도·깊이감** — 예: "intense shallow depth of field with cinematic background blur", "low-angle dramatic perspective showing leading lines", "eye-level macro close-up"
-- **텍스처·디테일 강조** — 예: "glistening condensation on a cold green bottle", "fine texture of red chili oil and rising steam", "weathered wooden pillars showing age rings"
-- **제외 조건** — 예: "no people, no text, no watermark, no logos, no 3d render, no anime style"
+> 🚨 **v4.1 개정 사유 (2026-08-18)**: 舊 3-3은 "분위기·라이팅 원칙"이었고, `no people, no text` 를 기본 제외 조건으로 못 박고 있었다. 그 결과 **깨끗하고 텅 빈, 어디에나 있을 법한 이미지**가 양산됐다. 2026-08-18 #137 실측: 생성한 4장 중 **3장(빈 지하철 통로, 스테인리스 좌석 위 정물, KTX 트레이)은 한국 요소를 지우면 도쿄·타이베이·뉴욕 사진과 구분되지 않았다.** 사실적이지만 **아무 데도 아닌 곳(nowhere)** 의 사진이었다.
+> KoreaPlug의 독자는 "한국이 궁금한 외국인"이다. 이들에게 필요한 건 **깔끔한 제품 사진이 아니라 "저기 가 보고 싶다"는 충동**이다. 따라서 v4.1은 제외 조건 두 개를 뒤집는다.
 
-**프롬프트 예시 (Food 카테고리):**
+**① 원칙 0 — 'Nowhere 테스트' (모든 이미지에 필수 적용)**
+
+프롬프트를 완성한 뒤 스스로 묻는다:
+
+> **"이 장면에서 한국 고유 요소를 지우면, 다른 나라 사진이 되는가?"**
+> 그렇다면 **실패다.** 프롬프트를 버리고 다시 쓴다.
+
+빈 지하철 객실, 깨끗한 책상 위 노트북, 창밖 풍경이 흐른 기차 좌석, 흰 배경 위 음식 — 이런 구도는 이 테스트를 통과하지 못한다.
+
+**② 한국 지표(Korea Markers) — 이미지마다 최소 2개 이상 명시적으로 넣는다**
+
+아래는 외국인이 한눈에 "한국"으로 인식하는 시각 요소다. 글의 주제와 상관있는 것을 골라 **프롬프트 문장에 물리적으로 묘사**한다. 단순히 "Korean"이라는 형용사를 붙이는 것으로는 절대 대체되지 않는다.
+
+| 영역 | 지표 (프롬프트에 쓸 물리 묘사) |
+|---|---|
+| 간판·거리 | 한 건물 외벽을 층층이 덮은 **간판 패널 더미**, 붉은 네온 십자가, 얽힌 전봇대 전선, **파란색으로 칠해진 버스전용차선**, 주름진 금속 셔터, 노란 안전 볼라드 |
+| 식탁 | **납작한 은색 스테인리스 젓가락과 긴 숟가락**, 뚜껑 덮인 **은색 스테인리스 밥공기**, 작은 접시에 담긴 **반찬 여러 종**, 초록 소주병과 작은 소주잔, 테이블 매립형 가스버너, 가위로 자르는 고기 |
+| 편의점·가게 | 삼각김밥 매대, **온장고**, 즉석 라면 조리기, 가게 앞 **플라스틱 스툴과 접이식 테이블**, 파라솔 |
+| 대중교통 | **분홍색 임산부 배려석**, 경로석 표시, 스크린도어, 벽면 노선도, 파란 삼각 손잡이, 은색 롱벤치 |
+| 주거 | 회색·베이지 **고층 아파트 단지**와 동 번호, 현관 **디지털 도어락**, 베란다 빨래건조대, 보일러 온돌 바닥, 신발 벗는 현관 단차 |
+| 계절·자연 | 벚꽃 터널, 은행나무 노란 낙엽, 단풍 든 산비탈, 장마철 젖은 아스팔트, 한강 둔치 돗자리 |
+| 전통 | 기와 처마 곡선, 창호지 문살, 단청, 돌담길, 한복 저고리 옷고름 |
+
+**③ 인물 정책 — `no people` 기본값을 폐기한다**
+
+사람이 없으면 스케일·생활감·이야기가 사라진다. 이제 기본값은 **"부분 인물 허용"** 이다.
+
+- ✅ **적극 허용**: 손·팔·뒷모습·실루엣·군중의 흐름·움직임 블러로 흐른 행인, 우산 쓴 사람들의 무리
+- ✅ 인물은 **행위 중**이어야 한다 — 가위로 고기를 자르는 손, 개찰구를 통과하는 뒷모습, 젓가락으로 반찬을 집는 손
+- ⛔ **금지**: 카메라를 보고 웃는 정면 모델 컷, 스톡사진 느낌의 연출된 포즈, 알아볼 수 있는 특정 인물의 얼굴
+- 프롬프트 표현: `hands only, no faces visible`, `seen from behind`, `blurred passers-by in motion`, `no posed model looking at camera`
+- 3장 중 **최소 1장은 사람의 흔적(손·뒷모습·군중)이 들어가야 한다.** 4장 전부 무인 정물이면 실패다.
+
+**④ 텍스트 정책 — `no text` 전면 금지를 해제한다**
+
+**한글 간판은 외국인에게 가장 강력한 '한국' 신호**인데, 舊 규칙은 이것을 통째로 금지했다. 이제 구분해서 지정한다.
+
+- ✅ **허용**: 원경·중경의 **간판 덩어리**, 초점 밖으로 흐려진 한글 네온, 형태로만 읽히는 글자 — `blurred Hangul neon signage in the background`, `stacked Korean signboards rendered as soft out-of-focus colour and letterform shapes`
+- ⛔ **금지**: 화면 안 UI 텍스트, 문서·자막·안내문의 **읽히는 문단**, 브랜드 로고 — `no readable paragraphs, no UI text, no logos`
+- 핵심 피사체 위에 **초점 맞은 글자를 올리지 않는다** (깨진 글자로 생성됨). 글자는 **배경·주변부·아웃포커스**에만 둔다.
+
+**⑤ 그 위에 얹는 촬영 조건 (기존 유지)**
+
+- **시간·날씨·빛** — 한국 특유의 빛을 명시. 예: "late afternoon cinematic side lighting", "rain-slicked asphalt reflecting colorful neon at night", "hazy blue hour over apartment towers"
+- **카메라·렌즈** — 예: "shot on Leica M11 with 35mm f/1.4 lens", "Sony A7R V with 90mm macro lens"
+- **구도·깊이감** — 예: "intense shallow depth of field", "low-angle dramatic perspective showing leading lines"
+- **텍스처·디테일** — 예: "glistening condensation on a cold green soju bottle", "rising steam and fine texture of red chili oil"
+- **제외 조건 (v4.1 표준 세트)** — `no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera, no generic stock photo look`
+  ⚠️ 이 세트에 **`no people` 과 `no text` 는 들어 있지 않다.** 무인·무텍스트가 정말 필요한 정물 컷에서만 개별적으로 추가한다.
+
+> 아래 예시는 모두 **한국 지표 2개 이상 + 사람의 흔적 또는 아웃포커스 한글**을 포함하도록 v4.1에서 다시 쓴 것이다. 舊 예시(무인·무텍스트 정물)는 Nowhere 테스트를 통과하지 못해 폐기했다.
+
+**프롬프트 예시 (Food 카테고리) — 지표: 스테인리스 반상기 + 반찬 + 소주병 + 자르는 손**
 
 ```
-A boiling, bubbling stone pot of kimchi-jjigae with thick slices of pork belly and soft tofu blocks, placed on a scratched stainless steel round table inside a cozy Korean tavern, glistening condensation on a cold green bottle next to it, late afternoon warm window light creating sharp highlights on the broth surface, shot on Sony A7R V with 90mm macro lens, eye-level close-up, cinematic shallow depth of field, hyperrealistic food photography capturing rising steam and fine texture of red chili oil, no people, no text, no watermark, no logos
+A boiling stone pot of kimchi-jjigae still bubbling hard, set on a scratched stainless steel table inside a cramped Korean tavern. Around it, six small side dishes in shallow white saucers, a lidded silver stainless rice bowl, and flat silver metal chopsticks resting on a paper napkin. A cold green soju bottle sweating with condensation and two small shot glasses beside it. A pair of hands enters the frame from the right holding kitchen scissors, cutting a strip of pork belly directly in the pot, hands only, no faces visible. Warm late afternoon window light rakes across the broth surface, blurred Hangul signage glowing faintly through the window behind. Shot on Sony A7R V with 90mm macro lens, eye-level close-up, cinematic shallow depth of field, hyperrealistic food photography capturing rising steam and the fine texture of red chili oil, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera
 ```
 
-**프롬프트 예시 (Travel 카테고리):**
+**프롬프트 예시 (Travel 카테고리) — 지표: 간판 더미 + 플라스틱 스툴 + 전선 + 행인 실루엣**
 
 ```
-A narrow atmospheric alleyway in Euljiro, Seoul, with weathered concrete walls, retro Korean neon signs glowing in twilight, stacked blue and orange plastic stools outside a small restaurant, ground is slightly wet reflecting the neon lights, dramatic blue hour lighting with warm gold neon highlights, shot on Leica M11 with 35mm f/1.4 lens, low-angle perspective showing leading lines into the alley, crisp architectural and metallic textures, ultra-realistic street photography, no people, no text, no watermark, no logos
+A narrow alleyway in Euljiro, Seoul at blue hour, both walls stacked from ground to roofline with dense layered Korean signboard panels glowing in red, yellow and green neon, the lettering soft and out of focus so it reads as colour and letterform shapes rather than words. Tangled overhead power lines cross the strip of sky. Blue and orange plastic stools and a folding table sit outside a tiny restaurant, a corrugated metal shutter half rolled down next door. Two silhouetted figures walk away from the camera deeper into the alley, seen from behind, slightly motion blurred. The ground is wet and mirrors the neon. Dramatic blue hour lighting with warm gold neon highlights, shot on Leica M11 with 35mm f/1.4 lens, low-angle perspective showing strong leading lines into the alley, crisp metallic and concrete textures, ultra realistic documentary street photography, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style
 ```
 
-**프롬프트 예시 (Culture 카테고리):**
+**프롬프트 예시 (Culture 카테고리) — 지표: 창호지 문살 + 기와 처마 + 작업하는 손**
 
 ```
-A close-up shot of hands intricately folding a colorful silk Bojagi (traditional Korean wrapping cloth) on a clean wooden floor of a quiet Hanok, detailed fabric texture with subtle satin sheen and traditional patterns, warm morning sunlight streaming through paper-screen windows (Changhoji) creating soft shadows, shot on Fujifilm X-T5 with 35mm lens, shallow depth of field, focused on the precise finger movements and the knot texture, warm and peaceful mood, no people, no text, no watermark, no logos
+An extreme close-up of two hands folding a colourful silk Bojagi wrapping cloth on the polished dark wood floor of a quiet hanok room, hands only, no faces visible, fingers pressing a sharp crease into the fabric. Detailed silk texture with subtle satin sheen and traditional patchwork seams. Behind them, a sliding paper screen door with a fine wooden lattice grid filters warm morning sunlight into soft geometric patches across the floor, and through the open doorway the upward curve of a tiled roof eave is visible against a pale sky. Shot on Fujifilm X-T5 with 35mm lens, shallow depth of field focused on the fingertips and the knot, warm and quiet mood, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style
 ```
 
-**프롬프트 예시 (Lifecycle 카테고리):**
+**프롬프트 예시 (Lifecycle 카테고리) — 지표: 돌상 오브젝트 + 한복 옷고름 + 아이 손**
 
 ```
-An elaborate and colorful Doljanchi (Korean first birthday) celebration table set up inside a bright modern space with traditional accents, featuring neat stacks of traditional rice cakes (Mujeigae-tteok) on brass plates, a small wooden thread spool, a calligraphy brush, and a brass bowl, soft natural diffused daylight from a large window illuminating the textures of the silk tablecloth, shot on Canon EOS R5 with 50mm f/1.2 lens, elegant low-angle perspective, crisp focus on the symbolic objects in the foreground with a soft bokeh background, cheerful and vibrant mood, no people, no text, no watermark, no logos
+A low three-quarter view across an elaborate Korean doljanchi first-birthday table, foreground filled with neat towers of pastel rainbow rice cakes on brass plates, a wooden thread spool, a calligraphy brush and a brass bowl arranged in a row on a richly embroidered silk cloth. At the edge of the frame a small child's hand in a bright hanbok sleeve with a long silk ribbon tie reaches toward the brush, hand only, no face visible, slight motion blur on the reaching arm. Soft diffused daylight from a large window rakes across the silk texture. Shot on Canon EOS R5 with 50mm f/1.2 lens, crisp focus on the symbolic objects with soft bokeh behind, cheerful vibrant mood, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style
 ```
 
-**프롬프트 예시 (기기·시설 피사체 — 피사체 정확성 적용):**
+**프롬프트 예시 (v4.1 신설 — 대중교통·생활 장면, #137류 주제의 올바른 처리)**
+
+舊 #137은 "텅 빈 지하철 객실"을 그려 Nowhere 테스트에 걸렸다. 같은 주제를 이렇게 쓴다.
 
 ```
-A close-to-medium shot of a beige steel apartment entrance door in Seoul, fitted with an authentic modern Korean digital door lock (Gateman/Samsung SDS style) — a tall vertical rectangular brushed-silver metal panel mounted flush on the door, a touch-sensitive numeric keypad glowing faintly blue in the upper section, a slim horizontal push-down lever handle integrated into the lower section of the same panel, absolutely no separate round doorknob, soft afternoon window light casting gentle shadows across the door, shot on Sony A7R V with 50mm f/1.8 lens, eye-level straight-on composition centered on the lock panel, crisp texture of brushed metal and matte painted steel door, no people, no text, no watermark, no logos
+Interior of a crowded Seoul metro car in the evening, shot down the length of the aisle. Rows of silver stainless bench seats on both sides, a block of bright pink priority seats clearly visible on the left with a printed pregnant-woman pictogram above them, blue triangular hanging strap handles swaying in rows, a wall-mounted route map panel and a small advertising screen glowing above the door. Standing passengers fill the middle of the car, all seen from behind or in profile, several of them motion blurred, faces not visible. One seated passenger's hands hold a sealed convenience-store rice triangle in its plastic film. Cool white LED ceiling light mixed with the warm glow of the ad screen, dark tunnel rushing past the tinted windows. Shot on Sony A7R V with 35mm lens, eye-level documentary perspective, crisp metal and fabric textures, ultra realistic street photography, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera
+```
+
+**프롬프트 예시 (기기·시설 피사체 — 피사체 정확성 + v4.1 한국성 보강):**
+
+기기 접사는 Nowhere 테스트에 걸리기 가장 쉬운 유형이다. **주변부에 한국 주거 지표(복도 창밖 아파트 동, 현관 단차, 벗어 둔 신발)와 조작하는 손을 반드시 함께 넣는다.**
+
+```
+A close-to-medium shot of a beige steel apartment entrance door in a Seoul apartment corridor, fitted with an authentic modern Korean digital door lock (Gateman/Samsung SDS style) — a tall vertical rectangular brushed-silver metal panel mounted flush on the door, a touch-sensitive numeric keypad glowing faintly blue in the upper section, a slim horizontal push-down lever handle integrated into the lower section of the same panel, absolutely no separate round doorknob. A hand enters from the right and presses the keypad, hand only, no face visible. Through the corridor window behind, out-of-focus grey concrete apartment towers with painted building numbers rise against a hazy sky. A pair of shoes sits on the raised threshold at the base of the door. Soft afternoon light casting gentle shadows across the door, shot on Sony A7R V with 50mm f/1.8 lens, eye-level composition centered on the lock panel, crisp brushed metal and matte painted steel texture, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style
 ```
 
 **프롬프트 예시 (v3.3 — 두 상태 비교형 히어로):**
@@ -290,33 +448,69 @@ A close-to-medium shot of a beige steel apartment entrance door in Seoul, fitted
 글의 핵심이 'A일 때와 B일 때가 다르다'인 경우, 히어로는 **두 상태를 한 프레임에 나란히** 넣으면 썸네일만으로 주제가 읽힌다.
 
 ```
-A clean straight-on wide photograph of two screens side by side on a light oak table in a bright modern Korean living room. On the left, a flat-screen television shows a Korean drama scene in which one object is covered by a grey pixelated mosaic patch. On the right, a tablet propped on a stand shows the exact same scene completely sharp and clear with no mosaic at all. Identical framing and identical colours on both screens so the single difference is obvious at a glance, soft diffused daylight from a large window, shot on Canon EOS R5 with 50mm f/1.2 lens, symmetrical eye-level composition, crisp screen glass and matte table textures, no people in the room, no readable text, no watermark, no logos, no anime style, no 3d render
+A clean straight-on wide photograph of two screens side by side on a low table in a Korean apartment living room, the floor a warm honey-toned ondol laminate with a floor cushion beside the table. On the left, a flat-screen television shows a scene in which one object is covered by a coarse grey pixelated mosaic patch, the individual mosaic squares clearly larger than the surrounding picture detail. On the right, a tablet propped on a stand shows the exact same scene completely sharp with no mosaic at all. Identical framing and identical colours on both screens so the single difference is obvious at a glance. Through the sliding balcony door behind, out-of-focus grey apartment towers and a laundry drying rack are visible. Soft diffused daylight, shot on Canon EOS R5 with 50mm f/1.2 lens, symmetrical eye-level composition, crisp screen glass and matte surface textures, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style
 ```
+
+ℹ️ **(v4.1)** 舊 버전은 "bright modern living room"이라 어느 나라 거실인지 알 수 없었다. **온돌 바닥재·좌식 쿠션·베란다 빨래건조대·아파트 동** 네 가지를 넣어 장소를 못 박았다.
 
 **프롬프트 예시 (v3.4 — 두 상태 비교형 히어로, 실사 풍경형):**
 
 화면·소품이 아니라 **풍경 자체가 두 상태**인 글에서는, 하나의 실제 장면 안에 두 상태가 공존하는 구도를 찾으면 합성 느낌 없이 대비가 만들어진다.
 
 ```
-A high aerial drone photograph of a wide Korean expressway just outside Seoul on a public holiday morning, showing two opposite traffic states in one single frame. The outbound carriageway on the right side is completely jammed bumper to bumper with hundreds of cars crawling in every lane, stretching unbroken all the way to the horizon. The inbound carriageway on the left side of the same central barrier is almost totally empty, with only two or three lone cars on wide open asphalt. Identical road width and identical lighting on both sides so the contrast is obvious at a glance, a low concrete median barrier and green roadside trees separating them, clusters of tall Korean apartment towers and forested hills in the hazy background, soft early-autumn morning light, shot on Sony A7R V with 70mm lens, high three-quarter aerial perspective looking down the length of the road, crisp asphalt and car roof textures, ultra realistic documentary aerial photography, no readable text, no watermark, no logos, no 3d render, no anime style
+A high aerial drone photograph of a wide Korean expressway just outside Seoul on a public holiday morning, showing two opposite traffic states in one single frame. The outbound carriageway on the right side is completely jammed bumper to bumper with hundreds of cars crawling in every lane, stretching unbroken all the way to the horizon. The inbound carriageway on the left side of the same central barrier is almost totally empty, with only two or three lone cars on wide open asphalt. Identical road width and identical lighting on both sides so the contrast is obvious at a glance, a low concrete median barrier and green roadside trees separating them, clusters of tall grey Korean apartment towers and forested hills in the hazy background, blue-painted bus-only lane markings running along the inside edge of the jammed carriageway, soft early-autumn morning light, shot on Sony A7R V with 70mm lens, high three-quarter aerial perspective looking down the length of the road, crisp asphalt and car roof textures, ultra realistic documentary aerial photography, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style
 ```
 
-**프롬프트 예시 (v4.0 — 두 상태 비교형 히어로, 정물 대비형 / 2026-08-18 #137 채택본):**
+ℹ️ **(v4.1)** 이 구도는 **아파트 단지 + 파란 버스전용차선**이라는 지표가 이미 들어 있어 Nowhere 테스트를 통과한다. 원경 항공 컷은 지표를 크게 잡아야 썸네일에서 살아남는다.
 
-두 상태를 **같은 평면 위 두 개의 사물**로 놓으면 가장 단순하고 썸네일에서 가장 잘 읽힌다.
+**프롬프트 예시 (v4.1 — 두 상태 비교형 히어로, 정물 대비형 / #137 개선판):**
+
+두 상태를 **같은 평면 위 두 개의 사물**로 놓으면 썸네일에서 가장 잘 읽힌다. 다만 정물 대비형은 배경이 비어 Nowhere가 되기 쉬우므로, **배경에 한국 지표와 사람의 흔적을 반드시 깔아 준다.**
 
 ```
-A clean straight-on wide photograph of the interior of a Seoul metro train car, centered on an empty long brushed stainless steel bench seat with slim vertical dividers, and exactly two items placed side by side on that seat. On the left, a tall sealed transparent plastic cup of iced coffee with a domed lid and heavy condensation running down the cup. On the right, an open brown paper takeout bag with hot fried chicken visible spilling out of the top and faint steam rising from it. Identical lighting and identical framing on both items so the contrast between sealed-and-cold and open-and-hot is obvious at a glance. Behind the seat, brushed stainless steel wall panels, vertical stainless grab poles, a row of blue hanging strap handles above, cool white LED ceiling lighting, dark tinted train windows. No people at all, no readable text, no watermark, no logos, no 3d render, no anime style. Shot on Sony A7R V with 35mm lens, eye-level symmetrical composition, crisp metal, plastic and paper textures, ultra realistic documentary photography.
+A straight-on wide photograph of the interior of a Seoul metro train car, centered on a silver stainless steel bench seat with slim vertical dividers, and exactly two items placed side by side on that seat. On the left, a tall sealed transparent plastic cup of iced coffee with a domed lid and heavy condensation running down the cup. On the right, an open brown paper takeout bag with hot fried chicken spilling out of the top and faint steam rising from it. Identical lighting and identical framing on both items so the contrast between sealed-and-cold and open-and-hot is obvious at a glance. Behind the seat, a block of bright pink priority seats with a printed pictogram above them, a wall-mounted route map panel, vertical stainless grab poles and a row of blue triangular hanging strap handles. Further down the car, two standing passengers seen from behind, slightly motion blurred, faces not visible. Cool white LED ceiling lighting, dark tunnel rushing past the tinted windows. Shot on Sony A7R V with 35mm lens, eye-level symmetrical composition, crisp metal, plastic and paper textures, ultra realistic documentary photography, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera
 ```
 
-**이미지 3장의 역할 분담:**
+ℹ️ **(v4.1)** 2026-08-18 채택본은 이 프롬프트의 舊 버전(`No people at all` + 텅 빈 객실)으로 만들어졌고, 결과물은 도쿄·타이베이 지하철과 구분되지 않았다. **분홍 임산부 배려석·노선도 패널·뒷모습 승객** 세 가지를 추가한 것이 이 개정판의 핵심이다.
 
-- **이미지 1 (글 도입부)**: 글의 전체 분위기를 대표하는 와이드 장면 — 랜드마크, 전경, 공간감. **와이드 장면 안에도 핵심 피사체가 정확한 형태로 포함되어야 한다** (배경만 한국이고 피사체가 틀리면 실패).
-- **이미지 2 (글 중반)**: 글의 핵심 소재를 클로즈업 — 음식 디테일, 문화 오브젝트, 체험 장면
-- **이미지 3 (글 후반)**: 감성적 마무리 장면 — 저녁빛, 계절감, 여운이 있는 구도
-- **(hasStockImg인 경우) 히어로 이미지**: 제목을 가장 직관적으로 시각화한 정면·와이드샷 — 썸네일로 봤을 때 글 주제가 한눈에 읽히는 구도
+**이미지 3장의 역할 분담 (v4.1 개정):**
+
+- **이미지 1 (글 도입부)**: 글의 무대가 되는 **실제 한국 공간의 생활 장면** — 사람·간판·거리가 살아 있는 와이드 컷. 텅 빈 공간이 아니라 **쓰이고 있는 공간**을 그린다. 핵심 피사체는 이 안에도 정확한 형태로 들어가야 한다.
+- **이미지 2 (글 중반)**: 핵심 소재의 클로즈업 — 음식 디테일, 문화 오브젝트, **행위 중인 손**. 한국 지표(스테인리스 식기·반찬·한복 소매 등)를 프레임 안에 반드시 포함한다.
+- **이미지 3 (글 후반)**: 감성적 마무리 — 저녁빛, 계절감, 여운. **계절 지표(벚꽃·은행잎·단풍·장마)나 한강·아파트 스카이라인** 중 하나를 넣어 장소를 못 박는다.
+- **(hasStockImg인 경우) 히어로 이미지**: 제목을 가장 직관적으로 시각화한 컷 — 썸네일에서 주제가 한눈에 읽히되, **한국 지표가 최소 2개 보여야 한다.** 썸네일 크기로 줄였을 때 "한국"이 안 읽히면 다시 만든다.
 
 ⚠️ **(v3.4) 히어로와 본문 이미지의 소재가 겹치지 않게 배분한다.** 히어로가 이미 A를 다뤘다면 본문 3장은 B·C·D를 맡는다. 같은 피사체가 두 번 나오면 글이 단조로워진다.
+
+⚠️ **(v4.1) 4장의 '한국 지표'가 서로 달라야 한다.** 4장 모두 지하철 실내이거나 4장 모두 음식 접사면, 각각은 한국적이어도 글 전체는 단조롭다. 거리·실내·접사·계절 중 최소 3개 영역을 섞는다.
+
+⚠️ **(v4.1) 3장 중 최소 1장에는 사람의 흔적(손·뒷모습·군중)이 들어가야 한다.** 전부 무인 정물이면 글이 박물관 도록처럼 보인다.
+
+#### 3-3B. 나쁜 예 → 좋은 예 (2026-08-18 #137 실전 자기비판)
+
+v4.1 한국성 규칙만으로는 부족했다는 증거다. 아래 4장은 전부 "정확하고 한국적이지만 아무 일도 일어나지 않는" 이미지였다.
+
+| 이미지 | v4.0/v4.1 산출 (통과했지만 무난) | v5.0 재설계 (사건 + 한국성) |
+|---|---|---|
+| 히어로 | 스테인리스 좌석 위 아이스커피와 치킨 봉투가 **놓여 있음** — 상태 서술 | 치킨 봉투에서 **김이 막 피어오르는 순간**, 분홍 임산부 배려석에 앉은 승객이 **고개를 막 돌린다**(뒷모습). 유일한 밝은 지점은 김이 오르는 봉투 입구 |
+| 이미지1 | 삼각김밥·바나나우유가 좌석에 **놓여 있음** | 손이 삼각김밥 포장 **탭을 뜯는 중**, 비닐이 반쯤 벌어지고 김이 서린 우유병이 옆에서 **미끄러지려 기울어져 있다** |
+| 이미지2 | 텅 빈 심야 객실 통로 — **⑥ 범용 은유 위반(텅 빈 공간)** | 만원 객실, 승객 **여러 명이 동시에 휴대폰을 들어 한 방향을 향하고** 있다(전부 뒷모습). "벌금이 아니라 시선"을 그대로 시각화 |
+| 이미지3 | KTX 트레이에 도시락이 **놓여 있음** | 트레이 위 도시락 뚜껑이 **막 열리며 김이 오르고**, 창밖 논이 흐르는 가운데 젓가락을 **집으려는 손**이 프레임에 들어온다 |
+
+#### 3-3C. 프롬프트 조립 체크리스트 (전송 전 8항목 자가 점검)
+
+전송 직전 아래 8개가 프롬프트 문장 안에 실제로 들어 있는지 센다. **하나라도 비면 전송하지 않는다.**
+
+1. 훅 문장 (한국어 주석으로 상단에 기록)
+2. 사건 동사 — 뜯는 / 기울어진 / 김이 오르는 / 고개를 돌리는 / 흘러내리는
+3. 물리량 번역 — 길이·높이·개수의 구체적 배수 (해당하는 글만)
+4. **한국 지표 2개 이상** — 3-3 ② 표에서 물리적 형태로 (KoreaPlug 고유 항목)
+5. 인물 흔적 — 손·뒷모습·군중 중 하나 (3장 중 최소 1장 필수)
+6. 시선 유도점 1개 — `the only bright accent is ...`
+7. 카메라·렌즈·빛
+8. 제외 조건 세트 (3-3 ⑤ 말미 문장 그대로 — `no people`·`no text` 금지)
+
+**최종 통과 조건 = ① 한 문장 테스트(사건) + ⑦ 썸네일 3초 테스트 + Nowhere 테스트(한국성).** 셋 중 하나라도 걸리면 채택하지 않는다.
 
 또한 각 이미지에 대한 **영문 alt text** (60자 내외)도 미리 작성해 둔다.
 
@@ -388,56 +582,97 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 ⛔ **`에이전트` 버튼은 사용하지 않는다.** 켜면 프롬프트를 재해석해 의도와 다른 결과가 나온다.
 
-#### 5-2. 프롬프트 투입
+#### 5-2. 프롬프트 연속 제출 (v4.2 — 대기하지 않는다)
 
-입력창 클릭 → 프롬프트 입력 → **우측 화살표(→) 버튼 클릭**.
-프롬프트 작성 원칙(STEP 3-2 피사체 정확성, 3-3 분위기)은 **그대로 유지**한다. 프롬프트 앞에 `Generate a photorealistic image.` 같은 지시문을 붙일 필요는 없다.
+⛔ **한 장씩 만들고 기다리는 방식을 금지한다.** STEP 3에서 완성해 둔 프롬프트 **전부(본문 3개 + 히어로 1개)를 연속으로 제출**한 뒤, 대기는 마지막에 **한 번만** 한다.
 
-⏱ 그리드 상단에 진행률(%)이 실시간 표시되며 **약 20초**에 2장이 완료된다 (2026-08-18 실측: 10% → 76% → 완료). Chrome MCP의 wait 10초를 2~3회 반복하면 충분하다. **60초를 넘기면 지연으로 보고 재전송**한다.
+제출 1건은 `browser_batch` **1회 호출**로 처리한다:
 
-ℹ️ Gemini와 달리 **첫 클릭이 씹히지 않는다.** 그래도 전송 직후 스크린샷으로 그리드에 진행률 카드 2장이 생겼는지 한 번 확인한다.
+```
+browser_batch([
+  {computer: left_click  → 입력창 (약 700, 622)},
+  {computer: type        → 프롬프트 전문},
+  {computer: left_click  → 전송 화살표 (약 1008, 657)},
+  {computer: wait 3},
+  {computer: screenshot scale 0.4}
+])
+```
 
-#### 5-3. 2장 중 채택본 선택 (필수)
+스크린샷으로 **진행률 카드가 새로 2장 생겼는지**만 확인하고, 완료를 기다리지 말고 **곧바로 다음 프롬프트를 같은 방식으로 제출**한다. 제출 직후 입력창은 비워져 있으므로 바로 입력이 가능하다.
 
-그리드에서 새로 생성된 2장의 썸네일을 각각 클릭해 **에디터 뷰에서 육안 검증**한다.
+✅ **(2026-08-18 실측) 병렬 진행이 확인됐다** — 1차 제출분이 74%일 때 2차 제출분이 13%로 함께 돌았고, 4장이 **약 60초에 모두 완료**됐다. 프롬프트 4개(=이미지 8장 후보)까지 같은 방식으로 밀어 넣는다.
+
+**전부 제출한 뒤 대기 — 이것도 1회 호출로 묶는다:**
+
+```
+browser_batch([
+  {computer: wait 10}, {computer: wait 10}, {computer: wait 10},
+  {computer: screenshot scale 0.45}
+])
+```
+
+진행률이 99%에서 멈춘 것처럼 보여도 디코딩에 5~8초가 더 걸린다. 스크린샷에 **모든 카드가 실제 이미지로 바뀐 것**을 확인한 뒤 5-3으로 간다. 개별 카드가 **90초를 넘기면** 그 건만 재제출한다 (나머지는 그대로 둔다).
+
+ℹ️ Gemini와 달리 **첫 클릭이 씹히지 않는다.**
+
+#### 5-3. 채택본 선택 (v4.2 — 그리드 스크린샷 1장으로 판정)
+
+⛔ **에디터 뷰에 들어가지 않는다.** 후보를 하나씩 클릭해 여는 것이 舊 실행에서 20회 왕복을 잡아먹은 원인이다.
+5-2 마지막 스크린샷 **한 장에 모든 후보가 나란히 보이므로**, 그 화면에서 바로 판정한다. 세부가 안 보이면 `computer: zoom` 으로 해당 카드 영역만 확대한다 (에디터 진입보다 훨씬 싸다).
+
+아래 기준으로 각 프롬프트의 2장 중 1장을 고른다.
 
 - 핵심 피사체가 **실제 한국 형태**와 일치하는가 (STEP 3-2 기준)
+- 🚨 **(v4.1) Nowhere 테스트**: 이 사진에서 한국 지표를 지우면 다른 나라 사진이 되는가? **그렇다면 둘 다 탈락**이다. 채택하지 말고 3-3 ②의 지표 표에서 요소를 더 뽑아 프롬프트를 다시 쓴다.
+- 🚨 **(v4.1) 썸네일 테스트**: 이미지를 손톱만 하게 줄여도 "한국"이 읽히는가? 지표가 원경에만 흐릿하게 있으면 썸네일에서 사라진다.
 - 글 제목을 아는 독자가 봤을 때 "글 내용과 맞는 이미지"라고 느낄 것인가
-- 왜곡된 손·어색한 텍스트·서구식 형태 등 이상 요소가 없는가
+- 왜곡된 손·깨진 글자·서구식 형태 등 이상 요소가 없는가. **글자가 초점 안에 들어와 깨졌다면 탈락** — 배경·아웃포커스로 밀어 다시 만든다
 - **둘 다 부적합할 때만** 잘못된 부분을 물리적으로 더 명시한 **수정 프롬프트**로 재생성한다 (동일 프롬프트 재전송 금지). 수정 1회 후에도 어긋나면 해당 이미지 건너뜀.
 
 ℹ️ 2장 중 고르는 구조라 舊 루틴의 "재시도 1회" 규정이 실제로 발동할 일은 거의 없다.
 
-#### 5-4. 캡처 (채택본을 에디터 뷰에 띄운 상태에서 실행)
+#### 5-4. 캡처 — 그리드에서 일괄 (v4.2 · 에디터 진입 폐지)
 
 Flow 워터마크(✦)는 이미지 **모서리가 아니라 안쪽**, 상대좌표 **(0.925W, 0.875H)** 에 고정돼 있다 (2026-08-18 실측: 1376×768 기준 중심 ≈ (1273, 672), 크기 ≈ 56×56. 프로젝트 내 과거 이미지들도 동일 상대좌표). 따라서 **`cropRight = 150` 으로 우측만 잘라내면 세로 해상도 손실 없이 제거된다** → 1226×768.
 
+✅ **(v4.2 실측) 그리드 썸네일은 표시폭이 318px여도 `naturalWidth` 는 원본 1376×768 그대로다.** 따라서 **에디터에 들어가지 않고 그리드에서 채택본들을 한 번에 캡처한다. 4장 실측 439ms, 호출 1회.**
+
+그리드는 **최신순**이므로 방금 생성한 것들이 앞쪽에 온다. 5-3에서 고른 채택본의 그리드 인덱스를 `pick` 배열에 적어 넣는다 (예: 프롬프트1의 2장이 0·1번, 프롬프트2가 2·3번일 때 각각 앞쪽을 골랐다면 `[0, 2]`).
+
 ```javascript
-// 실행 → 2~3초 대기 → window._img1dims 로 확인
-(async () => {
- try {
-  const imgs = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 400);
-  const main = imgs.sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width)[0];
-  const cropRight = 150, cropBottom = 0;   // (v4.0) Flow 워터마크는 우측 크롭으로 제거
+// v4.2 일괄 캡처 — 최상위 await 사용, 1회 호출로 끝낸다
+const pick = [0, 2, 4, 6];              // ← 5-3에서 채택한 그리드 인덱스 (순서 = 본문1,2,3,히어로)
+const names = ['_img1', '_img2', '_img3', '_imgHero'];
+const all = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 400);
+const out = [];
+for (let k = 0; k < pick.length; k++) {
+  const img = all[pick[k]];
+  const cropRight = 150, cropBottom = 0;   // Flow 워터마크는 우측 크롭으로 제거
   const c = document.createElement('canvas');
-  c.width  = main.naturalWidth  - cropRight;
-  c.height = main.naturalHeight - cropBottom;
-  c.getContext('2d').drawImage(main, 0, 0, c.width, c.height, 0, 0, c.width, c.height);
+  c.width  = img.naturalWidth  - cropRight;
+  c.height = img.naturalHeight - cropBottom;
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height, 0, 0, c.width, c.height);
   const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.85));
-  window._img1 = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
-  window._img1dims = c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB';
- } catch (e) { window._img1dims = 'FAIL: ' + e.message; }
-})();
-'fired'
+  window[names[k]] = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
+  out.push(names[k] + ' ' + c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB');
+}
+out.join(' | ')
 ```
 
-⚠️ **에디터 뷰에는 사이드바 썸네일·히스토리 이미지도 함께 존재하므로 `naturalWidth` 만으로 고르면 안 된다.** 반드시 **화면상 표시 폭(`getBoundingClientRect().width`)이 가장 큰 img** 를 채택한다. (2026-08-18 실측: 같은 페이지에 `naturalWidth 1376` 인 img가 7~8개 존재)
+⚠️ **그리드 인덱스는 반드시 5-3 스크린샷과 대조해 확인한다.** 잘못 집으면 엉뚱한 옛 이미지가 캡처된다. 확신이 서지 않으면 캡처 전에 아래로 인덱스와 실물을 맞춰 본다:
+
+```javascript
+Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 400)
+  .slice(0, 10).map((i, n) => n + ' ' + i.naturalWidth + 'x' + i.naturalHeight
+  + ' @' + Math.round(i.getBoundingClientRect().top)).join('\n')
+```
 
 ✅ **(v4.0 실측) Flow는 이미지를 `labs.google` 동일 출처로 서빙하므로 canvas taint가 발생하지 않는다.** 舊 v3.4~v3.5의 `SecurityError: canvas has been tainted` 복구 절차(URL 릴레이·IMGTAB 탭 생성·`location.href` 이동)는 **전부 불필요하며 삭제됐다.**
 
-✅ **(v4.0 실측) 그리드 ↔ 에디터 이동은 SPA 라우팅이라 `window._img*` 가 보존된다.** URL이 `/edit/...` 로 바뀌어도 리로드가 아니므로 이미지 4장을 순차 캡처해도 안전하다. 단 **주소창 navigate·새로고침은 여전히 금지** — 변수가 날아간다.
+⛔ **(v4.2) 그리드를 떠나지 않는다.** 舊 v4.0은 "그리드 ↔ 에디터 이동은 SPA라 `window._img*` 가 보존된다"고 적어 두었는데, 사실이긴 하지만 **그렇다고 들어가도 된다는 뜻은 아니다.** 그리드로 돌아오면 **이미지가 지연 로딩으로 다시 붙는 데 20초 이상**이 걸리고(0and1Life 2026-08-18 실측: 콜드 로드 6초·14초 시점 0개 → 26초에 18개), 왕복 호출도 이미지당 6~7회가 추가된다. 캡처·판정 모두 그리드에서 끝나므로 **에디터에 들어갈 이유가 없다.**
+**주소창 navigate·새로고침은 절대 금지** — `window._img*` 가 전부 날아간다.
 
-이미지 2·3·히어로는 좌상단 **←** 로 그리드에 돌아가 5-2부터 반복하고, 각각 `window._img2`, `window._img3`, `window._imgHero` 에 저장한다. 매 캡처 후 `'1:' + !!window._img1 + ' 2:' + !!window._img2 + ...` 로 보존 여부를 확인한다.
+위 한 번의 호출로 `_img1`·`_img2`·`_img3`·`_imgHero` 가 모두 채워진다. **이미지마다 5-2로 되돌아가는 반복은 v4.2에서 사라졌다.**
 
 ---
 
@@ -513,6 +748,23 @@ window.addEventListener('message', async (e) => {
 
 **6-3. Flow 탭에서 이미지 순서대로 전송 (본문용 1→2→3, 히어로가 있으면 마지막):**
 
+✅ **(v4.2) 4건을 한 호출에 이어서 보내고, 확인은 마지막에 한 번만 한다.** postMessage는 비동기로 큐에 쌓이므로 전송 사이마다 확인할 필요가 없다. 舊 방식은 전송 4회 + 대기 4회 + 확인 4회 = 12회를 썼지만, 아래처럼 하면 **2회**로 끝난다.
+
+```javascript
+// Flow 탭에서 1회 호출 — 4장 연속 전송 후 마지막에만 대기
+const send = (d, f, a) => window._wpWin.postMessage({dataUrl: d, filename: f, altText: a}, 'https://koreaplug.com');
+send(window._img1,    'koreaplug-SLUG-1.webp',    'ALT_1');
+send(window._img2,    'koreaplug-SLUG-2.webp',    'ALT_2');
+send(window._img3,    'koreaplug-SLUG-3.webp',    'ALT_3');
+send(window._imgHero, 'koreaplug-SLUG-hero.webp', 'ALT_HERO');   // hasStockImg인 경우만
+await new Promise(r => setTimeout(r, 9000));
+'sent 4'
+```
+
+그 다음 WP admin 탭에서 **한 번만** 확인한다 (아래 확인용 스니펫). 개수가 모자라면 부족한 건만 다시 보낸다.
+
+<details><summary>참고 — 舊 v4.0의 개별 전송 방식 (문제 발생 시 절체용)</summary>
+
 각 전송 후 6~8초 대기. 전송 사이에 WP admin 탭에서 `window._uploadedIds.length` 로 업로드 완료 확인 후 다음 전송.
 
 ```javascript
@@ -526,6 +778,8 @@ window._wpWin.postMessage({dataUrl: window._img3, filename: 'koreaplug-SLUG-3.we
 window._wpWin.postMessage({dataUrl: window._imgHero, filename: 'koreaplug-SLUG-hero.webp', altText: 'ALT_TEXT_HERO'}, 'https://koreaplug.com');
 // 6~8초 대기 후 window._uploadedIds.length가 전송한 수와 같은지 확인
 ```
+
+</details>
 
 확인용 (WP admin 탭에서):
 
@@ -581,6 +835,9 @@ const c = window._finalContent;
 
 ```javascript
 // 2) 역순으로 이미지 삽입 (뒤→앞 순서로 삽입해야 인덱스가 밀리지 않음)
+// ⚠️ (v5.0) 스톡이 2개 이상인 글은 2.5에서 본문 이미지 일부가 교체에 소비된다.
+//    그 경우 아래 uploads에서 소비분(window._bodyUsedInReplace)만큼 뒤에서 제외하고,
+//    _insertPoints도 같은 개수만 사용한다. 스톡이 1개면 소비분 0이라 그대로 진행하면 된다.
 const uploads = window._uploadedIds.filter(u => !u.tag.includes('hero')); // 본문용 3장만
 const pts = window._insertPoints;    // [pos1, pos2, pos3]
 let c = window._finalContent;
@@ -595,24 +852,30 @@ window._newContent = c;
 ```
 
 ```javascript
-// 2.5) (hasStockImg인 경우) 기존 스톡 이미지의 src/alt를 히어로 이미지로 교체
+// 2.5) (v5.0) 기존 스톡 이미지 교체 — 첫 번째만 히어로, 나머지는 본문 이미지로 순차 교체
+// ⛔ v4.0처럼 전부 히어로로 바꾸면 스톡이 2개인 글에서 같은 이미지가 본문에 두 번 박힌다
+//    (2026-08-18 0and1Life #88 Post 1160에서 실측 — [FEATURED_IMAGE_URL] 2곳)
 // img 태그의 src와 alt만 바꾸고 나머지 마크업(제목 오버레이 등)은 유지한다
 const hero = window._uploadedIds.find(u => u.tag && u.tag.includes('hero'));
+const body = window._uploadedIds.filter(u => u.tag && !u.tag.includes('hero'));
 if (hero) {
-  let replaced = 0;
+  let n = 0;
   window._newContent = window._newContent.replace(/<img[^>]*>/g, (tag) => {
-    if (/unsplash\.com|pexels\.com|pixabay\.com|FEATURED_IMAGE/.test(tag)) {
-      replaced++;
-      let t = tag.replace(/src="[^"]*"/, 'src="' + hero.url + '"');
-      t = t.match(/alt="[^"]*"/) ? t.replace(/alt="[^"]*"/, 'alt="' + hero.alt + '"')
-                                 : t.replace('<img', '<img alt="' + hero.alt + '"');
-      return t;
-    }
-    return tag;
+    if (!/unsplash\.com|pexels\.com|pixabay\.com|FEATURED_IMAGE/.test(tag)) return tag;
+    n++;
+    const pick = (n === 1) ? hero : body[n - 2];   // 2번째부터는 본문 이미지를 순서대로 소비
+    if (!pick) return tag;                          // 남는 이미지가 없으면 원본 유지 (STEP 8에 보고)
+    let t = tag.replace(/src="[^"]*"/, 'src="' + pick.url + '"');
+    t = t.match(/alt="[^"]*"/) ? t.replace(/alt="[^"]*"/, 'alt="' + pick.alt + '"')
+                               : t.replace('<img', '<img alt="' + pick.alt + '"');
+    return t;
   });
-  window._heroReplaced = replaced; // 확인용
+  window._stockReplaced = n;
+  window._bodyUsedInReplace = Math.max(0, n - 1);  // STEP 4 삽입 대상에서 제외한 개수와 일치해야 한다
 }
-'heroReplaced:' + window._heroReplaced + ' newLen:' + window._newContent.length
+'stockReplaced:' + window._stockReplaced + ' (hero 1 + body ' + window._bodyUsedInReplace + ')'
+ + ' newLen:' + window._newContent.length
+ + ' leftover:' + (window._newContent.match(/FEATURED_IMAGE|unsplash\.com/g) || []).length
 ```
 
 ```javascript
@@ -630,13 +893,15 @@ window._evGuard = {
   table:   cnt(before, /<table/g)           + '->' + cnt(after, /<table/g),            // 좌우 같아야 함
   figPair: cnt(after, /<figure/g)           + '/'  + cnt(after, /<\/figure>/g),        // 짝이 맞아야 함
   imgTags: cnt(before, /<img/g)             + '->' + cnt(after, /<img/g),
-  stock:   cnt(before, /unsplash\.com/g)    + '->' + cnt(after, /unsplash\.com/g),      // 히어로 교체 시 →0
+  stock:   cnt(before, /unsplash\.com|FEATURED_IMAGE/g) + '->' + cnt(after, /unsplash\.com|FEATURED_IMAGE/g), // (v5.0) 교체 시 →0
+  dupImg:  (() => { const s = (after.match(/src="[^"]*"/g) || []); return s.length - new Set(s).size; })(),   // (v5.0) 0이어야 함
   noAlt:   cnt(after, /<img(?![^>]*alt=)/g)                                            // 0이어야 함
 };
 Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ```
 
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
+🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
 
 ```javascript
 // 3) content 저장 — (v3.4) status를 명시 동봉해 상태 전환을 막는다
@@ -716,6 +981,8 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('koreaplug-SLUG', 'KP
 **이어서 육안으로 확인한다:**
 
 - 각 이미지의 피사체가 글 내용·주변 섹션과 맞는가?
+- 🚨 **(v4.1) 4장을 한 화면에 놓고 봤을 때 "한국 글"로 보이는가?** 각각은 통과했어도 4장이 전부 무인·무간판 정물이면 글 전체가 Nowhere가 된다. 이 경우 가장 밋밋한 1장을 골라 STEP 5부터 다시 만든다.
+- 🚨 **(v4.1) 사람의 흔적이 최소 1장에 있는가? 한국 지표 영역이 3개 이상으로 흩어져 있는가?**
 - 히어로/대표이미지가 정상 반영됐는가? (제목 오버레이 마크업이 보존됐는가)
 - 증빙 캡처가 원래 자리에 그대로 있는가? (`window._evGuard` 확인)
 - **워터마크 흔적(✦)이 남아 있지 않은가?** — 남아 있으면 STEP 5-4의 `cropRight` 값을 늘려 재캡처하거나, 이미 업로드된 파일을 koreaplug.com **동일 출처**에서 canvas로 다시 읽어 재크롭·재업로드한다.
@@ -738,6 +1005,9 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('koreaplug-SLUG', 'KP
 - **(v3.4) 글 상태**: 시작 시 status → 종료 시 status. 전환이 발생했다면 복구 여부까지 명시
 - 대표이미지: 선정된 이미지, 선정 이유, 설정 결과 (`window._featuredResult`)
 - 피사체 정확성 검증: 각 이미지별 통과/재시도/건너뜀 여부, **2장 중 어느 쪽을 채택했는지**
+- **(v4.1) 한국성 검증 표**: 이미지별로 ① 사용한 **한국 지표 2개 이상**을 명시 ② **Nowhere 테스트 통과 여부** ③ 사람의 흔적 유무. 4장 중 지표 영역이 몇 개로 흩어졌는지도 함께 적는다
+- **(v5.0) 사건 설계 기록**: 이미지별 **훅 문장(본문 인용)**과 **한 문장 테스트 결과**(무슨 일이 벌어지는가). '있다/놓여 있다'로 끝난 건이 있으면 왜 채택했는지 사유를 남긴다
+- **(v5.0) 스톡 교체 내역**: `window._stockReplaced`(교체 총수) / `window._bodyUsedInReplace`(교체에 소비된 본문 이미지 수) / `dupImg` 값. 교체되지 않고 남은 플레이스홀더가 있으면 개수와 위치를 보고한다
 - Skip된 경우 그 이유
 - **(v4.0) 생성 소요시간**: 이미지별 생성 대기 시간을 기록한다. 60초를 넘긴 건이 있으면 Flow 지연으로 보고한다
 - **삭제 대기 미디어**: 재크롭 등으로 남은 원본 미디어 ID를 나열하고 **사용자 확인을 요청**한다 (임의 삭제 금지)
@@ -755,10 +1025,16 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('koreaplug-SLUG', 'KP
 - **(v3.4) 본문을 읽는 모든 REST 요청에 `context=edit` 필수. `content.raw` 가 없으면 중단한다 — `|| content.rendered` 폴백은 원본을 파괴한다**
 - **(v3.4) 모든 저장 POST에 `status: window._origStatus` 를 동봉한다. 저장 후 status가 바뀌었으면 즉시 되돌리고 보고한다**
 - REST API 검색 시 `status=any` 파라미터 필수 (없으면 draft 글이 검색되지 않음)
-- async JavaScript 결과는 항상 window 변수에 저장 후 별도 호출로 읽는다 (fire-and-read 패턴)
+- ⚡ **(v4.2) `fire-and-read` 2회 호출 패턴 폐기** — `javascript_tool` 은 최상위 `await` 를 지원하고 마지막 표현식을 반환한다 (2026-08-18 실측). `const d = await fetch(...).then(r=>r.json()); window._x = d; '요약'` 처럼 **fetch와 검증을 한 호출에 합친다.** window 변수 저장은 계속 하되, '읽기 위한 추가 호출'만 없앤다
+- ⚡ **(v4.2) 이미지는 전부 제출 → 1회 대기 → 그리드에서 일괄 캡처.** 한 장씩 만들고 기다리는 방식 금지 (STEP 5-2·5-4). Flow는 생성 중에도 다음 프롬프트를 받으며, 그리드 썸네일이 원본 해상도를 그대로 갖고 있다
+- ⚡ **(v4.2) `browser_batch` 를 기본으로 쓴다** — `click → type → click → wait → screenshot` 은 1회 호출. 10초 wait 반복도 한 배치에 묶는다
+- ⚡ **(v4.2) 후보 판정은 그리드 스크린샷 1장으로.** 에디터 뷰 진입 금지 — 舊 실행에서 20회 왕복을 잡아먹은 원인이다. 세부가 필요하면 `computer: zoom` 을 쓴다
 - Chrome MCP의 wait는 1회 최대 10초, scroll_amount는 최대 10 — 긴 대기는 나눠서 반복
 - **이미지 생성 실패·부정확 시 재시도는 반드시 '수정된 프롬프트'로** (동일 프롬프트 재시도 금지). Flow는 1회에 2장을 주므로 먼저 **2장 중 채택**을 시도하고, 둘 다 부적합할 때만 수정 재시도한다. 수정 1회 후에도 부정확하면 해당 이미지 건너뜀
 - **프롬프트 작성 전 본문을 반드시 읽고, 피사체 형태가 불확실하면 웹 검색으로 확인**
+- 🚨 **(v4.1) `no people` 과 `no text` 를 기본 제외 조건으로 쓰지 않는다.** 이 두 줄이 "어디에나 있을 법한 텅 빈 이미지"를 만든 직접 원인이다 (2026-08-18 #137 실측, 4장 중 3장 Nowhere 판정). 표준 제외 세트는 `no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera, no generic stock photo look` 이며, 무인·무텍스트가 정말 필요한 정물 컷에서만 개별 추가한다
+- 🚨 **(v4.1) 모든 이미지는 한국 지표 2개 이상 + Nowhere 테스트 통과가 필수다** (STEP 3-3). 형용사 "Korean"을 붙이는 것으로는 대체되지 않으며, 지표를 **물리적 형태로 묘사**해야 한다
+- **(v4.1) 한글은 배경·아웃포커스에만 둔다** — 초점 안에 들어온 글자는 깨져 나온다. 원경 간판 덩어리·흐린 네온은 오히려 '한국' 신호로 적극 활용한다
 - 글 제목(title)은 수정하지 않음
 - 이미지 삽입 후 글 상태(publish/draft/future)는 변경하지 않음 — **발행·예약발행 전환은 어떤 경우에도 금지 (발행 결정은 항상 사용자 몫, 2026-08-01 사용자 지시)**
 - **미디어 삭제는 어떤 경우에도 사용자 확인 후에만 수행한다** (2026-08-01 사용자 지시)
