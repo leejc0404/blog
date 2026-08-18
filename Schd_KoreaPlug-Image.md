@@ -1,4 +1,17 @@
-# KoreaPlug 자동 이미지 삽입 태스크 (v5.2 — 사건 설계 + 한국성 + 실행 효율 + Google Flow)
+# KoreaPlug 자동 이미지 삽입 태스크 (v5.4 — 사건 설계 + 한국성 + 신체 결손 방지 + 반응형 전송 + Google Flow)
+
+> 🖼️ **v5.4 변경 (2026-08-19) — WordPress가 만들어 둔 축소 사본을 이 루틴이 단 한 번도 쓰지 않고 있었다.**
+> 사용자 지적으로 확인: **WebP 변환과 크롭은 정상**이었지만(1226×768, 75~242KB), 본문 래퍼가 **788px**인데 전 기기가 **1226px full 파일**을 내려받고 있었다. WordPress는 업로드 시 `medium 300` · `medium_large 768` · `large 1024` WebP 사본을 **이미 만들어 두고 있었는데도** 전혀 쓰이지 않았다.
+> 원인은 삽입 마크업이다. 舊 7-2는 `<img style src alt>` 4개 속성만 넣었고 **`srcset` 도 `wp-image-{ID}` 클래스도 없었다.** 클래스가 없으면 WordPress의 `wp_filter_content_tags()` 가 그 `<img>` 를 첨부파일과 매핑하지 못해 **srcset 자동 주입을 건너뛴다.** `width`/`height` 부재로 **CLS**가, `loading` 부재로 **본문 하단 이미지까지 즉시 로드**되는 문제도 함께 있었다.
+> 실측(2026-08-19, #138·#139·#140 12장): full 합계 **1,836KB** → large **1,216KB(-34%)** → medium_large **792KB(-57%)**. 하단 3장은 `lazy` 로 초기 로드에서 아예 빠진다.
+> → v5.4는 ① **7-2-0에서 `media_details` 를 조회해 `window._srcset` 구축**(필수) ② **`window._buildImg()` 반응형 빌더**로 삽입·스톡교체 마크업 통일(`srcset`·`sizes`·`width`·`height`·`loading`·`decoding`·`wp-image-{ID}`, 히어로만 `eager`+`fetchpriority`) ③ `_evGuard` 에 **`noSrcset`·`noWH`·`noLoad` 가드**(하나라도 0이 아니면 저장 금지) ④ **7.5에 `currentSrc` 실측 검증**을 추가한다.
+> ⚠️ **원본 폭 1226은 줄이지 않는다.** dpr 2 기기는 788×2=1576px가 필요하므로 1226은 이미 상한에 가깝다. 해결책은 원본 축소가 아니라 **브라우저가 srcset에서 고르게 하는 것**이다.
+
+> 🩻 **v5.3 변경 (2026-08-19) — 이 루틴은 사람의 머리를 지우는 문구를 권장 표현으로 싣고 있었다.**
+> 2026-08-19 #139(Post 3461) 마지막 이미지에 **머리와 목이 통째로 없는 인물**이 생성됐고, 발행 전 사용자가 직접 발견했다. 원인은 프롬프트 실수가 아니라 **舊 3-3 ③ 384행이 `hands only, no faces visible` 을 권장 표현으로 명시**한 것이었다. `only` 는 생성 모델에게 "**열거된 것만 그리고 나머지는 지워라**"로 읽히므로, 손만 프레임에 들어오는 접사에서는 안전하지만 **몸통이 보이는 인물**에 붙이면 열거되지 않은 부위가 실제로 사라진다.
+> 실측 대조: 문제 이미지는 `shoulders and one hand only, no face visible` → **머리 결손**. 같은 프롬프트의 나머지 후보 1장, 그리고 `only` 없이 `seen from behind` 만 쓴 #138 골목·#140 부산역 이미지는 **전부 정상**이었다. 문구가 유일한 변수였다.
+> 부차 원인: 舊 5-3 채택 기준에 "왜곡된 손"은 있었지만 **결손 신체 항목이 없어** 판정에서 걸러지지 않았고, 7.5 육안 검증에도 해부 항목이 없었다.
+> → v5.3은 ① **3-3 ③에 `X only` 금지 규칙과 「몸통이 보이는 인물」 표준 문형**을 신설 ② 표준 제외 세트에 **`no headless figures` 계열 추가** ③ **5-3에 해부 검사를 최우선 탈락 기준으로 신설** ④ **7.5에 프리뷰 재확인**을 추가해 **두 번 거르는 구조**로 만든다. 핵심 원리는 **"얼굴을 지워라(no face)"가 아니라 "얼굴을 돌려라(turned away)"** 로 지시하는 것이다.
 
 > 🎯 **v5.2 변경 (2026-08-18) — 0and1Life v5.0/v5.1에서 역백포트한 2건.**
 > ① **프롬프트 철학이 한 세대 뒤처져 있었다.** v4.1은 '어디에서 찍었는가'(한국성)를 고쳤지만 **'무슨 일이 벌어지는가'(사건)** 는 비어 있어, 규칙을 다 지켜도 *"한국이 배경인, 아무 일도 일어나지 않는 사진"* 이 나왔다. 2026-08-18 #137 채택본 4장의 한 문장이 **전부 "…가 있다"** 였다. → **STEP 3-2를 「장면 설계 원칙」으로 교체**하고(한 문장 테스트·훅 문장·물리량 번역·긴장 요소·시선 유도점·범용 은유 금지·3초 테스트), 기존 피사체 정확성은 3-2B, 한국성은 3-3으로 내렸다. **3-3B 자기비판 표**와 **3-3C 8항목 체크리스트**를 신설했다. 최종 통과 조건은 **사건 + 한국성 + 썸네일** 3중 게이트다.
@@ -374,15 +387,33 @@ integrated into the lower section of the same panel, absolutely no separate roun
 | 계절·자연 | 벚꽃 터널, 은행나무 노란 낙엽, 단풍 든 산비탈, 장마철 젖은 아스팔트, 한강 둔치 돗자리 |
 | 전통 | 기와 처마 곡선, 창호지 문살, 단청, 돌담길, 한복 저고리 옷고름 |
 
-**③ 인물 정책 — `no people` 기본값을 폐기한다**
+**③ 인물 정책 — `no people` 기본값을 폐기한다 (v5.3 개정)**
 
 사람이 없으면 스케일·생활감·이야기가 사라진다. 이제 기본값은 **"부분 인물 허용"** 이다.
 
 - ✅ **적극 허용**: 손·팔·뒷모습·실루엣·군중의 흐름·움직임 블러로 흐른 행인, 우산 쓴 사람들의 무리
 - ✅ 인물은 **행위 중**이어야 한다 — 가위로 고기를 자르는 손, 개찰구를 통과하는 뒷모습, 젓가락으로 반찬을 집는 손
 - ⛔ **금지**: 카메라를 보고 웃는 정면 모델 컷, 스톡사진 느낌의 연출된 포즈, 알아볼 수 있는 특정 인물의 얼굴
-- 프롬프트 표현: `hands only, no faces visible`, `seen from behind`, `blurred passers-by in motion`, `no posed model looking at camera`
 - 3장 중 **최소 1장은 사람의 흔적(손·뒷모습·군중)이 들어가야 한다.** 4장 전부 무인 정물이면 실패다.
+
+🚨 **`X only` 구문은 프레임 안에 그 부위밖에 없는 접사에서만 쓴다 (v5.3 신설 — 위반 시 신체 결손이 생긴다).**
+
+`only` 는 생성 모델에게 "**열거된 것만 그리고 나머지는 지워라**"로 읽힌다. 손이 화면을 가득 채우는 매크로 컷에서는 의도대로 동작하지만, **몸통이 보이는 인물**에 붙이면 열거되지 않은 부위가 실제로 사라진다.
+
+> 2026-08-19 #139 실측: `The person is seen from behind, shoulders and one hand only, no face visible` → **머리와 목이 통째로 없는 인물**이 생성돼 발행 전 사용자가 발견(Post 3461, media 3478 → 3486으로 교체). 같은 프롬프트의 나머지 1장은 정상이었고, `seen from behind` 만 쓴 #138 골목·#140 부산역 이미지도 전부 정상이었다. **문구가 유일한 변수였다.** 이 표현은 舊 384행이 권장 표현으로 명시하고 있었으므로, 원인은 지침서 자체였다.
+
+**프레임 안에 몸통이 보이는 인물에는 반드시 아래 형식을 쓴다:**
+
+```
+a complete and anatomically correct adult figure seen from behind, the whole back of their head and hair clearly visible above the collar, neck and shoulders fully intact and connected, face simply turned away from the camera so it cannot be seen
+```
+
+핵심은 **"얼굴을 지워라"가 아니라 "얼굴을 돌려라"** 로 지시하는 것이다. 부재(no face)가 아니라 방향(turned away)으로 표현해야 모델이 부위를 삭제하지 않는다.
+
+- ✅ **접사 전용 (손·발만 프레임에 있을 때)**: `hands only, no faces visible`
+- ✅ **몸통이 보이는 인물**: `seen from behind, the back of the head clearly visible, face turned away from the camera`
+- ✅ **군중**: `all seen from behind or in profile, motion blurred, faces not recognisable` — `only` 를 쓰지 않는다
+- ⛔ **금지**: `shoulders and one hand only` · `torso only` · `upper body only` 처럼 **몸의 일부를 `only` 로 한정하는 모든 표현**
 
 **④ 텍스트 정책 — `no text` 전면 금지를 해제한다**
 
@@ -398,7 +429,8 @@ integrated into the lower section of the same panel, absolutely no separate roun
 - **카메라·렌즈** — 예: "shot on Leica M11 with 35mm f/1.4 lens", "Sony A7R V with 90mm macro lens"
 - **구도·깊이감** — 예: "intense shallow depth of field", "low-angle dramatic perspective showing leading lines"
 - **텍스처·디테일** — 예: "glistening condensation on a cold green soju bottle", "rising steam and fine texture of red chili oil"
-- **제외 조건 (v4.1 표준 세트)** — `no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera, no generic stock photo look`
+- **제외 조건 (v5.3 표준 세트)** — `no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera, no generic stock photo look`
+  **인물이 들어가는 컷에는 아래를 반드시 덧붙인다** — `complete natural human anatomy with no missing or cropped body parts, no headless figures, no floating clothing`
   ⚠️ 이 세트에 **`no people` 과 `no text` 는 들어 있지 않다.** 무인·무텍스트가 정말 필요한 정물 컷에서만 개별적으로 추가한다.
 
 > 아래 예시는 모두 **한국 지표 2개 이상 + 사람의 흔적 또는 아웃포커스 한글**을 포함하도록 v4.1에서 다시 쓴 것이다. 舊 예시(무인·무텍스트 정물)는 Nowhere 테스트를 통과하지 못해 폐기했다.
@@ -627,6 +659,7 @@ browser_batch([
 - 🚨 **(v4.1) 썸네일 테스트**: 이미지를 손톱만 하게 줄여도 "한국"이 읽히는가? 지표가 원경에만 흐릿하게 있으면 썸네일에서 사라진다.
 - 글 제목을 아는 독자가 봤을 때 "글 내용과 맞는 이미지"라고 느낄 것인가
 - 왜곡된 손·깨진 글자·서구식 형태 등 이상 요소가 없는가. **글자가 초점 안에 들어와 깨졌다면 탈락** — 배경·아웃포커스로 밀어 다시 만든다
+- 🩻 **(v5.3) 해부 검사 — 인물이 있는 후보는 이것을 먼저 본다.** 머리·목·팔·다리 중 **없는 부위가 있는가?** 옷만 있고 그 안이 비어 있는가? 손가락이 6개인가? **하나라도 해당하면 즉시 탈락**이며, 다른 기준이 아무리 좋아도 채택하지 않는다. 후보 2장이 모두 걸리면 3-3 ③의 「몸통이 보이는 인물」 형식으로 수정 재생성한다. 그리드 썸네일에서 인물이 작아 판별이 어려우면 **그 카드만 `computer: zoom` 으로 확대해 확인한다** — 이 항목만은 확대 비용을 감수한다.
 - **둘 다 부적합할 때만** 잘못된 부분을 물리적으로 더 명시한 **수정 프롬프트**로 재생성한다 (동일 프롬프트 재전송 금지). 수정 1회 후에도 어긋나면 해당 이미지 건너뜀.
 
 ℹ️ 2장 중 고르는 구조라 舊 루틴의 "재시도 1회" 규정이 실제로 발동할 일은 거의 없다.
@@ -833,6 +866,28 @@ const c = window._finalContent;
 
 ⚠️ 삽입 위치(`window._insertPoints`)는 **이 시점의 `window._finalContent` 기준으로 다시 계산한다.** STEP 4에서 구한 인덱스는 그 사이 본문이 바뀌면 어긋난다. (계산식은 STEP 4의 문자 위치 버전을 그대로 쓴다.)
 
+🚨 **(v5.4) 삽입 전에 각 미디어의 `media_details` 를 받아 `srcset` 을 만든다. 이것을 빼면 리사이징이 통째로 무효가 된다.**
+
+WordPress는 업로드 시 **`medium 300` · `medium_large 768` · `large 1024` · `full 1226` WebP 사본을 이미 생성해 둔다.** 그런데 舊 마크업은 `<img src>` 하나만 넣고 `srcset` 도 `wp-image-{ID}` 클래스도 없었다. 클래스가 없으면 WordPress의 `wp_filter_content_tags()` 가 이 `<img>` 를 첨부파일과 **매핑하지 못해 srcset 자동 주입을 건너뛴다.** 결과적으로 **만들어 둔 사본이 하나도 쓰이지 않고 전 기기가 항상 full 파일을 내려받았다** (2026-08-19 실측: 본문 래퍼 788px에 1226px 파일 전송, 3편 합계 **1,836KB**).
+
+```javascript
+// 2-0) (v5.4 필수) 업로드한 미디어의 사이즈 사본을 조회해 srcset 재료를 만든다
+const ids = window._uploadedIds.map(u => u.id).join(',');
+const md = await fetch('/wp-json/wp/v2/media?include=' + ids + '&per_page=20&_fields=id,source_url,media_details',
+  {headers: {'X-WP-Nonce': window._nonce}}).then(r => r.json());
+window._srcset = {};
+md.forEach(m => {
+  const d = m.media_details || {}, set = {};
+  Object.values(d.sizes || {}).forEach(v => { if (v.mime_type === 'image/webp') set[v.width] = v.source_url; });
+  set[d.width] = m.source_url;                       // full 포함
+  const widths = Object.keys(set).map(Number).sort((a, b) => a - b).filter(w => w >= 300);
+  window._srcset[m.id] = {w: d.width, h: d.height, srcset: widths.map(w => set[w] + ' ' + w + 'w').join(', ')};
+});
+Object.entries(window._srcset).map(([k, v]) => k + ' ' + v.w + 'x' + v.h + ' n=' + v.srcset.split(',').length).join('\n')
+```
+
+⛔ `n` 이 1이면 사이즈 사본이 아직 안 만들어졌거나 WebP 변환이 꺼져 있다. 그대로 진행하지 말고 **몇 초 뒤 재조회**한다.
+
 ```javascript
 // 2) 역순으로 이미지 삽입 (뒤→앞 순서로 삽입해야 인덱스가 밀리지 않음)
 // ⚠️ (v5.0) 스톡이 2개 이상인 글은 2.5에서 본문 이미지 일부가 교체에 소비된다.
@@ -842,14 +897,31 @@ const uploads = window._uploadedIds.filter(u => !u.tag.includes('hero')); // 본
 const pts = window._insertPoints;    // [pos1, pos2, pos3]
 let c = window._finalContent;
 
+// (v5.4) 반응형 img 빌더 — 본문 이미지는 lazy, 히어로는 eager
+window._buildImg = (u, opt) => {
+  const s = window._srcset[u.id];
+  return '<img class="wp-image-' + u.id + '"'
+    + ' src="' + u.url + '"'
+    + ' srcset="' + s.srcset + '"'
+    + ' sizes="(max-width: 820px) 100vw, 820px"'
+    + ' width="' + s.w + '" height="' + s.h + '"'
+    + ' alt="' + u.alt + '"'
+    + (opt && opt.hero ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"')
+    + ' decoding="async"'
+    + ' style="' + (opt && opt.cover ? 'width:100%;height:100%;object-fit:cover;display:block;'
+                                     : 'width:100%;display:block;height:auto;border-radius:8px;') + '" />';
+};
+
 for (let i = 2; i >= 0; i--) {
-  const {url, alt} = uploads[i];
-  const imgBlock = '\n<figure style="margin:20px 0">\n  <img style="width:100%;display:block;height:auto;border-radius:8px;" src="' + url + '" alt="' + alt + '" />\n</figure>\n';
+  const imgBlock = '\n<figure style="margin:20px 0">\n  ' + window._buildImg(uploads[i]) + '\n</figure>\n';
   c = c.slice(0, pts[i]) + imgBlock + c.slice(pts[i]);
 }
 window._newContent = c;
 'inserted, new len: ' + c.length + ' order:' + uploads.map(u => u.tag.slice(-6)).join(',')
 ```
+
+ℹ️ `sizes` 의 `820px` 는 KoreaPlug 본문 래퍼 폭이다 (Astra `full-width-container`, 실측 표시폭 788px). 테마를 바꾸면 이 값도 함께 고친다.
+ℹ️ **원본 폭 1226은 줄이지 않는다.** dpr 2 기기에서는 788×2=1576px가 필요하므로 1226이 오히려 상한에 가깝다. 해결책은 원본 축소가 아니라 **브라우저가 srcset에서 고르게 하는 것**이다.
 
 ```javascript
 // 2.5) (v5.0) 기존 스톡 이미지 교체 — 첫 번째만 히어로, 나머지는 본문 이미지로 순차 교체
@@ -865,9 +937,16 @@ if (hero) {
     n++;
     const pick = (n === 1) ? hero : body[n - 2];   // 2번째부터는 본문 이미지를 순서대로 소비
     if (!pick) return tag;                          // 남는 이미지가 없으면 원본 유지 (STEP 8에 보고)
-    let t = tag.replace(/src="[^"]*"/, 'src="' + pick.url + '"');
-    t = t.match(/alt="[^"]*"/) ? t.replace(/alt="[^"]*"/, 'alt="' + pick.alt + '"')
-                               : t.replace('<img', '<img alt="' + pick.alt + '"');
+    // (v5.4) src/alt만 갈아끼우지 않고 srcset·크기·로딩 속성까지 함께 넣는다.
+    //        원래 마크업의 style(제목 오버레이용 object-fit 등)은 그대로 승계한다.
+    const st = (tag.match(/style="([^"]*)"/) || [])[1] || '';
+    const s  = window._srcset[pick.id];
+    let t = '<img class="wp-image-' + pick.id + '" src="' + pick.url + '"'
+          + ' srcset="' + s.srcset + '" sizes="(max-width: 820px) 100vw, 820px"'
+          + ' width="' + s.w + '" height="' + s.h + '" alt="' + pick.alt + '"'
+          + (n === 1 ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"')
+          + ' decoding="async"'
+          + (st ? ' style="' + st + '"' : '') + ' />';
     return t;
   });
   window._stockReplaced = n;
@@ -895,12 +974,18 @@ window._evGuard = {
   imgTags: cnt(before, /<img/g)             + '->' + cnt(after, /<img/g),
   stock:   cnt(before, /unsplash\.com|FEATURED_IMAGE/g) + '->' + cnt(after, /unsplash\.com|FEATURED_IMAGE/g), // (v5.0) 교체 시 →0
   dupImg:  (() => { const s = (after.match(/src="[^"]*"/g) || []); return s.length - new Set(s).size; })(),   // (v5.0) 0이어야 함
-  noAlt:   cnt(after, /<img(?![^>]*alt=)/g)                                            // 0이어야 함
+  noAlt:   cnt(after, /<img(?![^>]*alt=)/g),                                           // 0이어야 함
+  // (v5.4) 생성 이미지(koreaplug-)만 대상 — 증빙 캡처는 세지 않는다
+  genImg:  (after.match(/<img[^>]*koreaplug-[^>]*>/g) || []).length,
+  noSrcset:(after.match(/<img[^>]*koreaplug-[^>]*>/g) || []).filter(t => !/srcset=/.test(t)).length,   // 0이어야 함
+  noWH:    (after.match(/<img[^>]*koreaplug-[^>]*>/g) || []).filter(t => !/width="/.test(t)).length,   // 0이어야 함
+  noLoad:  (after.match(/<img[^>]*koreaplug-[^>]*>/g) || []).filter(t => !/loading="/.test(t)).length  // 0이어야 함
 };
 Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ```
 
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
+🆕 **(v5.4) `noSrcset`·`noWH`·`noLoad` 중 하나라도 0이 아니면 저장 금지다.** 반응형 속성이 빠진 이미지가 있다는 뜻이고, 그 상태로 저장하면 WordPress가 만들어 둔 사이즈 사본이 전부 사장돼 **모든 기기가 full 파일을 내려받는다.** 7-2-0의 `window._srcset` 이 채워졌는지부터 확인한다.
 🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
 
 ```javascript
@@ -975,12 +1060,23 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('koreaplug-SLUG', 'KP
 
 - **TOC 컨테이너가 정확히 1개**인가? (2개면 본문에 목차가 박제된 것 — STEP 3-1 복구 절차 필요)
 - 이미지가 **본문 전체에 고르게 퍼져 있는가?** 히어로 없는 글은 대략 10~15% / 45% / 70%, 히어로 있는 글은 0% / 30% / 50% / 65% 부근
-- `broken` 이 0인가? 모든 `nw`(naturalWidth)가 정상인가? (v4.0 Flow 산출물은 `nw 1226`)
+- `broken` 이 0인가? 모든 `nw`(naturalWidth)가 정상인가? (v4.0 Flow 산출물은 원본 `1226`)
+- 🖼️ **(v5.4) 브라우저가 실제로 축소본을 골랐는가?** 아래를 돌려 `currentSrc` 가 **`-1024x641` 또는 `-768x481`** 이면 정상이고, 전부 **`full`(접미사 없음)** 이면 `srcset` 이 안 먹은 것이다. 본문 아래쪽 이미지는 `lazy` 라 **스크롤해야 로드된다** — 스크롤 후 다시 측정한다.
+
+```javascript
+const g = Array.from(document.querySelectorAll('article img')).filter(i => /koreaplug-/.test(i.src));
+g.map(i => i.currentSrc.split('/').pop().split('?')[0].replace(/^koreaplug-/, '~').replace(/[^A-Za-z0-9.\-~]/g, '')
+  + ' disp' + Math.round(i.getBoundingClientRect().width)
+  + ' srcset' + ((i.getAttribute('srcset') || '').split(',').length) + '개'
+  + ' ' + (i.getAttribute('loading') || 'NONE')).join('\n')
+ + '\n--- full받은수:' + g.filter(i => !/-\d+x\d+\.webp$/.test(i.currentSrc.split('?')[0])).length + ' (히어로 1장만 정상)'
+```
 - h2·표 개수가 삽입 전과 같은가?
 
 **이어서 육안으로 확인한다:**
 
 - 각 이미지의 피사체가 글 내용·주변 섹션과 맞는가?
+- 🩻 **(v5.3) 인물이 있는 이미지를 프리뷰에서 다시 한번 본다** — 머리·목·팔·손가락이 온전한가? 이 항목은 그리드 판정(5-3)과 프리뷰(7.5) **두 번 확인한다.** 축소된 썸네일에서는 결손이 잘 안 보이기 때문이다. 결손이 발견되면 해당 이미지만 3-3 ③ 형식으로 재생성해 교체하고, 舊 미디어는 **삭제하지 않고 STEP 8에 삭제 대기로 보고한다.**
 - 🚨 **(v4.1) 4장을 한 화면에 놓고 봤을 때 "한국 글"로 보이는가?** 각각은 통과했어도 4장이 전부 무인·무간판 정물이면 글 전체가 Nowhere가 된다. 이 경우 가장 밋밋한 1장을 골라 STEP 5부터 다시 만든다.
 - 🚨 **(v4.1) 사람의 흔적이 최소 1장에 있는가? 한국 지표 영역이 3개 이상으로 흩어져 있는가?**
 - 히어로/대표이미지가 정상 반영됐는가? (제목 오버레이 마크업이 보존됐는가)
@@ -1032,6 +1128,9 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('koreaplug-SLUG', 'KP
 - Chrome MCP의 wait는 1회 최대 10초, scroll_amount는 최대 10 — 긴 대기는 나눠서 반복
 - **이미지 생성 실패·부정확 시 재시도는 반드시 '수정된 프롬프트'로** (동일 프롬프트 재시도 금지). Flow는 1회에 2장을 주므로 먼저 **2장 중 채택**을 시도하고, 둘 다 부적합할 때만 수정 재시도한다. 수정 1회 후에도 부정확하면 해당 이미지 건너뜀
 - **프롬프트 작성 전 본문을 반드시 읽고, 피사체 형태가 불확실하면 웹 검색으로 확인**
+- 🖼️ **(v5.4) 본문에 넣는 모든 생성 이미지에 `srcset`·`sizes`·`width`·`height`·`loading`·`wp-image-{ID}` 를 붙인다.** 이걸 빼면 WordPress가 만들어 둔 축소 사본이 전부 사장되고 전 기기가 full 파일을 받는다 (2026-08-19 실측: 3편 1,836KB → 1,216KB, 모바일 792KB). 히어로만 `loading="eager" fetchpriority="high"`, 나머지는 `loading="lazy"` (STEP 7-2-0·7-2)
+- 🩻 **(v5.3) 몸통이 보이는 인물에 `X only` 를 쓰지 않는다.** `shoulders and one hand only` 같은 표현은 모델이 열거되지 않은 부위(머리·목)를 실제로 삭제한다 (2026-08-19 #139 실측, 머리 없는 인물 생성). `only` 는 **손·발만 프레임에 있는 접사에서만** 허용하고, 인물에는 `seen from behind, the back of the head clearly visible, face turned away from the camera` 형식과 `complete natural human anatomy with no missing or cropped body parts, no headless figures, no floating clothing` 제외 조건을 함께 쓴다 (3-3 ③)
+- 🩻 **(v5.3) 인물 이미지의 해부 검사는 5-3(그리드)과 7.5(프리뷰)에서 두 번 한다.** 머리·목·팔·손가락 결손은 **다른 모든 기준에 우선하는 즉시 탈락 사유**다
 - 🚨 **(v4.1) `no people` 과 `no text` 를 기본 제외 조건으로 쓰지 않는다.** 이 두 줄이 "어디에나 있을 법한 텅 빈 이미지"를 만든 직접 원인이다 (2026-08-18 #137 실측, 4장 중 3장 Nowhere 판정). 표준 제외 세트는 `no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera, no generic stock photo look` 이며, 무인·무텍스트가 정말 필요한 정물 컷에서만 개별 추가한다
 - 🚨 **(v4.1) 모든 이미지는 한국 지표 2개 이상 + Nowhere 테스트 통과가 필수다** (STEP 3-3). 형용사 "Korean"을 붙이는 것으로는 대체되지 않으며, 지표를 **물리적 형태로 묘사**해야 한다
 - **(v4.1) 한글은 배경·아웃포커스에만 둔다** — 초점 안에 들어온 글자는 깨져 나온다. 원경 간판 덩어리·흐린 네온은 오히려 '한국' 신호로 적극 활용한다

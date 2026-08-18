@@ -1,4 +1,27 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v5.2 — 큐잉 확정 · fire-and-read 폐기 + v5.0 프롬프트 철학)
+# 0and1Life 자동 이미지 삽입 태스크 (v5.4 — 다운스케일·srcset 주입 + v5.0 프롬프트 철학)
+
+> 🖼 **v5.4 변경 (2026-08-19) — 이미지 전송량. 이 루틴은 지금까지 리사이즈본을 만들어만 두고 한 번도 쓰지 않았다.**
+>
+> 사용자 지적("Flow로 바꾸면서 리사이징이 안 된 것 같다")을 실측한 결과, WebP 변환 자체는 정상이었으나 **두 가지 결함**이 겹쳐 있었다.
+>
+> | | 결함 | 실측 (2026-08-19) | 개정 |
+> |---|---|---|---|
+> | ① | **다운스케일 단계 부재** | v4.0에서 Flow로 갈아타며 원본이 984×469(46만px) → **1226×768(94만px)로 2.05배**. 본문 표시 폭은 **728px**이라 1.68배 과잉. 파일도 25~63KB → **57~154KB** | **5-5에 `TARGET_W = 1100` 다운스케일 추가**. `imageSmoothingQuality:'high'` 로 축소 화질 보존 |
+> | ② | **`srcset` 이 전혀 안 붙음 (더 큰 문제)** | 삽입 마크업에 `wp-image-{ID}` 클래스가 없어 `wp_filter_content_tags()` 가 동작하지 않았다. WP가 만들어 둔 **300/768/1024px 리사이즈본이 하나도 안 쓰이고** 모두 원본을 통째로 받는다. 발행분 751·894·1095 **전부 srcset 0 / lazy 0** — Flow 이전부터의 결함 | **7-2 · 7-2.5에 `class="wp-image-{ID}"` 주입**, 본문은 `loading="lazy"`, 히어로는 `fetchpriority="high"`. `_evGuard` 에 `noWpCls` 게이트 신설 |
+>
+> 두 조치를 합치면 **1배속 독자 실전송량이 60~80% 감소**한다(768px본 약 35KB). ①만 해서는 효과가 25%에 그치므로 **②가 본체**다.
+> 왜 900이 아니라 1100인가는 5-5 하단 참조 — 1024 미만으로 줄이면 `large` 사이즈가 생성되지 않아 2배 DPI 화면이 뭉개진다.
+
+> 🛠 **v5.3 변경 (2026-08-19) — 2026-08-19 실전(Post 1175)에서 드러난 결함 3건과 오해 1건을 정리한다.**
+>
+> | # | 사건 (2026-08-19 실측) | 개정 |
+> |---|---|---|
+> | ① | STEP 5-3의 `for (t < 24)` **120초 블로킹 폴링이 2회 연속 실패**했다. Chrome MCP는 `javascript_tool` 을 CDP `Runtime.evaluate` 로 실행하는데 여기에 **45초 하드 타임아웃**이 걸려 있다. v5.2가 자랑한 "JS 안에서는 10초 제한이 없다"는 **절반만 맞는 말**이었다 — 10초 wait 상한은 없지만 **45초 CDP 상한은 있다.** 35초(7×5초)로 줄인 재시도도 렌더 부하 중에는 실패했다 | **5-3 폴링 상한을 30초(6×5초)로 고정**하고, 미완료 시 **같은 호출을 반복**하는 구조로 교체. 2회 연속 CDP 타임아웃이면 **스크린샷 대기로 폴백**하는 절차를 명문화 |
+> | ② | 자동 계산된 삽입 위치 27%가 **증빙 캡처(29%)와 305자 거리**에 떨어져, 이미지→헤딩→2문단→증빙 순으로 사실상 연속 배치될 뻔했다. 손으로 43/57/70%로 재배정해 회피 | **STEP 4에 증빙 인접 배제 규칙 신설** — 증빙 figure의 문자 위치 ±5%pt 구간을 삽입 후보에서 자동으로 제외 |
+> | ③ | 최종 검증에서 히어로가 `0%`와 `2%` **두 번 잡혀** 중복으로 오인했다. 실제로는 테마가 대표이미지를 페이지 헤더로 출력하되 **`display:none` 으로 숨기고 있어** 화면에는 1장만 보인다 (Post 1160도 동일 구조) | **STEP 7.5에 가시성 판정 조항 추가** — 같은 src가 2회 잡히면 곧바로 결함으로 보고하지 말고 `getComputedStyle().display` 를 먼저 확인한다 |
+> | ④ | 대상 탐색은 WP REST **1회 질의로 draft 8건**을 받아 즉시 판정에 넘겼다. v5.1의 의도대로 동작 | 변경 없음 — 확정 동작으로 재확인 |
+>
+> 이번 회차 실적: 대상 탐색 1회 · Flow 4쌍(8장) **동시 생성 약 60초** · 재생성 0건 · 그리드 이탈 0회 · 총 도구 호출 약 35회.
 
 > ⚡ **v5.2 변경 (2026-08-18) — KoreaPlug에서 역백포트한 효율 규칙 2건.**
 > ① **`fire-and-read` 2회 호출 패턴 폐기.** `javascript_tool` 이 최상위 `await` 를 지원하고 마지막 표현식 값을 반환한다는 것이 실측으로 확인됐다. 舊 주의사항은 "async 결과는 window에 저장 후 별도 호출로 읽는다"를 규칙으로 박아 두어, STEP 2·3·5·7의 모든 비동기 작업이 **매번 2~3회로 쪼개져** 호출됐다. 폴링(5-3)·일괄 캡처(5-5)를 각각 1회 호출로 합쳤다.
@@ -409,24 +432,46 @@ STEP 3-1에서 확보한 `window._rawContent`(반드시 raw)를 사용한다.
 
 ⛔ **(v3.4 백포트) 헤딩 '개수' 분위(1/4·2/4·3/4)를 쓰지 않는다.** 헤딩이 문서 후반에 몰려 있으면 이미지가 전부 뒤쪽으로 쏠린다 (2026-08-12 실측: h2 8개의 개수 분위가 문서의 59%·74%·87% 지점에 해당 — 앞 절반이 통째로 빔). 대신 **h2의 문자 위치를 뽑아, 목표 비율에 가장 가까운 h2를 고른다.**
 
+🆕 **(v5.3) 증빙 캡처 인접 구간은 삽입 후보에서 자동 배제한다.** 증빙은 이미 그 섹션의 시각 자료 역할을 하고 있으므로, 그 옆에 생성 이미지를 또 넣으면 두 장이 붙어 버리고 나머지 구간이 비게 된다. **증빙 figure의 문자 위치 ±5%pt 안에 있는 h2는 후보에서 뺀다.**
+
+> 2026-08-19 실측(Post 1175): 자동 계산이 고른 27% 지점이 증빙(29%)과 **305자 거리**였다. 그 h2 바로 뒤에 두 문단, 그다음이 증빙이라 사실상 연속 배치였다. 손으로 43/57/70%로 옮겨 회피했고, v5.3에서 아래 코드로 자동화한다.
+
 ```javascript
 const c = window._rawContent;
 const h2 = []; const re = /<h2[^>]*>([\s\S]*?)<\/h2>/g; let m;
 while ((m = re.exec(c)) !== null) h2.push({i: m.index, t: m[1].replace(/<[^>]*>/g, '').replace(/[?&=]/g, ' ').slice(0, 45)});
 window._h2 = h2;
 const L = c.length;
+
+// (v5.3) 증빙·기존 이미지의 문자 위치를 모두 모아 배제 구간을 만든다
+const occupied = [];
+const figRe = /<figure[^>]*>[\s\S]*?<\/figure>/g; let f;
+while ((f = figRe.exec(c)) !== null) {
+  if (/evidence-capture|\/evidence-/i.test(f[0])) occupied.push(f.index);   // 증빙
+}
+const banned = (pos) => occupied.some(o => Math.abs(o - pos) < L * 0.05);   // ±5%pt
+window._occupied = occupied.map(o => Math.round(o / L * 100) + '%');
+
 // 목표 비율(문자 기준) — 도입 / 중반 / 후반
 const targets = [0.10, 0.45, 0.72];
+const pool = h2.filter(x => !banned(x.i));                                  // 배제 후 후보
+const picked = [];
 window._insertPoints = targets.map(t => {
   const want = L * t;
-  return h2.reduce((a, b) => Math.abs(b.i - want) < Math.abs(a.i - want) ? b : a).i;
+  const cand = pool.filter(x => !picked.includes(x.i));
+  const best = cand.reduce((a, b) => Math.abs(b.i - want) < Math.abs(a.i - want) ? b : a);
+  picked.push(best.i);
+  return best.i;
 });
 // 눈으로 확인: 어떤 섹션 앞에 들어가는지 제목까지 본다
-h2.map((x, n) => n + ' ' + Math.round(x.i / L * 100) + '% @' + x.i + ' :: ' + x.t).join('\n')
- + '\n--> picked: ' + window._insertPoints.join(', ')
+h2.map((x, n) => n + ' ' + Math.round(x.i / L * 100) + '% @' + x.i + (banned(x.i) ? ' [BANNED]' : '') + ' :: ' + x.t).join('\n')
+ + '\n--> evidence at ' + window._occupied.join(',')
+ + '\n--> picked: ' + window._insertPoints.map(p => Math.round(p / L * 100) + '%@' + p).join(', ')
 ```
 
 ⚠️ **선택된 h2의 제목을 반드시 눈으로 확인하고, 그 섹션 주제와 맞는 이미지를 배정한다.** 비율이 맞아도 FAQ·결론 섹션 앞이면 한 칸 당긴다. 같은 위치가 중복 선택되면 인접 h2로 분산한다. 자동 계산이 어색하면 `window._insertPoints = [h2[a].i, h2[b].i, h2[c].i]` 로 **인덱스를 손으로 지정**한다.
+
+🆕 **(v5.3) 배제 규칙을 적용해도 섹션 주제가 안 맞으면 주제를 우선한다.** 비율은 균등 분포를 위한 수단이지 목적이 아니다. 2026-08-19 회차는 배제 후 후보 중에서도 ⓐ 차액을 다루는 「우리 경우는 얼마나 차이 나나요」에 영수증 길이 이미지 ⓑ 재발권·취소 손실을 다루는 「이미 산 항공권은 어떻게 되나요」에 지폐 낙하 이미지 ⓒ 체크리스트 「8월이 가기 전에 확인할 4가지」에 여권 4권 이미지를 배정해, 43/57/70%로 **비율과 주제가 동시에 맞는 조합**을 찾았다.
 
 ℹ️ **(v4.0) `hasStockImg`로 히어로를 만드는 글은 글 맨 위(0%)가 히어로로 이미 채워진다.** 이때 본문 3장의 목표 비율은 `[0.10, 0.45, 0.72]` 대신 **`[0.30, 0.55, 0.72]`** 로 뒤로 밀어 잡는 편이 분포가 고르다 (2026-08-18 실측: 히어로 2% + 본문 29%/47%/60%로 균등 배치 성공).
 
@@ -491,29 +536,42 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 ⏱ 한 쌍당 **약 20~55초**(2026-08-18 실측 50~56초), 4장 병렬 시 **약 60초**. **한 쌍이 90초를 넘기면 그 건만 재전송**한다 (나머지는 그대로 둔다).
 
-#### 5-3. 완료 대기 — 스크린샷이 아니라 JS 폴링으로 (v5.1)
+#### 5-3. 완료 대기 — 30초 분할 폴링 (v5.3 · CDP 45초 상한 대응)
 
-⛔ **진행 상태 확인에 스크린샷을 쓰지 않는다.** 2026-08-18 회차는 진행률 확인용 스크린샷만 12장을 찍었고 그중 절반이 "아직 99%"였다. 스크린샷은 호출·토큰 모두 비싸다. 아래 **문자열 반환 폴링**으로 대체한다.
+⛔ **진행 상태 확인에 스크린샷을 먼저 쓰지 않는다.** 2026-08-18 회차는 진행률 확인용 스크린샷만 12장을 찍었고 그중 절반이 "아직 99%"였다. 스크린샷은 호출·토큰 모두 비싸다. 아래 **문자열 반환 폴링**을 1순위로 쓴다.
 
-✅ **(v5.2) 최상위 `await` 로 폴링과 결과 읽기를 한 호출에 합친다.** `javascript_tool` 은 최상위 `await` 를 지원하고 마지막 표현식 값을 그대로 반환한다 (2026-08-18 실측). 舊 fire-and-read 2회 호출은 불필요하다.
+🚨 **(v5.3 최중요 정정) `javascript_tool` 안의 대기에는 상한이 없다는 v5.1·v5.2의 서술은 틀렸다.**
+Chrome MCP는 이 도구를 CDP `Runtime.evaluate` 로 실행하며 **45초 하드 타임아웃**이 걸려 있다. 2026-08-19 실측:
+
+| 시도 | 루프 | 결과 |
+|---|---|---|
+| 1회차 | `t < 24` (최대 120초) | ❌ `CDP Runtime.evaluate timed out after 45000ms` |
+| 2회차 | `t < 7` (최대 35초) | ❌ 동일 — 렌더 부하 중이면 35초도 넘긴다 |
+| 폴백 | `computer:wait` + 스크린샷 | ✅ 정상 |
+
+→ **폴링 1회의 상한을 30초(6×5초)로 고정하고, 미완료면 같은 호출을 다시 던진다.** 한 호출에 전부 담으려 하지 않는다.
 
 ```javascript
-// 완료 판정: 원본 해상도(1376) 이미지 개수가 목표치에 도달했는가
-// 기대치 = (기존 그리드 이미지 수) + (투입한 프롬프트 수 × 2)
-window._expect = BASE_COUNT + N_PROMPTS * 2;
-const big = () => Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000);
-let res = 'timeout';
-for (let t = 0; t < 24; t++) {                       // 최대 약 120초
-  if (big().length >= window._expect) { res = 'done ' + big().length + ' @' + (t * 5) + 's'; break; }
+// 완료 판정: 진행률 카드가 사라졌고, 원본 해상도(1376) 이미지가 목표치에 도달했는가
+// 기대치 = 투입한 프롬프트 수 × 2 (그리드 기존분은 지연 로딩으로 개수가 흔들리므로 절대값 비교를 피한다)
+const prog = () => Array.from(document.querySelectorAll('div,span,p'))
+  .filter(e => e.children.length === 0 && /^\d{1,3}%$/.test((e.textContent || '').trim())).length;
+const big = () => Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000).length;
+let res = 'wait';
+for (let t = 0; t < 6; t++) {                        // ⛔ 30초 — CDP 45초 상한 안쪽으로 고정
+  if (prog() === 0 && big() >= N_PROMPTS * 2) { res = 'done big' + big(); break; }
   await new Promise(r => setTimeout(r, 5000));
 }
-window._poll = (res === 'timeout') ? 'timeout ' + big().length + '/' + window._expect : res;
-window._poll
+'prog:' + prog() + ' big:' + big() + ' ' + res
 ```
 
-⚠️ 이 호출은 최대 120초까지 블로킹된다. **Chrome MCP의 10초 wait 상한을 우회하는 것이 이 방식의 핵심 이점**이므로, 도중에 스크린샷을 끼워 넣지 않는다.
+- 반환값이 `wait` 면 **같은 코드를 그대로 다시 호출**한다. 4쌍 기준 보통 2~3회면 끝난다
+- **2회 연속 CDP 타임아웃이 나면 폴링을 포기하고** `browser_batch` 의 `computer:wait 8초 → screenshot` 으로 전환한다. 진행률 카드가 전부 사라졌으면 완료다
+- 진행률 카드가 사라진 직후에도 썸네일은 **블러 플레이스홀더로 잠깐 남는다.** 이때 캡처하면 흐린 이미지가 저장되므로, `big()` 이 목표치를 채운 뒤 **8초를 더 준다**
 
-ℹ️ **(v5.1 실측) 그리드 이미지는 지연 로딩된다.** 2026-08-18 콜드 로드 측정: 6초·14초 시점 `img 0개`, **26초에 18개**. 그래서 ⓐ 폴링 상한을 넉넉히 두고 ⓑ **그리드를 떠났다가 돌아오는 동작 자체를 피한다**(돌아오면 이 20여 초를 다시 낸다).
+ℹ️ **(v5.1 실측) 그리드 이미지는 지연 로딩된다.** 2026-08-18 콜드 로드 측정: 6초·14초 시점 `img 0개`, **26초에 18개**. 그래서 ⓐ 완료 판정을 **절대 개수가 아니라 `prog()===0`** 로 잡고 ⓑ **그리드를 떠났다가 돌아오는 동작 자체를 피한다**(돌아오면 이 20여 초를 다시 낸다).
+
+⚠️ **(v5.3) 스크린샷 호출도 30초 CDP 상한에 걸린다.** 2026-08-19에 `Page.captureScreenshot timed out after 30000ms` 가 4회 발생했다. 전부 **직후 단독 재호출로 성공**했으므로, 배치 안에서 스크린샷이 실패하면 실패로 처리하지 말고 **스크린샷만 따로 한 번 더 부른다.**
 
 #### 5-4. 채택 판정 — 그리드에서 끝낸다 (v5.1 · 에디터 진입 폐지)
 
@@ -535,34 +593,42 @@ window._poll
 - 🆕 **(v5.0) 썸네일 3초 테스트** — 그리드 썸네일 크기(318px)에서 주제가 읽히는가. 안 읽히면 피사체를 더 크게 잡아 재생성. **그리드 판정은 이 테스트를 자동으로 수행하는 셈**이라 v5.1에서 오히려 정확해졌다
 - **둘 다 부적합할 때만** 재생성한다. 이때 **밋밋함이 사유면 '더 정확하게'가 아니라 '사건을 추가'하는 방향으로** 고친다 — 동사(흘러내리는·잘린·떨어지는)와 배수를 문장에 넣는다. 동일 프롬프트 재전송 금지. 수정 1회 후에도 어긋나면 해당 이미지 건너뜀.
 
-#### 5-5. 캡처 — 그리드에서 일괄 (v5.1)
+#### 5-5. 캡처 — 그리드에서 일괄 · 크롭 후 다운스케일 (v5.4)
 
 Flow 워터마크(✦)는 이미지 **모서리가 아니라 안쪽**, 상대좌표 **(0.925W, 0.875H)** 에 고정돼 있다 (2026-08-18 실측: 1376×768 기준 중심 ≈ (1273, 672), 크기 ≈ 56×56). 따라서 **`cropRight = 150` 으로 우측만 잘라내면 세로 해상도 손실 없이 제거된다** → 1226×768.
 
-그리드에서는 **채택본들을 인덱스로 지정해 한 번에 캡처**한다. 이미지당 호출 1회가 아니라 **회차당 호출 1회**다.
+🆕 **(v5.4) 크롭 뒤 목표 폭으로 다운스케일한다.** v4.0에서 Flow로 갈아타며 원본이 **984×469(46만px) → 1226×768(94만px)로 2.05배** 커졌는데, 다운스케일 단계가 없어 그대로 업로드됐다. **본문 표시 폭은 728px**이므로 1226px는 1.68배 과잉이다 (2026-08-19 실측: Post 1175 4장이 57~98KB, KoreaPlug 계열은 최대 154KB).
 
 ```javascript
 // PICK = 그리드에서 고른 채택본의 인덱스 배열 (좌상단 0부터, 최신이 앞)
 // KEYS = 저장할 window 변수명 (본문 순서와 무관하게 이름으로 관리)
 const PICK = [1, 2, 5, 6];
 const KEYS = ['_imgHero', '_img1', '_img2', '_img3'];
+const TARGET_W = 1100;                   // (v5.4) 목표 폭 — 아래 '왜 1100인가' 참조
 // (v5.2) 최상위 await — 캡처와 결과 확인을 1회 호출로 끝낸다 (2026-08-18 실측 4장 439ms)
 const grid = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000);
 const out = [];
 for (let k = 0; k < PICK.length; k++) {
   const src = grid[PICK[k]];
   if (!src) { out.push(KEYS[k] + ':MISSING'); continue; }
+  const cw = src.naturalWidth - 150, ch = src.naturalHeight;   // 워터마크 우측 크롭
+  const scale = Math.min(1, TARGET_W / cw);                     // (v5.4) 확대는 하지 않는다
   const c = document.createElement('canvas');
-  c.width = src.naturalWidth - 150;      // 워터마크 우측 크롭
-  c.height = src.naturalHeight;
-  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height, 0, 0, c.width, c.height);
+  c.width  = Math.round(cw * scale);
+  c.height = Math.round(ch * scale);
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';   // (v5.4) 축소 화질 보존
+  ctx.drawImage(src, 0, 0, cw, ch, 0, 0, c.width, c.height);    // 크롭 + 축소를 한 번에
   const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.85));
   window[KEYS[k]] = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
   out.push(KEYS[k] + ':' + c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB');
 }
 window._capDims = out.join(' | ');
-window._capDims   // 전부 1226x768 이어야 정상
+window._capDims   // 전부 1100x689 이어야 정상 (TARGET_W 기준)
 ```
+
+**왜 1100인가 (900이 아니라)**: 리사이즈본은 WordPress가 자동 생성하는데, **원본이 1024px 미만이면 `large`(1024) 사이즈가 아예 만들어지지 않는다.** 900px로 줄이면 srcset 후보가 300/768/900만 남아 **2배 DPI 화면에서 눈에 띄게 뭉개진다.** 1100px는 ⓐ `large 1024` 생성을 보장하고 ⓑ 원본을 1226 대비 **약 25% 줄이며** ⓒ 아래 7-2의 srcset과 합쳐지면 1배속 독자에게는 768px본(약 35KB)만 전송된다 — 실전송량 기준 **60~80% 감소**다.
+**용량을 더 줄여야 하면 `TARGET_W` 만 900으로 낮춘다.** 화질 손실을 감수하는 선택이므로 값을 바꿨다면 STEP 8에 명시한다.
 
 ⚠️ **인덱스 확인 필수.** 캡처 전에 아래로 그리드 순서를 한 번 찍어 **어느 인덱스가 어느 프롬프트의 산출인지** 대조한다 (새 이미지가 앞쪽에 쌓인다).
 
@@ -738,6 +804,11 @@ const c = window._finalContent;
 
 ⚠️ 삽입 위치(`window._insertPoints`)는 **이 시점의 `window._finalContent` 기준으로 다시 계산한다.** STEP 4에서 구한 인덱스는 그 사이 본문이 바뀌면 어긋난다.
 
+🚨 **(v5.4) 삽입 `<img>` 에 `class="wp-image-{미디어ID}"` 와 `loading="lazy"` 를 반드시 넣는다. 이게 이 루틴 최대의 성능 결함이었다.**
+WordPress의 `wp_filter_content_tags()` 는 **`wp-image-{ID}` 클래스가 붙은 img에만** `srcset`·`sizes` 를 자동 주입한다. 클래스가 없으면 WP가 만들어 둔 300/768/1024px 리사이즈본이 **하나도 쓰이지 않고 모든 독자가 원본을 통째로 내려받는다.**
+
+> 2026-08-19 실측: 발행분 751·894·1095 전부 `srcset 0 / wp-image 클래스 0 / lazy 0`. Post 1175도 동일 — 표시 폭 728px 자리에 1226px 원본이 그대로 전송되고 있었다. **Flow 전환 이전부터 있던 결함**이며, v4.0의 해상도 증가가 이를 두 배로 키웠다.
+
 ```javascript
 // 2) 역순으로 이미지 삽입 (뒤→앞 순서로 삽입해야 인덱스가 밀리지 않음)
 const uploads = window._uploadedIds.filter(u => !u.tag.includes('hero')); // 본문용 3장만
@@ -745,13 +816,16 @@ const pts = window._insertPoints;    // [pos1, pos2, pos3]
 let c = window._finalContent;
 
 for (let i = 2; i >= 0; i--) {
-  const {url, alt} = uploads[i];
-  const imgBlock = '\n<figure style="margin:20px 0">\n  <img style="width:100%;display:block;height:auto;border-radius:8px;" src="' + url + '" alt="' + alt + '" />\n</figure>\n';
+  const {id, url, alt} = uploads[i];                       // (v5.4) id 필수 — srcset 주입의 열쇠
+  const imgBlock = '\n<figure style="margin:20px 0">\n  <img class="wp-image-' + id + '" loading="lazy" decoding="async" style="width:100%;display:block;height:auto;border-radius:8px;" src="' + url + '" alt="' + alt + '" />\n</figure>\n';
   c = c.slice(0, pts[i]) + imgBlock + c.slice(pts[i]);
 }
 window._newContent = c;
 'inserted, new len: ' + c.length + ' order:' + uploads.map(u => u.tag.slice(-6)).join(',')
+ + ' wpImgClass:' + ((c.match(/wp-image-\d+/g) || []).length)
 ```
+
+⚠️ **히어로(첫 화면 이미지)에는 `loading="lazy"` 를 붙이지 않는다.** LCP 요소를 지연 로딩하면 오히려 느려진다. 7-2.5의 스톡 교체 코드가 히어로를 다루므로 그쪽에서 `fetchpriority="high"` 를 넣는다.
 
 ```javascript
 // 2.5) (v5.0) 기존 스톡 이미지 교체 — 첫 번째만 히어로, 나머지는 본문 이미지로 순차 교체
@@ -770,6 +844,12 @@ if (hero) {
     let t = tag.replace(/src="[^"]*"/, 'src="' + pick.url + '"');
     t = t.match(/alt="[^"]*"/) ? t.replace(/alt="[^"]*"/, 'alt="' + pick.alt + '"')
                                : t.replace('<img', '<img alt="' + pick.alt + '"');
+    // (v5.4) wp-image 클래스 주입 — 기존 class 속성이 있으면 뒤에 덧붙인다
+    t = t.match(/class="[^"]*"/) ? t.replace(/class="([^"]*)"/, 'class="$1 wp-image-' + pick.id + '"')
+                                 : t.replace('<img', '<img class="wp-image-' + pick.id + '"');
+    // (v5.4) 히어로는 LCP 요소다 — lazy 금지, 우선 로딩 지정
+    if (n === 1) { if (!/fetchpriority=/.test(t)) t = t.replace('<img', '<img fetchpriority="high"'); }
+    else if (!/loading=/.test(t)) { t = t.replace('<img', '<img loading="lazy" decoding="async"'); }
     return t;
   });
   window._stockReplaced = n;
@@ -797,12 +877,17 @@ window._evGuard = {
   imgTags: cnt(before, /<img/g)             + '->' + cnt(after, /<img/g),
   stock:   cnt(before, /unsplash\.com|FEATURED_IMAGE/g) + '->' + cnt(after, /unsplash\.com|FEATURED_IMAGE/g), // (v5.0) 교체 시 →0
   dupImg:  (() => { const s = (after.match(/src="[^"]*"/g) || []); return s.length - new Set(s).size; })(),   // (v5.0) 0이어야 함
-  noAlt:   cnt(after, /<img(?![^>]*alt=)/g)                                            // 0이어야 함
+  noAlt:   cnt(after, /<img(?![^>]*alt=)/g),                                           // 0이어야 함
+  wpImgCls:cnt(before, /wp-image-\d+/g) + '->' + cnt(after, /wp-image-\d+/g),          // (v5.4) 이번에 넣은 이미지 수만큼 늘어야 함
+  noWpCls: (() => { const t = after.match(/<img[^>]*>/g) || [];                        // (v5.4) 0이어야 함
+             return t.filter(x => /0and1life-/.test(x) && !/wp-image-\d+/.test(x)).length; })(),
+  lazyCnt: cnt(after, /loading="lazy"/g)                                               // (v5.4) 히어로 제외 본문 이미지 수와 같아야 함
 };
 Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ```
 
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
+🆕 **(v5.4) `noWpCls` 가 0이 아니면 그 이미지는 srcset을 못 받는다** — 클래스 주입이 빠진 것이므로 저장 금지. `wpImgCls` 증가분이 이번에 넣은 이미지 수와 다른 경우도 마찬가지다.
 🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
 
 ```javascript
@@ -877,14 +962,43 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('0and1life-SLUG', 'OL
 
 - **TOC 컨테이너가 정확히 1개**인가? (2개면 본문에 목차가 박제된 것 — STEP 3-1 복구 절차 필요)
 - 이미지가 **본문 전체에 고르게 퍼져 있는가?** 히어로 없는 글은 대략 10~15% / 45% / 70%, 히어로 있는 글은 0% / 30% / 50% / 65% 부근
-- `broken` 이 0인가? 모든 `nw`(naturalWidth)가 정상인가? (v4.0 Flow 산출물은 `nw 1226`)
+- `broken` 이 0인가? 모든 `nw`(naturalWidth)가 정상인가? (**v5.4 산출물은 `nw 1100`**, v4.0~v5.3 산출물은 1226)
 - h2·표 개수가 삽입 전과 같은가?
+
+🆕 **(v5.4) srcset 주입 여부를 렌더 기준으로 확인한다 — 이 검사가 통과해야 다운스케일 효과가 실제로 난다:**
+
+```javascript
+Array.from(document.querySelectorAll('.entry-content img')).filter(i => i.naturalWidth > 300)
+  .map((i, n) => n + ' disp:' + Math.round(i.getBoundingClientRect().width) + 'px'
+    + ' nw:' + i.naturalWidth
+    + ' srcset:' + (i.getAttribute('srcset') ? 'YES(' + (i.getAttribute('srcset').split(',').length) + ')' : 'NO')
+    + ' sizes:' + (i.getAttribute('sizes') ? 'YES' : 'NO')
+    + ' cls:' + (/wp-image-\d+/.test(i.className) ? 'YES' : 'NO')
+    + ' loading:' + (i.getAttribute('loading') || 'none')).join('\n')
+```
+
+  - 생성 이미지는 전부 `srcset:YES` · `cls:YES` 여야 한다. **하나라도 `NO` 면 그 이미지는 원본이 통째로 전송되고 있다**
+  - 히어로는 `loading:none`(또는 `eager`), 본문 이미지는 `loading:lazy` 여야 한다
+  - 증빙 캡처는 Draft 루틴 소관이라 `NO` 가 나올 수 있다 — 이 루틴에서 고치지 말고 **STEP 8에 별도 항목으로 보고**한다
 
 **이어서 육안으로 확인한다:**
 
 - 🆕 **(v5.0) 이미지마다 "무슨 일이 벌어지는가"를 한 문장으로 말할 수 있는가?** 전부 '있다/놓여 있다'로 끝나면 그 회차는 프롬프트 설계가 실패한 것이다 — 보고에 명시하고 다음 회차 개선안을 남긴다
 - 🆕 **(v5.0) 같은 이미지가 두 번 나오지 않는가?** (스톡 2개 교체 시 특히 확인 — `dupImg` 와 육안 둘 다)
+- 🆕 **(v5.3) 같은 src가 2회 잡혔다고 곧바로 중복으로 보고하지 않는다 — 가시성을 먼저 확인한다.** GeneratePress 계열 테마는 대표이미지를 `.featured-image.page-header-image-single` 로 한 번 더 출력하는데, 이 사이트는 **CSS로 `display:none` 처리**돼 있어 화면에는 히어로가 1장만 보인다. 아래로 판정한다:
+
+```javascript
+const f = document.querySelector('.featured-image.page-header-image-single');
+f ? (() => { const cs = getComputedStyle(f);
+  return 'display:' + cs.display + ' vis:' + cs.visibility
+   + ' h:' + Math.round(f.getBoundingClientRect().height)
+   + ' offsetParent:' + (f.offsetParent ? 'yes' : 'no'); })()
+  : 'no theme featured-image block'
+```
+
+  `display:none` · `h:0` · `offsetParent:no` 이면 **정상이며 결함이 아니다.** 2026-08-19 Post 1175에서 기계 검증이 히어로를 `0%`·`2%` 두 번 잡았으나 실제 화면은 1장이었고, Post 1160도 동일 구조였다. 이 확인 없이 "중복"으로 보고하면 멀쩡한 배치를 뜯게 된다.
 - 각 이미지의 피사체가 글 내용·주변 섹션과 맞는가?
+- 🆕 **(v5.3) 생성 이미지와 증빙 캡처가 붙어 있지 않은가?** 렌더 기준으로 **두 이미지 사이 간격이 5%pt 미만**이면 STEP 4의 배제 규칙이 제대로 안 돈 것이다. 2026-08-19 정상 사례: 히어로 2% → 증빙 29% → 38% → 53% → 70%
 - 다양성 규칙(3-7)이 지켜졌는가 — 같은 구도·같은 피사체 유형·같은 주인공 소재가 반복되지 않는가?
 - 히어로/대표이미지가 정상 반영됐는가?
 - 증빙 캡처가 원래 자리에 그대로 있는가? (`window._evGuard` 확인)
@@ -914,8 +1028,11 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('0and1life-SLUG', 'OL
 - 피사체 정확성 검증: 각 이미지별 통과/재시도/건너뜀 여부, **2장 중 어느 쪽을 채택했는지**
 - Skip된 경우 그 이유
 - **(v4.0) 생성 소요시간**: 이미지별 생성 대기 시간을 기록한다. 한 쌍이 90초를 넘긴 건이 있으면 Flow 지연으로 보고한다
-- 🆕 **(v5.1) 큐잉 검증 결과**: 생성 중 추가 프롬프트 전송이 **큐잉 가능/불가** 였는지. 다음 회차부터 확정 동작으로 삼는다
 - 🆕 **(v5.1) 실행 효율**: 총 도구 호출 수와 Flow 구간 소요시간. 그리드 이탈 횟수(**0이어야 정상**), 대상 탐색 경로(WP 1회 / Notion 폴백)
+- 🆕 **(v5.3) 삽입 위치 대 증빙 간격**: 렌더 기준 이미지 위치를 나열하고, 인접 두 장의 최소 간격이 **5%pt 이상**인지 명시한다. 자동 배제 규칙이 후보를 몇 개 잘라냈는지도 함께 적는다
+- 🆕 **(v5.4) 이미지 전송 최적화 결과**: 캡처 해상도(`TARGET_W` 값 포함)와 장당 KB, 렌더 기준 `srcset:YES/NO` · `cls:YES/NO` · `loading` 값. 생성 이미지 중 하나라도 `NO` 면 실패로 보고한다. 증빙 캡처가 `NO` 인 것은 Draft 루틴 소관이므로 별도 항목으로 분리해 적는다
+- 🆕 **(v5.3) CDP 타임아웃 발생 횟수**: `Runtime.evaluate`(45초)·`Page.captureScreenshot`(30초) 각각 몇 회였고 어떻게 복구했는지. 폴링 폴백이 발동했다면 그 사실을 남긴다 — 이 수치가 다음 회차의 루프 상한을 조정하는 근거가 된다
+- ⛔ **(v5.3) 큐잉 검증 항목은 삭제한다.** v5.2에서 확정 동작이 됐고 2026-08-19에 4쌍 동시 생성으로 재확인됐다. 매 회차 보고할 이유가 없다
 - **삭제 대기 미디어**: 재크롭 등으로 남은 원본 미디어 ID를 나열하고 **사용자 확인을 요청**한다 (임의 삭제 금지)
 - 루틴 자체의 오류·개선점이 발견됐다면 **수정할 조항 번호와 교체용 전문(前文)**을 함께 제시한다 — 사용자가 붙여넣기만 하면 되도록
 
@@ -927,16 +1044,25 @@ imgs.map(i => i.src.split('/').pop().split('?')[0].replace('0and1life-SLUG', 'OL
 - **(v4.0) labs.google(Google Flow)에 로그인되어 있어야 함** — Flow 프로젝트 URL은 STEP 5 상단 참조
 - **(v4.0) Flow 설정은 `에이전트 미사용 / 이미지 / 16:9 / Nano Banana 2 / x2` 고정.** 에이전트를 켜면 프롬프트가 재해석된다
 - **(v4.0) 워터마크는 `cropRight = 150` 으로 잘라낸다** (Flow 워터마크는 상대좌표 0.925W·0.875H의 이미지 안쪽에 있음). 덮기(fillRect) 방식은 배경에 디테일이 있으면 사각형이 눈에 띄므로 금지
+- 🆕 **(v5.4) 크롭 뒤 `TARGET_W = 1100` 으로 다운스케일한다.** 1024 미만으로 줄이면 WP가 `large` 사이즈를 만들지 않아 2배 DPI 화면이 뭉개진다 — 900 이하로 낮췄다면 STEP 8에 명시
+- 🚨 **(v5.4) 삽입하는 모든 `<img>` 에 `class="wp-image-{미디어ID}"` 를 넣는다.** 이 클래스가 없으면 WordPress가 `srcset`·`sizes` 를 주입하지 않아 **리사이즈본이 전혀 쓰이지 않는다.** 저장 전 `_evGuard.noWpCls === 0` 을 반드시 확인
+- 🆕 **(v5.4) 본문 이미지는 `loading="lazy" decoding="async"`, 히어로는 `fetchpriority="high"`.** 히어로는 LCP 요소이므로 lazy를 붙이면 오히려 느려진다
 - **(v4.0) 캡처 대상은 `getBoundingClientRect().width` 가 가장 큰 img** — 같은 페이지에 `naturalWidth 1376` 인 썸네일이 여러 개 있다
 - **(v3.4) 본문을 읽는 모든 REST 요청에 `context=edit` 필수. `content.raw` 가 없으면 중단한다 — `|| content.rendered` 폴백은 원본을 파괴한다**
 - **(v3.4) 모든 저장 POST에 `status: window._origStatus` 를 동봉한다. 저장 후 status가 바뀌었으면 즉시 되돌리고 보고한다**
 - REST API 검색 시 `status=any` 파라미터 필수 (없으면 draft 글이 검색되지 않음)
 - ⚡ **(v5.2) `fire-and-read` 2회 호출 패턴 폐기** — `javascript_tool` 은 최상위 `await` 를 지원하고 마지막 표현식 값을 그대로 반환한다 (2026-08-18 실측: `await new Promise(...)` 가 2.2초 뒤 값 반환). `const d = await fetch(...).then(r=>r.json()); window._x = d; '요약'` 처럼 **fetch·폴링·캡처와 그 검증을 한 호출에 합친다.** window 변수 저장은 계속 하되, '읽기 위한 추가 호출'만 없앤다. STEP 2·3·5·7에서 호출이 절반으로 준다
-- ⚡ **(v5.2) 긴 대기는 JS 내부 루프로 처리한다** — Chrome MCP의 wait 10초 상한을 우회할 수 있는 유일한 방법이다 (STEP 5-3 폴링). 대기 중 스크린샷을 끼워 넣지 않는다
-- Chrome MCP의 wait는 1회 최대 10초, scroll_amount는 최대 10 — **다만 v5.1에서는 `wait` 반복 대신 JS 내부 `setTimeout` 루프 폴링을 쓴다**(STEP 5-3). JS 안에서는 10초 제한이 없다
+- 🚨 **(v5.3) Chrome MCP의 실제 상한은 세 개다. 전부 지킨다**
+  - `computer:wait` — **1회 10초**
+  - `javascript_tool` (CDP `Runtime.evaluate`) — **45초**. 그러므로 JS 내부 `setTimeout` 루프는 **최대 30초(6×5초)** 로 잡고, 미완료면 같은 호출을 반복한다 (STEP 5-3)
+  - `computer:screenshot` (CDP `Page.captureScreenshot`) — **30초**. 배치 안에서 실패하면 **스크린샷만 단독으로 한 번 더** 부른다 (2026-08-19 실측 4회 전부 재호출로 성공)
+- ⛔ **(v5.3) "JS 안에서는 시간 제한이 없다"는 v5.1·v5.2의 서술은 폐기한다.** 이 오해 때문에 2026-08-19 회차가 120초·35초 루프로 **2회 연속 타임아웃**을 냈다
+- Chrome MCP의 scroll_amount는 최대 10 — 그리드 내 스크롤은 페이지 이동이 아니므로 캡처 전에 써도 무방하다 (하위 행의 후보를 볼 때 필요)
 - 🆕 **(v5.1) 캡처 완료 전까지 Flow 그리드를 떠나지 않는다** — 에디터 진입·새로고침·주소창 이동 모두 금지. 복귀 시 그리드 재로딩에 20여 초가 든다 (실측 6s·14s 0개 → 26s 18개)
 - 🆕 **(v5.1) 에디터 뷰는 쓰지 않는다.** 그리드 썸네일이 원본 해상도(1376×768)이므로 판정·캡처 모두 그리드에서 끝낸다. 세밀 확인은 `zoom` 으로 해당 영역만
-- 🆕 **(v5.1) 진행 상태 확인에 스크린샷을 쓰지 않는다.** JS 폴링이 반환하는 짧은 문자열로 판단한다. 스크린샷은 ⓐ 그리드 채택 판정 1장 ⓑ 최종 육안 검증에만 쓴다
+- 🆕 **(v5.1) 진행 상태 확인에 스크린샷을 먼저 쓰지 않는다.** JS 폴링이 반환하는 짧은 문자열로 판단한다. 스크린샷은 ⓐ 그리드 채택 판정 1장 ⓑ 최종 육안 검증 ⓒ **(v5.3) 폴링이 2회 연속 CDP 타임아웃일 때의 폴백**에만 쓴다
+- 🆕 **(v5.3) 삽입 위치는 증빙 캡처의 ±5%pt 구간을 피한다** (STEP 4). 비율이 맞아도 증빙 옆이면 다른 h2를 고르고, 배제 후에도 섹션 주제가 안 맞으면 **주제를 비율보다 우선**한다
+- 🆕 **(v5.3) 테마의 대표이미지 헤더(`.featured-image.page-header-image-single`)는 `display:none` 이다.** 기계 검증에서 히어로가 두 번 잡히는 것은 **정상**이며, `getComputedStyle` 확인 없이 중복으로 보고하지 않는다 (STEP 7.5)
 - 🆕 **(v5.1) 클릭·입력·전송·대기는 `browser_batch` 로 묶어 1회 호출로 처리한다**
 - 🆕 **(v5.1) 업로드 postMessage는 연속 전송 후 1회만 폴링**한다. 건별 대기 금지
 - 🆕 **(v5.1) 대상 탐색은 WP REST(`status=draft,future&modified_after=`)가 1순위**, Notion은 0건이거나 제목·서브카테고리가 필요할 때만
