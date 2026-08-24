@@ -2,6 +2,8 @@
 
 > **개정 2026-08-25**: 기존 글 확인의 원천을 Notion 현황표 → **WordPress REST**(`https://0and1life.com/wp-json/wp/v2/posts`)로 이관. STEP 1 입력·STEP 3 중복 대조·STEP 5 내부링크 조달·STEP 7-B 백로그 적재 전 대조가 전부 WP REST를 원천으로 삼는다. 현황표는 회차·번호·로그 전용으로 축소(STEP 0-⓪·STEP 7은 변경 없음).
 >
+> **개정 2026-08-25 (2차) — 절단 판정을 실행 가능한 형태로 교정.** 8/26 개정이 주 경로의 `per_page`를 100으로 올려 절단 자체는 막았으나, **그것을 판정할 수단이 빠져 있었다.** STEP 1의 처방 명령이 `curl -s`로 헤더를 버리는 형태라 바로 아래 줄의 "`x-wp-total`이 `per_page`를 넘으면 절단"이라는 규칙을 **실행할 수 없었다**(규칙은 있는데 도구가 없던 상태). 보조 경로는 여전히 `per_page=20`이었고, 가이드 1-3에만 있던 절단 조항이 **루틴에는 복제돼 있지 않아** 루틴만 읽고 실행하면 그대로 잘렸다. 계기는 자매 블로그 KoreaPlug의 같은 날 실측 — `entry card` 30건 중 10건, `transit` 26건 중 6건, `arrival card` 22건 중 2건 절단(재조회 결과 누락분은 전부 무관으로 확인). 0and1Life에서도 재현된다: `기준` 76건 중 **56건**, `계산` 56건 중 36건, `비용` 43건 중 23건, `신청` 42건 중 22건, `카드` 33건 중 13건, `세금` 27건 중 7건. 이번 개정은 ⓐ `-D` 헤더 캡처 의무화 ⓑ 보조 경로 `per_page=100` 상향 ⓒ **헤더 미확인 조회 = '절단 미판정'** 조항 신설 세 가지다. **현재 83건 / 상한 100건으로 천장까지 9~17일뿐**이라 `page=2` 승계도 함께 명문화한다.
+>
 > **개정 2026-08-26 — 중복 검증 경로 실측 교정.** 후보별 `?search=` 조회를 **전 코퍼스 1회 캐시(`WP_CORPUS`)**로 대체한다. 계기: `per_page=20` + 정렬 미지정(WP 기본 = 날짜 내림차순) 조합이 광범위 질의에서 진짜 중복을 절단하는 것이 실측됐다 — `기준` 76건 중 관련도 상위 5건 **전부 누락**, `신청` 42건 중 3건, `카드` 33건 중 2건(`credit-card-payment-date-14`·`credit-debit-card-tax-deduction`), `계산` 56건 중 2건, `비용` 43건 중 1건 누락. 아울러 앱 비밀번호 인증이 연결돼 `status=any`가 정상 동작함을 확인했다(**전체 83건 = publish 71 + draft 3 + pending 2 + future 7**, 휴지통·auto-draft 미포함 — `wp-admin/edit.php?post_type=post` 전체 목록과 일치).
 
 *예약된 트리거 시간이 되면 해당 일자에 먼저 루틴이 실행되었더라도 무조건 다시 진행한다(가드가 중복을 막는다).
@@ -104,18 +106,28 @@ STEP 1 — Read Reference Materials from GitHub (검색 없이 먼저 실행)
 - **작성 가이드**: WebFetch → https://raw.githubusercontent.com/leejc0404/blog/main/0and1Life-Writer.md (반드시 준수)
 - **기존 글 확인 — `WP_CORPUS` 전 코퍼스 1회 캐시 (중복 대조의 원천)**
   ```
-  curl -s -u "$WP_USER:$WP_APP_PASS" -G "https://0and1life.com/wp-json/wp/v2/posts" \
+  # ⚠️ -D 필수 — 헤더를 버리면 절단 여부를 판정할 수 없다 (2026-08-25 2차 개정)
+  curl -s -D /tmp/wp_headers.txt -u "$WP_USER:$WP_APP_PASS" -G "https://0and1life.com/wp-json/wp/v2/posts" \
     --data-urlencode "status=any" --data-urlencode "per_page=100" \
-    --data-urlencode "orderby=date" --data-urlencode "_fields=id,slug,status,title"
+    --data-urlencode "orderby=date" --data-urlencode "_fields=id,slug,status,title" -o /tmp/wp_corpus.json
+
+  # 절단 판정 — 이 두 줄을 반드시 함께 실행하고 결과를 STEP 8에 기재한다
+  grep -i -E "^x-wp-total" /tmp/wp_headers.txt
+  python3 -c "import json;d=json.load(open('/tmp/wp_corpus.json'));print('반환 건수:',len(d))"
   ```
   → **세션당 1회만 호출**하고 결과를 `WP_CORPUS`로 들고 간다. STEP 2 엔진 C·STEP 3·STEP 5 내부링크·STEP 7-B가 전부 이 캐시를 로컬 대조로 쓴다 — **재호출 금지**
   → 실측 83건 · `x-wp-totalpages: 1` · 약 7,345토큰. 후보별 조회(12회×339토큰)보다 총량이 비슷하면서 **누락이 0**이다
-  → 응답 헤더 `x-wp-total`이 `per_page`를 넘으면 **절단된 것**이다. `per_page`를 올려 전량을 확보한다(코퍼스가 100건을 넘으면 `page=2`를 이어 받는다)
+  → 🔴 **절단 판정 (2026-08-25 2차 개정 · 생략 금지)**: `x-wp-total`을 읽지 않은 조회는 "중복 없음"이 아니라 **'절단 미판정'**이다. 반환 건수가 `per_page`와 정확히 같으면 그게 전부인지 잘린 것인지 **본문만으로는 구분되지 않는다**
+  &nbsp;&nbsp;&nbsp;&nbsp;• `x-wp-total ≤ per_page` → 전량 확보. 정상
+  &nbsp;&nbsp;&nbsp;&nbsp;• `x-wp-total > per_page` → **절단이다.** `per_page`를 올리거나 `page=2`를 이어 받아 전량을 채운다. **절단 상태로 중복 판정을 내리지 않는다**
+  &nbsp;&nbsp;&nbsp;&nbsp;• 헤더를 못 읽었다 → STEP 8에 🔴 「중복 대조 절단 미판정」으로 기록하고, 그 회차의 '중복 없음' 결론에 이 단서를 붙인다
+  → ⚠️ **천장 경보**: 현재 **83건 / 상한 100건**. `DAILY_TARGET=2` 기준 약 9일, 실제 발행 속도 기준 약 17일 뒤 100을 넘는다. 넘어가는 순간부터 헤더를 안 읽으면 **주 경로가 조용히 잘린다** — `per_page`를 200으로 올리거나 `page=2`를 승계한다
   → `status` 분포를 함께 기록한다. **`publish`만 링크 대상**이고(STEP 5), `draft`·`pending`·`future`는 중복 대조에는 쓰되 링크 대상에서는 제외한다
   → ⚠️ `_fields` 생략 금지 — 미지정 시 응답이 **6,599토큰**까지 부풀어 오른다(2026-08-25 KoreaPlug 실측)
   → ⚠️ **인증(앱 비밀번호 Basic)은 필수다.** 미설정 시 `status=any`가 HTTP 400(`rest_forbidden_status`)이 되고 발행분만 보인다 — 2026-08-25 실측 기준 **12건(draft 3·pending 2·future 7)이 통째로 사각지대**가 되며, 하필 최근 2주 작성분이라 자기잠식이 가장 잘 나는 구간이다. 이 경우 `status`를 빼고 발행분만 조회한 뒤 STEP 8에 🔴 **「기존 글 확인 인증 실패 — 초안·예약 {n}건 미대조」**로 기록한다. 진행은 하되 정상 경로가 아니다
   → ⚠️ 포커스 키워드는 REST에 노출되지 않는다(Rank Math 메타 미등록, 2026-08-25 실측). 제목 대조로 갈음하며, 정밀 확인이 필요한 후보만 현황표의 해당 행 하나를 연다
-  → **보조 경로(캐시로 부족할 때만)**: `&search={질의}&orderby=relevance&per_page=20`. ⚠️ `orderby=relevance` 생략 금지 — 생략하면 날짜순이라 오래된 진짜 중복이 잘려 나간다
+  → **보조 경로(캐시로 부족할 때만)**: `&search={질의}&orderby=relevance&per_page=100`. ⚠️ `orderby=relevance` 생략 금지 — 생략하면 날짜순이라 오래된 진짜 중복이 잘려 나간다. **이 경로에도 위 절단 판정을 그대로 적용한다**(`-D` 필수)
+  &nbsp;&nbsp;&nbsp;&nbsp;⚠️ **舊 `per_page=20`은 폐기한다 (2026-08-25 2차 개정).** 0and1Life 코퍼스 83건 실측 절단량 — `기준` 76건 중 **56건** · `계산` 56건 중 36건 · `비용` 43건 중 23건 · `신청` 42건 중 22건 · `카드` 33건 중 13건 · `세금` 27건 중 7건. `_fields` 지정 상태라 100건으로 올려도 토큰 부담은 사실상 없다
 
 - **전체 글 현황표** (회차·번호·로그 전용): STEP 0-⓪ ②에서 이미 fetch한 두 계열 결과를 재사용(재fetch 금지)
   → 현재 최고 번호 MAX_NUM 확인(**양 계열 합산**). ⚠️ **기존 글 중복 대조에는 쓰지 않는다** — 위 WP REST가 원천이다. 현황표는 워드프레스에 없는 메타데이터(Blog #번호·Head Type·실행 로그·클러스터)만 담당한다
@@ -387,6 +399,7 @@ STEP 8 — Report
    (2회 연속 🟡 / 3회 연속 🔴 + 예약 작업 점검을 사용자에게 요청)
 🎰 슬롯: {SLOT}/{DAILY_TARGET} · 오늘 앞 슬롯 {있음(#XX {카테고리}) / 없음} · 카테고리·클러스터 충돌 회피 {n}건
 📡 포착면: 스캔 {n}/10 소스 · 수확 헤드 {m}건 · 전환 시도 {k}건 · 스파이크 {발견(키워드) / 미발견} — 미발견 시 상위 탈락 사유 3건. 미발견 {j}회 연속이면 가이드 0-3에 따라 포착면 확장 안건 병기(1순위 검토: 앱스토어 순위 관측 경로)
+🗃️ 중복 대조: `WP_CORPUS` {n}건 대조 (publish {a}·draft {b}·pending {c}·future {d}) / `x-wp-total` **{n}** vs `per_page` {p} → **절단 {없음 / 🔴 있음 {k}건 — 조치}** / 인증 {정상 / 🔴 실패} / 보조 경로 사용 {미사용 / {질의} n건}
 🔍 주제 탐색: 브레인스토밍 {M}개 / 중복 제거 후 {K}개 / 숏리스트 {J}개 / WebFetch: {정상/차단} / WebSearch {N}회 (한도 4) / 트랙: {S/L} / 수요 증거: {확인된 것}
 🎯 스킬: create-viral-content (제목 스코어 {X}/9, 정제 {n}패스) / avoid-ai-writing (완료)
 🖋️ 문체 지문: {적용 완료/조회 실패} / 총 {X,XXX}어절 / 평균 {X.X} / 표준편차 {X.X} / 5어절 이하 {XX}% / `~습니다` {XX}% / 금지어 {N}건
@@ -416,7 +429,8 @@ STEP 8 — Report
 | 포착면 | 매 실행 가이드 0-2 전 10소스 의무 스캔 + 스캔 로그. "S 후보 없음" 문구 금지 — "스파이크 미발견 (스캔 n소스/헤드 m건)"만 허용(가이드 0-3) |
 | Notion 권한 | MCP 커넥터가 서브카테고리 페이지 편집 권한 보유 |
 | **WP REST 인증** | **앱 비밀번호 Basic 인증 필수** — 환경변수 `WP_USER`·`WP_APP_PASS`. 미설정 시 `status=any`가 HTTP 400이 되어 **초안·대기·예약 글이 중복 대조에서 통째로 누락**된다(2026-08-25 실측 12건). 발동 시 STEP 8에 🔴로 기록하며, 이는 정상 폴백이 아니라 이상 신호다. 자격증명은 프롬프트·Notion·GitHub에 두지 않는다 |
-| **WP_CORPUS** | STEP 1에서 **세션당 1회** `status=any&per_page=100&_fields=id,slug,status,title`로 전량 확보 후 STEP 2·3·5·7-B가 재사용. 재호출 금지. `x-wp-total > per_page`면 절단이므로 `per_page`를 올린다 |
+| **WP_CORPUS** | STEP 1에서 **세션당 1회** `status=any&per_page=100&_fields=id,slug,status,title`로 전량 확보 후 STEP 2·3·5·7-B가 재사용. 재호출 금지 |
+| **절단 판정** | **`-D`로 `x-wp-total` 캡처는 모든 WP REST 조회에 필수다.** 헤더를 읽지 않은 조회는 '중복 없음'이 아니라 **'절단 미판정'**이며 STEP 8에 🔴로 기록한다. `x-wp-total > per_page`면 `per_page`를 올리거나 `page=2`를 승계해 전량을 채운 뒤에만 중복 판정을 내린다. 보조 경로(`?search=`)도 `per_page=100` + 같은 판정을 적용한다. ⚠️ 현재 83건/100건으로 천장까지 9~17일 |
 | WebSearch 한도 | 글당 최대 4회, STEP 4-B 전용(STEP 1~4-A 미사용). 소진해도 STOP 아님 — 4-B는 숏리스트 내 비교로 승자를 정함. 진짜 STOP은 STEP 3·4-A에서 채택 가능 후보가 0개일 때만 |
 | 품질 관문 | 차단 무관 불변 — 수요검증 생략 금지(수단은 무료) / **네이버 검증 4-A2 생략 금지**(실패해도 `N-미검증`으로 기록) / 서브키워드는 실존 노출 문구만 / GAP ⭐ H2 필수 / EEAT 강제 조건 유지 / 경쟁 구도 관문 불통과는 예외 없이 폐기 / 시즌·제도 헤드는 앵커 날짜 필수(가이드 0-5) |
 | 스킬 | create-viral-content(5-0) + avoid-ai-writing(5-2) 필수 |
