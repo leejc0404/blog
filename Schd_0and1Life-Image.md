@@ -1,4 +1,16 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v5.4 — 다운스케일·srcset 주입 + v5.0 프롬프트 철학)
+# 0and1Life 자동 이미지 삽입 태스크 (v5.5 — 히어로 헤더 오버레이 + UI 오탐 3건 교정)
+
+> 🧩 **v5.5 변경 (2026-08-25) — 2026-08-25 실전(Post 1278)에서 드러난 결함 4건.**
+> 이번 회차는 이미지 4장 자체는 전부 통과했는데, **UI를 잘못 읽어 낭비한 호출**과 **히어로가 제목과 분리돼 버리는 구조 결함**이 함께 나왔다.
+>
+> | # | 사건 (2026-08-25 실측 · Post 1278) | 개정 |
+> |---|---|---|
+> | ① | **히어로가 제목과 분리됐다.** Writer가 만든 본문이 `초록 헤더 박스(제목+날짜)` + `그 아래 독립 히어로 figure` 구조였고, 7-2.5는 `<img>` 의 src만 갈아끼우므로 **제목 위에 이미지가 깔리는 원래 디자인이 복원되지 않았다.** 사용자 지적: "제목쪽이 그냥 초록색으로 되어 있다" | **STEP 7-2.6 신설** — 헤더 박스 + 독립 히어로를 감지해 **제목 오버레이형 `<figure>` 하나로 병합**한다 |
+> | ② | 5-3 폴링이 **완료 후에도 `prog:4` 로 3회(약 90초) 헛돌았다.** `div,span,p` 전체에서 `^\d{1,3}%$` 를 찾는 셀렉터가 **진행률 카드가 아닌 요소**(설정 패널 잔상 등)를 계속 잡았다 | **셀렉터를 그리드 컨테이너 하위로 한정**하고, **정체(stall) 판정**을 추가 — 직전 호출과 `prog`·`big` 이 모두 같으면 완료로 본다 |
+> | ③ | 5-5의 인덱스 대조가 불가능했다. `getBoundingClientRect()` 가 **2열 레이아웃(left 16/325)** 을 보고했는데 화면은 **4열**이었다 — 좌표를 캡처 대상 선택에 쓸 수 없다 | **좌표 대신 `outline` 마킹 1회**로 DOM 순서 = 시각 순서를 확인하는 절차를 명문화 (호출 1회로 끝난다) |
+> | ④ | 첫 프롬프트 입력 클릭이 **상단 검색창에 들어가 프롬프트 1건이 통째로 유실**됐다. 게다가 `동영상` 필터 칩이 켜져 그리드가 빈 상태로 보였다 | **입력 직전 `document.activeElement` 확인**과 **필터 칩 해제** 절차를 5-2에 추가 |
+>
+> 또 하나 기록해 둘 것: **WP 세션이 회차 도중이 아니라 회차 직후에 끊겼다.** 후속 수정 작업에서 `reauth=1` 로 튕겼다. 로그인 폼 대리 제출은 금지이므로, 세션 만료를 만나면 그 자리에서 중단하고 사용자에게 알린다(STEP 1 기존 조항 그대로).
 
 > 🖼 **v5.4 변경 (2026-08-19) — 이미지 전송량. 이 루틴은 지금까지 리사이즈본을 만들어만 두고 한 번도 쓰지 않았다.**
 >
@@ -516,6 +528,10 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 ⛔ **`에이전트` 버튼은 사용하지 않는다.** 켜면 프롬프트를 재해석해 의도와 다른 결과가 나온다.
 
+🆕 **(v5.5) 패널은 `동영상` 모드로 열려 있을 수 있다.** 2026-08-25 실측: 칩이 `동영상 · 720p · 4s · x1` 이었다. **`이미지` 를 먼저 누르면 패널의 두 번째 줄이 `프레임/애셋` 에서 `16:9 / 4:3 / 1:1 / 3:4 / 9:16` 으로 통째로 바뀐다** — 즉 `이미지` 클릭 전에 잡아 둔 비율 버튼 좌표는 무효다. 순서를 반드시 **① 이미지 → ② 16:9 → ③ 모델 → ④ x2** 로 지키고, ①과 ② 사이에 스크린샷을 한 장 넣어 좌표를 다시 읽는다.
+
+🆕 **(v5.5) 그리드 상단의 필터 칩을 먼저 확인한다.** `최신순` 옆에 `동영상 ✕` 같은 칩이 남아 있으면 **이미지가 하나도 안 보여** 그리드가 빈 것처럼 오인된다. 칩의 `✕` 를 눌러 해제한 뒤 진행한다.
+
 #### 5-2. 프롬프트 일괄 투입 (v5.1 — 한 장씩 기다리지 않는다)
 
 > 🚀 **v5.1 핵심: 그리드를 떠나지 않고, 필요한 프롬프트를 전부 먼저 넣는다.**
@@ -523,9 +539,23 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 **투입 절차 (이미지 N장 = N회 반복, 사이에 대기 없음):**
 
-1. 입력창 클릭 → 프롬프트 입력 → **우측 화살표(→)** 클릭
+1. 입력창 클릭 → **포커스 검증(아래)** → 프롬프트 입력 → **우측 화살표(→)** 클릭
 2. **완료를 기다리지 않고 곧바로** 다음 프롬프트를 같은 방식으로 투입한다
 3. 클릭·입력·전송은 `browser_batch` 로 묶어 1회 호출로 처리한다
+
+🚨 **(v5.5) 첫 프롬프트는 반드시 포커스를 검증하고 넣는다.** 2026-08-25 실측: 하단 입력창을 노렸다고 생각한 클릭이 **상단 검색창에 들어가** 1,000자짜리 프롬프트가 통째로 유실됐고, 그 부작용으로 `동영상` 필터까지 걸렸다. 아래 한 줄을 클릭 직후에 넣으면 1회 호출로 막을 수 있다.
+
+```javascript
+// 입력 직전 — 포커스가 하단 프롬프트 입력창에 있는지 확인한다
+const a = document.activeElement;
+'tag:' + a.tagName + ' role:' + (a.getAttribute('role')||'-')
+ + ' ph:' + (a.getAttribute('placeholder')||a.getAttribute('aria-label')||'-')
+ + ' top:' + Math.round(a.getBoundingClientRect().top)
+```
+
+- `ph` 에 **"무엇을 만들고 싶으신가요"** 계열 문구가 잡히고 `top` 이 화면 하단(뷰포트 높이의 80% 이상)이면 정상이다
+- 상단 검색창(`top` 이 100 미만)이 잡혔다면 **타이핑하지 말고** ⓐ 검색창 `✕` 로 닫고 ⓑ 필터 칩을 해제한 뒤 ⓒ 다시 하단 입력창을 클릭한다
+- 2번째 프롬프트부터는 전송 직후 포커스가 입력창에 유지되므로 이 검증을 생략해도 된다
 
 **(v5.0) 전송 전에 STEP 3-8의 7항목 체크리스트를 반드시 센다.** 하나라도 비면 전송하지 않고 프롬프트를 고친다.
 
@@ -551,21 +581,35 @@ Chrome MCP는 이 도구를 CDP `Runtime.evaluate` 로 실행하며 **45초 하�
 
 → **폴링 1회의 상한을 30초(6×5초)로 고정하고, 미완료면 같은 호출을 다시 던진다.** 한 호출에 전부 담으려 하지 않는다.
 
+🚨 **(v5.5) `prog()` 셀렉터를 그리드 하위로 한정하고, 정체(stall) 판정을 함께 쓴다.**
+2026-08-25 실측: 8장이 **전부 완성된 뒤에도** `prog:4 big:18` 이 3회 연속(약 90초) 그대로 반환됐다. `div,span,p` 전체를 훑는 舊 셀렉터가 **진행률 카드가 아닌 `%` 텍스트**(설정 패널 잔상 등)를 계속 잡은 것이다. 결국 스크린샷을 찍고서야 완료를 알았다 — 폴링이 오히려 시간을 잡아먹었다.
+
 ```javascript
-// 완료 판정: 진행률 카드가 사라졌고, 원본 해상도(1376) 이미지가 목표치에 도달했는가
+// (v5.5) 완료 판정 — ⓐ 그리드 하위로 한정한 진행률 카드 ⓑ 이전 호출 대비 정체 여부
 // 기대치 = 투입한 프롬프트 수 × 2 (그리드 기존분은 지연 로딩으로 개수가 흔들리므로 절대값 비교를 피한다)
-const prog = () => Array.from(document.querySelectorAll('div,span,p'))
-  .filter(e => e.children.length === 0 && /^\d{1,3}%$/.test((e.textContent || '').trim())).length;
+const gridRoot = document.querySelector('main') || document.body;
+const prog = () => Array.from(gridRoot.querySelectorAll('div,span,p'))
+  .filter(e => e.children.length === 0
+            && /^\d{1,3}%$/.test((e.textContent || '').trim())
+            && e.closest('img,video,[class*=card],[class*=grid],[class*=tile]') !== null   // 카드 안에 있는 것만
+            && e.getBoundingClientRect().width > 0).length;                                 // 화면에 보이는 것만
 const big = () => Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000).length;
+
+const prev = window._pollPrev || {p: -1, b: -1, same: 0};
 let res = 'wait';
 for (let t = 0; t < 6; t++) {                        // ⛔ 30초 — CDP 45초 상한 안쪽으로 고정
-  if (prog() === 0 && big() >= N_PROMPTS * 2) { res = 'done big' + big(); break; }
+  if (prog() === 0) { res = 'done big' + big(); break; }
   await new Promise(r => setTimeout(r, 5000));
 }
-'prog:' + prog() + ' big:' + big() + ' ' + res
+// 정체 판정: 직전 호출과 prog·big 이 모두 같으면 진행이 멈춘 것 → 스크린샷 1장으로 눈으로 확인한다
+const now = {p: prog(), b: big()};
+now.same = (now.p === prev.p && now.b === prev.b) ? prev.same + 1 : 0;
+window._pollPrev = now;
+'prog:' + now.p + ' big:' + now.b + ' same:' + now.same + ' ' + res
 ```
 
 - 반환값이 `wait` 면 **같은 코드를 그대로 다시 호출**한다. 4쌍 기준 보통 2~3회면 끝난다
+- 🆕 **`same` 이 2 이상이면 폴링을 신뢰하지 않는다.** 값이 두 번 연속 안 움직였다는 뜻이므로 **스크린샷 1장을 찍어 눈으로 완료를 확인**하고, 완료면 그대로 5-4로 넘어간다. `prog` 이 0이 아니어도 화면에 진행률 카드가 없으면 **완료다**
 - **2회 연속 CDP 타임아웃이 나면 폴링을 포기하고** `browser_batch` 의 `computer:wait 8초 → screenshot` 으로 전환한다. 진행률 카드가 전부 사라졌으면 완료다
 - 진행률 카드가 사라진 직후에도 썸네일은 **블러 플레이스홀더로 잠깐 남는다.** 이때 캡처하면 흐린 이미지가 저장되므로, `big()` 이 목표치를 채운 뒤 **8초를 더 준다**
 
@@ -607,6 +651,7 @@ const KEYS = ['_imgHero', '_img1', '_img2', '_img3'];
 const TARGET_W = 1100;                   // (v5.4) 목표 폭 — 아래 '왜 1100인가' 참조
 // (v5.2) 최상위 await — 캡처와 결과 확인을 1회 호출로 끝낸다 (2026-08-18 실측 4장 439ms)
 const grid = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000);
+grid.forEach(i => { i.style.outline = 'none'; });   // (v5.5) 인덱스 대조용 테두리 제거
 const out = [];
 for (let k = 0; k < PICK.length; k++) {
   const src = grid[PICK[k]];
@@ -636,6 +681,24 @@ window._capDims   // 전부 1100x689 이어야 정상 (TARGET_W 기준)
 Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000)
   .slice(0, 12).map((i, n) => n + ':' + i.naturalWidth + 'x' + i.naturalHeight).join(' ')
 ```
+
+🚨 **(v5.5) 인덱스 대조에 `getBoundingClientRect()` 좌표를 쓰지 않는다 — 화면과 어긋난다.**
+2026-08-25 실측: `innerWidth 1568 / dpr 1` 인데도 이미지 rect가 **`left:16` 과 `left:325` 단 두 값**(= 2열)으로 나왔다. 화면은 명백히 **4열**이었다. 좌표로 "몇 번째 칸인지"를 추론하면 **엉뚱한 이미지를 캡처한다.**
+
+대신 **`outline` 마킹 1회**로 DOM 순서와 시각 순서가 일치하는지 눈으로 못 박는다. 호출 2개(마킹+스크린샷)면 끝나고, 이후 모든 인덱스를 신뢰할 수 있다.
+
+```javascript
+// (v5.5) 앞 4장에 색 테두리를 입힌다 — 0:빨강 1:연두 2:하늘 3:자홍
+const all = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000);
+all.forEach((im, n) => {
+  im.style.outline = '6px solid ' + (n===0?'red':n===1?'lime':n===2?'cyan':n===3?'magenta':'transparent');
+  im.style.outlineOffset = '-6px';
+});
+'marked ' + all.length
+```
+
+- 이어서 스크린샷 1장을 찍어 **빨강이 좌상단 첫 칸인지** 확인한다. 일치하면 DOM 순서 = 시각 순서(좌→우, 위→아래)이므로 그대로 `PICK` 인덱스를 쓴다
+- 캡처 코드(위 블록) 첫머리에서 `grid.forEach(i => { i.style.outline = 'none'; })` 로 테두리를 지운다. **테두리는 CSS이므로 `drawImage` 결과에는 들어가지 않지만**, 다음 스크린샷을 헷갈리지 않게 지우는 편이 낫다
 
 ✅ **(v4.0 실측) Flow는 이미지를 `labs.google` 동일 출처로 서빙하므로 canvas taint가 발생하지 않는다.** 舊 Gemini 경로의 `SecurityError: canvas has been tainted` 복구 절차는 **전부 불필요하며 삭제됐다.**
 
@@ -860,6 +923,95 @@ if (hero) {
  + ' leftover:' + (window._newContent.match(/FEATURED_IMAGE|unsplash\.com/g) || []).length
 ```
 
+🆕 **(v5.5) 2.6) 히어로 헤더 오버레이 병합 — 제목이 '그냥 초록 박스'로 남지 않게 한다**
+
+2026-08-25 Post 1278 사용자 지적: **"제목쪽이 그냥 초록색으로 되어 있다."**
+원인은 Writer가 만든 본문 구조였다. 원래 이 사이트의 표준 헤더는 **히어로 이미지 위에 제목을 얹는 오버레이형 `<figure>`** 인데(아래 A), 그날 본문은 **초록 헤더 박스 + 그 아래 독립 히어로 `<figure>`** 로 쪼개져 있었다(아래 B). 7-2.5는 `<img>` 의 `src`·`alt` 만 갈아끼우므로 **B는 B인 채로 남는다** — 히어로를 아무리 잘 만들어도 제목 자리는 여전히 단색이다.
+
+```html
+<!-- A. 표준(목표) — 이미지 위에 제목 오버레이 -->
+<figure style="position:relative; margin:0 0 28px; border-radius:16px; overflow:hidden;">
+  <img class="wp-image-{ID}" fetchpriority="high" style="width:100%;display:block;height:auto;" src="{HERO_URL}" alt="{ALT}" />
+  <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);"></div>
+  <figcaption style="position:absolute; bottom:0; left:0; right:0; padding:26px 24px; color:#fff;">
+    <h1 style="font-size:26px; line-height:1.4; font-weight:800; margin:0 0 10px; color:#fff;">{제목}</h1>
+    <p style="margin:0; font-size:13px; opacity:.85;">{날짜} · 읽는 시간 {N}분</p>
+  </figcaption>
+</figure>
+
+<!-- B. 결함형 — 초록 헤더 박스 + 아래에 히어로가 따로 (이 구조를 A로 병합한다) -->
+```
+
+**판정과 병합 절차 (저장 전, 7-2.5 직후에 수행):**
+
+```javascript
+// (v5.5) 헤더 박스 + 독립 히어로 → 오버레이형 figure 하나로 병합
+const hero2 = window._byTag ? window._byTag['hero'] : window._uploadedIds.find(u => /hero/.test(u.tag));
+const d = document.createElement('div'); d.innerHTML = window._newContent;
+
+// ① 제목·날짜를 담은 헤더 블록 찾기 — h1을 품고 있고 배경색이 지정된 첫 요소
+const h1 = d.querySelector('h1');
+const headerBox = h1 ? h1.closest('[style*="background"]') : null;
+// ② 히어로 figure 찾기 — 방금 교체한 hero URL을 가진 img의 figure
+const heroImg = hero2 ? d.querySelector('img[src="' + hero2.url + '"]') : null;
+const heroFig = heroImg ? heroImg.closest('figure') : null;
+
+window._headerMerge = {
+  h1: !!h1, headerBox: !!headerBox, heroFig: !!heroFig,
+  alreadyOverlay: !!(heroFig && heroFig.querySelector('h1'))     // 이미 A형이면 손대지 않는다
+};
+JSON.stringify(window._headerMerge)
+```
+
+- `alreadyOverlay: true` → **이미 표준 A형이다. 아무것도 하지 않는다.**
+- `headerBox: true && heroFig: true && alreadyOverlay: false` → **B형이다. 아래로 병합한다.**
+- `headerBox: false` → 테마가 제목을 출력하는 구조다. **병합하지 않고** STEP 8에 "헤더 박스 없음 — 병합 대상 아님"으로 남긴다
+
+```javascript
+// 병합 실행 — 헤더 박스의 제목·날짜를 히어로 figure 안으로 옮기고 헤더 박스는 제거한다
+if (window._headerMerge.headerBox && window._headerMerge.heroFig && !window._headerMerge.alreadyOverlay) {
+  const titleHtml = h1.outerHTML.replace(/<h1([^>]*)>/, '<h1 style="font-size:26px; line-height:1.4; font-weight:800; margin:0 0 10px; color:#fff;">');
+  const metaEl = headerBox.querySelector('p');
+  const metaHtml = metaEl ? metaEl.outerHTML.replace(/<p([^>]*)>/, '<p style="margin:0; font-size:13px; opacity:.85;">') : '';
+
+  heroFig.setAttribute('style', 'position:relative; margin:0 0 28px; border-radius:16px; overflow:hidden;');
+  heroImg.setAttribute('style', 'width:100%;display:block;height:auto;');
+  if (!/fetchpriority=/.test(heroImg.outerHTML)) heroImg.setAttribute('fetchpriority', 'high');
+  heroImg.removeAttribute('loading');                       // 히어로는 LCP — lazy 금지
+
+  // 기존 figcaption(회색 캡션)은 오버레이 캡션으로 대체한다
+  const oldCap = heroFig.querySelector('figcaption');
+  if (oldCap) oldCap.remove();
+
+  const shade = document.createElement('div');
+  shade.setAttribute('style', 'position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);');
+  heroFig.appendChild(shade);
+
+  const cap = document.createElement('figcaption');
+  cap.setAttribute('style', 'position:absolute; bottom:0; left:0; right:0; padding:26px 24px; color:#fff;');
+  cap.innerHTML = titleHtml + metaHtml;
+  heroFig.appendChild(cap);
+
+  // 히어로 figure를 헤더 박스 자리로 올리고, 헤더 박스를 제거한다
+  headerBox.parentNode.insertBefore(heroFig, headerBox);
+  headerBox.remove();
+
+  window._newContent = d.innerHTML;
+  window._headerMerged = true;
+}
+'merged:' + !!window._headerMerged
+ + ' h1InFigure:' + ((window._newContent.match(/<figure[^>]*>[\s\S]*?<h1/g) || []).length)
+ + ' newLen:' + window._newContent.length
+```
+
+⚠️ **병합 후 반드시 확인할 것**
+- `h1InFigure` 가 **1** 이어야 한다. 0이면 제목이 figure 밖에 남은 것이고, 2 이상이면 h1이 중복 생성된 것이다
+- `<h1>` 개수는 **병합 전후가 같아야 한다** (아래 2.9의 `h1Cnt` 항목)
+- 히어로 `<img>` 에 `loading="lazy"` 가 남아 있으면 안 된다 (LCP 저하)
+- 이 병합은 **총 이미지 수를 바꾸지 않는다** — 히어로를 옮겨 붙일 뿐이므로 상한 5장 계산과 무관하다
+
+ℹ️ **근본 원인은 Writer 루틴의 헤더 템플릿이다.** 이 조항은 사후 교정이므로, B형이 **2회 이상 연속으로 감지되면** STEP 8에 "Writer 헤더 템플릿 점검 필요"를 🔴로 올린다.
+
 ```javascript
 // 2.9) 저장 전 불가침 검증 (v3.4 백포트 — 필수)
 const before = window._finalContent, after = window._newContent;
@@ -881,7 +1033,11 @@ window._evGuard = {
   wpImgCls:cnt(before, /wp-image-\d+/g) + '->' + cnt(after, /wp-image-\d+/g),          // (v5.4) 이번에 넣은 이미지 수만큼 늘어야 함
   noWpCls: (() => { const t = after.match(/<img[^>]*>/g) || [];                        // (v5.4) 0이어야 함
              return t.filter(x => /0and1life-/.test(x) && !/wp-image-\d+/.test(x)).length; })(),
-  lazyCnt: cnt(after, /loading="lazy"/g)                                               // (v5.4) 히어로 제외 본문 이미지 수와 같아야 함
+  lazyCnt: cnt(after, /loading="lazy"/g),                                              // (v5.4) 히어로 제외 본문 이미지 수와 같아야 함
+  h1Cnt:   cnt(before, /<h1/g) + '->' + cnt(after, /<h1/g),                            // (v5.5) 좌우 같아야 함 (헤더 병합해도 h1은 1개)
+  h1InFig: (after.match(/<figure[^>]*>[\s\S]*?<h1/g) || []).length,                    // (v5.5) 병합했으면 1, 안 했으면 0
+  heroLazy:(() => { const t = after.match(/<img[^>]*>/g) || [];                        // (v5.5) 0이어야 함 — 히어로에 lazy 금지
+             return t.filter(x => /fetchpriority="high"/.test(x) && /loading="lazy"/.test(x)).length; })()
 };
 Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ```
@@ -889,6 +1045,7 @@ Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
 🆕 **(v5.4) `noWpCls` 가 0이 아니면 그 이미지는 srcset을 못 받는다** — 클래스 주입이 빠진 것이므로 저장 금지. `wpImgCls` 증가분이 이번에 넣은 이미지 수와 다른 경우도 마찬가지다.
 🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
+🆕 **(v5.5) `h1Cnt` 좌우가 다르거나 `heroLazy` 가 0이 아니면 저장 금지.** 전자는 헤더 병합이 제목을 잃거나 복제한 것이고, 후자는 LCP 요소에 지연 로딩이 붙은 것이다. `h1InFig` 는 병합을 수행했으면 **1**, `alreadyOverlay`/`headerBox 없음` 으로 건너뛰었으면 **0 또는 1** 이면 정상이다.
 
 ```javascript
 // 3) content 저장 — (v3.4) status를 명시 동봉해 상태 전환을 막는다
@@ -1001,6 +1158,17 @@ f ? (() => { const cs = getComputedStyle(f);
 - 🆕 **(v5.3) 생성 이미지와 증빙 캡처가 붙어 있지 않은가?** 렌더 기준으로 **두 이미지 사이 간격이 5%pt 미만**이면 STEP 4의 배제 규칙이 제대로 안 돈 것이다. 2026-08-19 정상 사례: 히어로 2% → 증빙 29% → 38% → 53% → 70%
 - 다양성 규칙(3-7)이 지켜졌는가 — 같은 구도·같은 피사체 유형·같은 주인공 소재가 반복되지 않는가?
 - 히어로/대표이미지가 정상 반영됐는가?
+- 🆕 **(v5.5) 제목이 히어로 이미지 위에 얹혀 있는가?** 글 맨 위를 스크린샷으로 보고, **제목 자리가 단색 박스(초록 등)로 남아 있으면 실패**다 — 7-2.6 병합이 안 돌았거나 조건 판정이 어긋난 것이다. 아래로 렌더 기준 확인:
+
+```javascript
+const fig = document.querySelector('.entry-content figure h1, article figure h1');
+const box = document.querySelector('.entry-content h1, article h1');
+'h1InFigure:' + (fig ? 'YES' : 'NO')
+ + ' | h1Bg:' + (box && box.parentElement ? getComputedStyle(box.parentElement).backgroundColor : '-')
+ + ' | heroTop:' + (() => { const i = document.querySelector('.entry-content img'); return i ? Math.round(i.getBoundingClientRect().top + window.scrollY) : '-'; })()
+```
+
+  `h1InFigure:YES` 면 정상이다. `NO` 이고 `h1Bg` 가 투명이 아닌 색이면 **초록 박스가 그대로 남은 상태**이므로 7-2.6을 다시 돌린다
 - 증빙 캡처가 원래 자리에 그대로 있는가? (`window._evGuard` 확인)
 - **워터마크 흔적(✦)이 남아 있지 않은가?** — 남아 있으면 STEP 5-4의 `cropRight` 값을 늘려 재캡처하거나, 이미 업로드된 파일을 0and1life.com **동일 출처**에서 canvas로 다시 읽어 재크롭·재업로드한다.
 - 표·TOC·내부링크 등 기존 요소가 삽입으로 깨지지 않았는가?
@@ -1033,6 +1201,8 @@ f ? (() => { const cs = getComputedStyle(f);
 - 🆕 **(v5.4) 이미지 전송 최적화 결과**: 캡처 해상도(`TARGET_W` 값 포함)와 장당 KB, 렌더 기준 `srcset:YES/NO` · `cls:YES/NO` · `loading` 값. 생성 이미지 중 하나라도 `NO` 면 실패로 보고한다. 증빙 캡처가 `NO` 인 것은 Draft 루틴 소관이므로 별도 항목으로 분리해 적는다
 - 🆕 **(v5.3) CDP 타임아웃 발생 횟수**: `Runtime.evaluate`(45초)·`Page.captureScreenshot`(30초) 각각 몇 회였고 어떻게 복구했는지. 폴링 폴백이 발동했다면 그 사실을 남긴다 — 이 수치가 다음 회차의 루프 상한을 조정하는 근거가 된다
 - ⛔ **(v5.3) 큐잉 검증 항목은 삭제한다.** v5.2에서 확정 동작이 됐고 2026-08-19에 4쌍 동시 생성으로 재확인됐다. 매 회차 보고할 이유가 없다
+- 🆕 **(v5.5) 헤더 병합 결과**: `window._headerMerge` 판정값(`headerBox`/`heroFig`/`alreadyOverlay`)과 `merged` 여부, 렌더 기준 `h1InFigure:YES/NO`. **B형(초록 박스+독립 히어로)이 감지됐다면 그 사실을 반드시 남기고, 2회 연속이면 🔴 「Writer 헤더 템플릿 점검 필요」로 올린다**
+- 🆕 **(v5.5) UI 오탐 발생 여부**: ⓐ 5-3 폴링의 `same` 이 2 이상으로 올라가 스크린샷 폴백을 썼는지 ⓑ 5-2 포커스 검증에서 상단 검색창이 잡혀 재클릭했는지 ⓒ 필터 칩 해제가 필요했는지. **세 항목 모두 "없음"이면 한 줄로 "UI 오탐 없음"만 적는다**
 - **삭제 대기 미디어**: 재크롭 등으로 남은 원본 미디어 ID를 나열하고 **사용자 확인을 요청**한다 (임의 삭제 금지)
 - 루틴 자체의 오류·개선점이 발견됐다면 **수정할 조항 번호와 교체용 전문(前文)**을 함께 제시한다 — 사용자가 붙여넣기만 하면 되도록
 
@@ -1073,6 +1243,11 @@ f ? (() => { const cs = getComputedStyle(f);
 - 🆕 **(v5.0) 범용 은유 금지**(모래시계·저울·전구·퍼즐·돼지저금통·악수·빈 사무실·창밖 야경 단독 등) — 어느 글에나 어울리는 이미지는 이 글의 이미지가 아니다
 - 🆕 **(v5.0) 손·팔 등 신체 부분 컷은 권장**(3장 중 1~2장). 금지 대상은 카메라 보고 웃는 정면 모델뿐
 - 🆕 **(v5.0) 스톡 플레이스홀더가 2개 이상이면 첫 번째만 히어로, 나머지는 본문 이미지로 교체**하고 그만큼 삽입 개수를 줄인다 (STEP 4 · 7-2.5). 저장 전 `dupImg` 0 확인 필수
+- 🚨 **(v5.5) 히어로 교체로 끝내지 말고 헤더 구조까지 본다** — 제목이 단색 박스에 남아 있으면 히어로가 아무리 좋아도 실패다. 7-2.6의 병합 판정을 매 회차 수행하고, `h1InFigure` 를 렌더 기준으로 확인한다
+- 🆕 **(v5.5) 진행률 폴링을 맹신하지 않는다.** `prog()` 는 그리드 하위·가시 요소로 한정하고, 값이 **두 번 연속 안 움직이면(`same >= 2`) 스크린샷으로 판정**한다 (2026-08-25: 완료 후에도 `prog:4` 가 90초간 유지됨)
+- 🆕 **(v5.5) 캡처 인덱스는 좌표가 아니라 `outline` 마킹으로 확인한다.** `getBoundingClientRect()` 가 4열 화면을 2열로 보고한 실측이 있다 (2026-08-25)
+- 🆕 **(v5.5) Flow 첫 입력은 `document.activeElement` 로 포커스를 검증한 뒤 타이핑한다.** 상단 검색창에 들어가면 프롬프트가 유실되고 필터 칩까지 걸린다
+- 🆕 **(v5.5) Flow 설정 패널은 `동영상` 으로 열려 있을 수 있고, `이미지` 를 누르면 비율 버튼 줄이 통째로 바뀐다.** ① 이미지 → ② 16:9 → ③ 모델 → ④ x2 순서를 지키고 ①과 ② 사이에 스크린샷으로 좌표를 다시 읽는다
 - 글 제목(title)은 수정하지 않음
 - 이미지 삽입 후 글 상태(publish/draft/future)는 변경하지 않음 — **발행·예약발행 전환은 어떤 경우에도 금지 (발행 결정은 항상 사용자 몫, 2026-08-01 사용자 지시)**
 - **미디어 삭제는 어떤 경우에도 사용자 확인 후에만 수행한다** (2026-08-01 사용자 지시)
