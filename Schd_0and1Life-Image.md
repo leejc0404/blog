@@ -1,4 +1,45 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v5.5 — 히어로 헤더 오버레이 + UI 오탐 3건 교정)
+# 0and1Life 자동 이미지 삽입 태스크 (v6.0 — 히어로 헤더를 반응형 그리드 스택으로 전면 교체)
+
+> 📱 **v6.0 변경 (2026-08-31) — 히어로 제목 오버레이가 모바일에서 이미지 밖으로 넘쳐 잘렸다. 오버레이를 쓰는 글 13건 전부가 해당됐다.**
+> 사용자 지적: *"모바일로 보니 제목의 가장 윗줄이 이미지 밖으로 벗어나서 잘려 있다."*
+>
+> **원인은 v5.5가 도입한 오버레이 캡션 자체의 구조다.** 캡션이 `position:absolute; bottom:0` 이고 폰트가 **고정 26px**이라, 캡션 높이가 화면 폭과 무관하게 커진다. 반면 figure 높이는 이미지 비율로 결정된다. 좁은 화면에서는 줄 수가 늘어 **캡션이 이미지보다 커지고, 넘친 윗부분이 `overflow:hidden` 에 잘려 사라진다.**
+>
+> | 실측 (2026-08-31, 375px 아이프레임) | 값 |
+> |---|---|
+> | 본문 콘텐츠 폭 (뷰포트 375px) | **288px** |
+> | 히어로 figure 높이 (1100×689 기준) | **204px** |
+> | 캡션 높이 (제목 65자, 26px 고정) | **304px** |
+> | 넘쳐서 잘린 양 | **99px (제목 앞 2~3줄 소실)** |
+>
+> 사용자가 "정상"이라고 본 글(1322)도 **375px에서는 똑같이 99px 잘린다.** 기기 폭이 넓어 덜 티가 났을 뿐이다 — 430px에서는 두 글 모두 29px 잘렸다.
+>
+> **교정: `position:absolute` 를 버리고 `display:grid` 스택 + `clamp()` 로 바꾼다.**
+>
+> | 조치 | 효과 |
+> |---|---|
+> | `figure{display:grid}` · 세 자식 모두 `grid-area:1/1` | 행 높이 = max(이미지, 캡션) → **캡션이 커지면 figure가 따라 커진다. 넘침이 원천적으로 불가능** |
+> | `img{align-self:start}` · `figcaption{align-self:end}` | 이미지는 비율 유지, 캡션은 하단 정렬 (기존 디자인 그대로) |
+> | 그라디언트 `<div>` 도 `grid-area:1/1` (기본 stretch) + `figure{background:#111}` | figure가 커져 생긴 여백까지 어둡게 덮어 **흰 글자 가독성 확보** |
+> | `h1{font-size:clamp(16px,4.4vw,26px)}` · 패딩도 `clamp()` | 좁은 화면에서 자동 축소 → 대부분 이미지 안에 그대로 들어간다 |
+>
+> 검증 (수정 후 실측): 320 / 360 / 375 / 412 / 768 / 1440px **전 구간 ✅**, 최악(320px)에서도 여유 6px. 데스크톱은 `fs 26px` 로 종전과 완전히 동일하다.
+> 조치 범위: **오버레이형 13건 전부 수정 완료** (발행 11 · 예약 2). 본문 텍스트·이미지·글 상태는 일절 건드리지 않고 히어로 `figure` 마크업만 교체했다.
+>
+> 🔎 **부수 발견 — 구버전 raw 오염 4건**: `821 · 937 · 1018 · 1031` 의 `post_content` 에 **ez-toc 목차가 정적 HTML로 박제**돼 있다(각 45~55개 매치). v3.1 이하 시절의 `content.rendered` 폴백 저장 흔적이다. 이번 수정은 이 부분을 건드리지 않았다 — **STEP 3-1의 리비전 복구 절차를 사용자 확인 후 별도로 돌려야 한다.**
+
+> 🧨 **v5.9 변경 (2026-08-31) — 2026-08-31 실전(Post 1322·1323, 8장)에서 드러난 결함 1건과 그 연쇄 피해.**
+> 이번 회차는 이미지 8장이 전부 통과했고 두 글 모두 정상 저장됐다. 다만 **`computer:zoom` 한 번이 Flow 탭을 통째로 망가뜨렸고**, 그 여파로 프롬프트 1건 유실 · 검색창/필터 오염 · 탭 폐기·재생성까지 갔다.
+>
+> | # | 사건 (2026-08-31 실측) | 개정 |
+> |---|---|---|
+> | ① | **`computer:zoom` 이 탭에 뷰포트 에뮬레이션을 고착시켰다.** `Page.captureScreenshot` 타임아웃과 함께 `innerWidth/innerHeight` 가 **981×184 로 굳었고**, `outerWidth 1920×1040` 인데도 그대로였다. `resize_window` 를 두 번 불러도 복구되지 않았다 | **5-4·5-5·주의사항에서 `zoom` 사용을 전면 금지.** 세밀 확인은 ⓐ 전체 스크린샷 재촬영 ⓑ **canvas 8×5 평균 RGB 서명**으로 대체 |
+> | ② | ①의 여파로 **프롬프트 1건이 전송되지 않고 입력창에 잔류**했고, 이어진 타이핑이 그 뒤에 이어붙어 두 프롬프트가 한 문장으로 섞였다. 동시에 상단 검색창에 4자가 들어가고 `동영상` 필터 칩이 걸려 그리드가 빈 것처럼 보였다 | **5-2에 전송 버튼 rect 실시간 조회 + 전송 성공 검증(`textbox.textContent.length < 20`) 추가** |
+> | ③ | 복구책이 없었다. 결국 **탭을 닫고 새 탭에서 프로젝트를 다시 열어야** 했다 (그리드 재로딩 약 20초 재지불) | **주의사항에 "고착 시 유일한 복구는 탭 폐기·재생성"을 명문화** |
+> | ④ | 4열/5열 레이아웃이 스크린샷과 어긋나 **어느 카드가 어느 프롬프트의 산출인지 육안으로 확정할 수 없었다.** v5.5의 `outline` 마킹조차 스크린샷 스케일 변동으로 흔들렸다 | **5-5에 RGB 서명 대조 절차 신설** — 프롬프트별 색 온도 차이로 쌍이 즉시 갈린다 (실측: 우편함 `rgb(140,121,87)` vs 병원창구 `rgb(94,97,91)`) |
+>
+> 이번 회차 실적: 대상 2편 · 생성 8장 · 재생성 0건 · `_evGuard` 전 항목 통과 · `srcset` 8/8 주입 · 헤더 병합 2/2 성공 · `Page.captureScreenshot` 타임아웃 5회(전부 단독 재호출로 복구) · `Runtime.evaluate` 타임아웃 0회.
+> 🔴 **후속 과제**: B형 헤더(색 박스 + 독립 히어로)가 **2회 연속** 감지됐다 — Writer 루틴의 헤더 템플릿 점검이 필요하다.
 
 > 🧩 **v5.5 변경 (2026-08-25) — 2026-08-25 실전(Post 1278)에서 드러난 결함 4건.**
 > 이번 회차는 이미지 4장 자체는 전부 통과했는데, **UI를 잘못 읽어 낭비한 호출**과 **히어로가 제목과 분리돼 버리는 구조 결함**이 함께 나왔다.
@@ -438,54 +479,49 @@ window._featuredReason = "이유";
 
 ---
 
-#### 3-9. 실사 캡처 병용 원칙 (v5.7 신설 — 2026-08-28)
+#### 3-9. 실물 이미지 사용 원칙 (v5.8 — 2026-08-28 전면 개정)
 
-> 🚨 **신설 사유 (2026-08-28 사용자 지적)**: 이 루틴은 지금까지 **모든 이미지를 Flow로 생성**했다. 그런데 글이 **특정 서비스·앱·기관의 화면 자체**를 다룰 때(당근마켓, 카카오T, 정부24, 하이패스, 코레일 예매 화면 등) 생성 이미지는 원리적으로 실패한다. 생성 모델은 그 UI를 본 적이 없으므로 **"그럴듯한 가짜 앱 화면"** 을 만들고, 그 서비스를 아는 독자에게는 즉시 가짜로 읽힌다. 이때는 **실제 화면 캡처가 유일하게 정확한 이미지**다.
+> 🚨 **개정 사유 (2026-08-28 사용자 지시)**: v5.7은 "글의 핵심이 화면 자체일 때만" 캡처를 허용해, **실물이 있는 글에 실물 이미지를 넣는 것 자체를 막아버렸다.** 방향이 반대였다. 이 루틴은 **Flow 생성 이미지만 써야 하는 루틴이 아니다.** 글에 실제로 존재하는 물건·서비스·회사·장소가 나오고 그 실물 이미지가 필요하다고 판단되면 **넣는다.** 생성은 기본값일 뿐 의무가 아니다.
 >
-> 그동안 캡처를 피해 온 이유는 "웹 이미지를 쓰면 구글이 노출을 안 시켜준다"는 우려였는데 **사실이 아니다.** 구글에 중복·스톡 이미지에 대한 **랭킹 페널티는 존재하지 않는다.** 중복본은 **구글 이미지 검색에서 대표 1개만 노출**될 뿐이고, 웹 검색 순위와는 무관하다. 실제 리스크는 SEO가 아니라 **저작권·상표권과 애드센스 정책**이며, 그것은 아래 규칙으로 관리한다. 오히려 직접 접속해 찍은 캡처는 **1차 자료**라 E-E-A-T에 유리하다.
+> "웹 이미지를 쓰면 구글이 노출을 안 시켜준다"는 우려는 **사실이 아니다.** 구글에 중복·스톡 이미지에 대한 랭킹 페널티는 없다. 중복본이 **구글 이미지 검색에서 대표 1개만 노출**될 뿐, 웹 검색 순위와는 무관하다.
 
-⚠️ **이 절은 STEP 3-1(본문 정독) 직후, 프롬프트를 쓰기 전에 판단한다.** 캡처를 넣기로 하면 생성 장수가 줄어들기 때문이다(아래 ④).
+**① 규칙은 세 줄이다**
 
-**① 언제 쓰는가 — 남용 금지, 대체 불가일 때만**
+1. **공식 출처에서 직접 가져온 이미지는 그냥 쓴다** — 제조사 프레스킷·미디어킷, 공식 사이트·공식 앱 화면 캡처, 공식 SNS·유튜브 채널 이미지, 맥락 안에 들어간 로고.
+2. **아마존 제품 이미지는 핫링크만 쓴다.** 다운로드해 WP 미디어에 올리지 않는다 (제휴 약관 위반 → 계정 정지 리스크). `srcset` 도 붙이지 않는다.
+3. **출처를 모르는 이미지는 쓰지 않는다.** 구글 이미지 검색 결과, 타인 블로그·유튜버가 찍은 사진, 워터마크 스톡. **이것이 유일한 실질 위험선이다** (Getty·AFP 계열의 자동 탐지 청구).
 
-아래 중 하나에 해당할 때만 캡처를 쓴다. 그 외에는 전부 생성 이미지를 쓴다.
+**② 최소 실무 조건 2개**
 
-- 글의 핵심이 **특정 서비스·앱·사이트의 화면 자체**다 (가입 절차, 요금표, 메뉴 위치, 신청 폼, 예매 흐름)
-- 글이 **공개된 수치·조문·고시**를 근거로 삼고, 독자가 그 출처를 눈으로 봐야 설득된다
-- 생성으로 만들면 **반드시 가짜가 되는** 대상이다 (앱 UI, 지도, 대시보드, 공문서 양식, 표지판 문구)
+- figcaption에 **출처 + 확인일(`Captured YYYY-MM-DD` 또는 `Source: 브랜드 프레스킷, YYYY-MM-DD`)** 을 병기한다.
+- **개인정보가 보이는 화면은 제외한다** — 이름·전화번호·주소·계정 ID·얼굴·차량번호. 피할 수 없으면 그 이미지는 포기한다.
 
-⛔ 분위기·감성·배경용으로는 절대 쓰지 않는다. 그건 생성 이미지의 몫이다.
+**③ 언제 넣는가 — 판단은 단순하다**
 
-**② 무엇을 캡처해도 되는가**
+글에 **실제로 존재하는 대상**(제품, 앱, 서비스, 회사, 시설, 공공 조회 화면)이 나오고 그 **실제 모습이 독자에게 필요하다고 느껴지면 넣는다.** 특히 아래는 생성 이미지가 **원리적으로 실패**하므로 실물을 쓴다.
 
-| 허용 | 금지 |
+- **특정 제품의 형태** — Flow는 그 제품을 본 적이 없으므로 반드시 그럴듯한 가짜를 만든다. 그 제품을 아는 독자에게는 즉시 들킨다
+- 앱·웹 UI, 지도, 대시보드, 공문서 양식, 표지판 문구
+- 수치·조문·요금표처럼 독자가 출처를 눈으로 봐야 믿는 것
+
+반대로 **분위기·맥락·감성 컷은 계속 생성 이미지가 맡는다.** 제품 글에서도 제품을 클로즈업하지 않는 **사용 맥락 컷**은 생성이 더 낫다 (제품이 프레임에서 작고 초점 밖이면 형태 오류가 드러나지 않는다).
+
+**④ 파이프라인**
+
+| 조달 경로 | 처리 |
 |---|---|
-| 로그인 없이 접근 가능한 **공개 페이지** | **로그인 후 화면** (내 계정·마이페이지·결제내역·주문내역) |
-| 공공기관 조회 결과·고시·통계 화면 | **유료·구독 콘텐츠** 내부 화면 |
-| 서비스의 공개 요금표·이용안내·앱스토어 소개 페이지 | **뉴스 기사 본문**, 유료 리포트 본문 |
-| 지도·노선도 등 공개 조회 결과 | **사진 자체가 저작물**인 이미지 (사진 갤러리, SNS 게시물, 스톡 사이트) |
-| 화면 맥락 안에 자연스럽게 들어간 로고 | **로고 단독 컷**, 로고를 히어로 주인공으로 크게 배치 |
+| 프레스킷 · 공식 사이트 캡처 · 공식 채널 이미지 | WebP 변환 → WP 미디어 업로드 → STEP 7의 `srcset`·`sizes`·`width/height`·`loading` 동일 적용 |
+| **아마존 제휴 이미지** | **업로드 금지.** `<img src="아마존 URL">` 핫링크로 별도 삽입, `srcset` 없음 |
 
-⛔ **개인정보가 보이면 캡처하지 않는다.** 이름·전화번호·주소·계정 ID·얼굴·차량번호가 화면에 있으면 그 영역을 피해 다시 잡는다. 피할 수 없으면 그 캡처는 **포기한다** (모자이크로 덮어 쓰지 않는다 — 덮은 화면은 증빙 가치가 떨어진다).
-⛔ **제휴·승인처럼 보이게 쓰지 않는다.** 캡처는 '설명 대상'이지 '보증'이 아니다. figcaption에 추천·제휴를 시사하는 문구를 넣지 않는다.
+- 파일명·마크업은 증빙 규격을 따른다 — `evidence-*`, `<figure class="evidence-capture">`. STEP 2 분류기 ①②단계에 걸려 **증빙(evidence)으로 계산**된다.
+- 따라서 `genCount = min(3 - deco, 5 - evidence - deco)` 가 자동 적용된다. **실물 1장을 넣으면 생성이 1장 줄어든다.** 총량 상한 5장은 그대로 유지한다.
+- 아마존 핫링크는 WP 미디어가 아니라 분류기에 안 잡힌다. 총량 감각에는 포함해 관리한다.
+- **캡처는 전체 페이지 통짜로 넣지 않는다.** 설명에 필요한 영역만 크롭하고, 크롭 후 폭이 **600px 미만이면 쓰지 않는다**(본문 표시폭에서 뭉개진다). 확대 보간 금지.
+- 히어로(대표이미지)는 **제품 글이면 제품 공식 이미지**, 그 외에는 생성 이미지를 쓴다. **UI 스크린샷은 히어로로 쓰지 않는다** — 제목 오버레이와 겹쳐 읽히지 않고 썸네일 클릭률이 낮다.
 
-**③ 어떻게 캡처하는가 — 필요한 만큼만**
+**⑤ 보고**
 
-- **전체 페이지 통짜 캡처 금지.** 설명에 필요한 영역만 크롭한다. 인용은 '필요한 범위'일 때만 정당화된다.
-- 캡처는 **루틴이 Chrome으로 직접 접속해서** 찍는다. 검색 결과 썸네일, 제3자가 재배포한 이미지, 이미지 검색 결과를 가져오지 않는다.
-- 크롭 후 폭이 **600px 미만이면 그 캡처를 쓰지 않는다** (본문 표시폭에서 뭉개진다). 확대 보간 금지.
-- 마크업은 **증빙 캡처 규격을 그대로 따른다** — 파일명 `evidence-*`, `<figure class="evidence-capture">`, figcaption에 **출처 기관·서비스명 + 도메인 + `Captured YYYY-MM-DD`** 병기.
-- 캡처도 **WebP로 변환해 업로드**하고, STEP 7의 `srcset`·`sizes`·`width/height`·`loading="lazy"`·`wp-image-{ID}` 를 동일하게 붙인다.
-
-**④ 총량 규칙에 어떻게 들어가는가**
-
-- 캡처는 **증빙(evidence)으로 계산한다.** STEP 2 분류기의 ①②단계(`evidence-capture` 클래스 / `evidence-` 파일명)에 그대로 걸리므로 별도 처리가 필요 없다.
-- 따라서 **총량 상한 5장**과 `genCount = min(3 - deco, 5 - evidence - deco)` 가 자동 적용된다. 캡처 1장을 넣으면 **생성 이미지가 1장 줄어든다.**
-- 히어로(대표이미지)는 **캡처로 쓰지 않는다.** 썸네일에서 UI 스크린샷은 클릭률이 낮고, 제목 오버레이와 겹쳐 읽히지 않는다. 히어로는 항상 생성 이미지로 만든다.
-
-**⑤ 보고 의무**
-
-STEP 8 보고에 캡처별로 ⓐ 출처 도메인 ⓑ 캡처 일자 ⓒ 크롭한 영역과 그 이유 ⓓ **개인정보 노출 없음 확인** ⓔ 로고 포함 여부를 남긴다. 판단이 애매한 캡처는 **넣지 말고 보고에만 적어 사용자 판단을 받는다.**
+STEP 8 보고에 실물 이미지별로 ⓐ 조달 경로(프레스킷 / 공식 캡처 / 공식 채널 / 아마존) ⓑ 출처 도메인 ⓒ 확인일 ⓓ **개인정보 노출 없음 확인** 을 남긴다. 판단이 애매하면 넣지 말고 보고에만 적어 사용자 판단을 받는다.
 
 ---
 
@@ -600,7 +636,7 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 🆕 **(v5.5) 그리드 상단의 필터 칩을 먼저 확인한다.** `최신순` 옆에 `동영상 ✕` 같은 칩이 남아 있으면 **이미지가 하나도 안 보여** 그리드가 빈 것처럼 오인된다. 칩의 `✕` 를 눌러 해제한 뒤 진행한다.
 
-#### 5-2. 프롬프트 일괄 투입 (v5.1 — 한 장씩 기다리지 않는다)
+#### 5-2. 프롬프트 일괄 투입 (v5.1 · v5.9 전송 검증)
 
 > 🚀 **v5.1 핵심: 그리드를 떠나지 않고, 필요한 프롬프트를 전부 먼저 넣는다.**
 > v4.0/v5.0은 `투입 → 55초 대기 → 에디터 진입 → 캡처 → 그리드 복귀` 를 이미지마다 반복했다. 2026-08-18 실측에서 이 왕복이 전체 시간의 대부분을 먹었다.
@@ -624,6 +660,29 @@ const a = document.activeElement;
 - `ph` 에 **"무엇을 만들고 싶으신가요"** 계열 문구가 잡히고 `top` 이 화면 하단(뷰포트 높이의 80% 이상)이면 정상이다
 - 상단 검색창(`top` 이 100 미만)이 잡혔다면 **타이핑하지 말고** ⓐ 검색창 `✕` 로 닫고 ⓑ 필터 칩을 해제한 뒤 ⓒ 다시 하단 입력창을 클릭한다
 - 2번째 프롬프트부터는 전송 직후 포커스가 입력창에 유지되므로 이 검증을 생략해도 된다
+
+🚨 **(v5.9) 전송 버튼 좌표를 매번 JS로 읽고, 전송 성공을 문자열로 검증한다.**
+2026-08-31 실측: 뷰포트가 뒤틀린 상태에서 고정 좌표 클릭이 빗나가 **프롬프트 1건이 입력창에 잔류**했고, 다음 타이핑이 그 뒤에 이어붙어 두 프롬프트가 한 문장으로 섞였다. 아래 두 줄이면 두 사고를 모두 막는다.
+
+```javascript
+// ① 전송 버튼(→)의 현재 중심 좌표를 '스크린샷 좌표계'로 환산해 얻는다
+const sc = 1568 / innerWidth;                        // 스크린샷 폭 / 뷰포트 폭
+const b = Array.from(document.querySelectorAll('button'))
+  .find(x => /arrow_forward/.test(x.getAttribute('aria-label') || ''));
+b ? (() => { const r = b.getBoundingClientRect();
+  return 'send:' + Math.round((r.left + r.width / 2) * sc) + ',' + Math.round((r.top + r.height / 2) * sc); })()
+  : 'SEND-BUTTON-NOT-FOUND'
+```
+
+```javascript
+// ② 전송 직후 — 입력창이 비었는지로 전송 성공을 판정한다
+const tb = document.querySelector('[role="textbox"]');
+'boxLen:' + (tb ? tb.textContent.trim().length : '-')   // 20 미만이면 전송 성공
+```
+
+- `boxLen` 이 20 이상이면 **전송이 안 된 것이다.** 다음 프롬프트를 타이핑하지 말고 ⓐ 위 ①로 좌표를 다시 읽어 재클릭하거나 ⓑ 입력창을 비운 뒤 다시 넣는다. **이 확인을 건너뛰면 두 프롬프트가 한 문장으로 섞여 둘 다 버려야 한다**
+- 입력 상자는 텍스트가 길어지면 **위로 자라므로** 전송 버튼의 y좌표는 대개 유지된다. 그래도 좌표를 가정하지 않는 편이 싸다 (호출 1회)
+- `sc` 환산이 필요한 이유: **스크린샷 폭(1568)과 뷰포트 폭(`innerWidth`)이 다를 수 있다.** 같으면 `sc = 1` 이 되어 결과는 동일하다
 
 **(v5.0) 전송 전에 STEP 3-8의 7항목 체크리스트를 반드시 센다.** 하나라도 비면 전송하지 않고 프롬프트를 고친다.
 
@@ -685,7 +744,7 @@ window._pollPrev = now;
 
 ⚠️ **(v5.3) 스크린샷 호출도 30초 CDP 상한에 걸린다.** 2026-08-19에 `Page.captureScreenshot timed out after 30000ms` 가 4회 발생했다. 전부 **직후 단독 재호출로 성공**했으므로, 배치 안에서 스크린샷이 실패하면 실패로 처리하지 말고 **스크린샷만 따로 한 번 더 부른다.**
 
-#### 5-4. 채택 판정 — 그리드에서 끝낸다 (v5.1 · 에디터 진입 폐지)
+#### 5-4. 채택 판정 — 그리드에서 끝낸다 (v5.1 에디터 진입 폐지 · v5.9 `zoom` 금지)
 
 > 🚀 **(v5.1 실측) Flow 그리드 썸네일은 원본 해상도다.** 2026-08-18 확인: `naturalWidth 1376×768`, 화면 표시 폭만 318px. **캡처도 판정도 그리드에서 전부 가능하므로 에디터 뷰에 들어갈 이유가 없다.**
 > 舊 절차(썸네일 클릭 → 로딩 → 스크린샷 → ← 클릭 → 그리드 재로딩 → 재클릭 → 스크린샷)는 이미지당 6~7회 호출이었고, 5장이면 30회를 넘겼다. **전부 삭제한다.**
@@ -694,7 +753,14 @@ window._pollPrev = now;
 
 1. **그리드 전체 스크린샷 1장**을 찍는다 (전 이미지 후보가 한 화면에 들어온다)
 2. 각 쌍에서 아래 기준으로 채택본을 고른다
-3. 손 왜곡·글자 잔존처럼 세밀한 확인이 필요한 카드만 **`zoom` 으로 해당 영역만** 확대한다 — 페이지 이동 없음
+3. 손 왜곡·글자 잔존처럼 세밀한 확인이 필요하면 **전체 스크린샷을 한 장 더 찍는다.** ⛔ **(v5.9) `computer:zoom` 은 쓰지 않는다** — 아래 경고 참조
+
+⛔ **(v5.9) Flow 탭에서 `computer:zoom` 을 호출하지 않는다. 탭이 복구 불가능하게 망가진다.**
+2026-08-31 실측: zoom 호출이 `Page.captureScreenshot` 타임아웃과 함께 탭에 **뷰포트 에뮬레이션을 고착**시켰다 — `outerWidth 1920×1040` 인데 `innerWidth/innerHeight` 가 **981×184** 로 굳었고, `resize_window` 를 두 번 불러도 돌아오지 않았다. 그 상태에서 고정 좌표 클릭이 전부 빗나가 프롬프트가 유실되고 검색창·필터가 오염됐다.
+
+- 세밀 확인이 필요하면 **전체 스크린샷을 다시 찍는다.** 4열 기준 카드 폭이 313px라 손·글자 이상은 대개 이 크기에서도 보인다
+- 그래도 판별이 안 되면 **5-5의 RGB 서명**으로 쌍을 먼저 확정한 뒤, 애매한 카드 1장만 **canvas로 뽑아 dataURL로 확인**한다 (캔버스 경로는 뷰포트와 무관하다)
+- **이미 고착됐다면 유일한 복구는 탭 폐기·재생성이다** — `tabs_close_mcp` 로 닫고 새 탭에서 프로젝트 URL을 다시 연다. `window._img*` 는 사라지지만 **그리드의 생성물은 그대로 남아 있으므로 재생성은 불필요**하고, 캡처만 다시 하면 된다 (그리드 재로딩 약 20초)
 
 - 🆕 **(v5.0) 밋밋함 판정 — 이 항목을 가장 먼저 본다.** 이미지를 보고 **"지금 무슨 일이 벌어지는가"를 한 문장으로 말할 수 있는가**(3-2 ①). 말할 수 없거나 문장이 '있다/놓여 있다'로 끝나면 **정확해도 탈락**이다
 - 🆕 **(v5.0) 훅 문장이 화면에 실제로 구현됐는가** — ③ 물리량(길이·높이·두께 배수)이 눈으로 비교되는가. 배수가 애매하면 탈락
@@ -705,7 +771,7 @@ window._pollPrev = now;
 - 🆕 **(v5.0) 썸네일 3초 테스트** — 그리드 썸네일 크기(318px)에서 주제가 읽히는가. 안 읽히면 피사체를 더 크게 잡아 재생성. **그리드 판정은 이 테스트를 자동으로 수행하는 셈**이라 v5.1에서 오히려 정확해졌다
 - **둘 다 부적합할 때만** 재생성한다. 이때 **밋밋함이 사유면 '더 정확하게'가 아니라 '사건을 추가'하는 방향으로** 고친다 — 동사(흘러내리는·잘린·떨어지는)와 배수를 문장에 넣는다. 동일 프롬프트 재전송 금지. 수정 1회 후에도 어긋나면 해당 이미지 건너뜀.
 
-#### 5-5. 캡처 — 그리드에서 일괄 · 크롭 후 다운스케일 (v5.4)
+#### 5-5. 캡처 — 그리드에서 일괄 · 크롭 후 다운스케일 (v5.4 · v5.9 RGB 서명)
 
 Flow 워터마크(✦)는 이미지 **모서리가 아니라 안쪽**, 상대좌표 **(0.925W, 0.875H)** 에 고정돼 있다 (2026-08-18 실측: 1376×768 기준 중심 ≈ (1273, 672), 크기 ≈ 56×56). 따라서 **`cropRight = 150` 으로 우측만 잘라내면 세로 해상도 손실 없이 제거된다** → 1226×768.
 
@@ -767,6 +833,31 @@ all.forEach((im, n) => {
 
 - 이어서 스크린샷 1장을 찍어 **빨강이 좌상단 첫 칸인지** 확인한다. 일치하면 DOM 순서 = 시각 순서(좌→우, 위→아래)이므로 그대로 `PICK` 인덱스를 쓴다
 - 캡처 코드(위 블록) 첫머리에서 `grid.forEach(i => { i.style.outline = 'none'; })` 로 테두리를 지운다. **테두리는 CSS이므로 `drawImage` 결과에는 들어가지 않지만**, 다음 스크린샷을 헷갈리지 않게 지우는 편이 낫다
+
+🆕 **(v5.9) `outline` 마킹이 흔들리면 RGB 서명으로 쌍을 확정한다 (호출 1회 · 스크린샷 불필요).**
+스크린샷 스케일이 뷰포트와 어긋나면 색 테두리조차 신뢰하기 어렵다. 이때는 **각 이미지를 8×5로 축소해 평균 RGB를 뽑는다.** 프롬프트가 다르면 색 온도가 확실히 갈리므로 **어느 인덱스가 어느 프롬프트의 산출인지 즉시 확정된다.**
+
+```javascript
+// (v5.9) 앞 8장의 평균 RGB 서명 — 프롬프트별 색 온도로 쌍을 가른다
+const all = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000);
+const out = [];
+for (let n = 0; n < 8; n++) {
+  const im = all[n]; if (!im) { out.push(n + ':MISSING'); continue; }
+  const c = document.createElement('canvas'); c.width = 8; c.height = 5;
+  const x = c.getContext('2d'); x.drawImage(im, 0, 0, 8, 5);
+  const d = x.getImageData(0, 0, 8, 5).data;
+  let r = 0, g = 0, b = 0;
+  for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
+  const px = d.length / 4;
+  out.push(n + ':rgb(' + Math.round(r / px) + ',' + Math.round(g / px) + ',' + Math.round(b / px) + ')');
+}
+out.join(' ')
+```
+
+- 2026-08-31 실측: 우편함 컷 `rgb(140,121,87)`·`rgb(114,93,68)`(따뜻한 갈색) vs 병원 창구 컷 `rgb(94,97,91)`·`rgb(106,108,104)`(중성 회색). **인접한 두 인덱스가 비슷한 값을 가지면 그 둘이 한 쌍**이다
+- 이 값과 **투입 순서(최신이 인덱스 0, 마지막에 넣은 프롬프트가 앞)** 를 맞추면 좌표·레이아웃을 전혀 보지 않고 `PICK` 을 확정할 수 있다
+- 쌍 안에서 어느 쪽을 채택할지는 **전체 스크린샷 1장**으로 판단한다 — RGB는 **쌍 식별용이지 품질 판정용이 아니다**
+- 레이아웃 열 수는 창 크기에 따라 4열·5열로 바뀐다. `getBoundingClientRect()` 의 `top` 값이 같은 것끼리 한 행이므로, 행 구성이 궁금하면 rect를 **행 판정에만** 쓰고 **인덱스 확정에는 쓰지 않는다**
 
 ✅ **(v4.0 실측) Flow는 이미지를 `labs.google` 동일 출처로 서빙하므로 canvas taint가 발생하지 않는다.** 舊 Gemini 경로의 `SecurityError: canvas has been tainted` 복구 절차는 **전부 불필요하며 삭제됐다.**
 
@@ -997,18 +1088,25 @@ if (hero) {
 원인은 Writer가 만든 본문 구조였다. 원래 이 사이트의 표준 헤더는 **히어로 이미지 위에 제목을 얹는 오버레이형 `<figure>`** 인데(아래 A), 그날 본문은 **초록 헤더 박스 + 그 아래 독립 히어로 `<figure>`** 로 쪼개져 있었다(아래 B). 7-2.5는 `<img>` 의 `src`·`alt` 만 갈아끼우므로 **B는 B인 채로 남는다** — 히어로를 아무리 잘 만들어도 제목 자리는 여전히 단색이다.
 
 ```html
-<!-- A. 표준(목표) — 이미지 위에 제목 오버레이 -->
-<figure style="position:relative; margin:0 0 28px; border-radius:16px; overflow:hidden;">
-  <img class="wp-image-{ID}" fetchpriority="high" style="width:100%;display:block;height:auto;" src="{HERO_URL}" alt="{ALT}" />
-  <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);"></div>
-  <figcaption style="position:absolute; bottom:0; left:0; right:0; padding:26px 24px; color:#fff;">
-    <h1 style="font-size:26px; line-height:1.4; font-weight:800; margin:0 0 10px; color:#fff;">{제목}</h1>
-    <p style="margin:0; font-size:13px; opacity:.85;">{날짜} · 읽는 시간 {N}분</p>
+<!-- A. 표준(목표) — v6.0 반응형 그리드 스택. position:absolute 를 쓰지 않는다 -->
+<figure style="display:grid; margin:0 0 28px; border-radius:16px; overflow:hidden; background:#111;">
+  <img class="wp-image-{ID}" fetchpriority="high" style="grid-area:1/1; width:100%; display:block; height:auto; align-self:start;" src="{HERO_URL}" alt="{ALT}" />
+  <div style="grid-area:1/1; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);"></div>
+  <figcaption style="grid-area:1/1; align-self:end; padding:clamp(14px,3.6vw,26px) clamp(14px,3.2vw,24px); color:#fff;">
+    <h1 style="font-size:clamp(16px,4.4vw,26px); line-height:1.35; font-weight:800; margin:0 0 8px; color:#fff;">{제목}</h1>
+    <p style="margin:0; font-size:clamp(11px,2.9vw,13px); opacity:.85;">{날짜} · 읽는 시간 {N}분</p>
   </figcaption>
 </figure>
 
-<!-- B. 결함형 — 초록 헤더 박스 + 아래에 히어로가 따로 (이 구조를 A로 병합한다) -->
+<!-- B. 결함형 — 색 헤더 박스 + 아래에 히어로가 따로 (이 구조를 A로 병합한다) -->
+
+<!-- C. 舊 결함형(v5.5~v5.9) — 구조는 A인데 캡션이 position:absolute + 고정 26px.
+     모바일에서 캡션이 이미지보다 커져 윗부분이 잘린다. 발견 즉시 A로 정규화한다 -->
 ```
+
+⛔ **(v6.0) `position:absolute` 캡션은 금지한다.** 절대 위치 캡션은 **자기 높이가 figure 높이에 반영되지 않으므로**, 좁은 화면에서 반드시 넘친다. 위 A의 그리드 스택은 행 높이가 `max(이미지, 캡션)` 이라 **figure가 캡션을 따라 커지고 넘침이 구조적으로 불가능**하다. 넘쳐서 생긴 여백은 그라디언트 `<div>`(기본 `stretch`)와 `figure{background:#111}` 이 덮으므로 흰 글자가 그대로 읽힌다.
+
+⛔ **(v6.0) 히어로 제목·메타의 `font-size` 와 `padding` 은 반드시 `clamp()` 로 쓴다.** 고정 26px은 320px 화면에서 제목 65자를 **6줄**로 밀어내 캡션을 304px까지 키운다 (이미지는 180px). `clamp(16px,4.4vw,26px)` 이면 같은 제목이 **4줄·145px** 로 줄어 이미지 안에 들어간다. 데스크톱에서는 상한 26px에 걸려 **종전과 픽셀 단위로 동일**하다.
 
 **판정과 병합 절차 (저장 전, 7-2.5 직후에 수행):**
 
@@ -1038,12 +1136,13 @@ JSON.stringify(window._headerMerge)
 ```javascript
 // 병합 실행 — 헤더 박스의 제목·날짜를 히어로 figure 안으로 옮기고 헤더 박스는 제거한다
 if (window._headerMerge.headerBox && window._headerMerge.heroFig && !window._headerMerge.alreadyOverlay) {
-  const titleHtml = h1.outerHTML.replace(/<h1([^>]*)>/, '<h1 style="font-size:26px; line-height:1.4; font-weight:800; margin:0 0 10px; color:#fff;">');
+  const titleHtml = h1.outerHTML.replace(/<h1([^>]*)>/, '<h1 style="font-size:clamp(16px,4.4vw,26px); line-height:1.35; font-weight:800; margin:0 0 8px; color:#fff;">');
   const metaEl = headerBox.querySelector('p');
-  const metaHtml = metaEl ? metaEl.outerHTML.replace(/<p([^>]*)>/, '<p style="margin:0; font-size:13px; opacity:.85;">') : '';
+  const metaHtml = metaEl ? metaEl.outerHTML.replace(/<p([^>]*)>/, '<p style="margin:0; font-size:clamp(11px,2.9vw,13px); opacity:.85;">') : '';
 
-  heroFig.setAttribute('style', 'position:relative; margin:0 0 28px; border-radius:16px; overflow:hidden;');
-  heroImg.setAttribute('style', 'width:100%;display:block;height:auto;');
+  // (v6.0) 그리드 스택 — 세 자식을 같은 칸에 겹치고, 행 높이는 max(이미지, 캡션)이 된다
+  heroFig.setAttribute('style', 'display:grid; margin:0 0 28px; border-radius:16px; overflow:hidden; background:#111;');
+  heroImg.setAttribute('style', 'grid-area:1/1; width:100%; display:block; height:auto; align-self:start;');
   if (!/fetchpriority=/.test(heroImg.outerHTML)) heroImg.setAttribute('fetchpriority', 'high');
   heroImg.removeAttribute('loading');                       // 히어로는 LCP — lazy 금지
 
@@ -1052,11 +1151,11 @@ if (window._headerMerge.headerBox && window._headerMerge.heroFig && !window._hea
   if (oldCap) oldCap.remove();
 
   const shade = document.createElement('div');
-  shade.setAttribute('style', 'position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);');
+  shade.setAttribute('style', 'grid-area:1/1; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);');
   heroFig.appendChild(shade);
 
   const cap = document.createElement('figcaption');
-  cap.setAttribute('style', 'position:absolute; bottom:0; left:0; right:0; padding:26px 24px; color:#fff;');
+  cap.setAttribute('style', 'grid-area:1/1; align-self:end; padding:clamp(14px,3.6vw,26px) clamp(14px,3.2vw,24px); color:#fff;');
   cap.innerHTML = titleHtml + metaHtml;
   heroFig.appendChild(cap);
 
@@ -1079,6 +1178,43 @@ if (window._headerMerge.headerBox && window._headerMerge.heroFig && !window._hea
 - 이 병합은 **총 이미지 수를 바꾸지 않는다** — 히어로를 옮겨 붙일 뿐이므로 상한 5장 계산과 무관하다
 
 ℹ️ **근본 원인은 Writer 루틴의 헤더 템플릿이다.** 이 조항은 사후 교정이므로, B형이 **2회 이상 연속으로 감지되면** STEP 8에 "Writer 헤더 템플릿 점검 필요"를 🔴로 올린다.
+
+🆕 **2.6b) (v6.0) 반응형 정규화 — 병합 여부와 무관하게 매번 수행한다**
+
+`alreadyOverlay: true` 로 병합을 건너뛴 글에도 **舊 절대위치 캡션(C형)이 그대로 남아 있을 수 있다.** 그래서 반응형 스타일 적용은 병합의 일부가 아니라 **독립된 정규화 단계**로 항상 돌린다.
+
+```javascript
+// (v6.0) 히어로 figure를 반응형 그리드 스택으로 정규화한다 — A형·B형 병합분·C형 모두에 적용
+const d2 = document.createElement('div'); d2.innerHTML = window._newContent;
+const hf = Array.from(d2.querySelectorAll('figure')).find(f => f.querySelector('figcaption h1'));
+window._norm = 'no-hero';
+if (hf) {
+  const im = hf.querySelector('img');
+  const cp = hf.querySelector('figcaption');
+  const t1 = cp.querySelector('h1');
+  const mp = cp.querySelector('p');
+  let sh = Array.from(hf.children).find(x => x.tagName === 'DIV');
+  if (!sh) { sh = document.createElement('div'); hf.insertBefore(sh, cp); }   // 그라디언트가 없던 글 보강
+  hf.setAttribute('style', 'display:grid; margin:0 0 28px; border-radius:16px; overflow:hidden; background:#111;');
+  im.setAttribute('style', 'grid-area:1/1; width:100%; display:block; height:auto; align-self:start;');
+  im.removeAttribute('loading');
+  if (!/fetchpriority=/.test(im.outerHTML)) im.setAttribute('fetchpriority', 'high');
+  sh.setAttribute('style', 'grid-area:1/1; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);');
+  cp.setAttribute('style', 'grid-area:1/1; align-self:end; padding:clamp(14px,3.6vw,26px) clamp(14px,3.2vw,24px); color:#fff;');
+  t1.setAttribute('style', 'font-size:clamp(16px,4.4vw,26px); line-height:1.35; font-weight:800; margin:0 0 8px; color:#fff;');
+  if (mp) mp.setAttribute('style', 'margin:0; font-size:clamp(11px,2.9vw,13px); opacity:.85;');
+  window._newContent = d2.innerHTML;
+  window._norm = 'ok';
+}
+window._norm
+ + ' gridArea:' + ((window._newContent.match(/grid-area:1\/1/g) || []).length)      // 히어로 있으면 3
+ + ' clamp:' + ((window._newContent.match(/clamp\(/g) || []).length)                // 히어로 있으면 4
+ + ' absCap:' + ((window._newContent.match(/<figcaption[^>]*position\s*:\s*absolute/g) || []).length)  // 0이어야 함
+```
+
+- **`gridArea` 3 · `clamp` 4 · `absCap` 0** 이 정상값이다. 하나라도 어긋나면 저장하지 않는다
+- 이 단계는 **이미지 개수·본문 텍스트·h1 개수를 바꾸지 않는다** — 스타일 속성만 덮어쓴다
+- 그라디언트 `<div>` 가 없던 옛 글에는 **한 개 삽입**되므로 `<div>` 카운트만 +1 될 수 있다. `_evGuard` 의 `imgTags`·`h1Cnt`·`figPair` 는 그대로여야 한다
 
 ```javascript
 // 2.9) 저장 전 불가침 검증 (v3.4 백포트 — 필수)
@@ -1105,7 +1241,11 @@ window._evGuard = {
   h1Cnt:   cnt(before, /<h1/g) + '->' + cnt(after, /<h1/g),                            // (v5.5) 좌우 같아야 함 (헤더 병합해도 h1은 1개)
   h1InFig: (after.match(/<figure[^>]*>[\s\S]*?<h1/g) || []).length,                    // (v5.5) 병합했으면 1, 안 했으면 0
   heroLazy:(() => { const t = after.match(/<img[^>]*>/g) || [];                        // (v5.5) 0이어야 함 — 히어로에 lazy 금지
-             return t.filter(x => /fetchpriority="high"/.test(x) && /loading="lazy"/.test(x)).length; })()
+             return t.filter(x => /fetchpriority="high"/.test(x) && /loading="lazy"/.test(x)).length; })(),
+  absCap:  cnt(after, /<figcaption[^>]*position\s*:\s*absolute/g),                   // (v6.0) 0이어야 함
+  gridArea:cnt(after, /grid-area:1\/1/g),                                            // (v6.0) 히어로 있으면 3
+  clampCnt:cnt(after, /clamp\(/g),                                                   // (v6.0) 히어로 있으면 4
+  fixed26: cnt(after, /font-size:26px/g)                                             // (v6.0) 0이어야 함 — 고정 26px 잔존
 };
 Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ```
@@ -1113,6 +1253,8 @@ Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
 🆕 **(v5.4) `noWpCls` 가 0이 아니면 그 이미지는 srcset을 못 받는다** — 클래스 주입이 빠진 것이므로 저장 금지. `wpImgCls` 증가분이 이번에 넣은 이미지 수와 다른 경우도 마찬가지다.
 🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
+🚨 **(v6.0) `absCap` 또는 `fixed26` 이 0이 아니면 저장 금지.** 전자는 절대위치 캡션이, 후자는 고정 26px 폰트가 남아 있다는 뜻이고 **둘 다 모바일에서 제목이 잘리는 원인**이다. 히어로가 있는 글이라면 `gridArea` 는 **3**, `clampCnt` 는 **4** 여야 한다 (히어로가 없는 글은 둘 다 0).
+
 🆕 **(v5.5) `h1Cnt` 좌우가 다르거나 `heroLazy` 가 0이 아니면 저장 금지.** 전자는 헤더 병합이 제목을 잃거나 복제한 것이고, 후자는 LCP 요소에 지연 로딩이 붙은 것이다. `h1InFig` 는 병합을 수행했으면 **1**, `alreadyOverlay`/`headerBox 없음` 으로 건너뛰었으면 **0 또는 1** 이면 정상이다.
 
 ```javascript
@@ -1237,6 +1379,33 @@ const box = document.querySelector('.entry-content h1, article h1');
 ```
 
   `h1InFigure:YES` 면 정상이다. `NO` 이고 `h1Bg` 가 투명이 아닌 색이면 **초록 박스가 그대로 남은 상태**이므로 7-2.6을 다시 돌린다
+- 🆕 **(v6.0) 모바일 375px에서 제목이 이미지 안에 온전히 들어가는가?** 데스크톱만 보면 절대 발견되지 않는 결함이다 (2026-08-31에 13건이 이 방식으로 누락돼 있었다). **`resize_window` 는 이 사이트에서 뷰포트를 바꾸지 못하므로**(`innerWidth` 가 그대로다) **같은 원점 아이프레임으로 실측**한다:
+
+```javascript
+// (v6.0) 375px 아이프레임 실측 — 프리뷰/발행 페이지에서 실행
+const f = document.createElement('iframe');
+f.style.cssText = 'position:fixed;left:-4000px;top:0;width:375px;height:1000px;border:0';
+f.src = location.pathname + '?nc=' + Date.now();
+document.body.appendChild(f);
+await new Promise(r => { f.onload = r; setTimeout(r, 15000); });
+await new Promise(r => setTimeout(r, 2000));
+const d = f.contentDocument;
+const fig = d.querySelector('.entry-content figure');
+const cap = fig && fig.querySelector('figcaption');
+const h1 = cap && cap.querySelector('h1');
+const out = !fig ? 'NO-HERO' : (() => {
+  const fb = fig.getBoundingClientRect(), cb = cap.getBoundingClientRect();
+  const over = -Math.round(cb.top - fb.top);
+  return 'vw' + f.contentWindow.innerWidth + ' figH' + Math.round(fb.height)
+    + ' capH' + Math.round(cb.height) + ' 여유' + (-over) + 'px'
+    + ' fs' + f.contentWindow.getComputedStyle(h1).fontSize + (over > 0 ? '  ❌넘침' : '  ✅');
+})();
+f.remove(); out
+```
+
+  - **여유가 0 이상이면 통과.** 음수면 제목 윗줄이 잘린 것이므로 7-2.6b를 다시 돌린다
+  - 여유가 **10px 미만이면 320px(구형 아이폰 SE)에서 위험**하므로 `f.style.width` 를 `320px` 로 바꿔 한 번 더 본다
+  - 2026-08-31 기준 정상 예시: 375px에서 `figH204 capH145 여유60px fs16.5px ✅`, 320px에서 여유 6px
 - 증빙 캡처가 원래 자리에 그대로 있는가? (`window._evGuard` 확인)
 - **워터마크 흔적(✦)이 남아 있지 않은가?** — 남아 있으면 STEP 5-4의 `cropRight` 값을 늘려 재캡처하거나, 이미 업로드된 파일을 0and1life.com **동일 출처**에서 canvas로 다시 읽어 재크롭·재업로드한다.
 - 표·TOC·내부링크 등 기존 요소가 삽입으로 깨지지 않았는가?
@@ -1271,6 +1440,8 @@ const box = document.querySelector('.entry-content h1, article h1');
 - ⛔ **(v5.3) 큐잉 검증 항목은 삭제한다.** v5.2에서 확정 동작이 됐고 2026-08-19에 4쌍 동시 생성으로 재확인됐다. 매 회차 보고할 이유가 없다
 - 🆕 **(v5.5) 헤더 병합 결과**: `window._headerMerge` 판정값(`headerBox`/`heroFig`/`alreadyOverlay`)과 `merged` 여부, 렌더 기준 `h1InFigure:YES/NO`. **B형(초록 박스+독립 히어로)이 감지됐다면 그 사실을 반드시 남기고, 2회 연속이면 🔴 「Writer 헤더 템플릿 점검 필요」로 올린다**
 - 🆕 **(v5.5) UI 오탐 발생 여부**: ⓐ 5-3 폴링의 `same` 이 2 이상으로 올라가 스크린샷 폴백을 썼는지 ⓑ 5-2 포커스 검증에서 상단 검색창이 잡혀 재클릭했는지 ⓒ 필터 칩 해제가 필요했는지. **세 항목 모두 "없음"이면 한 줄로 "UI 오탐 없음"만 적는다**
+- 🆕 **(v5.9) 뷰포트·전송 사고 기록**: ⓐ `zoom` 호출 횟수(**0이어야 정상**) ⓑ 뷰포트 고착이 발생했다면 그 시점과 탭 재생성 여부 ⓒ 전송 검증(`boxLen`)에서 실패로 잡혀 재클릭한 건수 ⓓ 인덱스 확정에 쓴 방법(`outline` 마킹 / RGB 서명). **모두 정상이면 한 줄로 "뷰포트·전송 사고 없음"만 적는다**
+- 🆕 **(v6.0) 모바일 히어로 검증 결과**: 375px 아이프레임 실측의 `figH`/`capH`/`여유`/`fs` 를 그대로 적고, 여유가 10px 미만이면 320px 재측정 값도 함께 남긴다. `_evGuard` 의 `absCap`·`fixed26`(둘 다 0) · `gridArea`(3) · `clampCnt`(4)도 명시한다
 - **삭제 대기 미디어**: 재크롭 등으로 남은 원본 미디어 ID를 나열하고 **사용자 확인을 요청**한다 (임의 삭제 금지)
 - 루틴 자체의 오류·개선점이 발견됐다면 **수정할 조항 번호와 교체용 전문(前文)**을 함께 제시한다 — 사용자가 붙여넣기만 하면 되도록
 
@@ -1278,7 +1449,7 @@ const box = document.querySelector('.entry-content h1, article h1');
 
 ### 중요 주의사항
 
-- 📸 **(v5.7) 글이 특정 서비스·앱·기관 화면 자체를 다룰 때만 실사 캡처를 병용한다** (STEP 3-9). 구글에 중복 이미지 랭킹 페널티는 없으며, 실제 제약은 저작권·상표권·애드센스다. **로그인 후 화면·개인정보·뉴스 본문·타인의 사진은 캡처 금지**, 전체 페이지 통짜 캡처 금지, 로고 단독 컷 금지, **히어로는 항상 생성 이미지**. 캡처는 증빙으로 계산돼 총량 상한 5장에 그대로 편입된다
+- 📸 **(v5.8) 이 루틴은 Flow 생성 이미지만 쓰는 루틴이 아니다** (STEP 3-9). 글에 실제로 존재하는 제품·앱·서비스·기관이 나오고 실물 이미지가 필요하면 **넣는다.** 규칙은 셋 — ① **공식 출처**(프레스킷·공식 사이트 캡처·공식 채널)는 그냥 쓴다 ② **아마존 이미지는 핫링크만**, 자체 업로드 금지 ③ **출처 불명 이미지는 쓰지 않는다**(유일한 금지선). figcaption에 출처+확인일 병기, 개인정보 화면 제외. 실물 1장은 증빙으로 계산돼 생성이 1장 줄어든다
 - Chrome이 열려 있고, 0and1life.com WP admin에 로그인되어 있어야 함
 - **(v4.0) labs.google(Google Flow)에 로그인되어 있어야 함** — Flow 프로젝트 URL은 STEP 5 상단 참조
 - 🆕 **(2026-08-26) Flow가 계정 선택 화면으로 튕기면 `leejc0404@gmail.com` 을 클릭해 진행한다** (사용자 사전 승인). **비밀번호 입력 화면이 나오면 즉시 중단**하고 STEP 5 상단의 세션 만료 대응 절차를 따른다
@@ -1299,7 +1470,7 @@ const box = document.querySelector('.entry-content h1, article h1');
 - ⛔ **(v5.3) "JS 안에서는 시간 제한이 없다"는 v5.1·v5.2의 서술은 폐기한다.** 이 오해 때문에 2026-08-19 회차가 120초·35초 루프로 **2회 연속 타임아웃**을 냈다
 - Chrome MCP의 scroll_amount는 최대 10 — 그리드 내 스크롤은 페이지 이동이 아니므로 캡처 전에 써도 무방하다 (하위 행의 후보를 볼 때 필요)
 - 🆕 **(v5.1) 캡처 완료 전까지 Flow 그리드를 떠나지 않는다** — 에디터 진입·새로고침·주소창 이동 모두 금지. 복귀 시 그리드 재로딩에 20여 초가 든다 (실측 6s·14s 0개 → 26s 18개)
-- 🆕 **(v5.1) 에디터 뷰는 쓰지 않는다.** 그리드 썸네일이 원본 해상도(1376×768)이므로 판정·캡처 모두 그리드에서 끝낸다. 세밀 확인은 `zoom` 으로 해당 영역만
+- 🆕 **(v5.1) 에디터 뷰는 쓰지 않는다.** 그리드 썸네일이 원본 해상도(1376×768)이므로 판정·캡처 모두 그리드에서 끝낸다. 세밀 확인은 **전체 스크린샷 재촬영**으로 한다 — **(v5.9) `zoom` 금지**
 - 🆕 **(v5.1) 진행 상태 확인에 스크린샷을 먼저 쓰지 않는다.** JS 폴링이 반환하는 짧은 문자열로 판단한다. 스크린샷은 ⓐ 그리드 채택 판정 1장 ⓑ 최종 육안 검증 ⓒ **(v5.3) 폴링이 2회 연속 CDP 타임아웃일 때의 폴백**에만 쓴다
 - 🆕 **(v5.3) 삽입 위치는 증빙 캡처의 ±5%pt 구간을 피한다** (STEP 4). 비율이 맞아도 증빙 옆이면 다른 h2를 고르고, 배제 후에도 섹션 주제가 안 맞으면 **주제를 비율보다 우선**한다
 - 🆕 **(v5.3) 테마의 대표이미지 헤더(`.featured-image.page-header-image-single`)는 `display:none` 이다.** 기계 검증에서 히어로가 두 번 잡히는 것은 **정상**이며, `getComputedStyle` 확인 없이 중복으로 보고하지 않는다 (STEP 7.5)
@@ -1318,6 +1489,14 @@ const box = document.querySelector('.entry-content h1, article h1');
 - 🆕 **(v5.5) 캡처 인덱스는 좌표가 아니라 `outline` 마킹으로 확인한다.** `getBoundingClientRect()` 가 4열 화면을 2열로 보고한 실측이 있다 (2026-08-25)
 - 🆕 **(v5.5) Flow 첫 입력은 `document.activeElement` 로 포커스를 검증한 뒤 타이핑한다.** 상단 검색창에 들어가면 프롬프트가 유실되고 필터 칩까지 걸린다
 - 🆕 **(v5.5) Flow 설정 패널은 `동영상` 으로 열려 있을 수 있고, `이미지` 를 누르면 비율 버튼 줄이 통째로 바뀐다.** ① 이미지 → ② 16:9 → ③ 모델 → ④ x2 순서를 지키고 ①과 ② 사이에 스크린샷으로 좌표를 다시 읽는다
+- 🧨 **(v5.9) Flow 탭에서 `computer:zoom` 을 사용하지 않는다.** 2026-08-31 실측: zoom 호출이 `Page.captureScreenshot` 타임아웃과 함께 탭에 **뷰포트 에뮬레이션(981×184)을 고착**시켰고 `resize_window` 로 복구되지 않았다. 그 상태에서 프롬프트 1건이 전송되지 못하고 입력창에 잔류했으며, 상단 검색창 오염과 `동영상` 필터 칩이 동시에 걸렸다. 세밀 확인은 **전체 스크린샷 재촬영** 또는 **5-5의 RGB 서명**으로 대체한다. **이미 고착됐다면 유일한 복구는 탭을 닫고 새 탭에서 프로젝트를 다시 여는 것이다**
+- 🆕 **(v5.9) 전송 버튼 좌표는 매번 JS로 확인하고, 전송 성공을 문자열로 검증한다.** `aria-label` 에 `arrow_forward` 가 들어간 버튼의 rect를 스크린샷 좌표계로 환산해 클릭하고, 직후 `[role="textbox"]` 의 `textContent.trim().length` 가 **20 미만**인지 확인한다. 20 이상이면 전송 실패이므로 **다음 프롬프트를 타이핑하지 않는다** — 이어붙으면 두 프롬프트가 한 문장으로 섞여 둘 다 버려야 한다
+- 🆕 **(v5.9) 스크린샷 좌표계와 뷰포트가 다를 수 있다.** 클릭 전에 `innerWidth` 를 읽어 `sc = 1568 / innerWidth` 로 환산한다. 그리드 열 수(4열/5열)도 창 크기에 따라 바뀌므로 **캡처 인덱스는 DOM 순서 + RGB 서명으로만 확정**하고 좌표로 추론하지 않는다
+- 📱 **(v6.0) 히어로 제목 오버레이에 `position:absolute` 를 쓰지 않는다.** 절대위치 캡션은 자기 높이가 figure에 반영되지 않아 **좁은 화면에서 반드시 넘치고 `overflow:hidden` 에 잘린다.** `figure{display:grid}` + 세 자식 `grid-area:1/1` + `img{align-self:start}` / `figcaption{align-self:end}` 로 쓴다 (STEP 7-2.6 템플릿 A)
+- 📱 **(v6.0) 히어로 제목·메타의 `font-size`·`padding` 은 `clamp()` 로만 쓴다.** 제목 `clamp(16px,4.4vw,26px)`, 메타 `clamp(11px,2.9vw,13px)`, 패딩 `clamp(14px,3.6vw,26px) clamp(14px,3.2vw,24px)`. 고정 26px은 375px 화면에서 캡션을 304px까지 키운다(이미지는 180px) — **제목 앞 2~3줄이 사라진다**
+- 📱 **(v6.0) 저장 전 `_evGuard.absCap === 0` 과 `_evGuard.fixed26 === 0` 을 반드시 확인한다.** 히어로가 있는 글이면 `gridArea` 3 · `clampCnt` 4
+- 📱 **(v6.0) 검증은 데스크톱만 보지 않는다.** `resize_window` 는 이 사이트에서 `innerWidth` 를 바꾸지 못하므로, **같은 원점 375px 아이프레임**으로 실측한다 (STEP 7.5). 2026-08-31에 오버레이 글 13건 전부가 데스크톱 검증만 통과한 채 모바일에서 잘려 있었다
+- 🆕 **(v6.0) 히어로가 이미 오버레이형이어도 스타일 정규화는 매번 돌린다** (7-2.6b). `alreadyOverlay: true` 로 병합을 건너뛴 글에 舊 절대위치 캡션이 그대로 남아 있는 경우가 실제로 다수였다
 - 글 제목(title)은 수정하지 않음
 - 이미지 삽입 후 글 상태(publish/draft/future)는 변경하지 않음 — **발행·예약발행 전환은 어떤 경우에도 금지 (발행 결정은 항상 사용자 몫, 2026-08-01 사용자 지시)**
 - **미디어 삭제는 어떤 경우에도 사용자 확인 후에만 수행한다** (2026-08-01 사용자 지시)
