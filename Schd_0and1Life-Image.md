@@ -1,85 +1,4 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v6.0 — 히어로 헤더를 반응형 그리드 스택으로 전면 교체)
-
-> 📱 **v6.0 변경 (2026-08-31) — 히어로 제목 오버레이가 모바일에서 이미지 밖으로 넘쳐 잘렸다. 오버레이를 쓰는 글 13건 전부가 해당됐다.**
-> 사용자 지적: *"모바일로 보니 제목의 가장 윗줄이 이미지 밖으로 벗어나서 잘려 있다."*
->
-> **원인은 v5.5가 도입한 오버레이 캡션 자체의 구조다.** 캡션이 `position:absolute; bottom:0` 이고 폰트가 **고정 26px**이라, 캡션 높이가 화면 폭과 무관하게 커진다. 반면 figure 높이는 이미지 비율로 결정된다. 좁은 화면에서는 줄 수가 늘어 **캡션이 이미지보다 커지고, 넘친 윗부분이 `overflow:hidden` 에 잘려 사라진다.**
->
-> | 실측 (2026-08-31, 375px 아이프레임) | 값 |
-> |---|---|
-> | 본문 콘텐츠 폭 (뷰포트 375px) | **288px** |
-> | 히어로 figure 높이 (1100×689 기준) | **204px** |
-> | 캡션 높이 (제목 65자, 26px 고정) | **304px** |
-> | 넘쳐서 잘린 양 | **99px (제목 앞 2~3줄 소실)** |
->
-> 사용자가 "정상"이라고 본 글(1322)도 **375px에서는 똑같이 99px 잘린다.** 기기 폭이 넓어 덜 티가 났을 뿐이다 — 430px에서는 두 글 모두 29px 잘렸다.
->
-> **교정: `position:absolute` 를 버리고 `display:grid` 스택 + `clamp()` 로 바꾼다.**
->
-> | 조치 | 효과 |
-> |---|---|
-> | `figure{display:grid}` · 세 자식 모두 `grid-area:1/1` | 행 높이 = max(이미지, 캡션) → **캡션이 커지면 figure가 따라 커진다. 넘침이 원천적으로 불가능** |
-> | `img{align-self:start}` · `figcaption{align-self:end}` | 이미지는 비율 유지, 캡션은 하단 정렬 (기존 디자인 그대로) |
-> | 그라디언트 `<div>` 도 `grid-area:1/1` (기본 stretch) + `figure{background:#111}` | figure가 커져 생긴 여백까지 어둡게 덮어 **흰 글자 가독성 확보** |
-> | `h1{font-size:clamp(16px,4.4vw,26px)}` · 패딩도 `clamp()` | 좁은 화면에서 자동 축소 → 대부분 이미지 안에 그대로 들어간다 |
->
-> 검증 (수정 후 실측): 320 / 360 / 375 / 412 / 768 / 1440px **전 구간 ✅**, 최악(320px)에서도 여유 6px. 데스크톱은 `fs 26px` 로 종전과 완전히 동일하다.
-> 조치 범위: **오버레이형 13건 전부 수정 완료** (발행 11 · 예약 2). 본문 텍스트·이미지·글 상태는 일절 건드리지 않고 히어로 `figure` 마크업만 교체했다.
->
-> 🔎 **부수 발견 — 구버전 raw 오염 4건**: `821 · 937 · 1018 · 1031` 의 `post_content` 에 **ez-toc 목차가 정적 HTML로 박제**돼 있다(각 45~55개 매치). v3.1 이하 시절의 `content.rendered` 폴백 저장 흔적이다. 이번 수정은 이 부분을 건드리지 않았다 — **STEP 3-1의 리비전 복구 절차를 사용자 확인 후 별도로 돌려야 한다.**
-
-> 🧨 **v5.9 변경 (2026-08-31) — 2026-08-31 실전(Post 1322·1323, 8장)에서 드러난 결함 1건과 그 연쇄 피해.**
-> 이번 회차는 이미지 8장이 전부 통과했고 두 글 모두 정상 저장됐다. 다만 **`computer:zoom` 한 번이 Flow 탭을 통째로 망가뜨렸고**, 그 여파로 프롬프트 1건 유실 · 검색창/필터 오염 · 탭 폐기·재생성까지 갔다.
->
-> | # | 사건 (2026-08-31 실측) | 개정 |
-> |---|---|---|
-> | ① | **`computer:zoom` 이 탭에 뷰포트 에뮬레이션을 고착시켰다.** `Page.captureScreenshot` 타임아웃과 함께 `innerWidth/innerHeight` 가 **981×184 로 굳었고**, `outerWidth 1920×1040` 인데도 그대로였다. `resize_window` 를 두 번 불러도 복구되지 않았다 | **5-4·5-5·주의사항에서 `zoom` 사용을 전면 금지.** 세밀 확인은 ⓐ 전체 스크린샷 재촬영 ⓑ **canvas 8×5 평균 RGB 서명**으로 대체 |
-> | ② | ①의 여파로 **프롬프트 1건이 전송되지 않고 입력창에 잔류**했고, 이어진 타이핑이 그 뒤에 이어붙어 두 프롬프트가 한 문장으로 섞였다. 동시에 상단 검색창에 4자가 들어가고 `동영상` 필터 칩이 걸려 그리드가 빈 것처럼 보였다 | **5-2에 전송 버튼 rect 실시간 조회 + 전송 성공 검증(`textbox.textContent.length < 20`) 추가** |
-> | ③ | 복구책이 없었다. 결국 **탭을 닫고 새 탭에서 프로젝트를 다시 열어야** 했다 (그리드 재로딩 약 20초 재지불) | **주의사항에 "고착 시 유일한 복구는 탭 폐기·재생성"을 명문화** |
-> | ④ | 4열/5열 레이아웃이 스크린샷과 어긋나 **어느 카드가 어느 프롬프트의 산출인지 육안으로 확정할 수 없었다.** v5.5의 `outline` 마킹조차 스크린샷 스케일 변동으로 흔들렸다 | **5-5에 RGB 서명 대조 절차 신설** — 프롬프트별 색 온도 차이로 쌍이 즉시 갈린다 (실측: 우편함 `rgb(140,121,87)` vs 병원창구 `rgb(94,97,91)`) |
->
-> 이번 회차 실적: 대상 2편 · 생성 8장 · 재생성 0건 · `_evGuard` 전 항목 통과 · `srcset` 8/8 주입 · 헤더 병합 2/2 성공 · `Page.captureScreenshot` 타임아웃 5회(전부 단독 재호출로 복구) · `Runtime.evaluate` 타임아웃 0회.
-> 🔴 **후속 과제**: B형 헤더(색 박스 + 독립 히어로)가 **2회 연속** 감지됐다 — Writer 루틴의 헤더 템플릿 점검이 필요하다.
-
-> 🧩 **v5.5 변경 (2026-08-25) — 2026-08-25 실전(Post 1278)에서 드러난 결함 4건.**
-> 이번 회차는 이미지 4장 자체는 전부 통과했는데, **UI를 잘못 읽어 낭비한 호출**과 **히어로가 제목과 분리돼 버리는 구조 결함**이 함께 나왔다.
->
-> | # | 사건 (2026-08-25 실측 · Post 1278) | 개정 |
-> |---|---|---|
-> | ① | **히어로가 제목과 분리됐다.** Writer가 만든 본문이 `초록 헤더 박스(제목+날짜)` + `그 아래 독립 히어로 figure` 구조였고, 7-2.5는 `<img>` 의 src만 갈아끼우므로 **제목 위에 이미지가 깔리는 원래 디자인이 복원되지 않았다.** 사용자 지적: "제목쪽이 그냥 초록색으로 되어 있다" | **STEP 7-2.6 신설** — 헤더 박스 + 독립 히어로를 감지해 **제목 오버레이형 `<figure>` 하나로 병합**한다 |
-> | ② | 5-3 폴링이 **완료 후에도 `prog:4` 로 3회(약 90초) 헛돌았다.** `div,span,p` 전체에서 `^\d{1,3}%$` 를 찾는 셀렉터가 **진행률 카드가 아닌 요소**(설정 패널 잔상 등)를 계속 잡았다 | **셀렉터를 그리드 컨테이너 하위로 한정**하고, **정체(stall) 판정**을 추가 — 직전 호출과 `prog`·`big` 이 모두 같으면 완료로 본다 |
-> | ③ | 5-5의 인덱스 대조가 불가능했다. `getBoundingClientRect()` 가 **2열 레이아웃(left 16/325)** 을 보고했는데 화면은 **4열**이었다 — 좌표를 캡처 대상 선택에 쓸 수 없다 | **좌표 대신 `outline` 마킹 1회**로 DOM 순서 = 시각 순서를 확인하는 절차를 명문화 (호출 1회로 끝난다) |
-> | ④ | 첫 프롬프트 입력 클릭이 **상단 검색창에 들어가 프롬프트 1건이 통째로 유실**됐다. 게다가 `동영상` 필터 칩이 켜져 그리드가 빈 상태로 보였다 | **입력 직전 `document.activeElement` 확인**과 **필터 칩 해제** 절차를 5-2에 추가 |
->
-> 또 하나 기록해 둘 것: **WP 세션이 회차 도중이 아니라 회차 직후에 끊겼다.** 후속 수정 작업에서 `reauth=1` 로 튕겼다. 로그인 폼 대리 제출은 금지이므로, 세션 만료를 만나면 그 자리에서 중단하고 사용자에게 알린다(STEP 1 기존 조항 그대로).
-
-> 🖼 **v5.4 변경 (2026-08-19) — 이미지 전송량. 이 루틴은 지금까지 리사이즈본을 만들어만 두고 한 번도 쓰지 않았다.**
->
-> 사용자 지적("Flow로 바꾸면서 리사이징이 안 된 것 같다")을 실측한 결과, WebP 변환 자체는 정상이었으나 **두 가지 결함**이 겹쳐 있었다.
->
-> | | 결함 | 실측 (2026-08-19) | 개정 |
-> |---|---|---|---|
-> | ① | **다운스케일 단계 부재** | v4.0에서 Flow로 갈아타며 원본이 984×469(46만px) → **1226×768(94만px)로 2.05배**. 본문 표시 폭은 **728px**이라 1.68배 과잉. 파일도 25~63KB → **57~154KB** | **5-5에 `TARGET_W = 1100` 다운스케일 추가**. `imageSmoothingQuality:'high'` 로 축소 화질 보존 |
-> | ② | **`srcset` 이 전혀 안 붙음 (더 큰 문제)** | 삽입 마크업에 `wp-image-{ID}` 클래스가 없어 `wp_filter_content_tags()` 가 동작하지 않았다. WP가 만들어 둔 **300/768/1024px 리사이즈본이 하나도 안 쓰이고** 모두 원본을 통째로 받는다. 발행분 751·894·1095 **전부 srcset 0 / lazy 0** — Flow 이전부터의 결함 | **7-2 · 7-2.5에 `class="wp-image-{ID}"` 주입**, 본문은 `loading="lazy"`, 히어로는 `fetchpriority="high"`. `_evGuard` 에 `noWpCls` 게이트 신설 |
->
-> 두 조치를 합치면 **1배속 독자 실전송량이 60~80% 감소**한다(768px본 약 35KB). ①만 해서는 효과가 25%에 그치므로 **②가 본체**다.
-> 왜 900이 아니라 1100인가는 5-5 하단 참조 — 1024 미만으로 줄이면 `large` 사이즈가 생성되지 않아 2배 DPI 화면이 뭉개진다.
-
-> 🛠 **v5.3 변경 (2026-08-19) — 2026-08-19 실전(Post 1175)에서 드러난 결함 3건과 오해 1건을 정리한다.**
->
-> | # | 사건 (2026-08-19 실측) | 개정 |
-> |---|---|---|
-> | ① | STEP 5-3의 `for (t < 24)` **120초 블로킹 폴링이 2회 연속 실패**했다. Chrome MCP는 `javascript_tool` 을 CDP `Runtime.evaluate` 로 실행하는데 여기에 **45초 하드 타임아웃**이 걸려 있다. v5.2가 자랑한 "JS 안에서는 10초 제한이 없다"는 **절반만 맞는 말**이었다 — 10초 wait 상한은 없지만 **45초 CDP 상한은 있다.** 35초(7×5초)로 줄인 재시도도 렌더 부하 중에는 실패했다 | **5-3 폴링 상한을 30초(6×5초)로 고정**하고, 미완료 시 **같은 호출을 반복**하는 구조로 교체. 2회 연속 CDP 타임아웃이면 **스크린샷 대기로 폴백**하는 절차를 명문화 |
-> | ② | 자동 계산된 삽입 위치 27%가 **증빙 캡처(29%)와 305자 거리**에 떨어져, 이미지→헤딩→2문단→증빙 순으로 사실상 연속 배치될 뻔했다. 손으로 43/57/70%로 재배정해 회피 | **STEP 4에 증빙 인접 배제 규칙 신설** — 증빙 figure의 문자 위치 ±5%pt 구간을 삽입 후보에서 자동으로 제외 |
-> | ③ | 최종 검증에서 히어로가 `0%`와 `2%` **두 번 잡혀** 중복으로 오인했다. 실제로는 테마가 대표이미지를 페이지 헤더로 출력하되 **`display:none` 으로 숨기고 있어** 화면에는 1장만 보인다 (Post 1160도 동일 구조) | **STEP 7.5에 가시성 판정 조항 추가** — 같은 src가 2회 잡히면 곧바로 결함으로 보고하지 말고 `getComputedStyle().display` 를 먼저 확인한다 |
-> | ④ | 대상 탐색은 WP REST **1회 질의로 draft 8건**을 받아 즉시 판정에 넘겼다. v5.1의 의도대로 동작 | 변경 없음 — 확정 동작으로 재확인 |
->
-> 이번 회차 실적: 대상 탐색 1회 · Flow 4쌍(8장) **동시 생성 약 60초** · 재생성 0건 · 그리드 이탈 0회 · 총 도구 호출 약 35회.
-
-> ⚡ **v5.2 변경 (2026-08-18) — KoreaPlug에서 역백포트한 효율 규칙 2건.**
-> ① **`fire-and-read` 2회 호출 패턴 폐기.** `javascript_tool` 이 최상위 `await` 를 지원하고 마지막 표현식 값을 반환한다는 것이 실측으로 확인됐다. 舊 주의사항은 "async 결과는 window에 저장 후 별도 호출로 읽는다"를 규칙으로 박아 두어, STEP 2·3·5·7의 모든 비동기 작업이 **매번 2~3회로 쪼개져** 호출됐다. 폴링(5-3)·일괄 캡처(5-5)를 각각 1회 호출로 합쳤다.
-> ② **큐잉 조건 분기 삭제.** v5.1이 "1회차 검증 항목"으로 남겨 둔 큐잉 가능 여부는 2026-08-18 KoreaPlug 프로젝트에서 **실측 확인**됐다 (1차 74% 진행 중 2차 투입 → 13%로 병렬 시작, 4장 60초 완료). 폴백 절차를 삭제하고 **연속 투입을 확정 동작**으로 바꿨다.
-> 함께 정리: 5-4의 '밋밋함 판정' 항목이 두 번 중복돼 있던 것을 1개로 합쳤다.
+# 0and1Life 자동 이미지 삽입 태스크 (v6.1 — Flow 도메인 이전 대응: 교차 출처 캡처 경로 · 동시 생성 상한)
 
 ### 목적
 
@@ -602,6 +521,8 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 `https://labs.google/fx/ko/tools/flow/project/6a6af995-4d64-4bbb-8e97-4be7aa267e6d`
 
+🌐 **(v6.1) 이 URL은 `https://flow.google.com/project/6a6af995-4d64-4bbb-8e97-4be7aa267e6d` 로 리다이렉트된다** (2026-09-04 실측). 탭 목록에 `flow.google.com` 이 보이면 정상이다. 그리드 이미지는 **`flow-content.google`** 에서 서빙되므로 **페이지와 이미지의 출처가 다르다** — 5-5의 교차 출처 캡처 경로가 필요한 이유다.
+
 ℹ️ KoreaPlug와 동일한 프로젝트를 공용으로 쓴다. 사이트별로 프로젝트를 분리하고 싶으면 이 URL만 교체하면 되며, 나머지 절차는 동일하다.
 
 ⚠️ **Flow 세션 만료 대응 (2026-08-26 신설)** — 프로젝트 URL 접속 시 `accounts.google.com/.../accountchooser` 또는 `/signin/oauth/v3/consent` 로 리다이렉트되면 labs.google 세션이 만료된 것이다. 2026-08-26 실측: `/tools/flow` 로 다시 들어가도 동일하게 튕기므로 **자동 복구되지 않는다.**
@@ -617,7 +538,19 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 ⛔ **① 에이전트 토글 상태를 눈으로 확인한다. 이것이 가장 먼저다.**
 
-입력창 좌하단 `에이전트` 칩이 **밝은 배경 = ON**, **어두운 배경 = OFF** 다. ON이면 클릭해 끄고, `computer: zoom` 으로 입력바만 확대해 **어두워진 것을 확인한 뒤** 진행한다.
+입력창 좌하단 `에이전트` 칩이 **밝은 배경 = ON**, **어두운 배경 = OFF** 다. ON이면 클릭해 끈다. 확인은 **(v6.1) `zoom` 이 아니라 아래 JS 한 줄로 한다** (v5.9 zoom 금지와의 모순 해소). 설정 칩의 텍스트에 `crop_16_9` 와 `x2`, `Nano Banana 2` 가 함께 잡히면 ②의 4개 항목도 이 한 줄로 끝난다.
+
+```javascript
+// (v6.1) 에이전트 OFF · 설정 칩 확인 — 2026-09-04 실측 UI 기준
+const bs = Array.from(document.querySelectorAll('button'));
+const ag = bs.find(x => /에이전트/.test(x.textContent || ''));
+const cfg = bs.find(x => /설정 트리거/.test(x.getAttribute('aria-label') || ''));
+'agentPressed:' + (ag ? ag.getAttribute('aria-pressed') : 'na')          // false 여야 정상
+ + ' cfg:' + (cfg ? (cfg.textContent || '').replace(/\s+/g, ' ').slice(0, 60) : 'na')   // "Nano Banana 2 crop_16_9 x2" 여야 정상
+```
+
+- `agentPressed:true` 면 칩을 클릭해 끄고 다시 확인한다
+- `cfg` 에 `crop_16_9`·`x2`·`Nano Banana 2` 중 하나라도 빠지면 ②의 설정 패널을 열어 고친다. `Lite` 가 섞여 있으면 모델이 잘못 잡힌 것이다
 
 > 🚨 **2026-08-26 KoreaPlug 실측 (같은 Flow 프로젝트를 공유하므로 이 루틴도 동일 위험)**: 토글 ON 상태로 제출한 프롬프트가 별도 채팅 세션(`제목 없는 세션`)으로 넘어가 재해석됐고("I'm going to generate 2 images based on your detailed description…"), **2장 모두 `실패`** 로 끝났다. 세션 패널이 그리드를 덮어 **실패 사실을 즉시 알아채지도 못했다.** 舊 지침은 "에이전트를 쓰지 않는다"고만 적고 **상태 확인 절차가 없었다.**
 > 복구: 세션 패널 우상단 `✕` 로 닫으면 그리드가 돌아온다. 실패분은 WP에 올라가지 않으므로 삭제 대기 항목이 아니다.
@@ -636,62 +569,62 @@ Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
 🆕 **(v5.5) 그리드 상단의 필터 칩을 먼저 확인한다.** `최신순` 옆에 `동영상 ✕` 같은 칩이 남아 있으면 **이미지가 하나도 안 보여** 그리드가 빈 것처럼 오인된다. 칩의 `✕` 를 눌러 해제한 뒤 진행한다.
 
-#### 5-2. 프롬프트 일괄 투입 (v5.1 · v5.9 전송 검증)
+#### 5-2. 프롬프트 투입 — 건별 검증 · 동시 2건 상한 (v6.1)
 
-> 🚀 **v5.1 핵심: 그리드를 떠나지 않고, 필요한 프롬프트를 전부 먼저 넣는다.**
-> v4.0/v5.0은 `투입 → 55초 대기 → 에디터 진입 → 캡처 → 그리드 복귀` 를 이미지마다 반복했다. 2026-08-18 실측에서 이 왕복이 전체 시간의 대부분을 먹었다.
+> 🚀 **v5.1 핵심은 유지한다: 그리드를 떠나지 않는다.** 다만 v5.2가 "확정 동작"으로 못 박은 **무제한 연속 투입은 현재 Flow에서 성립하지 않는다.**
+> 2026-09-04 실측: 2쌍(4장)이 진행 중일 때 전송 버튼이 **`disabled`** 로 바뀌어 3번째 클릭이 무시됐고, 프롬프트는 입력창에 남았다. 그 상태에서 `browser_batch` 안의 다음 `type` 이 이어져 **프롬프트 2+3이 한 문장으로 섞여 전송**됐다 — 폐기물 2장, 재투입 2건. 동시 진행은 **2건까지**다.
 
-**투입 절차 (이미지 N장 = N회 반복, 사이에 대기 없음):**
+**투입 절차 (이미지 N장 = N회 반복 · 한 건이 끝나야 다음 건을 타이핑한다):**
 
-1. 입력창 클릭 → **포커스 검증(아래)** → 프롬프트 입력 → **우측 화살표(→)** 클릭
-2. **완료를 기다리지 않고 곧바로** 다음 프롬프트를 같은 방식으로 투입한다
-3. 클릭·입력·전송은 `browser_batch` 로 묶어 1회 호출로 처리한다
+1. 입력창 클릭 → **포커스 검증(아래)** → 프롬프트 타이핑
+2. **전송 버튼 `disabled` 해제를 폴링**한다 (아래 ②). 동시 2건이 진행 중이면 한 쌍이 끝날 때까지(약 20~55초) 버튼이 잠겨 있다
+3. 버튼이 풀리면 **좌표를 JS로 읽어** 클릭 → **`boxLen` 검증**(아래 ③) → 통과해야 다음 건으로
+4. ⛔ **한 `browser_batch` 에 "타이핑 → 클릭 → 다음 타이핑" 을 넣지 않는다.** 배치는 검증 결과를 보고 멈추지 못한다. 허용되는 묶음은 **`타이핑 → disabled 폴링`** 과 **`클릭 → 대기 → boxLen`** 두 종류뿐이며, 그 사이에는 반드시 반환값을 읽는다
 
-🚨 **(v5.5) 첫 프롬프트는 반드시 포커스를 검증하고 넣는다.** 2026-08-25 실측: 하단 입력창을 노렸다고 생각한 클릭이 **상단 검색창에 들어가** 1,000자짜리 프롬프트가 통째로 유실됐고, 그 부작용으로 `동영상` 필터까지 걸렸다. 아래 한 줄을 클릭 직후에 넣으면 1회 호출로 막을 수 있다.
+🚨 **(v5.5) 첫 프롬프트는 반드시 포커스를 검증하고 넣는다.** 2026-08-25 실측: 하단 입력창을 노렸다고 생각한 클릭이 **상단 검색창에 들어가** 1,000자짜리 프롬프트가 통째로 유실됐고, 그 부작용으로 `동영상` 필터까지 걸렸다.
 
 ```javascript
-// 입력 직전 — 포커스가 하단 프롬프트 입력창에 있는지 확인한다
-const a = document.activeElement;
-'tag:' + a.tagName + ' role:' + (a.getAttribute('role')||'-')
- + ' ph:' + (a.getAttribute('placeholder')||a.getAttribute('aria-label')||'-')
- + ' top:' + Math.round(a.getBoundingClientRect().top)
+// ① 입력 직전 — 포커스가 하단 프롬프트 입력창(.ProseMirror)에 있는지 확인하고, 전송 버튼 탐색기를 고정한다
+window._findSend = () => {
+  const pm = document.querySelector('.ProseMirror'); let box = pm;
+  for (let i = 0; i < 6; i++) { box = box.parentElement; if (box.querySelectorAll('button').length >= 3) break; }
+  const bs = Array.from(box.querySelectorAll('button')); return bs[bs.length - 1];   // 마지막 버튼 = 생성 시작(→)
+};
+const a = document.activeElement; const sc = 1568 / innerWidth; const b = window._findSend(); const r = b.getBoundingClientRect();
+'active:' + a.tagName + ' pm:' + a.classList.contains('ProseMirror') + ' top:' + Math.round(a.getBoundingClientRect().top)
+ + ' innerH:' + innerHeight
+ + ' send:' + Math.round((r.left + r.width / 2) * sc) + ',' + Math.round((r.top + r.height / 2) * sc)
+ + ' sendLabel:' + (b.getAttribute('aria-label') || '-') + ' dis:' + b.disabled
 ```
 
-- `ph` 에 **"무엇을 만들고 싶으신가요"** 계열 문구가 잡히고 `top` 이 화면 하단(뷰포트 높이의 80% 이상)이면 정상이다
+- `pm:true` 이고 `top` 이 `innerH` 의 80% 이상이면 정상이다 (2026-09-04 실측: `top 750 / innerH 863`, `sendLabel:생성 시작`, 좌표 `1009,658`)
 - 상단 검색창(`top` 이 100 미만)이 잡혔다면 **타이핑하지 말고** ⓐ 검색창 `✕` 로 닫고 ⓑ 필터 칩을 해제한 뒤 ⓒ 다시 하단 입력창을 클릭한다
-- 2번째 프롬프트부터는 전송 직후 포커스가 입력창에 유지되므로 이 검증을 생략해도 된다
-
-🚨 **(v5.9) 전송 버튼 좌표를 매번 JS로 읽고, 전송 성공을 문자열로 검증한다.**
-2026-08-31 실측: 뷰포트가 뒤틀린 상태에서 고정 좌표 클릭이 빗나가 **프롬프트 1건이 입력창에 잔류**했고, 다음 타이핑이 그 뒤에 이어붙어 두 프롬프트가 한 문장으로 섞였다. 아래 두 줄이면 두 사고를 모두 막는다.
+- ⛔ **(v6.1) 舊 `aria-label` 에 `arrow_forward` 를 찾는 셀렉터는 잡히지 않는다.** 현재 UI는 `aria-label="생성 시작"` 이고 `arrow_forward` 는 아이콘 텍스트다. `[role="textbox"]` 도 없다 — 입력창은 `.ProseMirror` 다
+- 2번째 프롬프트부터는 전송 직후 포커스가 입력창에 유지되므로 포커스 검증은 생략해도 된다. **좌표는 매번 다시 읽는다** (입력창이 위로 자라도 버튼 y는 대개 유지되지만 가정하지 않는다)
 
 ```javascript
-// ① 전송 버튼(→)의 현재 중심 좌표를 '스크린샷 좌표계'로 환산해 얻는다
-const sc = 1568 / innerWidth;                        // 스크린샷 폭 / 뷰포트 폭
-const b = Array.from(document.querySelectorAll('button'))
-  .find(x => /arrow_forward/.test(x.getAttribute('aria-label') || ''));
-b ? (() => { const r = b.getBoundingClientRect();
-  return 'send:' + Math.round((r.left + r.width / 2) * sc) + ',' + Math.round((r.top + r.height / 2) * sc); })()
-  : 'SEND-BUTTON-NOT-FOUND'
+// ② 타이핑 직후 — 전송 버튼이 풀릴 때까지 최대 30초 폴링 (CDP 45초 상한 안쪽). 'wait' 면 같은 호출 반복
+let res = 'wait';
+for (let t = 0; t < 6; t++) { if (!window._findSend().disabled) { res = 'enabled'; break; } await new Promise(r => setTimeout(r, 5000)); }
+res + ' len:' + document.querySelector('.ProseMirror').textContent.trim().length
 ```
+
+- **빈 입력창에서도 버튼은 `disabled`** 다. 그러므로 이 폴링은 반드시 **타이핑 뒤에** 돌린다
+- `enabled` 가 나오기 전에는 클릭하지 않는다. 클릭이 씹혀도 텍스트는 남아 있으므로 재타이핑은 불필요하다
 
 ```javascript
-// ② 전송 직후 — 입력창이 비었는지로 전송 성공을 판정한다
-const tb = document.querySelector('[role="textbox"]');
-'boxLen:' + (tb ? tb.textContent.trim().length : '-')   // 20 미만이면 전송 성공
+// ③ 클릭 직후(2~3초 대기 후) — 입력창이 비었는지로 전송 성공을 판정한다
+'boxLen:' + document.querySelector('.ProseMirror').textContent.trim().length   // 20 미만이면 전송 성공 (placeholder 14자)
 ```
 
-- `boxLen` 이 20 이상이면 **전송이 안 된 것이다.** 다음 프롬프트를 타이핑하지 말고 ⓐ 위 ①로 좌표를 다시 읽어 재클릭하거나 ⓑ 입력창을 비운 뒤 다시 넣는다. **이 확인을 건너뛰면 두 프롬프트가 한 문장으로 섞여 둘 다 버려야 한다**
-- 입력 상자는 텍스트가 길어지면 **위로 자라므로** 전송 버튼의 y좌표는 대개 유지된다. 그래도 좌표를 가정하지 않는 편이 싸다 (호출 1회)
-- `sc` 환산이 필요한 이유: **스크린샷 폭(1568)과 뷰포트 폭(`innerWidth`)이 다를 수 있다.** 같으면 `sc = 1` 이 되어 결과는 동일하다
+- `boxLen` 이 20 이상이면 **전송이 안 된 것이다.** 다음 프롬프트를 타이핑하지 말고 ②로 돌아가 버튼이 풀리길 기다렸다가 다시 클릭한다. **이 확인을 건너뛰면 두 프롬프트가 한 문장으로 섞여 둘 다 버려야 한다** (2026-08-31·2026-09-04 두 번 실측)
+- `sc` 환산이 필요한 이유: **스크린샷 폭(1568)과 뷰포트 폭(`innerWidth`)이 다를 수 있다.** 2026-09-04 실측 `innerWidth 1920 → sc 0.817`
 
 **(v5.0) 전송 전에 STEP 3-8의 7항목 체크리스트를 반드시 센다.** 하나라도 비면 전송하지 않고 프롬프트를 고친다.
 
-✅ **(v5.2 확정 — 큐잉은 실측으로 검증됐다. 조건 분기·폴백은 삭제한다.)**
-2026-08-18 KoreaPlug 프로젝트에서 직접 측정: **1차 제출분이 74%로 진행 중일 때 2차 프롬프트를 넣자 13%로 함께 시작**했고, 4장(2쌍)이 **약 60초에 모두 완료**됐다. 제출 직후 입력창은 비워지고 즉시 활성이다.
-→ **남은 프롬프트를 전부 연속 투입하는 것이 확정 동작이다.** 큐잉 가능 여부를 확인하거나 직렬로 되돌리는 분기는 더 이상 두지 않는다.
-확인이 필요하면 2번째 전송 직후 스크린샷 1장에서 **진행 카드가 4장(=2쌍)** 잡히는지만 보면 된다.
+⛔ **(v6.1) v5.2의 "남은 프롬프트를 전부 연속 투입" 조항은 폐기한다.** 2026-08-18의 "1차 74% 진행 중 2차 투입 → 병렬 시작" 실측은 여전히 맞다 — 다만 그것이 **2건 상한 안**의 이야기였을 뿐이다. 3건째부터는 버튼이 잠긴다. 4장 기준 실제 흐름은 `1·2 투입(병렬) → 1쌍 완료 대기 → 3 투입 → 1쌍 완료 대기 → 4 투입` 이고, 총 소요는 약 3~4분이다.
 
-⏱ 한 쌍당 **약 20~55초**(2026-08-18 실측 50~56초), 4장 병렬 시 **약 60초**. **한 쌍이 90초를 넘기면 그 건만 재전송**한다 (나머지는 그대로 둔다).
+⏱ 한 쌍당 **약 20~55초**(2026-08-18 실측 50~56초), 2쌍 병렬 시 **약 60초**. **한 쌍이 90초를 넘기면 그 건만 재전송**한다 (나머지는 그대로 둔다).
 
 #### 5-3. 완료 대기 — 30초 분할 폴링 (v5.3 · CDP 45초 상한 대응)
 
@@ -771,40 +704,61 @@ window._pollPrev = now;
 - 🆕 **(v5.0) 썸네일 3초 테스트** — 그리드 썸네일 크기(318px)에서 주제가 읽히는가. 안 읽히면 피사체를 더 크게 잡아 재생성. **그리드 판정은 이 테스트를 자동으로 수행하는 셈**이라 v5.1에서 오히려 정확해졌다
 - **둘 다 부적합할 때만** 재생성한다. 이때 **밋밋함이 사유면 '더 정확하게'가 아니라 '사건을 추가'하는 방향으로** 고친다 — 동사(흘러내리는·잘린·떨어지는)와 배수를 문장에 넣는다. 동일 프롬프트 재전송 금지. 수정 1회 후에도 어긋나면 해당 이미지 건너뜀.
 
-#### 5-5. 캡처 — 그리드에서 일괄 · 크롭 후 다운스케일 (v5.4 · v5.9 RGB 서명)
+#### 5-5. 캡처 — 이미지 탭에서 일괄 · 크롭 후 다운스케일 (v5.4 · v5.9 RGB 서명 · v6.1 교차 출처 경로)
 
 Flow 워터마크(✦)는 이미지 **모서리가 아니라 안쪽**, 상대좌표 **(0.925W, 0.875H)** 에 고정돼 있다 (2026-08-18 실측: 1376×768 기준 중심 ≈ (1273, 672), 크기 ≈ 56×56). 따라서 **`cropRight = 150` 으로 우측만 잘라내면 세로 해상도 손실 없이 제거된다** → 1226×768.
 
 🆕 **(v5.4) 크롭 뒤 목표 폭으로 다운스케일한다.** v4.0에서 Flow로 갈아타며 원본이 **984×469(46만px) → 1226×768(94만px)로 2.05배** 커졌는데, 다운스케일 단계가 없어 그대로 업로드됐다. **본문 표시 폭은 728px**이므로 1226px는 1.68배 과잉이다 (2026-08-19 실측: Post 1175 4장이 57~98KB, KoreaPlug 계열은 최대 154KB).
 
+🌐 **(v6.1) 캡처는 그리드 탭이 아니라 '이미지 탭'에서 한다.** 그리드 이미지는 `flow-content.google` 에서 오고 페이지는 `flow.google.com` 이라 **그리드 탭의 canvas 는 taint 된다** (2026-09-04 실측: 4장 전부 `Tainted canvases may not be exported`, `fetch(cors)`·`crossOrigin='anonymous'` 도 차단). 대신 **이미지 URL 자체를 새 탭으로 열면 그 탭의 출처가 `flow-content.google` 이 되어 같은 호스트의 나머지 이미지도 same-origin 으로 그릴 수 있다.** 그리드 탭은 그대로 두므로 v5.1의 "그리드를 떠나지 않는다"도 지켜진다.
+
 ```javascript
-// PICK = 그리드에서 고른 채택본의 인덱스 배열 (좌상단 0부터, 최신이 앞)
-// KEYS = 저장할 window 변수명 (본문 순서와 무관하게 이름으로 관리)
-const PICK = [1, 2, 5, 6];
-const KEYS = ['_imgHero', '_img1', '_img2', '_img3'];
-const TARGET_W = 1100;                   // (v5.4) 목표 폭 — 아래 '왜 1100인가' 참조
-// (v5.2) 최상위 await — 캡처와 결과 확인을 1회 호출로 끝낸다 (2026-08-18 실측 4장 439ms)
+// ⓐ Flow 그리드 탭에서 실행 — 채택본 URL을 모아 첫 URL을 새 탭으로 연다 (나머지는 fragment 로 실어 보낸다)
+// PICK = 그리드에서 고른 채택본의 인덱스 배열 (좌상단 0부터, 최신이 앞) · 순서는 KEYS(hero, 1, 2, 3)와 맞춘다
+const PICK = [8, 4, 3, 1];
 const grid = Array.from(document.querySelectorAll('img')).filter(i => i.naturalWidth > 1000);
 grid.forEach(i => { i.style.outline = 'none'; });   // (v5.5) 인덱스 대조용 테두리 제거
+const urls = PICK.map(n => grid[n] ? grid[n].src : null);
+window._imgUrls = urls;
+window._imgWin = window.open(urls[0] + '#' + encodeURIComponent(JSON.stringify(urls)));   // ⛔ '_blank' 금지 (v3.3)
+(window._imgWin ? 'opened' : 'blocked') + ' missing:' + urls.filter(u => !u).length
+// 5초 대기 후 tabs_context_mcp 로 새 tabId 확인 — 제목이 "<uuid> (1376×768)" 로 뜬다
+```
+
+- URL에는 서명 쿼리(`Expires`·`Signature`)가 붙어 있다. **javascript_tool 반환값에 URL을 찍지 않는다** — `[BLOCKED: Cookie/query string data]` 로 출력 전체가 막힌다. `hasQuery`·`pathLen` 같은 요약만 찍는다
+- fragment(`#…`)는 서버로 전송되지 않으므로 서명을 깨뜨리지 않는다. 2026-09-04 실측: hash 760자, 정상 로드, `document.contentType image/jpeg`, `document.images[0].naturalWidth 1376`
+- 서명 URL은 **약 15~20분** 뒤 만료된다. 캡처는 채택 판정 직후에 바로 한다
+
+```javascript
+// ⓑ 이미지 탭(출처 flow-content.google)에서 실행 — 4장을 same-origin 으로 그려 크롭·다운스케일·WebP 변환
+const urls = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+const KEYS = ['_imgHero', '_img1', '_img2', '_img3'];   // hasStockImg 가 아니면 '_imgHero' 를 빼고 PICK 도 3개로
+const TARGET_W = 1100;                                  // (v5.4) 목표 폭 — 아래 '왜 1100인가' 참조
 const out = [];
-for (let k = 0; k < PICK.length; k++) {
-  const src = grid[PICK[k]];
-  if (!src) { out.push(KEYS[k] + ':MISSING'); continue; }
-  const cw = src.naturalWidth - 150, ch = src.naturalHeight;   // 워터마크 우측 크롭
-  const scale = Math.min(1, TARGET_W / cw);                     // (v5.4) 확대는 하지 않는다
-  const c = document.createElement('canvas');
-  c.width  = Math.round(cw * scale);
-  c.height = Math.round(ch * scale);
-  const ctx = c.getContext('2d');
-  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';   // (v5.4) 축소 화질 보존
-  ctx.drawImage(src, 0, 0, cw, ch, 0, 0, c.width, c.height);    // 크롭 + 축소를 한 번에
-  const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.85));
-  window[KEYS[k]] = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
-  out.push(KEYS[k] + ':' + c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB');
+for (let k = 0; k < urls.length; k++) {
+  if (!urls[k]) { out.push(KEYS[k] + ':MISSING'); continue; }
+  try {
+    const im = new Image();
+    await new Promise((res, rej) => { im.onload = res; im.onerror = () => rej(new Error('load')); im.src = urls[k]; });
+    const cw = im.naturalWidth - 150, ch = im.naturalHeight;   // 워터마크 우측 크롭
+    const scale = Math.min(1, TARGET_W / cw);                  // (v5.4) 확대는 하지 않는다
+    const c = document.createElement('canvas');
+    c.width  = Math.round(cw * scale);
+    c.height = Math.round(ch * scale);
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';   // (v5.4) 축소 화질 보존
+    ctx.drawImage(im, 0, 0, cw, ch, 0, 0, c.width, c.height);   // 크롭 + 축소를 한 번에
+    const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.85));
+    window[KEYS[k]] = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
+    out.push(KEYS[k] + ':' + c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB');
+  } catch (e) { out.push(KEYS[k] + ':ERR ' + e.message.slice(0, 60)); }
 }
 window._capDims = out.join(' | ');
-window._capDims   // 전부 1100x689 이어야 정상 (TARGET_W 기준)
+window._capDims   // 전부 1100x689 이어야 정상 (2026-09-04 실측: 45/64/65/40KB)
 ```
+
+- 이제 `window._img*` 는 **이미지 탭**에 있다. STEP 6의 `window.open(WP)` 과 postMessage 는 **이 탭에서** 실행한다 (Flow 그리드 탭이 아니다)
+- 이미지 탭은 STEP 6-3 전송이 끝난 뒤 `tabs_close_mcp` 로 닫는다. 그리드 탭은 STEP 7.5 뒷정리 때 닫는다
 
 **왜 1100인가 (900이 아니라)**: 리사이즈본은 WordPress가 자동 생성하는데, **원본이 1024px 미만이면 `large`(1024) 사이즈가 아예 만들어지지 않는다.** 900px로 줄이면 srcset 후보가 300/768/900만 남아 **2배 DPI 화면에서 눈에 띄게 뭉개진다.** 1100px는 ⓐ `large 1024` 생성을 보장하고 ⓑ 원본을 1226 대비 **약 25% 줄이며** ⓒ 아래 7-2의 srcset과 합쳐지면 1배속 독자에게는 768px본(약 35KB)만 전송된다 — 실전송량 기준 **60~80% 감소**다.
 **용량을 더 줄여야 하면 `TARGET_W` 만 900으로 낮춘다.** 화질 손실을 감수하는 선택이므로 값을 바꿨다면 STEP 8에 명시한다.
@@ -859,28 +813,30 @@ out.join(' ')
 - 쌍 안에서 어느 쪽을 채택할지는 **전체 스크린샷 1장**으로 판단한다 — RGB는 **쌍 식별용이지 품질 판정용이 아니다**
 - 레이아웃 열 수는 창 크기에 따라 4열·5열로 바뀐다. `getBoundingClientRect()` 의 `top` 값이 같은 것끼리 한 행이므로, 행 구성이 궁금하면 rect를 **행 판정에만** 쓰고 **인덱스 확정에는 쓰지 않는다**
 
-✅ **(v4.0 실측) Flow는 이미지를 `labs.google` 동일 출처로 서빙하므로 canvas taint가 발생하지 않는다.** 舊 Gemini 경로의 `SecurityError: canvas has been tainted` 복구 절차는 **전부 불필요하며 삭제됐다.**
+⛔ **(v6.1) v4.0의 "Flow는 동일 출처라 canvas taint가 없다"는 서술은 폐기한다.** 2026-09-04부터 페이지(`flow.google.com`)와 이미지(`flow-content.google`)의 출처가 다르다. 그리드 탭에서 `drawImage → toBlob` 을 시도하면 반드시 실패하므로 위 ⓐ→ⓑ 경로만 쓴다. RGB 서명(위)도 같은 이유로 **그리드 탭에서는 `getImageData` 가 taint 로 막힌다** — 서명이 필요하면 이미지 탭에서 URL 배열을 순회하며 같은 방식으로 뽑는다.
 
-⛔ **(v5.1) 캡처가 끝날 때까지 그리드를 떠나지 않는다.** 주소창 navigate·새로고침은 `window._img*` 를 날린다. 에디터 진입은 SPA라 변수는 보존되지만 **복귀 시 그리드 재로딩 20여 초를 다시 내므로 금지**한다.
+⛔ **(v5.1) 캡처가 끝날 때까지 그리드를 떠나지 않는다.** 주소창 navigate·새로고침은 `window._imgUrls`·`window._imgWin` 을 날린다. 에디터 진입은 SPA라 변수는 보존되지만 **복귀 시 그리드 재로딩 20여 초를 다시 내므로 금지**한다. (v6.1) 이미지 탭은 **별도 탭**이므로 이 규칙과 충돌하지 않는다.
 
 ---
 
-### STEP 6: Flow 탭에서 WP admin 새 창 열기 → postMessage로 이미지 업로드
+### STEP 6: 이미지 탭에서 WP admin 새 창 열기 → postMessage로 이미지 업로드 (v6.1 — 실행 탭이 바뀌었다)
 
-**핵심:** Flow 탭에서 WP REST API를 직접 fetch하면 CORS로 차단된다. 기존 WP admin 탭에 대한 window 참조도 얻을 수 없다. 유일하게 작동하는 방법은 Flow 탭에서 `window.open()`으로 새 WP admin 창을 열고 그 참조에 postMessage를 보내는 것이다.
+**핵심:** `window._img*` 를 가진 탭에서 WP REST API를 직접 fetch하면 CORS로 차단된다. 기존 WP admin 탭에 대한 window 참조도 얻을 수 없다. 유일하게 작동하는 방법은 그 탭에서 `window.open()`으로 새 WP admin 창을 열고 그 참조에 postMessage를 보내는 것이다.
 
-**6-1. Flow 탭에서 새 WP admin 창 열기:**
+🌐 **(v6.1) `window._img*` 는 이제 Flow 그리드 탭이 아니라 5-5의 이미지 탭(`flow-content.google`)에 있다.** 그러므로 6-1·6-3은 **이미지 탭에서** 실행한다. Flow 그리드 탭에서 실행하면 `window[key]` 가 전부 undefined 라 `sent:0` 이 된다.
+
+**6-1. 이미지 탭에서 새 WP admin 창 열기:**
 
 ⛔ **(v3.3 백포트) 두 번째 인자 `'_blank'` 를 넘기지 않는다.** `'_blank'` 로 열린 탭은 Chrome MCP 탭 그룹 **밖에** 생성되어 `tabs_context_mcp` 목록에 나타나지 않고, 그 결과 6-2의 리스너 주입이 불가능해져 업로드 경로 전체가 막힌다.
 
 ```javascript
-// Flow 탭에서 실행 — 새 tabId가 생성됨
+// 이미지 탭(flow-content.google)에서 실행 — 새 tabId가 생성됨
 window._wpWin = window.open('https://0and1life.com/wp-admin/media-new.php');
 window._wpWin ? 'window opened' : 'blocked'
 // 6~8초 대기 후 tabs_context_mcp로 새 tabId 확인
 ```
 
-**복구 절차** — 이미 `'_blank'` 로 열어 탭이 목록에 없다면, Flow 탭에서 아래를 실행해 닫고 위 코드로 다시 연다. `window._img*` 는 Flow 탭 heap에 그대로 남아 있으므로 **이미지 재생성은 필요 없다.**
+**복구 절차** — 이미 `'_blank'` 로 열어 탭이 목록에 없다면, 이미지 탭에서 아래를 실행해 닫고 위 코드로 다시 연다. `window._img*` 는 이미지 탭 heap에 그대로 남아 있으므로 **이미지 재생성은 필요 없다.**
 
 ```javascript
 window._wpWin.close();
@@ -935,12 +891,12 @@ window.addEventListener('message', async (e) => {
 'listener ready'
 ```
 
-**6-3. Flow 탭에서 전 이미지를 한 번에 전송 (v5.1 — 건별 대기 폐지):**
+**6-3. 이미지 탭에서 전 이미지를 한 번에 전송 (v5.1 — 건별 대기 폐지 · v6.1 실행 탭 변경):**
 
 ⛔ **(v5.1) 전송 사이에 6~8초씩 기다리지 않는다.** 업로드는 서로 독립적이고 리스너가 비동기라 **연속 전송해도 안전**하다. v4.0 방식(건별 8초 대기 + 건별 확인)은 5장 기준 약 40초와 호출 8회를 그냥 버렸다.
 
 ```javascript
-// Flow 탭에서 1회 실행 — 전 이미지를 연속 전송
+// 이미지 탭에서 1회 실행 — 전 이미지를 연속 전송
 const SLUG = 'SLUG';
 const SEND = [
   ['_imgHero', 'hero', 'ALT_HERO'],   // hasStockImg인 경우만
@@ -981,6 +937,8 @@ window._upPoll = null;
 ```javascript
 window._upPoll + (window._upErrors.length ? '\nERR: ' + window._upErrors.join(' | ') : '')
 ```
+
+ℹ️ **(v6.1) `window._uploadedIds` 는 업로드 '도착 순'이라 hero·1·2·3 순서가 보장되지 않는다** (2026-09-04 실측: `hero,3,1,2`). STEP 7에서는 배열 인덱스가 아니라 **파일명 태그로 매핑**한다 — `window._byTag = {}; window._uploadedIds.forEach(u => { const m = u.tag.match(/-(hero|\d)\.webp$/); window._byTag[m[1]] = u; });` 후 `[_byTag['1'], _byTag['2'], _byTag['3']]` 를 본문 순서로 쓴다.
 
 ⚠️ 생성 이미지 파일명은 반드시 `0and1life-` prefix를 유지한다 — STEP 2 분류기 ④단계가 이 prefix로 데코를 확정하므로, 규칙을 어기면 다음 실행에서 그 이미지가 미분류(unknown)로 떨어진다.
 
@@ -1033,7 +991,9 @@ WordPress의 `wp_filter_content_tags()` 는 **`wp-image-{ID}` 클래스가 붙�
 
 ```javascript
 // 2) 역순으로 이미지 삽입 (뒤→앞 순서로 삽입해야 인덱스가 밀리지 않음)
-const uploads = window._uploadedIds.filter(u => !u.tag.includes('hero')); // 본문용 3장만
+// (v6.1) 도착 순이 아니라 태그 순으로 — 6-3 하단 참조
+window._byTag = {}; window._uploadedIds.forEach(u => { const m = u.tag.match(/-(hero|\d)\.webp$/); window._byTag[m[1]] = u; });
+const uploads = [window._byTag['1'], window._byTag['2'], window._byTag['3']].filter(Boolean); // 본문용 3장, 본문 순서
 const pts = window._insertPoints;    // [pos1, pos2, pos3]
 let c = window._finalContent;
 
@@ -1411,7 +1371,7 @@ f.remove(); out
 - 표·TOC·내부링크 등 기존 요소가 삽입으로 깨지지 않았는가?
 - **글 상태가 원래대로인가?** (`draft` 는 `draft` 그대로여야 한다)
 
-**뒷정리:** 검증이 끝나면 이 루틴이 만든 탭(Flow 탭, media-new 탭)을 `tabs_close_mcp` 로 모두 닫는다. 사용자가 결과를 바로 볼 수 있도록 **프리뷰 탭 1개만 남긴다.**
+**뒷정리:** 검증이 끝나면 이 루틴이 만든 탭(Flow 그리드 탭, 이미지 탭, media-new 탭)을 `tabs_close_mcp` 로 모두 닫는다. ⚠️ **(v6.1) 탭을 닫은 직후 같은 `browser_batch` 안에서 다른 탭에 navigate 하면 "not in the same group" 오류가 난다** (2026-09-04 실측). 닫기는 배치 마지막에 두거나, 닫은 뒤 `tabs_context_mcp` 를 한 번 다시 부른다. 사용자가 결과를 바로 볼 수 있도록 **프리뷰 탭 1개만 남긴다.**
 
 ---
 
@@ -1437,7 +1397,8 @@ f.remove(); out
 - 🆕 **(v5.3) 삽입 위치 대 증빙 간격**: 렌더 기준 이미지 위치를 나열하고, 인접 두 장의 최소 간격이 **5%pt 이상**인지 명시한다. 자동 배제 규칙이 후보를 몇 개 잘라냈는지도 함께 적는다
 - 🆕 **(v5.4) 이미지 전송 최적화 결과**: 캡처 해상도(`TARGET_W` 값 포함)와 장당 KB, 렌더 기준 `srcset:YES/NO` · `cls:YES/NO` · `loading` 값. 생성 이미지 중 하나라도 `NO` 면 실패로 보고한다. 증빙 캡처가 `NO` 인 것은 Draft 루틴 소관이므로 별도 항목으로 분리해 적는다
 - 🆕 **(v5.3) CDP 타임아웃 발생 횟수**: `Runtime.evaluate`(45초)·`Page.captureScreenshot`(30초) 각각 몇 회였고 어떻게 복구했는지. 폴링 폴백이 발동했다면 그 사실을 남긴다 — 이 수치가 다음 회차의 루프 상한을 조정하는 근거가 된다
-- ⛔ **(v5.3) 큐잉 검증 항목은 삭제한다.** v5.2에서 확정 동작이 됐고 2026-08-19에 4쌍 동시 생성으로 재확인됐다. 매 회차 보고할 이유가 없다
+- 🆕 **(v6.1) 투입 대기 기록**: 전송 버튼 `disabled` 로 대기한 건수와 대기 시간, `boxLen` 실패로 재클릭한 건수, 프롬프트 병합 사고 여부(**0이어야 정상**). 병합이 났다면 Flow 그리드에 남은 폐기물 인덱스를 적는다 (WP 미업로드라 삭제 대기 항목은 아니다)
+- 🆕 **(v6.1) 캡처 경로**: 이미지 탭 출처(`flow-content.google`)·해시 길이·`_capDims`. 그리드 탭에서 taint 오류가 났다면 그 사실을 남긴다
 - 🆕 **(v5.5) 헤더 병합 결과**: `window._headerMerge` 판정값(`headerBox`/`heroFig`/`alreadyOverlay`)과 `merged` 여부, 렌더 기준 `h1InFigure:YES/NO`. **B형(초록 박스+독립 히어로)이 감지됐다면 그 사실을 반드시 남기고, 2회 연속이면 🔴 「Writer 헤더 템플릿 점검 필요」로 올린다**
 - 🆕 **(v5.5) UI 오탐 발생 여부**: ⓐ 5-3 폴링의 `same` 이 2 이상으로 올라가 스크린샷 폴백을 썼는지 ⓑ 5-2 포커스 검증에서 상단 검색창이 잡혀 재클릭했는지 ⓒ 필터 칩 해제가 필요했는지. **세 항목 모두 "없음"이면 한 줄로 "UI 오탐 없음"만 적는다**
 - 🆕 **(v5.9) 뷰포트·전송 사고 기록**: ⓐ `zoom` 호출 횟수(**0이어야 정상**) ⓑ 뷰포트 고착이 발생했다면 그 시점과 탭 재생성 여부 ⓒ 전송 검증(`boxLen`)에서 실패로 잡혀 재클릭한 건수 ⓓ 인덱스 확정에 쓴 방법(`outline` 마킹 / RGB 서명). **모두 정상이면 한 줄로 "뷰포트·전송 사고 없음"만 적는다**
@@ -1451,14 +1412,16 @@ f.remove(); out
 
 - 📸 **(v5.8) 이 루틴은 Flow 생성 이미지만 쓰는 루틴이 아니다** (STEP 3-9). 글에 실제로 존재하는 제품·앱·서비스·기관이 나오고 실물 이미지가 필요하면 **넣는다.** 규칙은 셋 — ① **공식 출처**(프레스킷·공식 사이트 캡처·공식 채널)는 그냥 쓴다 ② **아마존 이미지는 핫링크만**, 자체 업로드 금지 ③ **출처 불명 이미지는 쓰지 않는다**(유일한 금지선). figcaption에 출처+확인일 병기, 개인정보 화면 제외. 실물 1장은 증빙으로 계산돼 생성이 1장 줄어든다
 - Chrome이 열려 있고, 0and1life.com WP admin에 로그인되어 있어야 함
-- **(v4.0) labs.google(Google Flow)에 로그인되어 있어야 함** — Flow 프로젝트 URL은 STEP 5 상단 참조
+- **(v4.0 · v6.1) Google Flow(`flow.google.com`, 舊 labs.google)에 로그인되어 있어야 함** — Flow 프로젝트 URL은 STEP 5 상단 참조. `labs.google` URL은 `flow.google.com` 으로 리다이렉트된다
+- 🌐 **(v6.1) 그리드 탭에서 canvas 캡처를 하지 않는다.** 이미지가 `flow-content.google` 교차 출처라 반드시 taint 된다. 5-5의 ⓐ(그리드 탭에서 `window.open(URL#URL들)`) → ⓑ(이미지 탭에서 `new Image()` 캡처) 경로만 쓰고, STEP 6은 **이미지 탭에서** 실행한다
+- ⛔ **(v6.1) Flow 동시 생성은 2건까지다.** 3번째부터 전송 버튼이 `disabled` 로 잠긴다. 타이핑 → `disabled` 해제 폴링 → 클릭 → `boxLen` 검증을 **건별로** 돌리고, **한 배치에 두 번의 타이핑을 넣지 않는다** (2026-09-04: 프롬프트 2+3 병합 전송 실측)
 - 🆕 **(2026-08-26) Flow가 계정 선택 화면으로 튕기면 `leejc0404@gmail.com` 을 클릭해 진행한다** (사용자 사전 승인). **비밀번호 입력 화면이 나오면 즉시 중단**하고 STEP 5 상단의 세션 만료 대응 절차를 따른다
 - 🎛 **(v5.6) Flow 설정 `에이전트 OFF / 이미지 / 16:9 / Nano Banana 2 / x2` 를 매 실행 눈으로 확인한다 (STEP 5-1).** '최초 1회'가 아니다 — 기본값이 실행마다 `x1`·`Nano Banana 2 Lite`·`동영상` 으로 돌아가 있었다. **에이전트 ON이면 프롬프트가 별도 채팅 세션으로 넘어가 재해석되고 생성이 전량 실패한다** (2026-08-26 KoreaPlug 실측: 2장 모두 `실패`, 세션 패널이 그리드를 덮어 인지도 늦었다 — 같은 Flow 프로젝트를 공유하므로 이 루틴도 동일 위험). 설정 변경 후 **저장** 버튼 필수
 - **(v4.0) 워터마크는 `cropRight = 150` 으로 잘라낸다** (Flow 워터마크는 상대좌표 0.925W·0.875H의 이미지 안쪽에 있음). 덮기(fillRect) 방식은 배경에 디테일이 있으면 사각형이 눈에 띄므로 금지
 - 🆕 **(v5.4) 크롭 뒤 `TARGET_W = 1100` 으로 다운스케일한다.** 1024 미만으로 줄이면 WP가 `large` 사이즈를 만들지 않아 2배 DPI 화면이 뭉개진다 — 900 이하로 낮췄다면 STEP 8에 명시
 - 🚨 **(v5.4) 삽입하는 모든 `<img>` 에 `class="wp-image-{미디어ID}"` 를 넣는다.** 이 클래스가 없으면 WordPress가 `srcset`·`sizes` 를 주입하지 않아 **리사이즈본이 전혀 쓰이지 않는다.** 저장 전 `_evGuard.noWpCls === 0` 을 반드시 확인
 - 🆕 **(v5.4) 본문 이미지는 `loading="lazy" decoding="async"`, 히어로는 `fetchpriority="high"`.** 히어로는 LCP 요소이므로 lazy를 붙이면 오히려 느려진다
-- **(v4.0) 캡처 대상은 `getBoundingClientRect().width` 가 가장 큰 img** — 같은 페이지에 `naturalWidth 1376` 인 썸네일이 여러 개 있다
+- **(v4.0 · v6.1) 캡처 대상은 `naturalWidth > 1000` 인 그리드 img 의 `src` URL** — 그리드에서 고른 인덱스의 URL을 이미지 탭으로 넘겨 그린다. 렌더 폭은 판정에 쓰지 않는다
 - **(v3.4) 본문을 읽는 모든 REST 요청에 `context=edit` 필수. `content.raw` 가 없으면 중단한다 — `|| content.rendered` 폴백은 원본을 파괴한다**
 - **(v3.4) 모든 저장 POST에 `status: window._origStatus` 를 동봉한다. 저장 후 status가 바뀌었으면 즉시 되돌리고 보고한다**
 - REST API 검색 시 `status=any` 파라미터 필수 (없으면 draft 글이 검색되지 않음)
@@ -1490,7 +1453,7 @@ f.remove(); out
 - 🆕 **(v5.5) Flow 첫 입력은 `document.activeElement` 로 포커스를 검증한 뒤 타이핑한다.** 상단 검색창에 들어가면 프롬프트가 유실되고 필터 칩까지 걸린다
 - 🆕 **(v5.5) Flow 설정 패널은 `동영상` 으로 열려 있을 수 있고, `이미지` 를 누르면 비율 버튼 줄이 통째로 바뀐다.** ① 이미지 → ② 16:9 → ③ 모델 → ④ x2 순서를 지키고 ①과 ② 사이에 스크린샷으로 좌표를 다시 읽는다
 - 🧨 **(v5.9) Flow 탭에서 `computer:zoom` 을 사용하지 않는다.** 2026-08-31 실측: zoom 호출이 `Page.captureScreenshot` 타임아웃과 함께 탭에 **뷰포트 에뮬레이션(981×184)을 고착**시켰고 `resize_window` 로 복구되지 않았다. 그 상태에서 프롬프트 1건이 전송되지 못하고 입력창에 잔류했으며, 상단 검색창 오염과 `동영상` 필터 칩이 동시에 걸렸다. 세밀 확인은 **전체 스크린샷 재촬영** 또는 **5-5의 RGB 서명**으로 대체한다. **이미 고착됐다면 유일한 복구는 탭을 닫고 새 탭에서 프로젝트를 다시 여는 것이다**
-- 🆕 **(v5.9) 전송 버튼 좌표는 매번 JS로 확인하고, 전송 성공을 문자열로 검증한다.** `aria-label` 에 `arrow_forward` 가 들어간 버튼의 rect를 스크린샷 좌표계로 환산해 클릭하고, 직후 `[role="textbox"]` 의 `textContent.trim().length` 가 **20 미만**인지 확인한다. 20 이상이면 전송 실패이므로 **다음 프롬프트를 타이핑하지 않는다** — 이어붙으면 두 프롬프트가 한 문장으로 섞여 둘 다 버려야 한다
+- 🆕 **(v5.9 · v6.1) 전송 버튼 좌표는 매번 JS로 확인하고, 전송 성공을 문자열로 검증한다.** `.ProseMirror` 입력창의 컨테이너에서 **마지막 버튼**(`aria-label="생성 시작"`, `window._findSend()`)의 rect를 스크린샷 좌표계로 환산해 클릭하고, 직후 `.ProseMirror` 의 `textContent.trim().length` 가 **20 미만**인지 확인한다. 舊 `arrow_forward` aria-label·`[role="textbox"]` 셀렉터는 현재 UI에 없다. 20 이상이면 전송 실패이므로 **다음 프롬프트를 타이핑하지 않는다** — 이어붙으면 두 프롬프트가 한 문장으로 섞여 둘 다 버려야 한다
 - 🆕 **(v5.9) 스크린샷 좌표계와 뷰포트가 다를 수 있다.** 클릭 전에 `innerWidth` 를 읽어 `sc = 1568 / innerWidth` 로 환산한다. 그리드 열 수(4열/5열)도 창 크기에 따라 바뀌므로 **캡처 인덱스는 DOM 순서 + RGB 서명으로만 확정**하고 좌표로 추론하지 않는다
 - 📱 **(v6.0) 히어로 제목 오버레이에 `position:absolute` 를 쓰지 않는다.** 절대위치 캡션은 자기 높이가 figure에 반영되지 않아 **좁은 화면에서 반드시 넘치고 `overflow:hidden` 에 잘린다.** `figure{display:grid}` + 세 자식 `grid-area:1/1` + `img{align-self:start}` / `figcaption{align-self:end}` 로 쓴다 (STEP 7-2.6 템플릿 A)
 - 📱 **(v6.0) 히어로 제목·메타의 `font-size`·`padding` 은 `clamp()` 로만 쓴다.** 제목 `clamp(16px,4.4vw,26px)`, 메타 `clamp(11px,2.9vw,13px)`, 패딩 `clamp(14px,3.6vw,26px) clamp(14px,3.2vw,24px)`. 고정 26px은 375px 화면에서 캡션을 304px까지 키운다(이미지는 180px) — **제목 앞 2~3줄이 사라진다**
