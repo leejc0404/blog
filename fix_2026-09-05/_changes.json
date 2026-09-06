@@ -1,0 +1,686 @@
+[
+ {
+  "site": "ol",
+  "id": 1248,
+  "slug": "oura-ring-galaxy-ring-comparison",
+  "status": "future",
+  "title": "오우라링 갤럭시링 비교 — 솔직히 반지값보다 구독료, 총액은 9개월째 뒤집힙니다",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "5열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1248_oura-ring-galaxy-ring-comparison.html",
+  "len_before": 21257,
+  "len_after": 21423
+ },
+ {
+  "site": "ol",
+  "id": 721,
+  "slug": "chatgpt-diet-meal-plan-worker",
+  "status": "future",
+  "title": "챗GPT 다이어트 식단 — 3주 직접 시켜봤더니 야식 습관까지 이렇게 바뀌었습니다",
+  "changes": [
+   "링크해제 chatgpt-prompt-guide-worker (대체 글 없음, 텍스트만 유지)"
+  ],
+  "file": "721_chatgpt-diet-meal-plan-worker.html",
+  "len_before": 16903,
+  "len_after": 16817
+ },
+ {
+  "site": "ol",
+  "id": 753,
+  "slug": "subscription-cleanup-guide",
+  "status": "future",
+  "title": "안 쓰는 구독 서비스 정리 — 솔직히 카드 3장 뒤져보니 매달 4만원씩 새고 있었습니다",
+  "changes": [
+   "링크수정 ai-resume → ai-resume-guide-worker",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "753_subscription-cleanup-guide.html",
+  "len_before": 13373,
+  "len_after": 13469
+ },
+ {
+  "site": "ol",
+  "id": 1278,
+  "slug": "samsung-shareholder-return-dividend-tax",
+  "status": "future",
+  "title": "삼성전자 주주환원 배당금 110조 — 배당은 15.4%에 건보료까지, 소각이면 0원인 내 100주 실전 계산",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1278_samsung-shareholder-return-dividend-tax.html",
+  "len_before": 21505,
+  "len_after": 21671
+ },
+ {
+  "site": "ol",
+  "id": 1258,
+  "slug": "chuseok-stock-market-closure-dividend",
+  "status": "future",
+  "title": "추석 주식 휴장 나흘 — 배당금 입금은 9월 마지막 주가 아니라 10월 첫 주로 밀립니다",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1258_chuseok-stock-market-closure-dividend.html",
+  "len_before": 17901,
+  "len_after": 18067
+ },
+ {
+  "site": "ol",
+  "id": 1435,
+  "slug": "september-property-tax-card-benefit",
+  "status": "future",
+  "title": "9월 재산세 카드 혜택 — 60만원 긁어도 카드 실적은 0원, 그래도 카드가 이기는 구간 실전 계산",
+  "changes": [
+   "5열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1435_september-property-tax-card-benefit.html",
+  "len_before": 17005,
+  "len_after": 17088
+ },
+ {
+  "site": "ol",
+  "id": 1457,
+  "slug": "auto-insurance-8week-rule-2026",
+  "status": "publish",
+  "title": "자동차보험 8주룰 9월 10일 시행 — 솔직히 8주는 두 번째 관문이고, 첫 마감은 사고 4주차예요",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1457_auto-insurance-8week-rule-2026.html",
+  "len_before": 17911,
+  "len_after": 17994
+ },
+ {
+  "site": "ol",
+  "id": 1467,
+  "slug": "tving-data-leak-compensation",
+  "status": "publish",
+  "title": "티빙 개인정보 유출 보상 2만원 — 탈퇴회원도 받지만, 신청 안 하면 화질 업그레이드만 남아요",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1467_tving-data-leak-compensation.html",
+  "len_before": 20097,
+  "len_after": 20180
+ },
+ {
+  "site": "ol",
+  "id": 1160,
+  "slug": "marriage-registration-timing-cost",
+  "status": "publish",
+  "title": "혼인신고 하면 손해라는 말의 현실 — 결혼세액공제 100만원이 50만원으로 줄어드는 조건",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1160_marriage-registration-timing-cost.html",
+  "len_before": 23499,
+  "len_after": 23665
+ },
+ {
+  "site": "ol",
+  "id": 1445,
+  "slug": "gardasil-9-price-2027-nip",
+  "status": "publish",
+  "title": "가다실 9가 가격 3회 65만원 — 2027년 무료 전환은 남 얘기고, 병원만 바꿔도 42만원이 남습니다",
+  "changes": [
+   "6열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1445_gardasil-9-price-2027-nip.html",
+  "len_before": 19328,
+  "len_after": 19494
+ },
+ {
+  "site": "ol",
+  "id": 1323,
+  "slug": "medical-cost-cap-refund-payment-date",
+  "status": "publish",
+  "title": "본인부담상한액 초과금 지급일 9월 2일 — 자동 입금 58%, 진짜 문제는 내 상한액이 89만원인지 826만원인지예요",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1323_medical-cost-cap-refund-payment-date.html",
+  "len_before": 20700,
+  "len_after": 20866
+ },
+ {
+  "site": "ol",
+  "id": 1081,
+  "slug": "wedding-hall-rental-fee-free",
+  "status": "publish",
+  "title": "웨딩홀 대관료 무료 vs 500만원 — 하객 200명 총액을 나란히 놓으니 싼 쪽이 반대였습니다",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1081_wedding-hall-rental-fee-free.html",
+  "len_before": 26960,
+  "len_after": 27126
+ },
+ {
+  "site": "ol",
+  "id": 1309,
+  "slug": "half-price-travel-refund-regions",
+  "status": "publish",
+  "title": "반값여행 신청 지역 9곳 추가 — 28만원 쓰면 청년 14만원, 그 위로는 진짜 1원도 안 늘어요",
+  "changes": [
+   "5열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1309_half-price-travel-refund-regions.html",
+  "len_before": 21138,
+  "len_after": 21304
+ },
+ {
+  "site": "ol",
+  "id": 1138,
+  "slug": "resignation-notice-period-cost",
+  "status": "publish",
+  "title": "퇴사 통보 기간 30일 안 채우고 나가면 — 퇴직금이 진짜 깎이는 구간과, 통상임금이 막아주는 상한선",
+  "changes": [
+   "5열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1138_resignation-notice-period-cost.html",
+  "len_before": 22951,
+  "len_after": 23117
+ },
+ {
+  "site": "ol",
+  "id": 787,
+  "slug": "indemnity-insurance-renewal-check",
+  "status": "publish",
+  "title": "실손보험 갱신 보험료 인상 — 회사 단체보험 있는데 해지하면 손해인 이유 3가지",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "787_indemnity-insurance-renewal-check.html",
+  "len_before": 13458,
+  "len_after": 13541
+ },
+ {
+  "site": "ol",
+  "id": 1132,
+  "slug": "jeonse-early-move-out-cost",
+  "status": "publish",
+  "title": "전세 계약 만료 전 이사 — 복비 90만원과 0원을 가르는 현실은 계약서가 아니라 달력입니다",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1132_jeonse-early-move-out-cost.html",
+  "len_before": 22893,
+  "len_after": 23059
+ },
+ {
+  "site": "ol",
+  "id": 982,
+  "slug": "pt-refund-list-price-deduction",
+  "status": "publish",
+  "title": "PT 환불 정상가 공제의 비밀, 20회 중 5회 받고 15만원이 사라지는 계약서 한 줄",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "5열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "982_pt-refund-list-price-deduction.html",
+  "len_before": 22627,
+  "len_after": 22793
+ },
+ {
+  "site": "ol",
+  "id": 1031,
+  "slug": "monthly-rent-restoration-cost",
+  "status": "publish",
+  "title": "월세 원상복구 비용 다 물어줘야 하나 — 3년 살았다면 도배비 90만원이 45만원이 되는 이유",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1031_monthly-rent-restoration-cost.html",
+  "len_before": 24951,
+  "len_after": 25117
+ },
+ {
+  "site": "ol",
+  "id": 1175,
+  "slug": "september-fuel-surcharge-ticketing",
+  "status": "publish",
+  "title": "9월 유류할증료 7단계 인상 — 진짜 마감은 8월 31일, 뉴욕 2인 왕복 37만원이 갈립니다",
+  "changes": [
+   "5열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1175_september-fuel-surcharge-ticketing.html",
+  "len_before": 22070,
+  "len_after": 22153
+ },
+ {
+  "site": "ol",
+  "id": 1116,
+  "slug": "grave-mowing-mower-rental-cost",
+  "status": "publish",
+  "title": "예초기 대여 가격 5천원인데 왜 12만원이 나갈까 — 벌초 직접이 싼 건 주말에 갈 때뿐입니다",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1116_grave-mowing-mower-rental-cost.html",
+  "len_before": 12781,
+  "len_after": 12947
+ },
+ {
+  "site": "ol",
+  "id": 751,
+  "slug": "ai-plagiarism-checker-guide",
+  "status": "publish",
+  "title": "생성형 AI 표절 검사 방법 — 카피킬러·GPT킬러 진짜 비교해봤습니다",
+  "changes": [
+   "링크해제 chatgpt-prompt-guide (대체 글 없음, 텍스트만 유지)",
+   "링크수정 ai-resume → ai-resume-guide-worker",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "751_ai-plagiarism-checker-guide.html",
+  "len_before": 15014,
+  "len_after": 15050
+ },
+ {
+  "site": "ol",
+  "id": 894,
+  "slug": "wedding-guarantee-headcount",
+  "status": "publish",
+  "title": "결혼식 보증인원 계산 — 하객 수가 같아도 490만원 더 내는 '각보증' 계약서 한 줄",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "5열 표를 가로 스크롤 컨테이너로 감쌈",
+   "5열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "894_wedding-guarantee-headcount.html",
+  "len_before": 37010,
+  "len_after": 37425
+ },
+ {
+  "site": "ol",
+  "id": 1095,
+  "slug": "substitute-holiday-leave-deduction",
+  "status": "publish",
+  "title": "대체공휴일 연차 차감은 불법입니다 — 2026년에만 3번, 진짜 합법인 경우는 딱 하나예요",
+  "changes": [
+   "5열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1095_substitute-holiday-leave-deduction.html",
+  "len_before": 20792,
+  "len_after": 21041
+ },
+ {
+  "site": "ol",
+  "id": 1051,
+  "slug": "chuseok-bonus-resignation-timing",
+  "status": "publish",
+  "title": "추석 상여금 받고 퇴사, 사직서 날짜 하루 차이로 상여금과 퇴직금이 같이 빠집니다",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1051_chuseok-bonus-resignation-timing.html",
+  "len_before": 23138,
+  "len_after": 23304
+ },
+ {
+  "site": "ol",
+  "id": 1018,
+  "slug": "dehumidifier-electricity-cost",
+  "status": "publish",
+  "title": "제습기 전기세, 300W 곱셈으로는 안 나옵니다 — 8월 고지서를 가르는 누진 3단계",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "1018_dehumidifier-electricity-cost.html",
+  "len_before": 22684,
+  "len_after": 22767
+ },
+ {
+  "site": "ol",
+  "id": 937,
+  "slug": "chuseok-train-ticket-cancellation",
+  "status": "publish",
+  "title": "추석 기차표 취소표 풀리는 시간, 하루 한 번 확인하면 6%가 현실입니다",
+  "changes": [
+   "5열 표를 가로 스크롤 컨테이너로 감쌈",
+   "5열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "937_chuseok-train-ticket-cancellation.html",
+  "len_before": 25119,
+  "len_after": 25285
+ },
+ {
+  "site": "ol",
+  "id": 953,
+  "slug": "holiday-bonus-ordinary-wage",
+  "status": "publish",
+  "title": "명절 상여금 통상임금 포함되면 얼마 오를까, 야근 20시간 실전 계산 월 35,880원",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "953_holiday-bonus-ordinary-wage.html",
+  "len_before": 27458,
+  "len_after": 27624
+ },
+ {
+  "site": "ol",
+  "id": 912,
+  "slug": "annual-leave-allowance-ordinary-wage",
+  "status": "publish",
+  "title": "연차수당 통상임금 포함 여부 — 두 줄 차이로 미사용 10일이 27만원 날아가는 현실",
+  "changes": [
+   "5열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "912_annual-leave-allowance-ordinary-wage.html",
+  "len_before": 27078,
+  "len_after": 27244
+ },
+ {
+  "site": "ol",
+  "id": 799,
+  "slug": "energy-cashback-application-guide",
+  "status": "publish",
+  "title": "에너지캐시백 신청 조건 — 솔직히 한전ON 5분 신청, 절감률별로 계산해봤습니다",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "799_energy-cashback-application-guide.html",
+  "len_before": 9256,
+  "len_after": 9339
+ },
+ {
+  "site": "ol",
+  "id": 752,
+  "slug": "annual-leave-promotion-guide",
+  "status": "publish",
+  "title": "연차 촉진 대응 방법 — 통보서 받고 무시했다간 진짜 손해 봅니다",
+  "changes": [
+   "링크해제 chatgpt-prompt-guide (대체 글 없음, 텍스트만 유지)",
+   "링크수정 ai-resume → ai-resume-guide-worker",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "752_annual-leave-promotion-guide.html",
+  "len_before": 14027,
+  "len_after": 14063
+ },
+ {
+  "site": "ol",
+  "id": 821,
+  "slug": "summer-electricity-progressive-rate",
+  "status": "publish",
+  "title": "여름철 전기요금 누진구간 450kWh — 우리 집 에어컨은 하루 몇 시간까지가 현실적 한계일까",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "821_summer-electricity-progressive-rate.html",
+  "len_before": 25825,
+  "len_after": 25991
+ },
+ {
+  "site": "ol",
+  "id": 692,
+  "slug": "parental-leave-pay-calculation",
+  "status": "publish",
+  "title": "육아휴직 급여 계산법 완전정리 — 상한액 250만원 기준 내 실수령액 직접 계산해봤습니다 (2026)",
+  "changes": [
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension",
+   "링크해제 youth-future-savings-guide (대체 글 없음, 텍스트만 유지)",
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension"
+  ],
+  "file": "692_parental-leave-pay-calculation.html",
+  "len_before": 19654,
+  "len_after": 19556
+ },
+ {
+  "site": "ol",
+  "id": 687,
+  "slug": "jeonse-loan-limit-guide",
+  "status": "publish",
+  "title": "전세자금대출 한도 계산법 완전정리 — 청년·신혼부부 한도가 다른 진짜 이유 (2026)",
+  "changes": [
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension"
+  ],
+  "file": "687_jeonse-loan-limit-guide.html",
+  "len_before": 20009,
+  "len_after": 19994
+ },
+ {
+  "site": "ol",
+  "id": 674,
+  "slug": "pension-default-option-guide",
+  "status": "publish",
+  "title": "퇴직연금 디폴트옵션 수익률 비교 — 방치하면 손해, 직장인이 지금 꼭 확인해야 할 것 (2026)",
+  "changes": [
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension",
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension"
+  ],
+  "file": "674_pension-default-option-guide.html",
+  "len_before": 21917,
+  "len_after": 21929
+ },
+ {
+  "site": "ol",
+  "id": 680,
+  "slug": "ai-interview-prep-worker",
+  "status": "publish",
+  "title": "AI 면접 준비 방법 완전 정리 — 챗GPT로 모의면접 돌려봤더니 진짜 준비가 됐다 (2026)",
+  "changes": [
+   "링크해제 chatgpt-prompt-guide-worker (대체 글 없음, 텍스트만 유지)"
+  ],
+  "file": "680_ai-interview-prep-worker.html",
+  "len_before": 26630,
+  "len_after": 26546
+ },
+ {
+  "site": "ol",
+  "id": 495,
+  "slug": "reits-investment-guide-2026",
+  "status": "publish",
+  "title": "리츠 투자 방법 완전 정리 — 2026 분리과세 개편, 직장인이 지금 시작해야 하는 이유",
+  "changes": [
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension"
+  ],
+  "file": "495_reits-investment-guide-2026.html",
+  "len_before": 21228,
+  "len_after": 21234
+ },
+ {
+  "site": "ol",
+  "id": 576,
+  "slug": "national-pension-early-claim-guide",
+  "status": "publish",
+  "title": "국민연금 조기수령 손익분기점 — 몇 세부터 손해? 나이 계산과 소득기준 함정 (2026)",
+  "changes": [
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension",
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension",
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "576_national-pension-early-claim-guide.html",
+  "len_before": 22884,
+  "len_after": 22979
+ },
+ {
+  "site": "ol",
+  "id": 654,
+  "slug": "grok-guide-worker",
+  "status": "publish",
+  "title": "그록 무료 사용법 완전 정리 — 일론 머스크의 AI, 무료 한도 어디까지 되나 (2026)",
+  "changes": [
+   "링크수정 claude-workflow-guide-worker → chatgpt-vs-claude-comparison-2026",
+   "링크해제 perplexity-guide-worker (대체 글 없음, 텍스트만 유지)",
+   "링크수정 claude-workflow-guide-worker → chatgpt-vs-claude-comparison-2026"
+  ],
+  "file": "654_grok-guide-worker.html",
+  "len_before": 17541,
+  "len_after": 17471
+ },
+ {
+  "site": "ol",
+  "id": 503,
+  "slug": "dividend-stock-investing-guide",
+  "status": "publish",
+  "title": "배당주 투자 방법 완전 정리 — ISA 계좌로 배당세 0원 만드는 직장인 실전 가이드 (2026)",
+  "changes": [
+   "링크수정 irp-pension-worker-guide → irp-account-retirement-pension"
+  ],
+  "file": "503_dividend-stock-investing-guide.html",
+  "len_before": 28301,
+  "len_after": 28307
+ },
+ {
+  "site": "ol",
+  "id": 556,
+  "slug": "ai-resume-guide-worker",
+  "status": "publish",
+  "title": "AI 이력서 작성법 직장인 완전 정리 — 챗GPT를 살짝 곁들인...",
+  "changes": [
+   "링크수정 claude-workflow-guide-worker → chatgpt-vs-claude-comparison-2026",
+   "링크수정 claude-workflow-guide-worker → chatgpt-vs-claude-comparison-2026"
+  ],
+  "file": "556_ai-resume-guide-worker.html",
+  "len_before": 17973,
+  "len_after": 17983
+ },
+ {
+  "site": "ol",
+  "id": 538,
+  "slug": "manus-guide-worker",
+  "status": "publish",
+  "title": "Manus 활용법 직장인 완전 정리 — 메타가 인수한 AI 에이전트, 리서치 자동화 어디까지 되나",
+  "changes": [
+   "링크수정 claude-workflow-guide-worker → chatgpt-vs-claude-comparison-2026",
+   "링크해제 notebooklm-guide-worker (대체 글 없음, 텍스트만 유지)",
+   "링크수정 claude-workflow-guide-worker → chatgpt-vs-claude-comparison-2026"
+  ],
+  "file": "538_manus-guide-worker.html",
+  "len_before": 20282,
+  "len_after": 20147
+ },
+ {
+  "site": "ol",
+  "id": 596,
+  "slug": "travel-planning-ai-guide",
+  "status": "publish",
+  "title": "AI 여행 계획 완전 정리 — 챗GPT로 짜봤더니 휴가 준비 시간이 반으로 줄었다 (2026)",
+  "changes": [
+   "링크해제 chatgpt-prompt-guide-worker (대체 글 없음, 텍스트만 유지)"
+  ],
+  "file": "596_travel-planning-ai-guide.html",
+  "len_before": 22488,
+  "len_after": 22402
+ },
+ {
+  "site": "ol",
+  "id": 422,
+  "slug": "sidejob-tax-guide-worker-2026",
+  "status": "publish",
+  "title": "부업 세금 직장인 완전 가이드 — 종합소득세 300만원 기준과 절세 5가지 실전법 2026",
+  "changes": [
+   "링크수정 irp-pension-guide-worker-2026 → irp-account-retirement-pension",
+   "링크수정 ai-agent-side-income-2026 → ai-side-hustle-automation-2026"
+  ],
+  "file": "422_sidejob-tax-guide-worker-2026.html",
+  "len_before": 16620,
+  "len_after": 16626
+ },
+ {
+  "site": "ol",
+  "id": 385,
+  "slug": "canva-guide-worker-ai-design",
+  "status": "publish",
+  "title": "Canva 활용법 직장인 완전 정리 — AI 디자인으로 카드뉴스·PPT·썸네일 어디까지 되나",
+  "changes": [
+   "링크해제 gamma-guide-worker (대체 글 없음, 텍스트만 유지)",
+   "링크해제 gamma-guide-worker (대체 글 없음, 텍스트만 유지)",
+   "링크해제 copilot-guide-worker (대체 글 없음, 텍스트만 유지)",
+   "링크해제 copilot-guide-worker (대체 글 없음, 텍스트만 유지)",
+   "링크해제 gamma-guide-worker (대체 글 없음, 텍스트만 유지)",
+   "링크해제 copilot-guide-worker (대체 글 없음, 텍스트만 유지)",
+   "링크수정 chatgpt-claude-compare-worker → chatgpt-vs-claude-comparison-2026"
+  ],
+  "file": "385_canva-guide-worker-ai-design.html",
+  "len_before": 14091,
+  "len_after": 13687
+ },
+ {
+  "site": "ol",
+  "id": 252,
+  "slug": "etf-investment-guide-worker",
+  "status": "publish",
+  "title": "ETF 투자 방법 직장인 — ISA 계좌로 절세하며 3개월 수익 낸 실전 가이드",
+  "changes": [
+   "링크수정 ai-agent-side-hustle-2026 → ai-side-hustle-automation-2026"
+  ],
+  "file": "252_etf-investment-guide-worker.html",
+  "len_before": 24554,
+  "len_after": 24559
+ },
+ {
+  "site": "ol",
+  "id": 158,
+  "slug": "ai-counseling-guide-workers",
+  "status": "publish",
+  "title": "고민 상담 AI 추천 | AI 심리상담 활용법과 주의사항",
+  "changes": [
+   "링크수정 claude-workflow-guide-worker → chatgpt-vs-claude-comparison-2026"
+  ],
+  "file": "158_ai-counseling-guide-workers.html",
+  "len_before": 11163,
+  "len_after": 11147
+ },
+ {
+  "site": "kp",
+  "id": 3027,
+  "slug": "pink-seat-subway-rules",
+  "status": "publish",
+  "title": "Pink Seat Subway Rules: The Real Reason You Can’t Sit There in Korea",
+  "changes": [
+   "빈 alt 채움",
+   "빈 alt 채움"
+  ],
+  "file": "3027_pink-seat-subway-rules.html",
+  "len_before": 10789,
+  "len_after": 10925
+ },
+ {
+  "site": "kp",
+  "id": 2355,
+  "slug": "korea-esim-guide",
+  "status": "publish",
+  "title": "Korea eSIM Guide: Avoid Expensive Airport SIM Counters",
+  "changes": [
+   "4열 표를 가로 스크롤 컨테이너로 감쌈"
+  ],
+  "file": "2355_korea-esim-guide.html",
+  "len_before": 22225,
+  "len_after": 22308
+ },
+ {
+  "site": "kp",
+  "id": 1383,
+  "slug": "korean-banana-flavor-snacks-guide",
+  "status": "publish",
+  "title": "Korean Banana Flavor Snack Guide: Best Convenience Treats",
+  "changes": [
+   "빈 alt 채움"
+  ],
+  "file": "1383_korean-banana-flavor-snacks-guide.html",
+  "len_before": 17368,
+  "len_after": 17425
+ }
+]

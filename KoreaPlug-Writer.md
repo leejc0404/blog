@@ -801,6 +801,19 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 - ⛔ **플레이스홀더를 남기지 않습니다**: `UNSPLASH_URL` `SEO_TITLE` `THEME_COLOR` `WRAPPER_ID` `ALT_TEXT` `INTRO_PARAGRAPH` `SECTION_TITLE` `FOOTER_CTA_TEXT` `EXTERNAL_URL` `AUTHORITY_SOURCE` `RELATED_SLUG` `MONTH YEAR`
 - ⛔ **본문 `<h1>`은 정확히 1개**입니다
 - ⚠️ **4열 이상 표는 `<div style="overflow-x:auto;">`로 감쌉니다.** 감싸지 않으면 모바일에서 표가 화면 밖으로 넘칩니다
+- ⭐ **[AEO] 인트로 직후 3줄 요약 박스를 넣습니다** — 0and1life에서 검증된 구조를 KoreaPlug에도 적용합니다. AI 검색·구글 스니펫이 그대로 인용하는 자리입니다. 마크업 고정:
+
+```html
+<div class="ai-knowledge-snippet" style="background:#f8fafc;border-radius:14px;padding:22px 26px;margin-bottom:28px;border-left:5px solid #THEME_COLOR;">
+  <ul style="margin:0;padding-left:18px;">
+    <li><strong>Core Fact:</strong> 한 문장 사실 (숫자·날짜 포함)</li>
+    <li><strong>Primary Insight:</strong> 검색자가 놓치는 핵심 한 문장</li>
+    <li><strong>Actionable Tip:</strong> 지금 할 일 한 문장</li>
+  </ul>
+</div>
+```
+
+- ⭐ **[AEO] FAQ 섹션은 `<p><strong>Q. …</strong><br>…</p>` 마크업으로 고정합니다.** Draft 루틴이 이 형태만 정규식으로 인식해 FAQPage 스키마를 생성합니다. 2026-09-05 실측: 0and1life는 발행 글의 45%가 FAQPage 스키마를 얻고 있으나 KoreaPlug은 0%입니다 — 마크업이 제각각이라 스키마가 생성되지 않습니다
 
 ### 2-5. 콘텐츠 작성 규칙
 
