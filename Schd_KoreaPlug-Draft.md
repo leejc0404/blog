@@ -127,16 +127,25 @@ CANDIDATE_POSTS가 비어 있으면 → **STEP 6m-Q(예약 큐 처리)를 먼저
 
 **인증 순서 — 위에서부터 시도**
 
-**⓪ 폴더 연결 (이 단계를 빠뜨리면 ①이 항상 실패한다)**
-스케줄 실행 세션은 **연결된 폴더가 0개**인 상태로 시작한다. pw.txt를 읽기 전에 먼저 실행한다:
-`mcp__cowork__request_cowork_directory { path: "C:\Users\win\Documents\Claude" }`
-연결 응답에 안내되는 `/sessions/{세션명}/mnt/Claude/` 경로로 접근한다.
+**⓪ 폴더 접근 확인 (조건부 — 무조건 호출 금지)**
+
+⛔ **`request_cowork_directory` 를 무조건 호출하지 않는다.** 무인 시간대에 승인 창이 뜨면 응답할 사람이 없어 `AbortError`(`permission stream closed`)로 끊기고, **그 이후 세션의 모든 권한 요청이 거부된다.** 2026-09-07 04:03 회차가 STEP 0에서 전체 중단된 실제 원인이 이것이다 — 그날 폴더는 이미 연결돼 있었고, 호출 자체가 불필요했다.
+
+1) **먼저 bash로 탐색한다** — 이 경로는 승인이 필요 없다:
+   ```bash
+   ls /sessions/*/mnt/Claude/pw.txt 2>/dev/null
+   ```
+   경로가 나오면 → **①로 바로 진행하고 `request_cowork_directory` 를 호출하지 않는다.** 세션명은 실행마다 달라지므로 와일드카드로 찾고, 확인된 실제 경로를 이후 단계에서 그대로 쓴다.
+2) 1)이 **빈 결과일 때만** `mcp__cowork__request_cowork_directory { path: "C:\Users\win\Documents\Claude" }` 를 **1회** 호출한다. 승인 창이 응답 없이 닫히면 **재시도하지 말고 즉시 ②로 이동한다.**
+3) 이 단계에서는 **승인이 필요한 호출을 다른 도구 호출과 같은 블록에 묶지 않는다.** 묶으면 함께 실패한다.
+
+> ⓪을 조건부로 생략하는 것은 정상 동작이며 오류가 아니다. 폴더가 이미 연결된 세션에서 호출하는 쪽이 사고다.
 
 **① pw.txt (Basic Auth)**
 `C:\Users\win\Documents\Claude\pw.txt` 의 `KOREAPLUG_WP_APP_PASSWORD` 값으로 Basic Auth.
 ⚠️ 비밀번호 값을 응답·로그·Notion에 출력하지 않는다. bash 안에서 변수로만 다룬다:
 ```bash
-cd /sessions/{세션명}/mnt/Claude
+cd {⓪에서 확인한 실제 경로}
 U=$(grep '^KOREAPLUG_WP_USER' pw.txt | cut -d'=' -f2- | tr -d ' \r\n')
 P=$(grep '^KOREAPLUG_WP_APP_PASSWORD' pw.txt | cut -d'=' -f2- | tr -d '\r\n' | sed 's/^ *//')
 curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/users/me?context=edit"
@@ -561,7 +570,8 @@ GET /wp-json/wp/v2/posts?slug={신규슬러그}&status=any&_fields=id,slug,statu
 | 조항이 지침서에 안 보임 | [0-3] 3단 검증(캐시버스터 → Chrome → 확정). 찾으면 그 기준 사용하고 **캐시 사고**로 기록(상충 아님) |
 | 3단 검증 후에도 조항 결번 | [0-4] 조항을 직접 작성해 로컬 `KoreaPlug-Draft.md` 에 추가 → 즉시 적용해 배포 계속 → STEP 7·Notion에 전문 기록. 커밋·푸시는 사용자 |
 | 지침서 개정 이력이 루틴이 아는 버전보다 낮음 | 캐시 사본 의심 — 새 `?cb=` 로 재조회 + Chrome 재확인. 캐시로 확인되면 상충 보고 금지 |
-| pw.txt 접근 실패 | 폴더 미연결이면 정상. Chrome 세션 nonce(STEP 3 ②)로 전환 |
+| pw.txt 접근 실패 | ⓪ 1) bash 탐색부터 재확인 → 빈 결과일 때만 `request_cowork_directory` 1회 → 그래도 실패면 ② Chrome 세션 nonce로 전환 |
+| **승인 창 무응답(AbortError)** | 같은 호출을 **반복하지 않는다.** 즉시 다음 폴백으로 이동하고 "무인 시간대 승인 대기 실패"로 기록. 반복하면 세션 전체의 권한 채널이 죽는다 |
 | **WP 세션 만료(reauth)** | ⛔ **로그인 버튼을 클릭하지 않는다**(STEP 3 ③). Basic Auth가 살아 있으면 STEP 5까지 진행하고 Rank Math만 미완으로 남긴 뒤 draft 일자 공란. 둘 다 죽었으면 오류 로그 후 STEP 7 |
 | Chrome 미연결 | Basic Auth로 STEP 5·6b·6m·6n 은 계속 수행. Rank Math 구간만 건너뛰고 draft 일자 공란 유지 |
 | WordPress API 실패 | 로그 기록 후 다음 포스트 진행 |
