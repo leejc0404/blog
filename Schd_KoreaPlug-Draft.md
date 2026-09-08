@@ -4,6 +4,10 @@
 
 ⚠️ 역할 분담: 이 루틴은 **운영 절차(언제·무엇을·몇 회·어떤 도구로)** 만 정의한다. **배포·SEO·관문 판정 기준의 단일 기준(SSOT)은 GitHub 지침서**다 — 이 루틴과 지침서가 상충하면 지침서를 따르고, 상충 발견 시 STEP 7 알림에 기록한다.
 
+> **v11.1 변경 (2026-09-08)** — 지침서 v10.6 「5-6 Rank Math REST 경로」에 맞춰 SEO 구간을 재배선했다.
+> ① `[6c]` 가 **REST 경로(브라우저 불필요)** 로 바뀌고 기존 UI 클릭은 `[6d]~[6g]` 폴백으로 내려갔다. ② `[6h]` 점수 게이트를 **브라우저 가용 시 78점 / 불가 시 `[6h-L]` 로컬 자가검사 8항목**으로 이원화했다. ③ `[6l]` 에서 **"Chrome 로그인 실패"를 draft 일자 보류 사유에서 제외**했다 — 세션이 만료돼도 회차를 정상 종료할 수 있게 됐기 때문이다. ④ UI 폴백의 좌표 밀림을 **`find` 로 얻은 `ref` 재사용**으로 고정했다.
+> 근거: 2026-09-08 04:03 회차가 Chrome 쿠키 만료로 SEO 구간만 멈춰 반쪽 회차가 됐다. 업로드·Astra·인바운드·구조검증은 앱 비밀번호로 모두 끝난 상태였다.
+
 ---
 
 ## ⛔ STEP -1 — AdSense 보호 규칙 (모든 STEP에 우선하는 불변 규약)
@@ -153,7 +157,7 @@ curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/users/me?context=edit"
 200이면 인증 정상. ※ 샌드박스 네트워크는 자체 도메인만 열려 있다 — unsplash·pexels·github raw 는 curl 접근 불가(코드 000).
 ⚠️ 이 경로도 **해당 폴더가 세션에 연결돼 있을 때만** 읽힌다. 연결돼 있지 않으면 실패하는 것이 정상이므로, 중단하지 말고 곧바로 ②로 넘어간다.
 
-> ⭐ **Basic Auth가 살아 있으면 STEP 5·6b·6c·6m·6n은 전부 curl로 처리한다.** 앱 비밀번호 Basic Auth로 `GET/POST /wp-json/wp/v2/posts` 가 정상 동작하고, **지침서 5-6 의 WPCode 스니펫 `1001` 덕분에 Rank Math 키워드·타이틀·설명도 REST 로 저장된다**(v10.6, 2026-09-08). 브라우저가 필요한 것은 **점수 갱신 · Schema 탭 · WPCode 조작 셋뿐**이다(지침서 5-6-E).
+> ⭐ **Basic Auth가 살아 있으면 STEP 5·6b·6c·6m·6n은 전부 curl로 처리한다.** 앱 비밀번호 Basic Auth로 `GET/POST /wp-json/wp/v2/posts` 가 정상 동작하고, **지침서 5-6 의 WPCode 스니펫 `4183` 덕분에 Rank Math 키워드·타이틀·설명도 REST 로 저장된다**(v10.6, 2026-09-08). 브라우저가 필요한 것은 **점수 갱신 · Schema 탭 · WPCode 조작 셋뿐**이다(지침서 5-6-E).
 
 **② Chrome 세션 nonce (점수·Schema·WPCode 전용 — 이제 SEO 설정의 필수 경로가 아니다)**
 1. `list_connected_browsers` → `select_browser`
@@ -421,7 +425,7 @@ curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/posts/{WP_POST_ID}?conte
 ```
 
 - **1 이상** → `[6c-1]` 로 진행
-- **0** → 스니펫 `1001` 미작동. **REST 를 시도하지 말고 `[6d]` UI 폴백으로 내려간다.** STEP 7 에 `스니펫 1001 미작동` 🔴 기록
+- **0** → 스니펫 `4183` 미작동. **REST 를 시도하지 말고 `[6d]` UI 폴백으로 내려간다.** STEP 7 에 `스니펫 4183 미작동` 🔴 기록
 
 **[6c-1] 값 준비**
 
@@ -651,7 +655,7 @@ GET /wp-json/wp/v2/posts?slug={신규슬러그}&status=any&_fields=id,slug,statu
 | 이미지 URL 404 | [4e] 재시도 1회, 실패 시 플레이스홀더 유지 + 오류 로그 |
 | Rank Math 78점 미달 | 지침서 5-3/오류표 기준 수정 후 재시도 1회. 수정했으면 [5-0] 재검사 |
 | SEO 설정이 새로고침 후 사라짐 | JS dispatch 금지. **`[6c]` REST 저장 + `[6c-3]` 재조회 검증**이 표준. UI 폴백을 썼다면 [6g] 새로고침 재검증 필수 |
-| **REST meta 에 `rank_math_focus_keyword` 없음** | `[6c-0]` 사전 점검이 0 → WPCode 스니펫 `1001` 미작동. REST 시도 중단, `[6d]` UI 폴백으로 내려가고 STEP 7 에 🔴 기록 |
+| **REST meta 에 `rank_math_focus_keyword` 없음** | `[6c-0]` 사전 점검이 0 → WPCode 스니펫 `4183` 미작동. REST 시도 중단, `[6d]` UI 폴백으로 내려가고 STEP 7 에 🔴 기록 |
 | **REST 로 넣었는데 점수가 그대로** | 정상이다. `rank_math_seo_score` 는 에디터 JS 가 계산한다. 브라우저 가용 시 `[6h]` 재분석, 불가 시 `[6h-L]` 자가검사로 판정 |
 | **`find` 가 키워드 입력창을 못 찾음 / 입력이 안 들어감** | Rank Math 패널 렌더 전에 `ref` 를 잡은 것이다. 패널을 열고 2~3초 대기 후 `find` 재실행([6d]) |
 | **키워드 입력 중 태그 소실** | 좌표 재계산 금지. `[6e]` 대로 `find` 로 얻은 **`ref` 를 재사용**한다 |
@@ -765,7 +769,7 @@ regex_findall(r'href="https?://koreaplug\.com/[a-z0-9\-]+/?"', C) == []
 | 활성 테마 | **Astra 4.13.4** (자식 테마 없음). GeneratePress는 설치돼 있으나 **비활성** |
 | 활성 플러그인 | 14개 (Breeze · Object Cache Pro · Rank Math SEO · WPCode Lite · UpdraftPlus · 간편한 목차 · 단순 작성자 상자 · WP Headers And Footers 등) |
 | 캐시 스택 | **Breeze**(페이지) + **Object Cache Pro**(Redis 객체 캐시). 대시보드 위젯의 `Flush Cache` 로 비운다 |
-| Rank Math REST | **WPCode 스니펫 `1001` "Rank Math REST meta — KoreaPlug"**(PHP · 어디서나 실행 · 활성)가 `rank_math_focus_keyword` · `rank_math_title` · `rank_math_description` 을 REST 에 쓰기 가능하게, `rank_math_seo_score` 를 읽기 전용으로 등록한다. 코드 원본은 `blog/wpcode-1001-rankmath-rest-meta.php`. 지침서 5-6 참조. ⛔ 999(AdSense)와 합치지 않는다 |
+| Rank Math REST | **WPCode 스니펫 `4183` "Rank Math REST meta - KoreaPlug"**(PHP · 자동 삽입 · 어디서나 실행 · 활성, 2026-09-08 설치)가 `rank_math_focus_keyword` · `rank_math_title` · `rank_math_description` 을 REST 에 쓰기 가능하게, `rank_math_seo_score` 를 읽기 전용으로 등록한다. **코드 전문은 지침서 5-6-B** 에 있다(별도 파일 없음). ⛔ 999(AdSense)와 합치지 않는다. ⛔ 이 스니펫이 꺼지면 SEO 구간이 UI 폴백으로 되돌아간다 |
 | 오디오 | **Compact WP Audio Player 비활성화됨.** 오디오 글은 네이티브 `<audio>` 태그를 쓰고, WPCode 스니펫 `1550` "KP Audio Click Handler"(사이트 전체 바닥글·JS)가 클릭 핸들러를 담당한다. 이 스니펫 최상단에 `if (!document.querySelector('audio')) return;` 가드가 있어 오디오 없는 페이지에서는 즉시 종료한다 — **가드를 제거하지 않는다** |
 | 성능 (참고) | PSI 모바일 61 / 데스크톱 97. 병목은 `<head>` 127KB 중 인라인 CSS 125KB. **CrUX 필드 데이터가 없어 현재 순위 요인이 아니다** — 이 루틴의 조치 대상이 아니며 기록만 한다 |
 

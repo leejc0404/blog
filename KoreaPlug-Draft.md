@@ -6,7 +6,7 @@
 
 - **포함**: **5-0(지침서 무결성 검증·조항 자기보완)** → 5-2(TOC 강제 스크립트) → 5-3(블록 구조·820px·키워드 입력 체크) → **5-4(⛔ 발행 차단 관문)** → **5-4B(캡처 품질·마크업)** → 5-4C(피드백) → 5-5(Schema) → **5-6(Rank Math REST 경로)** → Phase 6(완료 처리) → 오류표 → Phase 7(카테고리 매핑)
 - **번호 안내**: 번호는 ✏️ Writer 지침의 Phase 체계를 이어받은 것. Phase 0~5-1은 Writer 지침 담당이라 이 문서에 없음(의도된 결번, 오타 아님). ⚠️ Writer 지침의 '5-3(Focus Keyword 배치 자가검수)'과 이 문서의 '5-3(블록 구조·820px 체크)'은 **서로 다른 문서의 별개 항목**임에 주의.
-- **v10.6 변경(2026-09-08)**: **「5-6 Rank Math REST 경로」를 신설하고 5-3 의 키워드·스니펫 구간을 전면 개정**했다. WPCode 스니펫 `1001` 이 `rank_math_focus_keyword` · `rank_math_title` · `rank_math_description` 을 `show_in_rest` 에 등록하면서, v10.3 이 「REST 로도 저장되지 않는다」고 못박았던 전제가 사라졌다. 이제 **REST 가 1순위, 사이드바 UI 가 폴백**이다.
+- **v10.6 변경(2026-09-08)**: **「5-6 Rank Math REST 경로」를 신설하고 5-3 의 키워드·스니펫 구간을 전면 개정**했다. WPCode 스니펫 `4183` 이 `rank_math_focus_keyword` · `rank_math_title` · `rank_math_description` 을 `show_in_rest` 에 등록하면서, v10.3 이 「REST 로도 저장되지 않는다」고 못박았던 전제가 사라졌다. 이제 **REST 가 1순위, 사이드바 UI 가 폴백**이다.
   근거는 2026-09-08 04:03 회차다 — Chrome 로그인 쿠키 만료로 업로드·Astra·인바운드·구조검증은 다 끝났는데 SEO 구간만 멈춰 회차가 반쪽이 났다. '기억하기' 없는 쿠키는 2일이라 매일 도는 루틴보다 수명이 짧다.
   함께 정리한 것 3가지 — ① 점수 게이트를 **브라우저 가용 시 78점 / 불가 시 로컬 자가검사 8항목**으로 이원화(`rank_math_seo_score` 는 에디터 JS 가 계산하므로 REST 로 갱신되지 않는다), ② UI 폴백의 좌표 밀림을 **`find` 로 얻은 `ref` 재사용**으로 해결(같은 날 실측, 태그 소실 0건), ③ 스니펫 첫 글자 잔존 버그는 REST 경로에서 발생하지 않음을 명시.
   ⚠️ `wp.data.dispatch('rank-math')` **금지는 그대로 유효하다** — 열린 것은 REST `meta` 필드이지 JS 스토어가 아니다.
@@ -122,7 +122,7 @@ if (b.name === 'rank-math/toc-block' && !b.isValid) {
 
 **🟢 키워드·스니펫 입력 (v10.6 전면 개정 — REST 경로가 1순위, UI는 폴백)**
 
-> **v10.6 이전 지시는 「UI 입력만 유효」였다.** 그 전제가 2026-09-08 에 바뀌었다 — WPCode 스니펫 `1001` 이 Rank Math 포스트 메타를 REST 에 등록하면서 **브라우저 로그인 없이 저장이 가능**해졌다. 상세 규격은 **5-6** 을 본다.
+> **v10.6 이전 지시는 「UI 입력만 유효」였다.** 그 전제가 2026-09-08 에 바뀌었다 — WPCode 스니펫 `4183` 이 Rank Math 포스트 메타를 REST 에 등록하면서 **브라우저 로그인 없이 저장이 가능**해졌다. 상세 규격은 **5-6** 을 본다.
 
 **A. 1순위 — REST 경로 (브라우저 불필요)**
 
@@ -370,13 +370,75 @@ if (b.name === 'rank-math/toc-block' && !b.isValid) {
 
 ⚠️ `rank_math_seo_score` 를 REST 로 쓰지 않는다. 에디터가 계산해 넣는 값이라 임의로 써 넣으면 **실제 품질과 무관한 숫자가 Notion 에 기록된다.** 스니펫에서도 쓰기를 막아 둔다.
 
-### 5-6-B. WPCode 스니펫 규격
+### 5-6-B. WPCode 스니펫 규격 (2026-09-08 설치 완료)
 
-- 스니펫 ID **1001** · 이름 **`Rank Math REST meta — KoreaPlug`** · 유형 **PHP** · 위치 **어디서나 실행(Run Everywhere)** · 상태 **활성**
-- 코드 원본: `blog/wpcode-1001-rankmath-rest-meta.php`
-- ⛔ **이 스니펫을 AdSense 스니펫 `999` 와 같은 스니펫에 합치지 않는다.** 999 는 수익 코드이고 STEP -1 의 보호 대상이다. 서로 다른 이유로 죽으면 안 된다.
+- 스니펫 ID **4183** · 이름 **`Rank Math REST meta - KoreaPlug`** · 유형 **PHP** · 삽입 **자동 삽입 / 어디서나 실행** · 기기 **모든 장치** · 상태 **활성**
+- 편집 URL: `https://koreaplug.com/wp-admin/admin.php?page=wpcode-snippet-manager&snippet_id=4183`
+- ⛔ **이 스니펫을 AdSense 스니펫 `999` 와 합치지 않는다.** 999 는 수익 코드이고 STEP -1 의 보호 대상이다. 서로 다른 이유로 죽으면 안 된다.
 - ⛔ **WPCode 「헤더 및 푸터」 전역 블록에 넣지 않는다.** 18KB 덩어리에 묻히면 실수로 지워진다.
+- ⛔ **WPCode 편집기에 `<?php` 여는 태그를 넣지 않는다.** PHP 스니펫 편집기가 자체적으로 붙인다. 넣으면 중복 태그가 된다.
 - 스니펫을 건드린 회차는 **5-6-C 사전 점검을 반드시 재실행**하고 결과를 완료 로그에 남긴다.
+
+**코드 전문** (스니펫이 사라졌을 때 이 블록으로 복원한다 — 붙여넣을 때 `<?php` 는 제외)
+
+```php
+/**
+ * Rank Math REST meta - KoreaPlug (WPCode snippet 4183)
+ * wordpress_draft 루틴이 브라우저 로그인 없이 Rank Math 설정을 저장하게 한다.
+ * 지침서 KoreaPlug-Draft.md 5-6 (v10.6, 2026-09-08)
+ * - 쓰기: focus_keyword / title / description (edit_post 권한자만)
+ * - 읽기 전용: seo_score (에디터 JS가 계산하는 값)
+ */
+add_action(
+	'init',
+	function () {
+		$writable = array(
+			'rank_math_focus_keyword',
+			'rank_math_title',
+			'rank_math_description',
+		);
+
+		foreach ( $writable as $key ) {
+			register_post_meta(
+				'post',
+				$key,
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'default'           => '',
+					'show_in_rest'      => true,
+					'sanitize_callback' => function ( $value ) {
+						if ( ! is_string( $value ) ) {
+							return '';
+						}
+						return trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $value ) ) );
+					},
+					'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+						return current_user_can( 'edit_post', $post_id );
+					},
+				)
+			);
+		}
+
+		register_post_meta(
+			'post',
+			'rank_math_seo_score',
+			array(
+				'type'          => 'string',
+				'single'        => true,
+				'default'       => '',
+				'show_in_rest'  => true,
+				'auth_callback' => '__return_false',
+			)
+		);
+	},
+	99
+);
+```
+
+> `init` 우선순위 **99** 는 Rank Math 자신의 `register_meta` 가 끝난 뒤에 덮어쓰기 위한 것이다. 낮추면 Rank Math 등록에 밀려 `show_in_rest` 가 무효화될 수 있다.
+
+**설치 직후 실측 (2026-09-08)** — 메타 4종 REST 노출 확인 · UI 로 넣어 둔 값이 그대로 읽힘(키 이름 정확) · `rank_math_title` 쓰기 **200** · `rank_math_seo_score` 쓰기 **403 `rest_cannot_update`**(의도대로 차단) · 홈 정상, AdSense 로더 1개, PHP 오류 0.
 
 ### 5-6-C. 사전 점검 (REST 경로를 쓰기 전 매 회차 1회)
 
@@ -387,7 +449,7 @@ curl -s -u "$U:$P" \
 ```
 
 - **1 이상** → 스니펫 정상. 5-3 A(REST 경로)로 진행한다.
-- **0** → 스니펫이 꺼졌거나 삭제된 것이다. **REST 경로를 시도하지 말고** 5-3 B(UI 폴백)로 내려가고, 완료 로그에 `스니펫 1001 미작동`을 🔴 로 기록한다.
+- **0** → 스니펫이 꺼졌거나 삭제된 것이다. **REST 경로를 시도하지 말고** 5-3 B(UI 폴백)로 내려가고, 완료 로그에 `스니펫 4183 미작동`을 🔴 로 기록한다.
 
 ### 5-6-D. 쓰기 절차
 
@@ -497,7 +559,7 @@ JSON.stringify({
 | Rank Math 점수 60~74 | `core/code` 블록 사용 | `core/freeform` 블록으로 교체 |
 | **SEO 설정이 새로고침 후 사라짐** | `wp.data.dispatch('rank-math')` 사용 | JS 스토어는 저장되지 않는다. **REST `meta`(5-6)** 또는 사이드바 UI 직접 입력만 유효 |
 | **WP 세션 만료로 SEO 구간 중단** | Chrome 로그인 쿠키 만료(기억하기 없으면 2일) | **5-6 REST 경로로 수행한다.** 브라우저는 점수·Schema·WPCode 에만 필요(5-6-E). 로그인 대행은 금지 |
-| **REST `meta` 에 rank_math 키가 없음** | WPCode 스니펫 `1001` 비활성·삭제 | 5-6-C 사전 점검이 0 → UI 폴백(5-3 B)으로 내려가고 🔴 로 기록. 스니펫을 되살린 뒤 재점검 |
+| **REST `meta` 에 rank_math 키가 없음** | WPCode 스니펫 `4183` 비활성·삭제 | 5-6-C 사전 점검이 0 → UI 폴백(5-3 B)으로 내려가고 🔴 로 기록. 스니펫을 되살린 뒤 재점검 |
 | **REST 로 넣은 키워드가 점수에 반영 안 됨** | `rank_math_seo_score` 는 에디터 JS 가 계산 | 정상 동작이다. 브라우저 가용 시 편집 화면을 열어 재분석, 불가 시 **로컬 자가검사 8항목**으로 대체 판정(5-3) |
 | 키워드가 이어붙어 입력됨 | Enter 후 입력창에 잔여 텍스트가 남음 | UI 폴백 전용 함정. 각 키워드 입력 전 **triple_click** 으로 잔여 텍스트 선택 후 타이핑 |
 | 키워드 입력 중 기존 태그 소실 | 태그가 늘며 밀린 좌표에 triple_click | **좌표 대신 `find` 로 얻은 `ref` 를 재사용한다**(5-3 B, v10.6). `ref` 는 태그가 늘어도 밀리지 않는다 |
