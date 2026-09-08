@@ -153,9 +153,9 @@ curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/users/me?context=edit"
 200이면 인증 정상. ※ 샌드박스 네트워크는 자체 도메인만 열려 있다 — unsplash·pexels·github raw 는 curl 접근 불가(코드 000).
 ⚠️ 이 경로도 **해당 폴더가 세션에 연결돼 있을 때만** 읽힌다. 연결돼 있지 않으면 실패하는 것이 정상이므로, 중단하지 말고 곧바로 ②로 넘어간다.
 
-> ⭐ **Basic Auth가 살아 있으면 STEP 5·6m·6n은 curl로 처리한다.** 앱 비밀번호 Basic Auth로 `GET/POST /wp-json/wp/v2/posts` 가 정상 동작한다. **Rank Math 설정(`[6c]`~`[6g]`)과 WPCode 조작만 브라우저 UI가 필요**하고, 나머지 REST 작업은 브라우저 없이 끝난다.
+> ⭐ **Basic Auth가 살아 있으면 STEP 5·6b·6c·6m·6n은 전부 curl로 처리한다.** 앱 비밀번호 Basic Auth로 `GET/POST /wp-json/wp/v2/posts` 가 정상 동작하고, **지침서 5-6 의 WPCode 스니펫 `1001` 덕분에 Rank Math 키워드·타이틀·설명도 REST 로 저장된다**(v10.6, 2026-09-08). 브라우저가 필요한 것은 **점수 갱신 · Schema 탭 · WPCode 조작 셋뿐**이다(지침서 5-6-E).
 
-**② Chrome 세션 nonce (Rank Math UI 작업의 표준 경로)**
+**② Chrome 세션 nonce (점수·Schema·WPCode 전용 — 이제 SEO 설정의 필수 경로가 아니다)**
 1. `list_connected_browsers` → `select_browser`
 2. navigate → `https://koreaplug.com/wp-admin/index.php`
 3. `document.body?.classList.contains('wp-admin')` 로 로그인 확인
@@ -166,8 +166,10 @@ curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/users/me?context=edit"
 **③ 세션 만료 시**
 `wp-login.php?...&reauth=1` 로 리다이렉트되면 세션이 만료된 것이다.
 - ⛔ **루틴은 로그인 폼을 대신 제출하지 않는다.** 자격증명 입력과 인증 폼 제출은 AI 금지 동작이며, **아이디·비밀번호가 자동완성돼 있어도 '로그인' 버튼을 클릭하지 않는다**
-- 로그인 화면이 확인되면 오류 로그에 "WP 세션 만료 — 사용자 직접 로그인 필요"를 기록한다
-- **①(Basic Auth)이 살아 있으면 STEP 5까지는 계속 진행**하고, Rank Math 설정만 미완으로 남긴 뒤 draft 일자를 공란으로 둔다(`[6l]`). 다음 실행이 `[4d]` 복구 로직으로 이어받는다
+- 로그인 화면이 확인되면 오류 로그에 "WP 세션 만료 — 사용자 직접 로그인 필요('기억하기' 체크 시 쿠키 2일 → 14일)"를 기록한다
+- **①(Basic Auth)이 살아 있으면 회차를 계속 진행한다.** v10.6 이후 세션 만료는 **더 이상 SEO 구간 전체를 막지 않는다** — `[6c]` REST 경로로 키워드·타이틀·설명을 저장하고, 미완으로 남는 것은 **점수 갱신·Schema 탭·WPCode 조작 셋뿐**이다(지침서 5-6-E)
+- 이때 `[6l]` draft 일자는 **로컬 SEO 자가검사 8항목을 전부 통과하면 기록한다**(지침서 5-3 최종 확인의 이원화 판정). Notion SEO 셀에는 `자가검사 통과 (점수 미측정)` 로 적고, 다음 회차에 브라우저가 살아나면 실제 점수를 채운다
+- 자가검사에서 미달 항목이 나오면 draft 일자를 공란으로 두고 `[4d]` 로 넘긴다
 - ①도 죽어 있으면 STEP 7로 건너뛴다. draft 일자는 공란 유지
 - 사용자 조치 안내를 함께 남긴다: "Chrome에서 https://koreaplug.com/wp-admin 에 직접 로그인하고 '기억하기'를 체크해 주세요."
 
@@ -368,11 +370,15 @@ POST `/wp-json/wp/v2/posts`
 
 ---
 
-## STEP 6 — Astra + Rank Math 설정 (Rank Math 구간은 Claude in Chrome 필수)
+## STEP 6 — Astra + Rank Math 설정 (v10.6 — REST 우선, 브라우저는 점수·Schema 전용)
 
-### [6a] 에디터 열기
-navigate → `https://koreaplug.com/wp-admin/post.php?post={WP_POST_ID}&action=edit`
-wait 4초 후 `document.body?.classList.contains('wp-admin')` 로 로그인 확인. 'not-logged-in'이면 STEP 3 ③번(세션 복구) 수행 후 재시도.
+### [6a] 에디터 열기 — **조건부**
+
+브라우저가 필요한 것은 `[6h]` 점수 갱신과 Schema 탭뿐이다. 인증 상태에 따라 갈린다.
+
+- **Chrome 로그인 살아 있음** → navigate → `https://koreaplug.com/wp-admin/post.php?post={WP_POST_ID}&action=edit`, wait 4초 후 `document.body?.classList.contains('wp-admin')` 확인
+- **Chrome 미연결·세션 만료** → **에디터를 열지 않고 `[6b]` 로 바로 간다.** `[6b]`·`[6c]` 는 curl 만으로 끝난다. `[6h]` 만 건너뛰고 `[6h-L]` 로 대체 판정한다
+- ⛔ 로그인 화면이 뜨면 **로그인 버튼을 클릭하지 않는다**(STEP 3 ③)
 
 ### [6b] Astra 설정 — REST meta 직접 지정
 
@@ -402,43 +408,107 @@ m['site-content-style']==='unboxed' && m['ast-banner-title-visibility']==='disab
 
 > 콘텐츠는 STEP 5에서 freeform 래퍼로 저장돼 에디터가 자동 로딩한다. `resetBlocks`·`core/heading` 추가 금지. 본문이 비어 있을 때만 [6i] 폴백.
 
-### [6c] Rank Math — UI 클릭 방식만 사용
+### [6c] Rank Math 설정 — REST 경로 (1순위, 브라우저 불필요)
 
-⚠️ `wp.data.dispatch('rank-math').updateKeywords()/updateSerpTitle()/…` 은 **에러 없이 성공한 것처럼 보이지만 postmeta에 저장되지 않는다**. **JS dispatch 금지.**
+기준은 **지침서 5-6**. 아래는 실행 방법이다.
 
-**[6d] 패널 열기**: 상단 우측 Rank Math 점수 배지 클릭. 사이드바가 화면 밖이면 `find`로 포커스 키워드 입력창 ref를 찾아 `scroll_to`.
+⚠️ `wp.data.dispatch('rank-math').updateKeywords()/updateSerpTitle()/…` 은 **에러 없이 성공한 것처럼 보이지만 postmeta에 저장되지 않는다**. **JS dispatch 금지는 v10.6 이후에도 유효하다** — 열린 것은 REST `meta` 필드이지 JS 스토어가 아니다.
 
-**[6e] 키워드 입력**: 포커스 키워드 입력창 클릭 → `FOCUS_KEYWORD` 타이핑 → Enter → 같은 입력창에 SUB_KEYWORDS를 하나씩 타이핑 → Enter (보통 4개, 총 5개).
+**[6c-0] 사전 점검** (매 회차 1회, 지침서 5-6-C)
+
+```bash
+curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/posts/{WP_POST_ID}?context=edit&_fields=meta" | grep -c rank_math_focus_keyword
+```
+
+- **1 이상** → `[6c-1]` 로 진행
+- **0** → 스니펫 `1001` 미작동. **REST 를 시도하지 말고 `[6d]` UI 폴백으로 내려간다.** STEP 7 에 `스니펫 1001 미작동` 🔴 기록
+
+**[6c-1] 값 준비**
+
+- `rank_math_focus_keyword` = `{FOCUS_KEYWORD},{SUB1},{SUB2},{SUB3},{SUB4}` — 구분자 `,`, 공백 없음, Focus 가 첫 번째
+- `rank_math_title` = SEO_TITLE. **60자 초과면 지침서 5-3 에 따라 관사·수식어 1개를 빼서 57자 내외로 축약**한다. 글 제목(H1·post title)은 Notion 원문 유지
+- `rank_math_description` = META_DESCRIPTION. 150자 초과면 축약. Focus Keyword 포함 필수
+- ⚠️ Notion 값에 `(144자)` 같은 **길이 표기가 붙어 있으면 제거**한 뒤 넣는다
+
+**[6c-2] 저장**
+
+POST `/wp-json/wp/v2/posts/{WP_POST_ID}`
+
+```json
+{"meta": {
+  "rank_math_focus_keyword": "{FOCUS},{SUB1},{SUB2},{SUB3},{SUB4}",
+  "rank_math_title":         "{SEO_TITLE}",
+  "rank_math_description":   "{META_DESCRIPTION}"
+}}
+```
+
+**[6c-3] 재조회 검증** (생략 금지)
+
+```bash
+curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/posts/{WP_POST_ID}?context=edit&_fields=meta"
+```
+
+- `rank_math_focus_keyword` 를 `,` 로 쪼갠 길이가 **5**
+- `rank_math_title` ≤ 60자, `rank_math_description` ≤ 150자, 둘 다 Focus Keyword 포함
+
+어긋나면 1회 재시도. 그래도 어긋나면 `[6d]` UI 폴백으로 내려간다.
+
+### [6d]~[6g] Rank Math UI 폴백 (스니펫 미작동·REST 실패 시에만)
+
+**[6d] 패널 열기**: 상단 우측 Rank Math 점수 배지 클릭 → **wait 2~3초**(렌더 대기) → `find` 로 포커스 키워드 입력창 `ref` 확보(`Tags input field`).
+⚠️ **패널이 렌더되기 전에 잡은 `ref` 는 클릭해도 입력이 들어가지 않는다**(2026-09-08 실측 — 4162 에서 첫 2개 키워드가 통째로 유실). 반드시 패널을 먼저 열고 `find` 한다.
+
+**[6e] 키워드 입력**: 첫 키워드는 입력창 **좌표** 클릭 → 타이핑 → Enter. 이후 4개는 확보한 **`ref` 를 triple_click** → 타이핑 → Enter → 매회 `wp.data.select('rank-math').getKeywords()` 검증.
+✅ **좌표를 재계산하지 않는다.** 태그가 늘 때마다 입력창이 26px씩 내려가는데, `ref` 는 요소를 직접 가리켜 밀리지 않는다(v10.6, 태그 소실 0건).
 
 **[6f] 스니펫 편집**: "스니펫 편집" 클릭
-- 타이틀 필드 클릭 → Ctrl+A → `SEO_TITLE` 타이핑
-- 설명 필드 클릭 → Ctrl+A → `META_DESCRIPTION` 타이핑
-- ⚠️ Ctrl+A 후 타이핑해도 **이전 텍스트의 첫 글자 1개가 남는 사례가 반복 확인됨**(예: `aWhy do Koreans…`). 타이핑 직후 zoom으로 필드를 육안 확인하고, 잔여 문자가 있으면 필드 클릭 → Ctrl+Home → Delete로 제거 후 다시 확인
+- 타이틀 필드 클릭 → Ctrl+A → Delete → `SEO_TITLE` 타이핑
+- 설명 필드 클릭 → Ctrl+A → Delete → `META_DESCRIPTION` 타이핑
+- ⚠️ **첫 글자 잔존 버그**: Ctrl+A 후 타이핑해도 이전 텍스트의 첫 글자 1개가 남는다(`aWhy do Koreans…` · `aSeoraksan…` · `aKorea…` — 2026-09-08 에도 2건 재현). 타이핑 직후 zoom 으로 육안 확인하고, 남아 있으면 필드 클릭 → Ctrl+Home → Delete → 재확인
 - 창 닫기(X)
 
 **[6g] 저장 + 재검증**
-Ctrl+S → 저장 확인 → 편집 URL로 다시 navigate → wait 5초 → `wp.data.select('rank-math').getKeywords()` 에 쉼표 항목 5개가 남아 있어야 한다.
-비어 있으면 [6d]부터 1회 재시도. 재시도 후에도 비면 오류 로그에 "SEO 설정 미반영" 명시 — "완료"로 보고 금지.
+Ctrl+S → 저장 확인 → 편집 URL로 다시 navigate → wait 5초 → `getKeywords()` 에 쉼표 항목 5개가 남아 있어야 한다.
+비어 있으면 `[6d]` 부터 1회 재시도. 재시도 후에도 비면 오류 로그에 "SEO 설정 미반영" 명시 — "완료"로 보고 금지.
 
-**[6h] 점수 확인 및 보정**
-Rank Math 배지 숫자 확인. 목표 **78점 이상**.
-미달 시 **지침서 5-3 + 오류표** 기준으로 REST API로 HTML 수정 → Ctrl+S → 재시도 1회.
-(지침서 조회 실패 시에만 [부록 A] 사용.)
+### [6h] 점수 확인 및 보정 — 브라우저 가용 시
+
+에디터를 열고 **5-2 재분석 트리거**(`hasTOCPlugin = true` + freeform 재직렬화)를 실행한 뒤 Rank Math 배지 숫자를 확인한다. 목표 **78점 이상**.
+미달 시 **지침서 5-3 + 오류표** 기준으로 REST API로 HTML 수정 → Ctrl+S → 재시도 1회. (지침서 조회 실패 시에만 [부록 A] 사용.)
 ⚠️ 보정으로 HTML을 수정했으면 **[5-0] 1)~6) 검사를 다시 1회 돌린다.**
+
+> `rank_math_seo_score` 는 에디터 JS 가 계산해 저장하는 값이라 **REST 로는 갱신되지 않는다.** 읽기는 가능하지만 `[6c]` 직후의 값은 옛 점수다 — 브라우저로 재분석을 돌리기 전까지 신뢰하지 않는다.
+
+### [6h-L] 로컬 SEO 자가검사 — 브라우저 불가 시 점수 게이트 대체
+
+기준은 **지침서 5-3 「최종 확인 — 점수 게이트 이원화」**. `content.raw` 와 `[6c-3]` 에서 재조회한 메타만으로 8항목을 판정한다.
+
+1. Focus Keyword 가 첫 `<p>` 도입부 100자 이내에 포함
+2. Focus Keyword 가 `<h2>` 1개 이상에 포함
+3. `rank_math_title` ≤ 60자 + Focus Keyword 포함
+4. `rank_math_description` ≤ 150자 + Focus Keyword 포함
+5. 내부 링크 1개 이상, 목적지 전부 `publish`
+6. `<img>` alt 에 Focus Keyword 또는 연관어 포함
+7. 본문 1,500단어 이상
+8. `rank_math_focus_keyword` 쉼표 항목 5개
+
+- **8항목 전부 통과** → 점수 게이트 충족으로 본다. Notion SEO 셀에 `자가검사 통과 (점수 미측정)` 기록, `[6l]` draft 일자 기록 가능
+- **미달 항목 있음** → 지침서 5-3 기준으로 HTML 보정 1회 → `[5-0]` 재검사 → 그래도 미달이면 draft 일자 공란, `[4d]` 로 이월
+- 다음 회차에 브라우저가 살아나면 그 글을 열어 실제 점수를 채우고 Notion SEO 셀을 숫자로 교체한다
 
 **[6i] 콘텐츠 재업로드 폴백** (에디터 본문이 비어 있을 때만)
 POST `/wp-json/wp/v2/posts/{WP_POST_ID}` — `{"content": "<!-- wp:freeform -->\n{HTML_CONTENT}\n<!-- /wp:freeform -->"}`
 
 ### [6k] Notion SEO 점수 업데이트
-메인 테이블 해당 행의 SEO 셀 `—` → 실제 점수.
+메인 테이블 해당 행의 SEO 셀 `—` → 실제 점수. 브라우저 불가 회차는 `[6h-L]` 결과에 따라 `자가검사 통과 (점수 미측정)` 로 적고, 다음 회차에 숫자로 교체한다.
 ⚠️ `<td>—</td>` + 카테고리 셀 같은 짧은 old_str은 다른 행과 중복된다. **제목 또는 한줄 요약 셀부터 포함해** 유일한 범위로 잡는다.
 
 ### [6l] draft 일자 기록 — 전 과정 성공 시에만
 
 아래 중 하나라도 있었으면 draft 일자를 **공란으로 남긴다** (다음 실행이 [4d] 복구 로직으로 이어받는다):
-- Chrome 로그인 실패
 - Astra 설정 미반영 (재시도 후에도)
-- Rank Math 키워드가 [6g] 새로고침 재검증에서 비어 있음 (재시도 후에도)
+- Rank Math 키워드가 `[6c-3]` REST 재조회(또는 `[6g]` 새로고침 재검증)에서 5개가 아님 (재시도 후에도)
+- 브라우저 가용인데 `[6h]` 점수가 78점 미만 (보정 1회 후에도) / 브라우저 불가인데 `[6h-L]` 자가검사 8항목에 미달이 남음
 - **[6n] 구조 검증에서 🔴 항목이 남아 있음**
 - **AdSense 로더 개수가 1이 아님 (STEP -1)**
 
@@ -557,7 +627,7 @@ GET /wp-json/wp/v2/posts?slug={신규슬러그}&status=any&_fields=id,slug,statu
 - [4d]에서 미완성 draft를 복구했으면 함께 기록: `KoreaPlug 미완성 draft {M}개 복구완료 (SEO/이미지/구조) | ({TODAY_KST})`
 
 ⚠️ STEP 0 결과를 한 줄로 함께 기록한다 — 조회 실패([0-5]) / 캐시 사고([0-3]에서 조항 확인) / **조항 자동 신설([0-4], 조항번호 + 전문)** / 진짜 상충. **캐시 사고를 상충으로 쓰지 않는다.**
-⚠️ 추가 보고 항목: `[6m-Q]` 인바운드 대기 잔여 건수 / `[6m-R]` 구조 복구 편수와 이월 잔여 / `[6n]` 🔴 미해소 슬러그 목록 / **헤더 영역을 건드린 회차면 AdSense 로더 개수(STEP -1)**.
+⚠️ 추가 보고 항목: `[6m-Q]` 인바운드 대기 잔여 건수 / `[6m-R]` 구조 복구 편수와 이월 잔여 / `[6n]` 🔴 미해소 슬러그 목록 / **헤더 영역을 건드린 회차면 AdSense 로더 개수(STEP -1)** / **SEO 설정 경로(`REST` 또는 `UI폴백`)와 `[6c-0]` 사전 점검 결과** / **점수 판정 방식(`78점 배지` 또는 `자가검사 8/8`)**.
 ⚠️ Notion 메인 페이지 하단에 이번 회차 실행 로그를 append한다 (신규 draft·1급 자료·관문 결과·인바운드 링크·구조검증·오류·다음 실행 시각).
 
 ---
@@ -572,15 +642,19 @@ GET /wp-json/wp/v2/posts?slug={신규슬러그}&status=any&_fields=id,slug,statu
 | 지침서 개정 이력이 루틴이 아는 버전보다 낮음 | 캐시 사본 의심 — 새 `?cb=` 로 재조회 + Chrome 재확인. 캐시로 확인되면 상충 보고 금지 |
 | pw.txt 접근 실패 | ⓪ 1) bash 탐색부터 재확인 → 빈 결과일 때만 `request_cowork_directory` 1회 → 그래도 실패면 ② Chrome 세션 nonce로 전환 |
 | **승인 창 무응답(AbortError)** | 같은 호출을 **반복하지 않는다.** 즉시 다음 폴백으로 이동하고 "무인 시간대 승인 대기 실패"로 기록. 반복하면 세션 전체의 권한 채널이 죽는다 |
-| **WP 세션 만료(reauth)** | ⛔ **로그인 버튼을 클릭하지 않는다**(STEP 3 ③). Basic Auth가 살아 있으면 STEP 5까지 진행하고 Rank Math만 미완으로 남긴 뒤 draft 일자 공란. 둘 다 죽었으면 오류 로그 후 STEP 7 |
-| Chrome 미연결 | Basic Auth로 STEP 5·6b·6m·6n 은 계속 수행. Rank Math 구간만 건너뛰고 draft 일자 공란 유지 |
+| **WP 세션 만료(reauth)** | ⛔ **로그인 버튼을 클릭하지 않는다**(STEP 3 ③). Basic Auth가 살아 있으면 **`[6c]` REST 경로로 SEO 설정까지 끝낸다.** 미완은 점수·Schema·WPCode 셋뿐이고, `[6h-L]` 자가검사를 통과하면 draft 일자를 기록한다. 사용자에게 '기억하기' 체크 로그인을 안내. Basic Auth도 죽었으면 오류 로그 후 STEP 7 |
+| Chrome 미연결 | Basic Auth로 STEP 5·6b·**6c**·6m·6n 을 전부 수행. `[6h]` 점수만 `[6h-L]` 자가검사로 대체하고 회차를 정상 종료한다 |
 | WordPress API 실패 | 로그 기록 후 다음 포스트 진행 |
 | Notion 페이지 없음 | 로그 기록 후 다음 포스트 진행 |
 | 관문 불통과 | 반려 로그 행 추가 + draft 일자 공란 + 다음 포스트 진행 |
 | 캡처 실패/어색 | 지침서 5-4B 기준으로 region 재지정해 1회 재캡처. 실패 시 관문 ① 불충족 → 반려 |
 | 이미지 URL 404 | [4e] 재시도 1회, 실패 시 플레이스홀더 유지 + 오류 로그 |
 | Rank Math 78점 미달 | 지침서 5-3/오류표 기준 수정 후 재시도 1회. 수정했으면 [5-0] 재검사 |
-| SEO 설정이 새로고침 후 사라짐 | JS dispatch 금지 — UI 클릭([6d]~[6f]) + [6g] 새로고침 재검증 필수 |
+| SEO 설정이 새로고침 후 사라짐 | JS dispatch 금지. **`[6c]` REST 저장 + `[6c-3]` 재조회 검증**이 표준. UI 폴백을 썼다면 [6g] 새로고침 재검증 필수 |
+| **REST meta 에 `rank_math_focus_keyword` 없음** | `[6c-0]` 사전 점검이 0 → WPCode 스니펫 `1001` 미작동. REST 시도 중단, `[6d]` UI 폴백으로 내려가고 STEP 7 에 🔴 기록 |
+| **REST 로 넣었는데 점수가 그대로** | 정상이다. `rank_math_seo_score` 는 에디터 JS 가 계산한다. 브라우저 가용 시 `[6h]` 재분석, 불가 시 `[6h-L]` 자가검사로 판정 |
+| **`find` 가 키워드 입력창을 못 찾음 / 입력이 안 들어감** | Rank Math 패널 렌더 전에 `ref` 를 잡은 것이다. 패널을 열고 2~3초 대기 후 `find` 재실행([6d]) |
+| **키워드 입력 중 태그 소실** | 좌표 재계산 금지. `[6e]` 대로 `find` 로 얻은 **`ref` 를 재사용**한다 |
 | Astra 설정 미반영 | [6b] REST meta 재지정 1회 → 그래도 안 되면 명시 기록, draft 일자 공란 |
 | **[6n] 🔴 항목 발생** | 해당 항목 수정 후 재검사 1회. 남으면 draft 일자 공란 + STEP 7에 슬러그 명시. **"완료"로 보고 금지** |
 | **인바운드 목적지가 미발행** | 삽입하지 않고 `[6m-Q]` 큐 적재. 오류가 아니라 정상 동작이다 |
@@ -691,6 +765,7 @@ regex_findall(r'href="https?://koreaplug\.com/[a-z0-9\-]+/?"', C) == []
 | 활성 테마 | **Astra 4.13.4** (자식 테마 없음). GeneratePress는 설치돼 있으나 **비활성** |
 | 활성 플러그인 | 14개 (Breeze · Object Cache Pro · Rank Math SEO · WPCode Lite · UpdraftPlus · 간편한 목차 · 단순 작성자 상자 · WP Headers And Footers 등) |
 | 캐시 스택 | **Breeze**(페이지) + **Object Cache Pro**(Redis 객체 캐시). 대시보드 위젯의 `Flush Cache` 로 비운다 |
+| Rank Math REST | **WPCode 스니펫 `1001` "Rank Math REST meta — KoreaPlug"**(PHP · 어디서나 실행 · 활성)가 `rank_math_focus_keyword` · `rank_math_title` · `rank_math_description` 을 REST 에 쓰기 가능하게, `rank_math_seo_score` 를 읽기 전용으로 등록한다. 코드 원본은 `blog/wpcode-1001-rankmath-rest-meta.php`. 지침서 5-6 참조. ⛔ 999(AdSense)와 합치지 않는다 |
 | 오디오 | **Compact WP Audio Player 비활성화됨.** 오디오 글은 네이티브 `<audio>` 태그를 쓰고, WPCode 스니펫 `1550` "KP Audio Click Handler"(사이트 전체 바닥글·JS)가 클릭 핸들러를 담당한다. 이 스니펫 최상단에 `if (!document.querySelector('audio')) return;` 가드가 있어 오디오 없는 페이지에서는 즉시 종료한다 — **가드를 제거하지 않는다** |
 | 성능 (참고) | PSI 모바일 61 / 데스크톱 97. 병목은 `<head>` 127KB 중 인라인 CSS 125KB. **CrUX 필드 데이터가 없어 현재 순위 요인이 아니다** — 이 루틴의 조치 대상이 아니며 기록만 한다 |
 

@@ -172,7 +172,25 @@ Q/A가 1쌍 이하면 null.
 - 업로드 경로: 샌드박스에 스크린샷 파일이 없으므로 `mcp__claude-in-chrome__upload_image` 로 `/wp-admin/media-new.php?browser-uploader=1` 의 `#async-upload` 에 넣고 **'업로드' submit 버튼을 좌표 클릭**한다 (ref 클릭만으로는 전송되지 않는 사례 확인). 이후 `GET /wp-json/wp/v2/media?per_page=2` 로 id·source_url 확인.
 - 파일명: `evidence-{SLUG}-{n}` — Image 루틴이 증빙과 생성 이미지를 구분하는 근거. webp 변환 불가 경로에서는 .jpg 허용하되 로그에 남긴다.
 - 삽입 마크업:
-  `<figure class="evidence-capture" style="margin:26px 0; border:1px solid #e2e8f0; border-radius:12px; padding:10px; background:#fafafa;"><img style="width:100%;display:block;height:auto;border-radius:8px;" src="{URL}" alt="{Focus Keyword 포함 설명}" /><figcaption style="font-size:13px; color:#64748b; margin-top:8px;">{출처 기관 — 화면명 · Captured YYYY-MM-DD}</figcaption></figure>`
+  `<figure class="evidence-capture" style="margin:26px 0; border:1px solid #e2e8f0; border-radius:12px; padding:10px; background:#fafafa;"><img class="wp-image-{MEDIA_ID}" loading="lazy" decoding="async" style="width:100%;display:block;height:auto;border-radius:8px;" src="{URL}" alt="{Focus Keyword 포함 설명}" /><figcaption style="font-size:13px; color:#64748b; margin-top:8px;">{출처 기관 — 화면명 · Captured YYYY-MM-DD}</figcaption></figure>`
+
+🚨 **(2026-09-08 신설) `class="wp-image-{MEDIA_ID}"` 를 반드시 넣는다. 이게 빠지면 증빙 캡처가 원본 그대로 전송된다.**
+WordPress의 `wp_filter_content_tags()` 는 **`wp-image-{ID}` 클래스가 붙은 `<img>` 에만** `srcset`·`sizes` 를 자동 주입한다. 클래스가 없으면 WP가 만들어 둔 300/768/1024px 리사이즈본이 **하나도 쓰이지 않고**, 본문 표시폭 728px 자리에 1568px 원본이 통째로 내려간다.
+
+> 2026-09-08 실측(Post 1626): 생성 이미지 3장은 `srcset:YES(4)` 인데 **증빙 캡처 2장만 `srcset:NO` · `cls:NO`** 였다. Image 루틴은 v5.4에서 이미 고쳤는데 이 루틴이 만드는 증빙만 뒤처져 있었다. 같은 페이지 안에서 증빙만 원본이 전송되고 있었던 것이다.
+
+`{MEDIA_ID}` 는 172번 항목의 업로드 확인(`GET /wp-json/wp/v2/media?per_page=2`)에서 받은 `id` 를 그대로 쓴다. **id를 확인하지 못했으면 삽입하지 않는다** — 클래스 없이 넣는 것보다 다음 실행으로 미루는 편이 낫다.
+
+⚠️ **히어로(첫 화면 이미지)에는 `loading="lazy"` 를 붙이지 않는다.** LCP 요소를 지연 로딩하면 오히려 느려진다. 증빙은 본문 중간에 들어가므로 `lazy` 가 맞다.
+
+✅ **업로드 직후 검증(1줄)** — 프리뷰에서 확인하고, `NO` 가 있으면 그 자리에서 고친다.
+
+```javascript
+Array.from(document.querySelectorAll('figure.evidence-capture img'))
+  .map((i, n) => n + ' cls:' + (/wp-image-\d+/.test(i.className) ? 'YES' : 'NO')
+    + ' srcset:' + (i.getAttribute('srcset') ? 'YES' : 'NO')
+    + ' loading:' + (i.getAttribute('loading') || 'none')).join('\n')
+```
 
 ② 가짜경험 — 하지 않은 일의 1인칭 서술·가공된 신상 0건.
 ⚠️ **도입 첫 문단을 특히 주의해 읽는다.** 주어가 생략된 완료형("PT 20회를 100만원에 끊었습니다. 5회 받고 환불을 요청했더니…")은 필자의 실경험으로 읽힌다. Writer가 "가짜경험 0건"이라 적어두었어도 본문을 직접 읽고 판정한다. 적발 시 반려하지 말고 "~라고 해보죠"·"~인 경우를 가정하면"으로 **최소 수정 후 통과**시키고 로그에 남긴다.

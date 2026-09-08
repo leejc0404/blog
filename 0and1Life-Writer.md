@@ -505,7 +505,15 @@ Sub Keywords (핵심+1단어, 자동완성 기준): 노션 자동화 기능 / �
 
 ```html
 <div id="z-[SLUG_FIRST_WORD]-report" style="font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; max-width:820px; margin:0 auto; padding:0 16px 40px; color:#1a1a2e; line-height:1.8; box-sizing:border-box;">
-  <!-- 상단 배너 (H1 + 날짜/읽는시간) -->
+  <!-- 상단 배너 = 히어로 이미지 위에 H1을 얹는다. 아래 2-3b 템플릿을 그대로 쓴다 (색 박스 금지) -->
+  <figure style="display:grid; margin:0 0 28px; border-radius:16px; overflow:hidden; background:#111;">
+    <img fetchpriority="high" decoding="async" style="grid-area:1/1; width:100%; display:block; height:auto; align-self:start;" src="[FEATURED_IMAGE_URL]" alt="[ALT_TEXT]" />
+    <div style="grid-area:1/1; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);"></div>
+    <figcaption style="grid-area:1/1; align-self:end; padding:clamp(14px,3.6vw,26px) clamp(14px,3.2vw,24px); color:#fff;">
+      <h1 style="font-size:clamp(16px,4.4vw,26px); line-height:1.35; font-weight:800; margin:0 0 8px; color:#fff;">[SEO_TITLE]</h1>
+      <p style="margin:0; font-size:clamp(11px,2.9vw,13px); opacity:.85;">[YYYY년 M월 D일] 작성 · 읽는 데 약 [N]분</p>
+    </figcaption>
+  </figure>
   <!-- ① 공감 유도 첫 문단 (60단어 이내) -->
   <!-- ② [GEO] 3줄 스니펫 박스 -->
   <div class="ai-knowledge-snippet" style="background:#f8fafc; border-radius:14px; padding:22px 26px; margin-bottom:28px; border-left:5px solid [THEME_COLOR];">
@@ -523,6 +531,32 @@ Sub Keywords (핵심+1단어, 자동완성 기준): 노션 자동화 기능 / �
 </div>
 ```
 ⚠️ FAQ는 반드시 `<p><strong>Q. …</strong><br>…</p>` 마크업 — Draft 루틴이 이 형태만 정규식으로 인식해 FAQPage 스키마를 생성한다.
+
+### 2-3b. 상단 배너(히어로) 규칙 — 2026-09-08 신설
+
+🚨 **제목을 단색·그라디언트 박스에 넣지 않는다. 반드시 히어로 이미지 위에 얹는다.**
+
+舊 지침은 이 자리를 `<!-- 상단 배너 (H1 + 날짜/읽는시간) -->` 주석 한 줄로만 두었다. 마크업이 없으니 매 회차 즉흥적으로 만들어졌고, 실제로는 **테마 컬러 그라디언트 박스에 제목을 넣고 히어로 이미지를 그 아래에 따로 두는 구조**가 반복 생성됐다. 이미지 루틴이 매번 사후 병합으로 되돌리고 있었다.
+
+> 2026-09-08 실측(Post 1626): `background:linear-gradient(135deg,#16a34a 0%,#15803d 100%)` 초록 박스 + 독립 히어로 `<figure>`. 이미지 루틴이 오버레이로 병합해 교정했다. 2026-08-25 Post 1278에서도 사용자가 **"제목쪽이 그냥 초록색으로 되어 있다"** 고 직접 지적한 바 있다.
+
+**지켜야 할 4가지**
+
+1. **`figure{display:grid}` + 세 자식 모두 `grid-area:1/1`** — 이미지·그라디언트·캡션을 같은 칸에 겹친다
+2. ⛔ **`position:absolute` 금지** — 절대위치 캡션은 자기 높이가 figure에 반영되지 않아 **좁은 화면에서 반드시 넘치고 잘린다**. 그리드 스택은 행 높이가 `max(이미지, 캡션)` 이라 넘침이 구조적으로 불가능하다
+3. ⛔ **고정 `font-size` 금지, `clamp()` 만 쓴다** — 제목 `clamp(16px,4.4vw,26px)`, 메타 `clamp(11px,2.9vw,13px)`, 패딩 `clamp(14px,3.6vw,26px) clamp(14px,3.2vw,24px)`. 고정 26px은 375px 화면에서 캡션을 304px까지 키운다(이미지는 180px) — **제목 앞 2~3줄이 사라진다**. 데스크톱에서는 상한 26px에 걸려 종전과 픽셀 단위로 동일하다
+4. **히어로 `<img>` 는 `fetchpriority="high"`, `loading="lazy"` 금지** — LCP 요소다
+
+**히어로 이미지 URL**: Unsplash 확보에 실패하면 `[FEATURED_IMAGE_URL]` 플레이스홀더를 그대로 남긴다(2-6 ③ 경로). 이미지 루틴이 생성 이미지로 교체하며, **그때도 위 구조는 유지**되므로 병합 단계가 스킵된다.
+
+⚠️ **`[FEATURED_IMAGE_URL]` 플레이스홀더는 본문 전체에서 1개만 쓴다.** 2개 이상이면 이미지 루틴이 첫 번째만 히어로로 채우고 나머지는 본문 이미지를 소비해, 그만큼 새로 삽입되는 이미지가 줄어든다.
+
+✅ **발행 전 자가 점검** — 아래가 전부 참이어야 한다.
+
+- `<h1>` 이 `<figure>` 안에 있다 (색 박스 안이 아니다)
+- 본문에 `<h1>` 은 정확히 1개
+- `grid-area:1/1` 이 3개, `clamp(` 가 4개
+- `position:absolute` 인 `<figcaption>` 이 0개, `font-size:26px` 같은 고정값이 0개
 
 ⚠️ **열이 4개 이상인 표는 `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0;">`로 감싼다.** 감싸지 않으면 모바일에서 표가 화면 밖으로 넘쳐 본문 전체에 가로 스크롤이 생긴다 — 모바일 이탈률과 Core Web Vitals(CLS)에 직접 걸린다. (2026-09-05 전수검사: 발행 글 55개 표가 미래핑 상태였음)
 
