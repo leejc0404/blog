@@ -1,6 +1,6 @@
 # ✏️ KoreaPlug Writer 지침
 
-**v13.0 · 2026-09-21**
+**v13.1 · 2026-09-21**
 
 > **🎯 v13.0이 v12.x를 대체하는 근거 — GSC API 90일 전수 실측 (2026-06-21~09-18, 발행 167편 조인)**
 >
@@ -84,7 +84,7 @@
   2. 쿼리가 **결정형**이다 (`0-2 ①` 판정) — `meaning`·`what is`·`why do` 류는 여기서 제외
   3. 그 쿼리(또는 의미상 같은 문구)를 **제목·H1·첫 H2·메타 어디에도** 담은 페이지가 사이트에 없다 — 📡 WP REST `?search=`로 확인
 - 판정 두 갈래:
-  - **(a) 업그레이드**: 쿼리가 걸린 페이지가 이미 그 답을 본문에 갖고 있으면 → 그 페이지를 `0-5`대로 고친다 (신규 글 아님). 근거: `korean-cafe-culture-space-rental` — 본문은 체인별 와이파이·콘센트를 다 갖고 있는데 제목이 "Study Cafes Guide"라 7,218노출 0클릭
+  - **(a) 업그레이드**: 쿼리가 걸린 페이지가 이미 그 답을 본문에 갖고 있으면 → 노출 **100+**는 그 페이지를 `0-5`대로 고친다(신규 글 아님), **50~99**는 백로그에 「업그레이드 대기」로 적재한다. 근거: `korean-cafe-culture-space-rental` — 본문은 체인별 와이파이·콘센트를 다 갖고 있는데 제목이 "Study Cafes Guide"라 7,218노출 0클릭
   - **(b) 신규**: 걸린 페이지가 답을 갖고 있지 않거나(다른 각도), 걸린 페이지가 없으면 → 그 쿼리를 포커스로 새 글
 - 출력: 쿼리 · 노출 · 순위 · 걸린 페이지 · (a)/(b)
 - ⚠️ **정의형 제로클릭 페이지**(`sajangnim-meaning` · `why-do-koreans-say-imnida` · `korean-age-system-explained` 등)는 (a) 대상이 **아닙니다** — 제목·메타를 고쳐도 CTR이 오르지 않음이 실측됐습니다(`1-6` B-Z)
@@ -93,15 +93,28 @@
 
 지갑·예약·선택 직전의 질문을 자동완성에서 캡니다. 예산 미소모.
 
-- 고정 시드 (매 회차 최소 8개, 순환): `best {x} korea` · `best {x} for tourists korea` · `where to stay in {seoul/busan/jeju} {수식}` · `{x} worth it korea` · `{a} vs {b} korea` · `how much {x} korea` · `can foreigners {동사} korea` · `do i need {x} korea` · `is {장소} open {시점}` · `where to buy {x} in korea` · `{x} for foreigners korea`
-  - `{x}`는 여행 실행 명사에서 고릅니다: sim/esim/pocket wifi · rail pass/ktx · t-money/climate card · hotel/hostel/motel · tax refund · pharmacy/medication · sauna/jjimjilbang · bank/atm · taxi/kakao · 맛집 예약(catch table) 등
-- 후보 조건: 시드 반환 변형이 **8개 이상**이고, 그중 `reddit` 또는 `for tourists/foreigners` 변형이 **1개 이상** (= 기존 결과에 만족 못 하는 사람이 있다는 신호)
+- 시드 틀: `best {x} korea` · `best {x} for tourists korea` · `where to stay in {seoul/busan/jeju} {수식}` · `{x} worth it korea` · `{a} vs {b} korea` · `how much {x} korea` · `can foreigners {동사} korea` · `do i need {x} korea` · `is {장소} open {시점}` · `where to buy {x} in korea` · `{x} for foreigners korea`
+- **`{x}`는 요일별 고정 군에서 고릅니다** (기억 없이 순환되도록 — 회차마다 최소 8개 시드):
+
+| 요일 | 군 | `{x}` 예 |
+|---|---|---|
+| 월 | 통신 | sim / esim / pocket wifi / phone number / data plan |
+| 화 | 숙소 | hotel / hostel / guesthouse / motel / hanok stay / airbnb / where to stay |
+| 수 | 교통·패스 | ktx / rail pass / airport bus / arex / taxi / t-money / climate card / rental car |
+| 목 | 결제·현금 | cash / atm / credit card / wowpass / tax refund / exchange |
+| 금 | 식당·예약 | restaurant reservation / catch table / bbq / street food / vegetarian / halal |
+| 토 | 체험·스파 | jjimjilbang / sauna / hanbok / palace / temple stay / hair salon / skin clinic |
+| 일 | 공항·출국 | incheon airport / luggage storage / lounge / duty free / departure / transit |
+
+- 백로그 '대기' 항목과 엔진 G에서 넘어온 (b) 후보는 요일과 무관하게 합류합니다
+- 후보 조건: 시드 반환 변형이 **6개 이상**이고, **`reddit`·`for tourists/foreigners` 변형이 1개 이상 있거나 변형이 만석(10개)** — 둘 중 하나. 근거: 같은 수요가 시드 문구에 따라 7↔10변형으로 흔들린다(`best korea sim card` 10 vs `~ for tourist` 7, 2026-09-21 실측). reddit 변형은 기존 결과에 만족 못 하는 사람이 있다는 신호이고, 만석은 수요 두께의 신호다
 - Reddit `search.json?q={키워드}&t=year`는 취약 소스 — **1회만** 시도, 실패 시 건너뜁니다
 - ⚠️ **대형 관광 키워드에 수식이 붙으면 채택 대상**입니다. `where to stay in seoul first time`은 `seoul`이 들어 있어도 단독형이 아닙니다(v12.4 정정). 금지는 **수식 없는 단독형**(`seoul` · `gwangjang market`)뿐입니다
 
 **엔진 C — 시즌·날짜 이벤트 (실측 유일 승자)**
 
-- 입력: `0-4` 캘린더 + **시행일 확정 제도** + **날짜 확정 일회성 이벤트**(파업·축제·전시·행사)
+- 입력: `0-4` 캘린더 + **시행일 확정 제도** + **날짜 확정 일회성 이벤트**(파업·축제·전시·행사·**운행 변경**)
+- 일회성 이벤트·운행 변경의 입력은 **공식 공지 4곳의 제목만** 회차당 1회 스캔합니다(리더 프록시, 각 3회): AREX 공지(`arex.or.kr`) · 인천공항 공지(`airport.kr`) · Korail 공지(`letskorail.com`) · 서울시 영문 뉴스(`english.seoul.go.kr`). **날짜가 있고 방한자의 이동·예약·구매를 바꾸는 제목만** 후보화하고, 나머지는 읽지 않습니다. 근거: 2026-09-16 AREX 「막차 운행 구간 연장」 — 심야 도착 숙소 선택을 바꾸는 확정 사실인데 뉴스 스캔 삭제 후 잡을 입력이 없었다. ⛔ 이것은 뉴스 스캔의 부활이 아닙니다 — Trends·Reddit·Soompi·언론 헤드라인·실검·앱 순위는 여전히 읽지 않습니다
 - 후보 조건: 오늘이 선점 창 안이고(`0-4`), 7일 간격·정지 규칙에 걸리지 않으며, 같은 이벤트의 기존 글과 실행 수식(H2)이 겹치지 않는다
 - 각도는 `0-4`의 **실행 수식 축**(휴무·교통·예매·영업시간·예약·혼잡·규정)에서 고르고, 실제 키워드는 자동완성 실존 문구 또는 확정 사실 용어로 조합합니다
 - 근거: 시즌 14편 편당 10.6클릭 · CTR 3.28% · 사이트 클릭의 26%가 추석 6편
@@ -193,7 +206,7 @@
 
 **트리거 — 엔진 G (a)에서만**
 
-- 기존 페이지가 **노출 200+ · 순위 5~30** 쿼리에 걸려 있고
+- 기존 페이지가 **노출 100+ · 순위 5~30** 쿼리에 걸려 있고 (50~99는 백로그 대기 — 근거: `yakgwa near me` 168노출이 200 기준에서는 어디에도 가지 못했다, 2026-09-21 테스트)
 - 그 페이지의 **제목·H1·첫 H2·메타 어디에도** 그 쿼리(또는 의미상 같은 문구)가 없으며
 - 본문이 이미 그 질문의 답을 **실질적으로 갖고 있다**(없으면 (b) 신규)
 
@@ -300,7 +313,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 | **(가) 동일 각도** | 같은 각도의 영어 정리글 수 (시즌·제도는 올해 기준) | **기록만** — 탈락 사유 아님 |
 | **(나) 인접 신호** | 포럼 질문글 또는 인접 각도 정리글 1건 이상 | (가) 0건일 때 수요 사막 판정 |
 | **(다) 1페이지 구성** | 개인 블로그·Reddit·Quora·Tripadvisor 건수 | `0-2 ②` 관문 · `0-3` 승산 점수 |
-| **(라) AI Overview** | 최상단에서 답이 완결되는가 | 완결이면 `0-2 ①` 탈락 |
+| **(라) AI Overview (대리)** | 이 환경은 구글 AIO를 직접 볼 수 없다. **상위 3개 결과의 스니펫만으로 답이 2문장 안에 끝나는가**를 대리 기준으로 쓴다 | 끝나면 `0-2 ①` 탈락 |
 
 | (가) | (나) | (다) | 판정 |
 |---|---|---|---|
