@@ -140,7 +140,7 @@ await fetch('/wp-json/wp/v2/posts?slug=<슬러그>&status=any',
 
 ### [0] 네이버 랭크 점검 — 주지표 (2026-09-21 신설 · 가이드 1-5 ①)
 0and1life는 네이버 단일 채널이다(GA4 28일 549/550 · GSC 90일 클릭 2). 이 절이 리포트의 첫 표다.
-1. `GOOGLE_SA_JSON`·`GA4_PROPERTY_ID`(540835629)가 있으면 `python3 tools/google_fetch.py ga4-pages --days 28 --limit 300` / `ga4-sources --days 28`로 세션을 뽑는다(Chrome GA4 화면 대신). 없으면 Chrome 경로.
+1. `GOOGLE_SA_JSON`·`GA4_PROPERTY_ID`(540835629)가 있으면 Writer 루틴 STEP 1의 GA4 인라인 명령(같은 코드)으로 글별 세션을 뽑는다(Chrome GA4 화면 대신). 없으면 Chrome 경로.
 2. 전 발행 글의 Focus Keyword로 릴레이 `wp-json/o1/v1/naver-check?type=webkr&display=10`을 글당 1회 호출해 `items[].link`에 `0and1life.com`이 있는지 기록한다(상한 없음, 실패 시 1회 재시도).
 3. 표: `# | 제목 | Focus Keyword | 28일 네이버 세션 | 웹문서 상위10 진입(○/×) | WT/BT/CT(현황표 기록값) | 발행일`. 세 묶음(진입 / 미진입·14일+ / 14일 미만)으로 나눠 가이드 1-5 ① 조치를 적는다.
 4. 직전 4주 발행분 진입 0편이면 리포트 상단 `⚠️ 신규 발행분 네이버 랭크 0`. 💰 재테크 글이 1편이라도 진입하면 `💰 동결 해제 조건 충족`을 명시한다(가이드 1-3 R1).

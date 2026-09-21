@@ -134,7 +134,27 @@ STEP 1 — Read Reference Materials from GitHub (검색 없이 먼저 실행)
 - **발행 반려 로그** (Notion): https://www.notion.so/3adbfe4a2ae1817994f0f901de5c8dec
   → 최근 7일 행 확인 — 같은 사유 코드가 2회 이상 반복된 유형은 이번 회차 제외. '조달 주체=사용자' 미해결 행이 3건 이상이면 이번 회차는 루틴 조달 가능 주제만 선정(가이드 1-3 관문 입력)
 - **최신 주간 리포트** (Notion, `398bfe4a-2ae1-81ba-9ec6-fdae2acd6b2d`): "## 리포트 (최신순)" 맨 위 섹션의 **① 네이버 랭크 점검 표**(가이드 1-5)를 읽는다 — 랭크 진입 글의 계열이 후속 후보 우선순위, `⚠️ 신규 발행분 네이버 랭크 0`이면 STEP 8에 그대로 옮긴다. 구글 등급(F/B/C)은 참고만
-- **GA4 직접 조회 (환경변수 `GOOGLE_SA_JSON`·`GA4_PROPERTY_ID`가 있을 때만 — 없으면 건너뛰고 STEP 8에 `GA4 미연결` 기록)**: `python3 tools/google_fetch.py ga4-pages --days 28 --limit 40` → 네이버 세션 상위 슬러그를 `WP_CORPUS`로 제목 매핑해 내부링크 허브·후속 계열 판단에 쓴다. 자격증명은 환경변수로만, 출력 금지
+- **GA4 직접 조회 (환경변수 `GOOGLE_SA_JSON`·`GA4_PROPERTY_ID`가 있을 때만 — 없으면 건너뛰고 STEP 8에 `GA4 미연결` 기록)**: 아래를 그대로 실행해 네이버 세션 상위 슬러그를 `WP_CORPUS`로 제목 매핑하고 내부링크 허브·후속 계열 판단에 쓴다. 자격증명은 환경변수로만, 출력 금지.
+  ```bash
+  # GA4 페이지별 세션(전체·네이버) — 서비스계정 JWT를 openssl로 서명해 토큰 교환. 키·토큰은 출력하지 않는다.
+  python3 - <<'EOF'
+  import base64,json,os,subprocess,tempfile,time,urllib.parse,urllib.request
+  from datetime import date,timedelta
+  sa=json.loads(os.environ["GOOGLE_SA_JSON"]) if os.environ["GOOGLE_SA_JSON"].strip().startswith("{") else json.load(open(os.environ["GOOGLE_SA_JSON"]))
+  b64=lambda b: base64.urlsafe_b64encode(b).rstrip(b"=").decode(); now=int(time.time())
+  h=b64(json.dumps({"alg":"RS256","typ":"JWT"}).encode()); c=b64(json.dumps({"iss":sa["client_email"],"scope":"https://www.googleapis.com/auth/analytics.readonly","aud":sa["token_uri"],"iat":now,"exp":now+3600}).encode())
+  kf=tempfile.NamedTemporaryFile("w",suffix=".pem",delete=False); kf.write(sa["private_key"]); kf.close()
+  sig=subprocess.run(["openssl","dgst","-sha256","-sign",kf.name],input=f"{h}.{c}".encode(),capture_output=True,check=True).stdout; os.unlink(kf.name)
+  tok=json.load(urllib.request.urlopen(urllib.request.Request(sa["token_uri"],data=urllib.parse.urlencode({"grant_type":"urn:ietf:params:oauth:grant-type:jwt-bearer","assertion":f"{h}.{c}.{b64(sig)}"}).encode())))["access_token"]
+  DAYS=28; end=date.today()-timedelta(days=2); body={"dateRanges":[{"startDate":(end-timedelta(days=DAYS-1)).isoformat(),"endDate":end.isoformat()}],"dimensions":[{"name":"pagePath"},{"name":"sessionSource"}],"metrics":[{"name":"sessions"}],"orderBys":[{"metric":{"metricName":"sessions"},"desc":True}],"limit":1200}
+  r=urllib.request.Request(f"https://analyticsdata.googleapis.com/v1beta/properties/{os.environ['GA4_PROPERTY_ID']}:runReport",data=json.dumps(body).encode(),headers={"Authorization":"Bearer "+tok,"Content-Type":"application/json"})
+  agg={}
+  for row in json.load(urllib.request.urlopen(r)).get("rows",[]):
+      p,s,n=row["dimensionValues"][0]["value"],row["dimensionValues"][1]["value"].lower(),int(row["metricValues"][0]["value"]); t=agg.setdefault(p,[0,0]); t[0]+=n; t[1]+=n*("naver" in s)
+  print("pagePath\tsessions_total\tsessions_naver")
+  for p,(a,b) in sorted(agg.items(),key=lambda x:-x[1][0]): print(f"{p}\t{a}\t{b}")
+  EOF
+  ```
 
 STEP 2 — Candidate Brainstorm (후보 10~15개 생성, WebSearch 0회 — 항상)
 
@@ -454,7 +474,7 @@ STEP 8 — Report
 | **WP REST 인증** | **앱 비밀번호 Basic 인증 필수** — 환경변수 `WP_USER`·`WP_APP_PASS`. 미설정 시 `status=any`가 HTTP 400이 되어 **초안·대기·예약 글이 중복 대조에서 통째로 누락**된다. 발동 시 STEP 8에 🔴로 기록하며, 이는 정상 폴백이 아니라 이상 신호다. 자격증명은 프롬프트·Notion·GitHub에 두지 않는다 |
 | **WP_CORPUS** | STEP 1에서 **세션당 1회** `status=any&per_page=100&_fields=id,slug,status,title`로 전량 확보 후 STEP 2·3·5·7-B가 재사용. 재호출 금지 |
 | **네이버 경쟁도 API (4-A3)** | 사이트 릴레이 `wp-json/o1/v1/naver-check` (`type`=webkr·blog·cafearticle·news) — WP Basic(`WP_USER`·`WP_APP_PASS`) + 환경변수 `NAVER_APIGW_KEY_ID`·`NAVER_APIGW_KEY`(헤더 `X-O1-NKID`/`X-O1-NKEY`) 필수. WT·BT·CT·`items[]` 구성 전부 기록용(관문 아님). 0.5초 간격·실패 1회 재시도. 회차 전체 실패도 STOP 아님. 기준은 가이드 1-3·1-T2 T1.5 |
-| **GA4 API (STEP 1, 선택)** | `tools/google_fetch.py` — 환경변수 `GOOGLE_SA_JSON`(서비스계정 키 JSON 본문 또는 경로)·`GA4_PROPERTY_ID`(0and1life = 540835629). 없으면 건너뛰고 `GA4 미연결` 기록. 자격증명은 환경변수로만, 로그 출력 금지 |
+| **GA4 API (STEP 1, 선택)** | STEP 1 인라인 명령 — 환경변수 `GOOGLE_SA_JSON`(서비스계정 키 JSON 본문 또는 경로)·`GA4_PROPERTY_ID`(0and1life = 540835629). 없으면 건너뛰고 `GA4 미연결` 기록. 자격증명은 환경변수로만, 로그 출력 금지 |
 | **절단 판정** | **`-D`로 `x-wp-total` 캡처는 모든 WP REST 조회에 필수다.** 헤더를 읽지 않은 조회는 '중복 없음'이 아니라 **'절단 미판정'**이며 STEP 8에 🔴로 기록한다. `x-wp-total > per_page`면 `page=2`를 승계해 전량을 채운 뒤에만 중복 판정을 내린다(WP REST `per_page` 상한 = 100). 보조 경로(`?search=`)도 `per_page=100` + 같은 판정을 적용한다. ⚠️ 코퍼스가 100건 초과에 임박(2026-08-31 실측 89건) |
 | WebSearch 한도 | 글당 최대 2회, STEP 4-B GAP 재료 전용. 경쟁 구도 관문 폐지(가이드 1-3 — 기록만). 진짜 STOP은 STEP 3·4-A에서 채택 가능 후보가 0개일 때만 |
 | 품질 관문 | 차단 무관 불변 — 수요검증 생략 금지(수단은 무료) / **각도 수요 검증 생략 금지**(가이드 1-T ④ — 신선 스파이크는 1-T3 대체 검증 기록) / **네이버 검증 4-A2 생략 금지**(실패해도 `N-미검증`으로 기록) / **네이버 경쟁도 4-A3 생략 금지**(실패해도 `N-경쟁-미검증`으로 기록) / 서브키워드는 실존 노출 문구만 / GAP ⭐ H2 필수(가이드 2-5 정의) / EEAT 강제 조건 유지 / **YMYL 글은 가이드 2-8 신뢰 블록 필수** / 경쟁 구도는 기록만(가이드 1-3, 관문 폐지) / 시즌·제도 헤드는 앵커 날짜 필수(가이드 0-5) / 월별 프로브 생략 금지(가이드 0-2) |
