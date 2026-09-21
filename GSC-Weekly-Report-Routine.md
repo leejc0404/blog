@@ -138,9 +138,15 @@ await fetch('/wp-json/wp/v2/posts?slug=<슬러그>&status=any',
 - 수확 전 정리 먼저: '대기' 중 수확일 4주 경과분은 '만료'로 변경
 - ⚠️ **공급보다 소비를 먼저 볼 것**: '대기'가 10건을 넘고 daily writer가 3일 이상 연속 소비 0건이면 후보를 더 넣어도 백로그만 길어진다. 이 경우 신규 수확을 **블로그당 3건 이하로 줄이고**, 조치 목록에 "소비 정체 — 대기 항목 중 무엇을 왜 못 쓰는지"를 적는다
 
-> **API 경로 (2026-09-21 신설)**: 환경변수 `GOOGLE_SA_JSON`·`GSC_SITE_URL`·`GA4_PROPERTY_ID`가 있으면 Chrome 대신 `python3 tools/google_fetch.py gsc-query --dim query --limit 200` / `gsc-query --dim page` / `ga4-pages --days 28` / `ga4-sources`로 수치를 뽑는다. 가이드 1-5 「경쟁도 임계값 피드백」(유입 상위·하위 10편 WT/BT 대조)은 이 경로가 있을 때 자동 수행한다.
+### [0] 네이버 랭크 점검 — 주지표 (2026-09-21 신설 · 가이드 1-5 ①)
+0and1life는 네이버 단일 채널이다(GA4 28일 549/550 · GSC 90일 클릭 2). 이 절이 리포트의 첫 표다.
+1. `GOOGLE_SA_JSON`·`GA4_PROPERTY_ID`(540835629)가 있으면 `python3 tools/google_fetch.py ga4-pages --days 28 --limit 300` / `ga4-sources --days 28`로 세션을 뽑는다(Chrome GA4 화면 대신). 없으면 Chrome 경로.
+2. 전 발행 글의 Focus Keyword로 릴레이 `wp-json/o1/v1/naver-check?type=webkr&display=10`을 글당 1회 호출해 `items[].link`에 `0and1life.com`이 있는지 기록한다(상한 없음, 실패 시 1회 재시도).
+3. 표: `# | 제목 | Focus Keyword | 28일 네이버 세션 | 웹문서 상위10 진입(○/×) | WT/BT/CT(현황표 기록값) | 발행일`. 세 묶음(진입 / 미진입·14일+ / 14일 미만)으로 나눠 가이드 1-5 ① 조치를 적는다.
+4. 직전 4주 발행분 진입 0편이면 리포트 상단 `⚠️ 신규 발행분 네이버 랭크 0`. 💰 재테크 글이 1편이라도 진입하면 `💰 동결 해제 조건 충족`을 명시한다(가이드 1-3 R1).
+5. 아래 GSC 절(3-A~)은 **참고 기록**으로 유지한다 — 판정·발행 조절 근거로 쓰지 않는다.
 
-### [3-A] GSC 쿼리 수확 (최우선 소스)
+### [3-A] GSC 쿼리 수확 (참고 소스 — 구글 클릭 90일 2건)
 
 breakdown을 페이지 → 검색어로 전환:
 - KoreaPlug: `https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&num_of_days=28&breakdown=query&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION`
