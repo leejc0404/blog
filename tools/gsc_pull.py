@@ -11,6 +11,8 @@ GSC 전수 수집기 — Search Console API (무료, 서비스 계정 인증).
   pages_28d.csv        페이지별 최근 28일 + 직전 28일 델타
   queries_28d.csv      쿼리별 최근 28일 + 직전 28일 델타
   query_page_28d.csv   쿼리×페이지 (상위)
+  query_page_{days}d.csv  90일 쿼리×페이지 (엔진 G 입력)
+  engine_g_candidates.csv 노출≥50 · 순위 5~30 · 비정의형 쿼리 (엔진 G 1차 후보)
   device_28d.csv / country_28d.csv / appearance_28d.csv
   sitemaps.json
   summary.md           핵심 인사이트 자동 요약
@@ -130,6 +132,14 @@ def main():
     qp = flat(query(svc, a.site, c28_s, c28_e, ["query", "page"], limit=25000), ["query", "page"])
     qp.sort(key=lambda r: (-r["clicks"], -r["impressions"]))
     write_csv(f"{od}/query_page_28d.csv", qp, ["query", "page", "clicks", "impressions", "ctr", "position"])
+
+    # 4-b. 엔진 G 입력 — 90일 쿼리×페이지 (지침서 0-1 G)
+    qp90 = flat(query(svc, a.site, start_all, end, ["query", "page"], limit=25000), ["query", "page"])
+    qp90.sort(key=lambda r: (-r["impressions"], -r["clicks"]))
+    write_csv(f"{od}/query_page_{a.days}d.csv", qp90, ["query", "page", "clicks", "impressions", "ctr", "position"])
+    gap = [r for r in qp90 if r["impressions"] >= 50 and 5 <= r["position"] <= 30
+           and not any(k in r["query"] for k in (" meaning", "what is ", "what does ", "why do ", "why are ", "why is "))]
+    write_csv(f"{od}/engine_g_candidates.csv", gap, ["query", "page", "clicks", "impressions", "ctr", "position"])
 
     # 5. 기기 / 국가 / 검색 형태
     for dim in ("device", "country", "searchAppearance"):
