@@ -10,6 +10,14 @@ pw.txt
 credentials*.json
 token*.json
 client_secret*.json
+koreaplug-shorts-*.json
+gsc_sa*.json
+*.b64
+
+# ── 파이썬 / 수집기 산출물 ──
+__pycache__/
+*.pyc
+out/
 
 # ── 임시/시스템 파일 ──
 Thumbs.db
