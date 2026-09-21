@@ -137,8 +137,12 @@ def main():
     qp90 = flat(query(svc, a.site, start_all, end, ["query", "page"], limit=25000), ["query", "page"])
     qp90.sort(key=lambda r: (-r["impressions"], -r["clicks"]))
     write_csv(f"{od}/query_page_{a.days}d.csv", qp90, ["query", "page", "clicks", "impressions", "ctr", "position"])
+    DEF_Q = (" meaning", "what is ", "what does ", "why do ", "why are ", "why is ", " in korean", " in english")
+    DEF_PAGE = ("-meaning", "why-do-koreans", "-explained", "-culture/")   # 정의형 제로클릭 페이지 — 지침서 1-6 B-Z
     gap = [r for r in qp90 if r["impressions"] >= 50 and 5 <= r["position"] <= 30
-           and not any(k in r["query"] for k in (" meaning", "what is ", "what does ", "why do ", "why are ", "why is "))]
+           and not any(k in r["query"] for k in DEF_Q)
+           and not any(k in r["page"] for k in DEF_PAGE)
+           and len(r["query"].split()) >= 2]                              # 용어 단독 쿼리 제외
     write_csv(f"{od}/engine_g_candidates.csv", gap, ["query", "page", "clicks", "impressions", "ctr", "position"])
 
     # 5. 기기 / 국가 / 검색 형태
