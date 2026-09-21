@@ -17,3 +17,5 @@ desktop.ini
 *.tmp
 *.bak
 ~$*
+__pycache__/
+*.pyc
