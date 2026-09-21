@@ -132,6 +132,12 @@ STEP 1 — Read Reference Materials from GitHub (검색 없이 먼저 실행)
   → 상태='대기' 항목 전체 확인 — STEP 2 엔진 D의 입력. ⚠️ 백로그 항목도 **엔진 Q에서 경쟁도를 다시 잰다**(구 OR 임계값 통과분이 많다). 상태='날짜 대기' 항목은 앵커 날짜 확정 여부를 확인하고, 창(마감형 D-14 / 구간형 D-30) 안이면 '대기'로 승격해 검토
 - **발행 반려 로그** (Notion): https://www.notion.so/3adbfe4a2ae1817994f0f901de5c8dec
   → 최근 7일 행 확인 — 같은 사유 코드가 2회 이상 반복된 유형은 이번 회차 제외. '조달 주체=사용자' 미해결 행이 3건 이상이면 이번 회차는 루틴 조달 가능 주제만 선정(가이드 1-3 관문 입력)
+- **GA4·GSC 실측 (환경변수 `GOOGLE_SA_JSON`·`GSC_SITE_URL`·`GA4_PROPERTY_ID`가 있을 때만 — 없으면 건너뛰고 STEP 8에 `GA4/GSC 미연결` 기록)**:
+  ```
+  python3 tools/google_fetch.py ga4-pages --days 28 --limit 40     # 페이지별 세션(전체·네이버) → 유입 상위/하위 슬러그
+  python3 tools/google_fetch.py gsc-query --days 28 --dim query --limit 100   # 구글 노출 쿼리 → 엔진 D 시드 보강
+  ```
+  → 유입 상위 10편의 슬러그를 `WP_CORPUS`로 제목 매핑해 **승자 패턴 입력**으로 쓴다(어떤 생활명사·행동어가 이기는지 → 엔진 Q 시드 우선순위). 상위 10편 중 현황표 요약 셀에 `[N WT/BT]`가 있는 글은 그 값을 함께 적어 T1.5 임계값 검증 근거로 STEP 8에 남긴다. 스크립트는 저장소 `tools/`에 있고 자격증명은 환경변수로만 받는다(토큰·키 출력 금지).
 - **최신 주간 GSC 리포트** (Notion, `398bfe4a-2ae1-81ba-9ec6-fdae2acd6b2d`): "## 리포트 (최신순)" 맨 위 섹션의 특이사항·다음 조치를 후보 우선순위에 반영
 
 STEP 2 — Question Mining (질문 채굴 — 후보 생성, WebSearch 0회, 경쟁도 전량 측정)

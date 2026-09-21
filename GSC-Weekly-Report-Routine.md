@@ -138,6 +138,8 @@ await fetch('/wp-json/wp/v2/posts?slug=<슬러그>&status=any',
 - 수확 전 정리 먼저: '대기' 중 수확일 4주 경과분은 '만료'로 변경
 - ⚠️ **공급보다 소비를 먼저 볼 것**: '대기'가 10건을 넘고 daily writer가 3일 이상 연속 소비 0건이면 후보를 더 넣어도 백로그만 길어진다. 이 경우 신규 수확을 **블로그당 3건 이하로 줄이고**, 조치 목록에 "소비 정체 — 대기 항목 중 무엇을 왜 못 쓰는지"를 적는다
 
+> **API 경로 (2026-09-21 신설)**: 환경변수 `GOOGLE_SA_JSON`·`GSC_SITE_URL`·`GA4_PROPERTY_ID`가 있으면 Chrome 대신 `python3 tools/google_fetch.py gsc-query --dim query --limit 200` / `gsc-query --dim page` / `ga4-pages --days 28` / `ga4-sources`로 수치를 뽑는다. 가이드 1-5 「경쟁도 임계값 피드백」(유입 상위·하위 10편 WT/BT 대조)은 이 경로가 있을 때 자동 수행한다.
+
 ### [3-A] GSC 쿼리 수확 (최우선 소스)
 
 breakdown을 페이지 → 검색어로 전환:
