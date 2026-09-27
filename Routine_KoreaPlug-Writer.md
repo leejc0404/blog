@@ -1,4 +1,4 @@
-[루틴 : KoreaPlug-Writer — v10.1 · 2026-09-21]
+[루틴 : KoreaPlug-Writer — v10.2 · 2026-09-27]
 
 예약된 트리거 시간이 되면 진행한다. **단 STEP 0-A 재실행 가드가 이 원칙에 우선한다** — 오늘 목표를 이미 채웠으면 중복 발행하지 않고 즉시 종료한다.
 날짜: 실행 시점의 실제 KST 날짜를 사용한다 (이 프롬프트에 적힌 고정 날짜가 있어도 무시).
@@ -7,7 +7,7 @@
 
 **역할 경계 — 이 루틴은 도구다.**
 이 루틴은 **운영 절차(언제·무엇을·몇 회·어디에 기록)**와 **실행 자산(Notion 페이지 ID·API 경로·명령·리포트 형식)**만 정의한다.
-**판정 기준·수치·품질 기준의 단일 기준(SSOT)은 전적으로 GitHub 지침서**(`KoreaPlug-Writer.md`, **v13.1 이상**)다.
+**판정 기준·수치·품질 기준의 단일 기준(SSOT)은 전적으로 GitHub 지침서**(`KoreaPlug-Writer.md`, **v13.2 이상**)다.
 
 - ⛔ 지침서의 수치·판정 기준을 이 루틴에 복사해 적지 않는다 — 복사본은 지침서가 개정될 때 구버전으로 남아 상충을 만든다
 - ✅ 지침서의 조항 번호를 가리킨다 (예: "지침서 `0-2` 관문 3개를 그대로 적용한다")
@@ -47,11 +47,19 @@ curl -s -u "$WP_USER:$WP_APP_PASS" "https://koreaplug.com/wp-json/wp/v2/posts/{i
 curl -s -u "$WP_USER:$WP_APP_PASS" -X POST -H "Content-Type: application/json" --data-binary @patch.json \
   "https://koreaplug.com/wp-json/wp/v2/posts/{id}?context=edit&_fields=id,modified,title,meta"
 #  patch.json = {"title":..,"content":<raw>,"meta":{"rank_math_title":..,"rank_math_description":..,"rank_math_focus_keyword":"kw1,kw2,..."}}
+
+# 내부 링크 공개 여부 검증 (STEP 5-4 · 4-U 필수) — 본문 HTML의 모든 상대경로 링크를 추출해 status 재조회
+for s in $(grep -oE 'href="/[^"#?]+/"' post.html | sed -E 's#href="/([^"]+)/"#\1#' | sort -u); do
+  st=$(curl -s -u "$WP_USER:$WP_APP_PASS" "https://koreaplug.com/wp-json/wp/v2/posts?slug=$s&status=any&_fields=id,status" \
+       | python3 -c "import sys,json;d=json.load(sys.stdin);print(d[0]['status'] if d else 'NONE')")
+  echo "$s $st"; [ "$st" = "publish" ] || echo "  ⛔ 교체 필요: $s ($st)"
+done
 ```
 
 - ⚠️ `per_page=100` 고정 · `_fields` 생략 금지 · `status=any` 필수 — 위반 시의 결과는 지침서 `0-7`
 - ⚠️ 인증 호출은 Bash/curl 전용. `status=any`가 HTTP 400이면 인증 실패 → `status` 빼고 발행분만 조회하고 STEP 8에 기록. **STOP 사유 아님**
 - ⚠️ 소프트404: 존재하지 않는 슬러그도 HTTP 200. 실존은 REST 결과(id + status)로만 판정
+- ⛔ **내부 링크는 `status=publish`(공개) 글만** — `future`(예약)·`pending`(검토 대기)·`draft`·`private`는 공개 전까지 404. `status=any` 검색 결과에 섞여 나오므로 `status` 열로 걸러 고른다 (지침서 `2-5`)
 - ⚠️ REST가 간헐적으로 HTML(WAF 챌린지)을 돌려준다 — JSON 파싱 실패 시 5초 후 `-A "Mozilla/5.0"`으로 1회 재시도
 
 **GSC · GA4 — 데이터 SSOT (규격은 지침서 `0-9`)**
@@ -100,7 +108,7 @@ python3 tools/gsc_pull.py --site https://koreaplug.com/ --days 90 --out out/gsc
 ## STEP 1 — 참조 자료 읽기 (검색 없이)
 
 - **지침서**: `https://raw.githubusercontent.com/leejc0404/blog/main/KoreaPlug-Writer.md?cb={epoch_ms}` — WebFetch가 인용을 거부하면 `curl`로 원문. 404/403이면 저장소 루트 1회 재확인 후 실패 시 **STOP** (추측으로 지침 생성 금지)
-  → **버전 확인**: 상단이 **`v13.1` 이상**이고 `0-0 두 방향·두 금지` · `0-1 엔진 G·D·C` · `0-2 관문 3개` · `0-3 채점 3축` · `0-5 업그레이드 회차` · `0-9 GSC·GA4 규격` · `1-1 승산 판정 (가)~(라)` · `1-2 경쟁글 H2 대조` 가 있는가? 없으면 구버전 — STEP 8에 SSOT 이슈로 기록하고 사용자에게 알린다
+  → **버전 확인**: 상단이 **`v13.2` 이상**이고 `0-0 두 방향·두 금지` · `0-1 엔진 G·D·C` · `0-2 관문 3개` · `0-3 채점 3축` · `0-5 업그레이드 회차` · `0-9 GSC·GA4 규격` · `1-1 승산 판정 (가)~(라)` · `1-2 경쟁글 H2 대조` 가 있는가? 없으면 구버전 — STEP 8에 SSOT 이슈로 기록하고 사용자에게 알린다
   → 읽을 조항: `0-0` / `0-1` / `0-2` / `0-3` / `0-4` / `0-5` / `0-7` / `0-8` / `1-0`~`1-3` / `2-1`~`2-3` / `2-5` / `2-6`
 - **발행 목록** (https://www.notion.so/33cbfe4a2ae181b9a743cb7c194dea7f): `MAX_NUM` · 이벤트별 편수·발행일 · 최근 7일 `[U/업그레이드]`·`[제도]` 행 수. ⚠️ 중복 대조에는 쓰지 않는다(WP REST가 원천) · 행 수 ≠ 자산 수
 - **키워드 백로그** (https://www.notion.so/3a9bfe4a2ae1818f911bf852981d5018): 상태 '대기' 항목 — 엔진 D의 입력으로 합류(같은 관문 적용). '업그레이드 대기' 항목은 엔진 G (a) 후보로 합류
@@ -167,8 +175,8 @@ python3 tools/gsc_pull.py --site https://koreaplug.com/ --days 90 --out out/gsc
 지침서 `0-5` 수정 범위 안에서만 고친다. **지어내지 않는다** — 본문에 없는 사실이 필요하면 (b) 신규로 돌린다.
 
 1. 📡 `context=edit`로 `title` · `content.raw` · `rank_math_*` 3종을 읽어 **세션 파일에 백업**(before)
-2. 새 값 작성: 제목·H1(`2-2` 규칙, ≤60자, 대상 쿼리 선두) · `rank_math_description`(130~155자, 대상 쿼리 선두) · `rank_math_focus_keyword`(대상 쿼리 + 서브 3~4개, 쉼표 구분 공백 없음) · 첫 H2를 대상 쿼리의 질문형으로 + 직답 첫 문장 · 인트로 첫 문장 · AEO 3줄 박스(`2-3`) · 필요 시 표 열 1개 또는 문단 1개(출처 있는 것만) · 관련글 링크를 인접 글(REST `publish` 확인)로
-3. 자가검사: `<h1>` 1개 · 태그 개폐 균형 · 플레이스홀더 0 · 4열+ 표 래퍼 · 대상 쿼리 출현 4회 이상
+2. 새 값 작성: 제목·H1(`2-2` 규칙, ≤60자, 대상 쿼리 선두) · `rank_math_description`(130~155자, 대상 쿼리 선두) · `rank_math_focus_keyword`(대상 쿼리 + 서브 3~4개, 쉼표 구분 공백 없음) · 첫 H2를 대상 쿼리의 질문형으로 + 직답 첫 문장 · 인트로 첫 문장 · AEO 3줄 박스(`2-3`) · 필요 시 표 열 1개 또는 문단 1개(출처 있는 것만) · 관련글 링크를 인접 글(REST `status=publish`만 — 예약·대기·임시 금지)로
+3. 자가검사: `<h1>` 1개 · 태그 개폐 균형 · 플레이스홀더 0 · 4열+ 표 래퍼 · 대상 쿼리 출현 4회 이상 · 📡 내부 링크 공개 여부 검증 전부 `publish`
 4. 📡 PATCH → 응답의 `title`·`meta` 확인 → 라이브 `<title>`·`<meta description>`·첫 H2를 `curl`로 재확인
 5. STEP 7로 (Notion 카테고리 페이지 생성 없음)
 
@@ -186,7 +194,8 @@ python3 tools/gsc_pull.py --site https://koreaplug.com/ --days 90 --out out/gsc
 - 기본 메타 → `2-1`: **방향 · 엔진 · 수요 증거 · 승산 판정 · 클릭 필연성 · GAP 질문 · 배포 우선 · 1급 자료 조달 계획** 행 필수 — 전부 숫자·실측값
 - HTML → `2-3` 필수 템플릿 + 구조 규칙 전부(본문 래퍼 · 금지 블록 없음 · 태그 개폐 균형 · 플레이스홀더 0 · `<h1>` 1개 · 4열+ 표 래퍼 · TOC 플레이스홀더 2개 · AEO 3줄 박스 · FAQ 마크업 · **상황 질문형 H2 4개 이상**)
 - **첫 H2 = STEP 4-D의 GAP 질문**, 첫 문장 20~30단어 직답
-- 단어수·밀도·링크 → `2-5` (내부링크는 REST `publish`만) / 테마 컬러 → Phase 7
+- 단어수·밀도·링크 → `2-5` / 테마 컬러 → Phase 7
+- ⛔ **내부 링크 = 공개(`status=publish`) 글만.** 예약(`future`)·대기(`pending`)·임시(`draft`)·비공개(`private`) 글은 곧 공개될 예정이어도 걸지 않는다 — 공개 글이 없으면 인접 주제의 공개 글로 대체
 - 시즌·날짜 이벤트 추가 요건: SEO Title 연도 / INTRO D-day / (나) 날짜×항목 매트릭스 / slug 연도 미포함 / 배포 우선 `당일`
 - 방향 ② 추가 요건: (나) = 경쟁글이 흩어 놓은 사실을 처음 한 표로 통합한 결정표 (출처·확인일 병기)
 
@@ -198,7 +207,8 @@ python3 tools/gsc_pull.py --site https://koreaplug.com/ --days 90 --out out/gsc
 짧은 문장 우위 + 길이 혼합 / 기계적 전환어 0 / 실용 정보 선배치 / 단점·한계 최소 한 단락 / 마무리는 행동 지시 / 끝에 `*Key points : A, B, C` 3~4개
 
 **[5-4] 지침서 `5-3` + `5-5` 체크리스트 교차 검증 — 기계적으로 카운트**
-단어수(1,500~2,000) · 포커스 키워드 7~12회 · 외부 링크 2+ · 내부 링크 1+(REST publish) · 구조 규칙 6종 · 첫 H2 = GAP 질문 · 상황 질문형 H2 4+
+단어수(1,500~2,000) · 포커스 키워드 7~12회 · 외부 링크 2+ · 내부 링크 1+ · 구조 규칙 6종 · 첫 H2 = GAP 질문 · 상황 질문형 H2 4+
+→ **📡 내부 링크 공개 여부 검증**을 실행해 모든 링크가 `publish`인지 확인한다. 하나라도 `future`·`pending`·`draft`·`private`·`NONE`이면 **교체 후 재검증** — 통과 전에는 STEP 6(Notion 업로드)으로 넘어가지 않는다
 
 ## STEP 6 — Notion 페이지 생성
 
@@ -242,7 +252,7 @@ SEO 개선: 없음 | 오류: 없음
 | 🔍 관문 | 두 금지 제거 {n} / 중복·자기잠식 제거 {n} (재분류 업그레이드 {n}) / FT 제거 {n} / 클릭 필연성 제거 {n} / 예산 제거 {n} / 숏리스트 {n} |
 | 🎯 승산 판정 | `{키워드}` 동일 {n} / 인접 {有·無} / 블로그·포럼 {n} / AIO {완결·부분·무} → {①·②·탈락} · 탈락 후보와 값 |
 | 📝 채택 | {키워드} · 방향 {①·②·시즌} · 엔진 {G·D·C} · 수요 {n} · 필연성 {n}/5 · 승산 {n}/5 = {n}/15 · **GAP 질문(첫 H2)**: {문장} |
-| 📄 본문 | {n}단어 · 포커스 {n}회 · H2 {n}(상황 질문형 {n}) · 외부 {n} · 내부 {n}(publish 확인) · 구조 자가검사 {통과·항목} |
+| 📄 본문 | {n}단어 · 포커스 {n}회 · H2 {n}(상황 질문형 {n}) · 외부 {n} · 내부 {n}(전부 publish 재조회 확인 · 교체 {n}건) · 구조 자가검사 {통과·항목} |
 | 📚 1급 자료 | 조달처 {나열} · 프록시 사용 {n} · 3회 실패 {n} |
 | 📂 위치 | {카테고리} · Notion URL {URL} (업그레이드는 WP id·라이브 확인 결과) |
 | 📋 갱신 | 헤더 · 표 행 · 로그 · 백로그 {완료 항목} |
@@ -253,13 +263,13 @@ SEO 개선: 없음 | 오류: 없음
 | 항목 | 조건 |
 |---|---|
 | 실행 환경 | Claude Code on the web — Chrome MCP 없음. Bash/API 기본. WebSearch는 4-B에만 |
-| 지침서 버전 | **v13.1 이상** (`0-0`~`0-9` · `1-0`~`1-6` 신설 구조). 미충족 시 STEP 8에 SSOT 이슈 + 사용자 알림 |
+| 지침서 버전 | **v13.2 이상** (`0-0`~`0-9` · `1-0`~`1-6` 신설 구조). 미충족 시 STEP 8에 SSOT 이슈 + 사용자 알림 |
 | GSC·GA4 | 서비스 계정 `analytics-koreaplug@koreaplug-shorts.iam.gserviceaccount.com` — GSC 두 속성 전체 권한 · GA4 `WP_분석` 계정 뷰어. 키: `GSC_SA_JSON` 환경변수(권장) 또는 Drive `koreaplug-shorts-*.json`. 수집기 `tools/gsc_pull.py`(저장소). 실패 시 엔진 G만 생략 |
 | WP REST | `$WP_USER` · `$WP_APP_PASS`. Rank Math 메타 3종은 REST 읽기·쓰기 가능(WPCode 4183). 업그레이드 회차는 PATCH 전 백업 필수 |
 | 리더 프록시 | `https://r.jina.ai/{URL}` 최대 3회 (간헐 401·422). Reddit은 경유 불가 |
 | DAILY_TARGET | 기본 1. 업그레이드 회차도 1건으로 인정. 주 3회 상한(지침서 `0-5`) |
 | 재시도 예약 | 매일, 본 트리거와 동일 프롬프트. 등록은 사용자 몫 |
 | Notion 권한 | 4개 카테고리 페이지 + 발행 목록 + 백로그 + 반려 로그 편집 권한 (캐시·좌표계는 더 이상 쓰지 않음) |
-| 품질 관문 (불변) | 두 금지 / WP REST 규격·절단 확인 / 라이브 H2 자기잠식 / 관문 3개 / 채점 1점 축 탈락 / 승산 4값 숫자 기록 / 첫 H2 = GAP 질문 / EEAT (가)·(나) / 구조 규칙 6종 / 스킬 2종 / 업그레이드는 수정 범위 안에서만·지어내지 않음 |
+| 품질 관문 (불변) | 두 금지 / WP REST 규격·절단 확인 / 라이브 H2 자기잠식 / 관문 3개 / 채점 1점 축 탈락 / 승산 4값 숫자 기록 / 첫 H2 = GAP 질문 / EEAT (가)·(나) / 구조 규칙 6종 / 내부 링크는 공개(publish) 글만 / 스킬 2종 / 업그레이드는 수정 범위 안에서만·지어내지 않음 |
 
 [결과물] 간단하게 표로 정리할 것. 모든 것은 한글로 얘기하고, 중요한 부분이 아닌 것은 생략한다.
