@@ -1,6 +1,6 @@
 # Schd_0and1Life-Insta — 발행 글 → 인스타그램 캐러셀 게시 루틴 (Cowork 예약 작업용, v1.1 2026-09-30 — STEP W 주간 레퍼런스 스캔·STEP 4.5 스킨 선택 신설)
 
-*매일 08:00 KST 실행 권장(NaverCTR 06:30 · KoreaPlug GSC CTR 07:00 종료 후). 예약 시각이 되면 같은 날 이미 실행됐더라도 다시 진행한다(`ledger.json`이 같은 글을 두 번 올리지 않게 막는다).
+*매일 03:30 KST 실행(Cowork 예약 `0and1life 인스타 캐러셀`, 2026-09-30 등록 — 전날 발행 글을 다루므로 Draft 04:00·Image 05:30·NaverCTR 06:30보다 앞에 둔다). 예약 시각이 되면 같은 날 이미 실행됐더라도 다시 진행한다(`ledger.json`이 같은 글을 두 번 올리지 않게 막는다).
 날짜: 실행 시점의 실제 KST 날짜를 쓴다. 이 프롬프트에 적힌 고정 날짜는 무시한다.
 
 ⚠️ **역할 경계 — 이 루틴은 도구다.** 캐러셀 구성·문구·품질·허브 카드의 판정 기준(SSOT)은 전적으로 GitHub 지침 `0and1Life-Insta.md`다. 이 루틴은 **운영 절차**(언제·무엇을·어디에 기록)와 **실행 자산**(파일 경로·릴레이·스크립트·알림 형식)만 정의한다. 규칙을 가리킬 때는 조항 번호로 참조한다(예: "지침 I-2-3"). 상충이 보이면 지침을 따르고 STEP 11에 기록한다.
@@ -52,7 +52,7 @@
 1. **수집 목록 만들기** (최대 `REF_MAX_POSTS`): ① `refs/inbox.md`의 `- [ ]` 줄 전부 → ② `styles.json.bench_accounts` 각 계정 프로필의 최근 캐러셀 1편 → ③ 남는 자리는 `https://www.instagram.com/explore/tags/{키워드}/`(`카드뉴스` + 이번 주 대상 글 키워드 1개)의 인기 게시물 중 텍스트 중심 캐러셀. 지침 I-3-3 "고를 기준"(공유÷좋아요 ≥ 10% 또는 댓글 '저장' 언급)으로 거른다.
 2. **읽기 방법** (2026-09-30 실측 기준): 게시물은 `…/p/{code}/?img_index={n}` 으로 **URL 이동 → 5초 대기 → 스크린샷**. 화살표 클릭 후 스크린샷은 렌더러 타임아웃이 잦다. 스크린샷이 30초 타임아웃되면 같은 URL로 1회 재시도하고, 그래도 실패하면 그 장은 건너뛴다. 좋아요·댓글·공유 수와 댓글 반응은 `get_page_text`로 읽는다. 장수는 하단 점(dot) 개수 또는 `img_index` 최대값으로 센다. **인스타 화면에서 클릭은 페이지 이동에만 쓴다.**
 3. **기록**: `refs/{YYYY-Www}.md`에 게시물마다 지침 I-3-3 "추출 8항목" + 반응 수치 + "차용할 것 / 복제하지 않을 것"을 쓴다. 처리한 인박스 줄은 `[x]`로 바꾸고 노트 파일명을 덧붙인다.
-4. **스킨 반영**: 토큰으로 표현되는 기법이면 `styles.json.skins`에 **새 이름으로 추가**(`origin` 필수, 기존 스킨 수정 금지) → 이번 주 대상 글 유형에 맞으면 `active_skin`/`by_type` 갱신. 렌더러로 예시 원고(`2026-09-30/october-holidays-2026-annual-leave/carousel.json`)에 새 스킨을 넣어 1회 시험 렌더하고 `overflow`가 비어 있을 때만 채택한다. 템플릿 추가가 필요한 기법은 STEP 11에 "템플릿 제안"으로만 남긴다.
+4. **스킨 반영**: 토큰으로 표현되는 기법이면 `styles.json.skins`에 **새 이름으로 추가**(`origin` 필수, 기존 스킨 수정 금지, `active_skin`·`by_type`은 건드리지 않는다). 렌더러로 예시 원고(`2026-09-30/october-holidays-2026-annual-leave/carousel.json`)에 새 스킨을 넣어 1회 시험 렌더해 `refs/{YYYY-Www}_{스킨}_시험렌더.png`로 남기고, `overflow`가 비어 있으면 STEP 11에 `🎨 새 스킨 후보 {이름} — 시험렌더 확인 후 채택 여부 알려주세요`로 보고만 한다. 채택(`by_type` 변경)은 사용자가 한다. 템플릿 추가가 필요한 기법은 STEP 11에 "템플릿 제안"으로만 남긴다.
 5. 열었던 탭은 모두 닫는다. 이 단계에서 생성·수정한 파일: `refs/*.md`, `styles.json`뿐.
 
 ## STEP 0. 지침 읽기·설정 확인
@@ -97,7 +97,7 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 
 ## STEP 4.5. 스킨·훅 선택 (지침 I-3-2 · I-2-0)
 1. 글 유형을 정한다: 달력·표 중심 → `calendar`, 계산·비교 → `calc`, 제도·규정 설명 → `rule`, 체크리스트 → `checklist`, 💍 → `wedding`, 🤖 → `ai`.
-2. `styles.json.by_type[유형]`을 기본으로 하되, `ledger.posts`의 최근 3건 `skin`이 모두 같으면 다른 스킨(`active_skin` 또는 `clean-data`)으로 바꾼다(같은 스킨 3회 연속 금지).
+2. `styles.json.by_type[유형]`을 그대로 쓴다(2026-09-30 기준 전부 `clean-data`). 자동으로 다른 스킨으로 바꾸지 않는다 — 스킨 교체는 사용자가 시험 렌더를 보고 `styles.json`을 고쳤을 때만 일어난다.
 3. 이번 주 `refs/{YYYY-Www}.md`가 있으면 거기 기록된 **훅 유형·밀도** 메모를 읽고 STEP 5에서 1장 훅 유형(ⓐ/ⓑ/ⓒ)을 고른다. 없으면 ⓐ 결론 숫자형.
 4. 선택 결과를 `meta.json.skin`, `meta.json.hook`에 적는다.
 
@@ -179,9 +179,9 @@ PushNotification 1회. 첫 문장은 한 줄 요약, 그 뒤 표 형식. 모두 
 ## ⚠️ 전제조건 (사용자 몫 — 2026-09-30 기준 상태)
 | 항목 | 상태 | 비고 |
 |---|---|---|
-| WPCode 스니펫 `ig-relay` 활성 | ✅ 설치됨 (`me/container/carousel/status/limit/publish`) | `refresh`·`media` 동작이 추가된 `relay\wpcode_ig-relay.php`로 **교체 필요** |
+| WPCode 스니펫 `ig-relay` 활성 | ✅ 8동작 전부 설치·`media` 실측 확인(2026-09-30) | `relay\wpcode_ig-relay.php`와 동일본 |
 | Meta 앱 `Instar_API` · 장기 토큰 | ✅ pw.txt 보관, 계정 0and1life(MEDIA_CREATOR) 확인 | 60일 토큰, 30일마다 자동 갱신 |
-| 프로필 링크 = 허브 `/ig/?utm_...=ig_bio` | 사용자 설정 | 모바일 앱에서만 변경 가능 |
+| 프로필 링크 = 허브 `/ig/?utm_...=ig_bio` | ✅ 설정 완료(2026-09-30) | 모바일 앱에서만 변경 가능 |
 | 허브 페이지 1922 공개·index·Rank Math 78점 | ✅ | 제목·메타는 고정, 카드만 추가 |
-| Cowork 예약(08:00 KST, PC 연결, `C:\Users\win\Documents\Claude` 연결) | 사용자 생성 | 프롬프트는 이 파일 전문 |
+| Cowork 예약 `0and1life 인스타 캐러셀`(03:30 KST, PC 연결, `C:\Users\win\Documents\Claude` 연결) | ✅ 등록(2026-09-30) | 프롬프트는 이 파일 전문 — 파일을 고치면 예약 프롬프트도 같은 전문으로 교체 |
 | `PUBLISH_MODE` | `APPROVE` | 샘플 3회 검토 후 사용자 지시로 `AUTO` 전환 |
