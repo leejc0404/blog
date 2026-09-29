@@ -1,4 +1,4 @@
-"""월간 달력 이미지 생성기 (0and1life · Routine_0and1Life-Writer STEP C · 가이드 0-8·2-9).
+"""월간 달력 이미지 생성기 (0and1life · 가이드 0-8·2-9 월말 슬롯 — 선택 도구).
 
 사용: python3 tools/month_calendar.py config.json out.png
 - 화면 흐림 방지: 최종 크기(기본 2160px 폭)로 한 번에 그리고 무손실 PNG로 저장한다.
