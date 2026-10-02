@@ -1,4 +1,35 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v6.2 — 총량 상한 계산 정정 · 분류기 ⑧단계 · Flow 설정 자동 교정)
+# 0and1Life 자동 이미지 삽입 태스크 (v7.1 — 설명은 Claude 제작컷(모션·정적 SVG) 우선 · 촬영컷은 밝은 일상 톤 · 비용 0원)
+
+> 🌤 **v7.1 개정 (2026-10-02 오후) — 촬영컷을 '밝은 일상 톤'으로, 설명은 Claude 제작컷을 우선한다.**
+> 사용자 판정: **"Flow 이미지들은 분위기가 무겁고 현실감이 떨어지고 보고 싶은 이미지가 아니다."** → 같은 Flow(Nano Banana 2·무료)·같은 장면으로 프롬프트 톤만 바꿔 시험했고, 밝은 일상 톤에서 현실적이고 보기 좋은 사진이 나왔다. 사용자 결정: **기본은 밝은 톤, 손해·경고성 글만 차분한 톤 허용** + **"설명에 Claude가 제작한 이미지·모션 이미지·애니메이션이 더 어울리면 Flow 말고 직접 제작해서 올린다."**
+>
+> | # | 조치 |
+> |---|---|
+> | 1 | **3-2-R 전면 교체** — 기본 톤 '밝은 일상'(자연광·밝은 실내·high-key), 손해·경고성 글만 '차분한 톤'(흐린 날 자연광). 어두운·영화 같은 조명은 모든 글에서 금지. 시험 통과 프롬프트 골격 수록 |
+> | 2 | **3-0 판정 질문 교체** — "찍을 수 있는가"에서 **"독자에게 더 잘 설명하는 것은 사진인가, Claude 그래픽인가"** 로. 애매하면 Claude 제작컷 |
+> | 3 | **Claude 제작컷에 '정적(still)' 추가** — 움직일 필요 없는 분기도·체크리스트는 애니메이션 없이 (3-10) |
+> | 4 | **본문 촬영컷 최소 1장 규칙 폐지** — 본문 전부 Claude 제작컷이어도 된다. 히어로만 촬영컷 고정 |
+> | 5 | **v7.0의 노이즈·JPEG·사용감 강조 폐지, 그레인 기본값 0** — 칙칙한 인상의 원인 |
+> | 6 | 3-5 빛·카메라·제외 조건 세트, 5-4 AI 티 판정을 밝은 톤 기준으로 교체 |
+>
+> 아래 v7.0 블록은 이력으로 남긴다. **v7.0과 v7.1이 다르면 v7.1을 따른다.**
+
+> 🚀 **v7.0 개정 (2026-10-02) — 이미지를 '촬영컷'과 '설명컷' 두 종류로 나눈다. 설명컷은 Claude가 직접 그리고, 촬영컷은 Flow로 '실제로 찍은 사진'처럼 만든다.**
+> 사용자 지시(2026-10-02): **"비용이 들지 않아야 하고 사진 같아야 한다. 실제 촬영컷이 아닌 설명을 위한 이미지는 Claude가 모션 애니메이션이나 모션 이미지로 직접 만들어 넣어도 된다."**
+>
+> | # | 조치 | 근거 |
+> |---|---|---|
+> | 1 | **슬롯 유형 판정 신설** — 촬영컷(photo) / 설명컷(motion) (STEP 3-0) | 2026-10-01 Post 2007의 「지폐 4다발이 잘려 공중에서 떨어지는 컷」은 수치 비교를 사진으로 억지로 표현한 것이었다. 수치·배수·흐름은 그래픽이 더 정확하다 |
+> | 2 | **설명컷은 Claude가 인라인 SVG + CSS 애니메이션으로 직접 제작** (STEP 3-10) | Flow·업로드·캡처가 필요 없고 2~6KB, 글자·숫자가 본문과 정확히 일치한다. 2026-10-02 확인: 0and1life 관리자 계정 `unfiltered_html: true`, 기존 글에 `<style>` 저장 사례 1건. 템플릿은 Playwright로 1280px·375px 렌더 검증을 마쳤다 |
+> | 3 | **촬영컷 프롬프트를 '연출 광고컷'에서 '휴대폰 스냅샷'으로 전환** (STEP 3-2-R 신설, 3-5·3-8 교체) | 2026-10-01 산출물의 AI 티 원인은 툴이 아니라 v5.0 규칙이었다: 공중에 뜬 지폐(촬영 불가능한 장면), `the only bright accent` 연출 조명, 풀프레임·대구경 렌즈의 얕은 심도 |
+> | 4 | **캡처 시 미세 그레인 추가** (STEP 5-5) | 매끈한 플라스틱 질감 완화 |
+> | 5 | **채택 판정에 'AI 티 탈락 기준' 추가** (STEP 5-4) | 판정 질문: "지인이 단톡방에 올린 사진이라고 하면 믿겠는가" |
+> | 6 | **유료 도구 사용 금지 명문화** — Flow Nano Banana 2 · x2(0크레딧)만 쓴다 (STEP 5) | Higgsfield가 연결돼 있지만 무료 플랜 잔액 0.5크레딧이다(2026-10-02 확인). Claude는 사진형 래스터 이미지를 직접 만들지 못하므로 촬영컷은 계속 Flow가 맡는다 |
+>
+> 촬영컷이 하나도 필요 없는 글(히어로 불필요 + 본문 슬롯 전부 설명컷)은 **STEP 5·6을 통째로 건너뛴다.**
+>
+> ⚠️ **KoreaPlug 미반영**: v7.0과 v6.2 미반영분을 `Schd_KoreaPlug-Image.md` 에 **함께 백포트해야 한다.** 사용자 지시로 이번 회차는 0and1Life만 수정했다.
+> ⚠️ **첫 실전 회차 필수 확인**: 설명컷을 넣은 첫 저장 직후 STEP 7의 '3.5) 저장 후 SVG 생존 확인'을 반드시 통과해야 한다. 실패하면 설명컷을 빼고 재저장한 뒤 보고한다.
 
 > 🚨 **v6.2 개정 (2026-09-08) — 상한 5장 계산이 스톡을 빠뜨리고 있었다.**
 > 2026-09-08 Post 1626 실행 중 발견. `genCount` 공식이 `stock` 을 총량에서 빼지 않아, 스톡 1장이 있는 글에서 **총 6장**이 나왔다(상한 5장 위반). 그날은 손으로 3→2로 줄여 막았고, v6.2에서 공식을 고쳤다. 함께 반영한 것:
@@ -17,7 +48,12 @@
 
 ### 목적
 
-Notion 글 현황 테이블에서 오늘 날짜에 draft된 WordPress 글을 찾아, **데코(생성) 이미지가 3장 미만인 글**에 **Google Flow(Nano Banana 2)** 로 생성한 이미지를 WebP 형식으로 삽입한다 — 단, **증빙+데코 합계가 5장을 넘지 않는 범위**에서만 (생성 수를 3→2→1장으로 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다.
+Notion 글 현황 테이블에서 오늘 날짜에 draft된 WordPress 글을 찾아, **데코 이미지(촬영컷+설명컷)가 3장 미만인 글**에 이미지를 채운다. 이미지는 두 종류다 (v7.0).
+
+- **촬영컷(photo)**: 사람이 휴대폰으로 실제로 찍을 수 있는 장면. **Google Flow(Nano Banana 2, 0크레딧)** 로 '실제로 찍은 사진'처럼 생성해 WebP로 업로드한다. 히어로는 항상 촬영컷이다.
+- **설명컷(motion)**: 수치 비교·계산 흐름·조건 분기·타임라인·체크리스트처럼 사진으로 찍을 수 없는 내용. **Claude가 인라인 SVG 모션 그래픽으로 직접 만들어** 본문에 넣는다 (업로드 없음).
+
+단, **증빙+데코+스톡 합계가 5장을 넘지 않는 범위**에서만 채운다 (생성 수를 3→2→1장으로 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다. **비용이 드는 도구(유료 모델·크레딧 차감 옵션·유료 생성 서비스)는 쓰지 않는다** (2026-10-02 사용자 지시).
 
 > 🚨 **v4.0 일괄 개정 (2026-08-18) — 이 파일은 v3.1에 머물러 있어 KoreaPlug 대비 3세대(v3.2·v3.3·v3.4) 뒤처져 있었다.** KoreaPlug에서 실전으로 검증된 아래 수정을 **전부 백포트**하고, 여기에 v4.0(Flow 교체)을 함께 적용한다. 두 사이트의 루틴은 이제 사이트 고유값(도메인·Notion 페이지·파일명 prefix·프롬프트 철학)을 제외하면 동일한 구조다.
 >
@@ -190,6 +226,8 @@ window._cls = window._postData.map(p => {
 
   let evidence = 0, stock = 0, deco = 0;
   const detail = [], unknown = [];
+  // (v7.0) 설명컷(인라인 SVG 모션 그래픽)은 <img>가 아니므로 따로 센다 — 데코로 계산한다
+  const motion = div.querySelectorAll('figure.motion-figure').length;
 
   for (const img of Array.from(div.querySelectorAll('img'))) {
     const src  = img.getAttribute('src') || '';
@@ -216,12 +254,13 @@ window._cls = window._postData.map(p => {
     detail.push(base.slice(0, 44).replace(/[?&=]/g, '_') + ' => ' + k + ' [' + why + ']');
   }
 
+  deco += motion;                             // (v7.0) 설명컷도 데코 — 재실행 시 중복 삽입을 막는다
   // (v6.2) 스톡을 총량에 포함한다 — 스톡은 히어로로 교체되면서 데코가 되므로 상한 계산에 반드시 들어가야 한다
   const genCount = deco >= 3 ? 0 : Math.max(0, Math.min(3 - deco, 5 - evidence - deco - stock));
   return {id: p.id, title: p.title.raw || p.title.rendered, status: p.status, date: p.date, fm: p.featured_media, slug: p.slug,
-          evidence, stock, deco, genCount, hasStockImg: stock > 0, unknown, detail};
+          evidence, stock, deco, motion, genCount, hasStockImg: stock > 0, unknown, detail};
 });
-window._cls.map(c => c.id + ' st:' + c.status + ' fm:' + c.fm + ' ev:' + c.evidence + ' stk:' + c.stock + ' deco:' + c.deco + ' gen:' + c.genCount + ' unk:' + c.unknown.length).join('\n')
+window._cls.map(c => c.id + ' st:' + c.status + ' fm:' + c.fm + ' ev:' + c.evidence + ' stk:' + c.stock + ' deco:' + c.deco + '(mot' + c.motion + ')' + ' gen:' + c.genCount + ' unk:' + c.unknown.length).join('\n')
 ```
 
 ⚠️ (v3.3 백포트) `javascript_tool` 의 반환 문자열에 이미지 URL·쿼리스트링이 그대로 섞이면 **`[BLOCKED: Cookie/query string data]`** 로 출력 전체가 막힌다. 결과를 읽을 때는 한 번에 전부 찍지 말고 ⓐ 집계값만(`ev/st/deco/gen/unk`) 먼저, ⓑ `detail` 은 글 단위로 나눠서, ⓒ 파일명에서 `?&=` 를 치환하거나 공통 prefix를 축약해 출력한다. `.replace(/<img[^>]*>/g,'[IMG]')` 같은 치환도 **원본 문자열에 URL이 남아 있으면 소용없다** — 반드시 파일명만 잘라서 출력할 것.
@@ -243,6 +282,7 @@ window._cls.map(c => c.id + ' st:' + c.status + ' fm:' + c.fm + ' ev:' + c.evide
 
 ⛔ **(v3.4 백포트) Notion에 대상 행이 있는데 WP 검색 결과가 0건이면 '미배포'로 판정하고 즉시 종료한다.** 배포 루틴이 아직 글을 올리지 못한 상태이므로 이미지 생성·업로드를 일절 수행하지 않는다. 보고에 ① 미배포로 판정된 글 번호·제목·예상 slug ② WP 최신 수정 글의 날짜 ③ "배포 루틴 재실행 후 이 루틴을 다시 돌리면 자동으로 따라잡는다"는 안내를 남긴다.
 
+- **(v7.0) `genCount` 는 촬영컷+설명컷을 합친 '본문 새 슬롯 수'다.** 어느 슬롯을 설명컷으로 할지는 STEP 3-0에서 정한다
 - **genCount가 0이면 본문 삽입을 skip하고 종료** (단, `hasStockImg: true`면 스톡 이미지 교체만 수행 — 교체는 총량을 늘리지 않으므로 상한과 무관). `unknown`이 있으면 위 가드를 먼저 수행한 뒤 판단한다.
 - genCount가 1~2장이면 그 수만큼만 생성·삽입한다. 우선순위: **이미지 1(도입 훅) → 이미지 3(결론 시각화) → 이미지 2(중반 클로즈업)** — 증빙 캡처가 이미 있는 글에서는 중반 클로즈업의 역할을 증빙이 대신한다.
 - **증빙 캡처는 절대 건드리지 않는다**: 교체·이동·삭제 금지, 삽입 위치가 증빙 figure 내부에 떨어지면 직전 헤딩 바로 앞으로 옮긴다.
@@ -317,6 +357,33 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 - 본문이 언급하는 **구체적 도구·화면·환경·상황** (앱 이름, 작업 환경, 시간대, 감정선) — 그대로 프롬프트 재료가 됨
 - 헤딩(h2/h3) 텍스트 — 각 이미지가 들어갈 위치 주변 섹션의 주제
 
+#### 3-0. 슬롯 유형 판정 — 촬영컷 vs Claude 제작컷 (v7.1 · 프롬프트를 쓰기 전에 먼저 한다)
+
+본문 이미지 슬롯마다 질문 하나로 유형을 정한다: **"이 자리에서 독자에게 더 잘 설명하는 것은 사진인가, Claude가 직접 만든 그래픽인가?"** (v7.1 — 2026-10-02 사용자 지시: "설명에 Claude가 제작한 이미지·모션 이미지·애니메이션이 더 어울리면 Flow 말고 직접 제작해서 올린다")
+
+| 유형 | 고르는 경우 | 예 | 제작 |
+|---|---|---|---|
+| **촬영컷 (photo)** | 장소·상황·분위기를 **눈으로 알아보게** 하는 것이 목적일 때 | 구내식당 단말기에 사원증을 대는 손, 창가 책상에서 계약서를 보는 장면, 병원 접수 창구 | Flow (STEP 5) |
+| **Claude 제작컷 — 모션 (motion)** | 수치·변화·순서처럼 **움직임이 이해를 돕는** 설명 | 연 +57만원 vs 연 −4만~6만원 막대가 자라는 그림, 계산 단계가 차례로 켜지는 흐름도, 기한까지 점이 이동하는 타임라인 | Claude 인라인 SVG + CSS 애니메이션 (STEP 3-10) |
+| **Claude 제작컷 — 정적 (still)** | 움직일 필요가 없는 구조·비교·요약 | 조건별 결과 분기도, 확인 순서 체크리스트, 한눈에 보는 비교표 그림 | Claude 인라인 SVG, 애니메이션 없이 (STEP 3-10) |
+
+**판정 기준**
+
+- **설명이 목적이면 Claude 제작컷이 우선이다.** 숫자·배수·계산·조건 분기·기한·순서·체크리스트는 사진으로 억지로 표현하지 않는다. 생성 이미지는 정확한 숫자와 한글을 그리지 못하지만, Claude 제작컷은 본문 숫자를 그대로 쓴다
+- **분위기·실제 모습이 목적이면 촬영컷이다.** "이런 곳에서 이런 일이 일어난다"를 보여주는 자리
+- 애매하면 Claude 제작컷을 고른다 — 비용 0, 업로드·캡처 불필요, 실패 위험이 낮다
+
+**배분 규칙**
+
+- **히어로는 항상 촬영컷이다.** 대표이미지·검색 썸네일·OG 이미지는 래스터 파일이어야 한다
+- 본문 슬롯은 **전부 Claude 제작컷이어도 된다.** (v7.0의 '본문 촬영컷 최소 1장' 규칙은 폐지)
+- 다만 Claude 제작컷이 2장 이상이면 형식(막대·흐름·분기·타임라인·체크리스트)을 서로 다르게 하고, 모션과 정적을 섞는다 — 같은 모양의 그래프가 연달아 나오면 보고서처럼 보인다
+- 3-2 ③의 '숫자를 사물의 물리량으로 번역'은 **이제 Claude 제작컷이 맡는다.** 촬영컷에서 숫자를 억지로 사물 배수로 표현하지 않는다
+- 증빙 캡처 ±5%pt 구간에는 Claude 제작컷도 넣지 않는다 (STEP 4 배제 규칙 동일 적용)
+- 판정 결과를 STEP 4 삽입 순서대로 기록한다: `window._slotTypes = ['photo', 'motion', 'still']` — 코드에서 `still` 은 `motion` 과 같은 경로(인라인 SVG figure)로 삽입된다
+- **Flow 생성 장수 = (hasStockImg ? 1 : 0) + photo 슬롯 수.** 이 값이 0이면 STEP 5·6을 건너뛰고 STEP 7로 간다
+- Claude 제작컷도 데코로 계산한다 — 총량 상한 5장(`evidence + deco + stock + genCount ≤ 5`)에 그대로 포함된다
+
 #### 3-2. 장면 설계 원칙 (v5.0 — 최우선. 정확성보다도 먼저 통과해야 한다)
 
 > 이 루틴의 이미지는 '글을 설명하는 삽화'가 아니라 **'글을 계속 읽게 만드는 장치'**다.
@@ -334,7 +401,7 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 > 예(#88): "외벌이 부부의 결혼세액공제는 100만원이 아니라 50만원입니다."
 훅 문장은 STEP 8 보고에 이미지별로 **반드시 남긴다.**
 
-**③ 숫자를 사물의 물리량으로 번역한다 (문자로 쓰지 않는다)**
+**③ 숫자를 사물의 물리량으로 번역한다 (문자로 쓰지 않는다)** — (v7.0) 이 원칙은 이제 **Claude 제작컷(3-10)** 이 맡는다. 촬영컷에서는 숫자를 사물 배수로 억지 표현하지 않는다 (3-0)
 글의 핵심 수치는 화면에서 **눈으로 세지거나 비교되는 형태**여야 한다. 글자는 어차피 깨지므로 절대 쓰지 않는다.
 | 본문 수치 | 번역 |
 |---|---|
@@ -344,11 +411,11 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 | 7년 유예 | 같은 물건이 **한참 뒤로 밀려 원근상 작게** |
 | 90% 본인부담 | 10등분된 것 중 **9조각이 한쪽으로** |
 
-**④ 긴장 요소를 최소 1개 넣는다 (정적 배치 금지)**
+**④ 긴장 요소를 최소 1개 넣는다 (정적 배치 금지)** — (v7.0) 단 **'떨어지는 중'은 손에서 막 미끄러지는 정도까지만** 허용한다. 공중에 멈춘 물체는 3-2-R ③에 따라 금지
 다음 중 하나 이상이 프롬프트에 명시돼야 한다 — 기울어짐 / 떨어지는 중 / 반쯤 열림·찢김 / 한쪽만 켜짐 / 넘치기 직전 / 손이 막 놓거나 집는 순간 / 그림자가 물체보다 큼 / 한 개만 줄에서 이탈.
 
 **⑤ 시선 유도점은 1개만 둔다**
-화면에서 가장 밝은 곳(또는 가장 채도가 높은 곳)이 **훅 문장의 주어와 일치**해야 한다. 밝은 곳이 두 군데면 주제가 흐려진다. `the only bright accent in the frame is X` 처럼 못 박는다.
+화면에서 가장 밝은 곳(또는 가장 채도가 높은 곳)이 **훅 문장의 주어와 일치**해야 한다. 밝은 곳이 두 군데면 주제가 흐려진다. ⛔ (v7.0) `the only bright accent` 문구는 쓰지 않는다 — 연출 조명이 AI 티의 원인이었다. 대신 `X is near the center of the frame and in sharp focus` 처럼 **구도와 초점**으로 못 박는다 (3-2-R ⑤).
 
 **⑥ 범용 은유 금지 목록 (글이 그 물건 자체를 다루지 않는 한 사용 금지)**
 ⛔ 모래시계 · 저울 · 전구 · 퍼즐 조각 · 체스말 · 화살표 그래픽 · 돼지저금통 · 악수 · 계산기와 안경 플랫레이 · 창밖 도시야경 단독 컷 · 텅 빈 사무실/로비 · 정렬된 문구류 톱뷰.
@@ -356,6 +423,46 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 
 **⑦ 썸네일 3초 테스트**
 완성된 이미지를 폭 320px로 줄였다고 상상한다. 그 크기에서 주제가 안 읽히면 피사체가 너무 작거나 배경이 복잡한 것이다 — 피사체를 화면의 **1/3 이상** 차지하게 다시 잡는다.
+
+#### 3-2-R. 촬영컷 톤·사실감 원칙 (v7.1 — 촬영컷 전용 · 3-2와 충돌하면 이쪽이 우선)
+
+> 목표는 **'보고 싶은 사진'** — 지인이 인스타그램에 올린 밝은 일상 사진처럼 **자연스럽고 기분 좋은** 사진이다.
+> 2026-10-02 비교 시험(같은 Flow·같은 장면·무료): 어제 지침(연출 조명·풀프레임 렌즈·공중 부양)은 **어둡고 무겁고 현실감이 떨어졌고**, 프롬프트 톤만 '밝은 일상'으로 바꾸자 같은 모델에서 **밝고 현실적인 사진**이 나왔다. 사용자 판정: "분위기가 무겁고 현실감이 떨어지고 보고 싶은 이미지가 아니다" → 밝은 일상 톤을 기본값으로 채택.
+
+1. **기본 톤은 '밝은 일상'이다.** 낮의 자연광, 창가, 밝은 실내(화이트·우드·식물), 따뜻한 화이트, 부드러운 그림자, 상쾌하고 편안한 분위기, 밝은 노출(high-key)
+2. **글 성격에 따라 톤을 조절한다 (혼합 규칙).**
+
+   | 글 성격 | 톤 | 예 |
+   |---|---|---|
+   | 기본 — 정보·절약·제도 안내·생활 팁 | **밝은 일상** | 연말정산, 식대 비과세, 지원금 신청 |
+   | 손해·경고·사고·분쟁·질병 | **차분한 톤** — 흐린 날 자연광, 조용한 실내, 중간 노출. **어둡거나 영화 같은 조명은 여전히 금지** | 전세사기, 보험 거절, 응급실 비용 |
+
+   차분한 톤도 '현실의 흐린 날'이지 '연출된 어둠'이 아니다. 밤 장면·단일 조명·강한 그림자·붉은 조명은 어떤 글에서도 쓰지 않는다
+3. **찍힐 수 있는 순간만.** 3-2 ①④의 사건은 사람이 그 자리에서 셔터를 누를 수 있는 순간이어야 한다.
+   - ✅ 카드 단말기에 사원증을 대는 손, 휴대폰 알림을 내려다보는 손, 계약서에 형광펜을 긋는 손
+   - ⛔ 공중에 멈춘 지폐·서류, 잘린 단면, 불타는 봉투, 쏟아지는 돈다발 같은 **물리 연출·초현실 은유** — 이런 생각이 들면 그 슬롯은 Claude 제작컷(3-10)으로 보낸다
+4. **카메라는 휴대폰이다.** `taken on an iPhone 15 Pro main camera`. 장면 대부분이 선명. ⛔ 풀프레임 바디·대구경 렌즈(`Sony A7R V`, `f/1.2` 등), 강한 보케 명시 금지
+5. **시선 유도는 조명이 아니라 구도로.** ⛔ `the only bright accent` 문구 금지. 주인공 사물을 프레임 가운데 근처에 두고 초점을 맞춘다
+6. **사람은 손·팔·뒷모습·흐릿한 배경 인물까지** (3-4 유지). 손은 일상 동작(집기·넘기기·찍기·내밀기), 포즈 금지. 배경 인물은 얼굴이 알아보이지 않게
+7. **한국 실물 디테일을 구체적으로** (3-3 유지) — 사원증 목걸이, 스테인리스 식판, 반찬 그릇, 아파트 창밖 풍경 등. 실제 사진처럼 보이게 하는 가장 강한 단서다
+8. ⛔ **(v7.1) v7.0의 '센서 노이즈·JPEG 압축·손때·긁힘·구겨진 영수증' 강조는 폐지한다.** 칙칙하고 지저분한 인상을 만들었다. 생활감은 커피잔·화분·노트북 정도로 충분하다
+
+**v7.1 촬영컷 프롬프트 골격** (2026-10-02 시험 통과본 기준 · 영문 그대로 쓰고 [ ]만 채운다)
+
+```
+Bright, airy lifestyle photo taken on an iPhone 15 Pro main camera, like a photo a friend posted on Instagram.
+[시간대] at a clean, sunny [한국의 실제 장소]: [실물 디테일 2~3개].
+[손이 무엇을 막 하는 순간 — 일상 동작]. [배경 인물이 있으면: softly out of focus, faces not visible].
+Soft natural daylight, clean warm whites, gentle soft shadows, fresh and pleasant everyday mood, high-key exposure, true-to-life colors. Most of the scene in focus.
+[제외 조건 세트 v7.1 — 3-5 말미 문장 그대로]
+```
+
+차분한 톤(2번 표)일 때는 첫 줄과 넷째 줄을 아래로 바꾼다:
+
+```
+Calm, natural lifestyle photo taken on an iPhone 15 Pro main camera on an overcast day.
+Soft diffused daylight from a window, neutral whites, quiet and calm mood, normal exposure, true-to-life colors. Most of the scene in focus.
+```
 
 #### 3-3. 피사체 정확성 원칙 (2순위 — 사건이 있어야 그다음이다)
 
@@ -378,13 +485,13 @@ v4.0의 "인물 최대 1장" 규칙이 실무에서 "항상 0명"으로 굳어�
 
 #### 3-5. 조명·카메라·기법
 
-- **시간·빛**: 단순 낮/밤이 아니라 분위기를 명시. "soft morning light from floor-to-ceiling windows", "evening blue hour with city lights reflection", "single overhead fluorescent with hard shadows"
-- **카메라·렌즈**: "shot on Sony A7R V with 35mm f/1.8 lens", "Fujifilm X-T5 with 56mm f/1.2"
-- **구도·깊이감**: "shallow depth of field", "eye-level", "over-the-shoulder", "worm's eye view"
-- **제외 조건 세트**(항상 말미에 부착): `no readable text, no watermark, no logos, no anime style, no generic stock photo look, no posed corporate model smiling at camera, photorealistic`
-- 창의적 실사 기법 적극 허용: 미니어처/틸트시프트, 극단적 매크로, 톱뷰 플랫레이, 장노출 빛궤적, 강한 색 대비 조명, 얕은 초점의 전경 가림(foreground occlusion)
+- **시간·빛 (v7.1)**: 기본은 낮의 자연광 — "soft natural daylight from a big window", "bright sunny noon", "Saturday morning daylight". 손해·경고성 글만 "soft diffused daylight on an overcast day". ⛔ 밤 장면, 단일 조명(데스크 램프 하나), 강한 측광, 붉은·푸른 색조명
+- **카메라 (v7.1)**: `taken on an iPhone 15 Pro main camera`, `most of the scene in focus`. ⛔ 풀프레임 바디·대구경 렌즈(`Sony A7R V`, `f/1.2`, `85mm` 등) 명시 금지 — 스톡 사진 질감의 주원인이다
+- **구도 (v7.1)**: 눈높이 또는 살짝 위에서 내려다보는 휴대폰 높이. ⛔ `shallow depth of field`, `worm's eye view`, 극단적 매크로 같은 연출 구도는 쓰지 않는다
+- **제외 조건 세트 (v7.1 · 항상 말미에 부착)**: `no readable text, no logos, no watermark, no dark or moody lighting, no night scene, no harsh shadows, no cinematic color grading, no heavy bokeh, no floating objects, no surreal elements, no visible face, no posed model, no 3D render look, photorealistic`
+- ⛔ **(v7.0) 舊 '창의적 실사 기법'(틸트시프트·극단적 매크로·장노출 빛궤적·강한 색 대비 조명·전경 가림)은 촬영컷에서 폐지한다.** 모두 '찍은 사진'이 아니라 '연출된 사진'이라는 신호다
 
-**두 상태 비교형**: 글의 핵심이 'A일 때와 B일 때가 다르다'면 **같은 평면 위 두 개의 사물**로 놓는다. 조명·프레이밍 동일 지정이 핵심이다 (`Identical lighting and identical framing on both items so the contrast is obvious at a glance`). 다만 v5.0에서는 여기에 **③ 물리량 번역**과 **④ 긴장 요소**를 반드시 얹는다 — 두 물건을 그냥 나란히 놓기만 하면 그게 바로 '무난함'이다.
+**두 상태 비교형**: (v7.1) 원칙적으로 **Claude 제작컷(3-10 막대 비교)으로 보낸다.** 촬영컷으로 할 때만 아래를 따른다 — 글의 핵심이 'A일 때와 B일 때가 다르다'면 **같은 평면 위 두 개의 사물**로 놓는다. 조명·프레이밍 동일 지정이 핵심이다 (`Identical lighting and identical framing on both items so the contrast is obvious at a glance`). 다만 v5.0에서는 여기에 **③ 물리량 번역**과 **④ 긴장 요소**를 반드시 얹는다 — 두 물건을 그냥 나란히 놓기만 하면 그게 바로 '무난함'이다.
 
 #### 3-6. 나쁜 예 → 좋은 예 (2026-08-18 실전 자기비판)
 
@@ -395,6 +502,15 @@ v4.0의 "인물 최대 1장" 규칙이 실무에서 "항상 0명"으로 굳어�
 | #88 소멸형 vs 지연형 | 봉투 두 개 (재 + 달력 뒤) — **v5.0 기준으로도 통과**. 타버린 재와 밀려난 위치라는 사건이 있음 | 유지. 이 컷이 v5.0이 원하는 수준의 하한선이다 |
 | #88 12월 31일 기한 | 창가 모래시계 — **⑥ 범용 은유 위반** | 12월 마지막 주 달력장이 **한 장 뜯겨 나가 공중에 떠 있고**, 그 아래 접수 도장이 찍히다 만 서류. 또는 구청 창구 셔터가 **반쯤 내려온 틈**으로 서류를 밀어 넣는 손 |
 
+**(v7.0) 2026-10-01 Post 2007 재설계 예시 — 같은 글을 v7.0 기준으로 다시 짜면**
+
+| 슬롯 | v6.2 산출 (AI 티) | v7.0 재설계 |
+|---|---|---|
+| 히어로 | 식당 테이블에서 급여봉투 밖으로 지폐가 쏟아짐 — 연출 | **촬영컷**: 점심시간 밝은 창가 원목 테이블, 김치찌개·반찬 위로 휴대폰 급여 알림을 내려다보는 손 (화면은 흐린 블록) — 2026-10-02 v7.1 시험에서 실제로 이 구도가 나왔다 |
+| 본문1 식권카드 | 카드 단말기 + 현금을 빼가는 두 번째 손 — 은유 | **촬영컷**: 구내식당 입구 단말기에 사원증 카드를 대는 손, 뒤로 식판 들고 선 줄 |
+| 본문2 상여 400% | 지폐 4다발이 잘려 공중 낙하 — 촬영 불가 | **Claude 제작컷(모션)**: 연 +57만원 vs 연 −4만~6만원 막대가 자라는 애니메이션 (3-10 ⑥ 템플릿) |
+| 본문3 취업규칙 | 형광펜 매크로(100mm) — 통과했지만 연출 질감 | **촬영컷 유지**, 매크로 대신 밝은 창가 책상(아이스 라테·화분·노트북)에서 형광펜을 긋는 손 — v7.1 시험 통과. 또는 Claude 제작컷(정적 체크리스트)으로 대체 가능 |
+
 #### 3-7. 이미지 역할 분담과 다양성
 
 - **이미지 1 (도입부)**: 훅 문장 중 가장 충격적인 것 1개를 그대로 시각화. 썸네일에서 "뭐지?" 가 나와야 한다
@@ -404,6 +520,8 @@ v4.0의 "인물 최대 1장" 규칙이 실무에서 "항상 0명"으로 굳어�
 
 **다양성 규칙(필수)**: ⓐ 3장의 카메라 거리(원경/중경/접사)를 서로 다르게 ⓑ 최소 1장은 인물 흔적 없는 정물 ⓒ 최소 1장은 신체 부분 컷 ⓓ 같은 소재(달력·영수증·동전 등)를 두 장에서 주인공으로 쓰지 않는다.
 
+(v7.0) 다양성 규칙 ⓐ~ⓓ는 **촬영컷끼리만** 적용한다. 설명컷 2장은 형식(막대·흐름·분기·타임라인·체크리스트)을 서로 다르게 한다. 역할 분담에서 '이미지 2(판단이 갈리는 지점·두 상태 비교)'는 설명컷이 가장 잘 맞는 자리다.
+
 ⚠️ **히어로와 본문 이미지의 소재가 겹치지 않게 배분한다.** 히어로가 A를 다뤘다면 본문은 B·C·D를 맡는다.
 
 #### 3-8. 프롬프트 조립 체크리스트 (전송 전 7항목 자가 점검)
@@ -412,11 +530,13 @@ v4.0의 "인물 최대 1장" 규칙이 실무에서 "항상 0명"으로 굳어�
 
 1. 훅 문장(한국어 주석으로 상단에 기록)
 2. 사건 동사 — 흘러내리는 / 떨어지는 / 잘린 / 타버린 / 밀어 넣는
-3. 물리량 번역 — 길이·높이·두께·개수의 구체적 배수
+3. (v7.0) 물리량 번역 — 현실에서 실제로 그렇게 놓일 수 있는 배수만. 아니면 그 수치는 설명컷으로 보낸다
 4. 한국 실물 디테일 — 장소·기물의 실제 형태
-5. 시선 유도점 1개 — `the only bright accent is ...`
-6. 카메라·렌즈·빛
-7. 제외 조건 세트(3-5 말미 문장 그대로)
+5. (v7.1) 톤 — 기본 밝은 일상, 손해·경고성 글만 차분한 톤 (3-2-R ①②). 찍힐 수 있는 순간인가 (③). 시선은 구도·초점으로 (⑤)
+6. (v7.1) 휴대폰 카메라 · 자연광 · 장면 대부분 선명 · 밝은 실내 디테일 (3-2-R ④⑦, 3-5)
+7. 제외 조건 세트 (v7.1판 — 3-5 문장 그대로)
+
+(v7.0) 이 체크리스트는 **촬영컷 전용**이다. Claude 제작컷은 3-10의 ⑦ 정적 검증과 ⑧ 렌더 검증을 쓴다.
 
 각 이미지에 대한 **한국어·영문 alt text** (60자 내외)도 미리 작성해 둔다.
 
@@ -481,6 +601,164 @@ STEP 8 보고에 실물 이미지별로 ⓐ 조달 경로(프레스킷 / 공식 
 
 ---
 
+#### 3-10. Claude 제작컷 규격 — 인라인 SVG 모션·정적 그래픽 (v7.0 신설 · v7.1 정적 추가)
+
+> 🆕 **(v7.1) 정적(still) 제작컷도 같은 규격을 따른다.** 차이는 `<style>` 안에 `@keyframes`·`animation` 을 넣지 않는 것뿐이다. 이때 `prefers-reduced-motion` 블록은 생략해도 된다(⑦ 검증기가 애니메이션이 없으면 그 항목을 통과시킨다). 분기도·체크리스트·요약 비교처럼 움직임이 이해를 돕지 않는 그림은 정적으로 만든다. 본문에서 이 문서의 '설명컷'은 모션·정적을 모두 가리킨다.
+
+> 사진으로 찍을 수 없는 설명(수치·배수·흐름·분기·기한)은 생성 모델에 맡기지 않고 **Claude가 직접 그린다.**
+> Flow·업로드·캡처가 필요 없고, 글자와 숫자가 **본문과 정확히 일치**한다. 비용 0원. 생성 이미지가 원리적으로 못 하는 일(정확한 숫자·한글)을 하는 것이 설명컷의 존재 이유다.
+
+**① 형식 — 인라인 SVG + 내부 CSS 애니메이션 (WP 미디어 업로드 없음)**
+
+- 본문에 `<figure class="motion-figure">` 로 직접 삽입한다
+- 근거: 0and1life 관리자 계정 `unfiltered_html: true` (2026-10-02 REST `users/me?context=edit` 확인). 최근 100편 중 `<style>` 태그가 저장된 글이 1건 있다 — 관리자 저장 시 필터링되지 않는다
+- ⛔ `<script>`, `<foreignObject>`, `<image>`, 외부 URL(`href="http…"`, `@import`, `url(`), 웹폰트 로드 금지 — **자급자족 SVG만**
+- 용량 상한 **12KB** (보통 2~6KB)
+- 파일이 아니므로 WebP 변환·`srcset`·`wp-image` 클래스 규칙(STEP 7)은 적용하지 않는다
+
+**② 무엇을 그리나 — 5가지 형식 중 하나**
+
+| 본문 내용 | 형식 | 모션 |
+|---|---|---|
+| A vs B 수치·배수 (30배, +57만 vs −5만) | 가로 막대 비교 | 막대가 0에서 자라고 수치가 뒤따라 나타남 |
+| 계산 과정 (총급여 → 비과세 → 과표 → 세금) | 단계 흐름 (박스+화살표) | 단계가 순서대로 켜짐 |
+| 조건에 따라 결과가 갈림 (상여 연동 O/X) | 분기도 | 갈림길이 차례로 그려짐 |
+| 날짜·기한·유예 (2023.1.1, 12/31, 7년) | 타임라인 | 점이 이동하며 기한에 멈춤 |
+| 확인 순서·체크리스트 (4단계) | 체크리스트 | 항목이 하나씩 체크됨 |
+
+- 숫자는 **본문 텍스트를 그대로** 쓴다. 본문에 없는 수치를 새로 계산·추정해 넣지 않는다 (막대 길이 비율만 계산한다)
+- 막대 길이는 **실제 비율**로 그린다. 범위(−4만~6만원)는 중간값으로 길이를 정하고 라벨은 원문 그대로 쓴다. 음수는 빨강 + `−` 부호로 구분하고 막대는 크기(절댓값)로 그린다
+- **한 그림에 메시지 하나.** 비교 항목 3개 이하, 텍스트 줄 6개 이하
+- 설명컷 2장을 넣는 글은 형식을 서로 다르게 한다 (막대 + 타임라인 등)
+
+**③ 디자인 규격 (2026-10-02 Playwright 1280px·375px 실측으로 확정한 값)**
+
+- `viewBox="0 0 720 405"`(16:9), `width="100%"`, `style="display:block;height:auto;border-radius:8px;background:#f7f8f6"`
+- **최소 글자 크기 22 (viewBox 단위)** — 375px 화면에서 약 11.5px가 된다. 권장: 제목·라벨 26, 보조 22, 강조 수치 38. ⛔ 20 이하는 모바일에서 읽히지 않는다 (실측: 15 → 7.8px)
+- 줄 간격은 글자 크기의 1.4배 이상 (제목 26 아래 보조 22를 두면 y 간격 ≥ 36). 2026-10-02 시안에서 y 간격 28로 두 줄이 겹쳤다
+- 색: 이득·정상 `#2e7d5b`, 손해·주의 `#c0392b`, 중립 `#555`, 글자 `#222`, 보조 `#666`. 강조색은 2개까지
+- 폰트: `sans-serif` (테마 폰트 상속). 웹폰트 로드 금지
+- 좌우 여백 40 이상, 텍스트 오른쪽 끝이 x=680을 넘지 않게 한다. 한글 26 크기는 1자 ≈ 26 단위이므로 **한 줄 최대 약 24자** — 넘으면 줄이지 말고 문장을 짧게 고친다
+
+**④ 모션 규격**
+
+- CSS `@keyframes` 만 쓴다. 주기 **6초 무한 반복**: 0~25% 등장 → 25~90% 정지(읽는 시간) → 90~100% 페이드 아웃
+- ⚠️ `opacity` 를 애니메이션하면 **그 keyframes의 모든 프레임에 opacity를 명시**한다. 일부 프레임에만 쓰면 브라우저가 전 구간을 보간해 **정지 구간에서도 흐려진다** (2026-10-02 시안 실측 결함 — ⑦ 검증의 `kfOpacity` 가 잡는다)
+- `animation-fill-mode: both`, 요소 간 지연 0.3~0.5초
+- `@media (prefers-reduced-motion: reduce){ #ID *{animation:none!important} }` 필수. 이때 보이는 **기본 상태가 완성 상태**여야 한다 (막대는 다 자란 상태, 글자는 보이는 상태)
+- **모든 CSS 선택자와 keyframes 이름은 그림마다 고유한 ID로 시작**한다: `mf-{slug 약칭}{슬롯 번호}` (예 `mf-mat2`). 같은 글의 다른 그림·테마 CSS와 충돌하지 않게 하기 위해서다
+
+**⑤ 접근성·SEO**
+
+- `role="img"` + `aria-labelledby="{ID}-t {ID}-d"`, `<title>`(핵심 메시지 한 줄, 60자 안팎) + `<desc>`(수치를 포함한 완결 문장)
+- `<figcaption>` 은 **`그림: 본문 계산(기준 연도·조건) 재구성`** 형식으로 쓴다. 증빙과 혼동되지 않게 `Captured` 문구는 쓰지 않는다
+- `data-mf="{slug}-{슬롯 번호}"` 속성을 figure에 넣는다 — 다음 회차 분류기와 사후 추적용
+
+**⑥ 템플릿 (2026-10-02 렌더 검증 통과본 · Post 2007 본문2 슬롯 예시)**
+
+```html
+<figure class="motion-figure" data-mf="meal-allowance-tax-free-200k-2" style="margin:20px 0">
+<svg viewBox="0 0 720 405" width="100%" role="img" aria-labelledby="mf-mat2-t mf-mat2-d" xmlns="http://www.w3.org/2000/svg" style="display:block;height:auto;border-radius:8px;background:#f7f8f6">
+<title id="mf-mat2-t">식대 20만원 전환 효과: 상여 연동 여부에 따라 연 +57만원 또는 연 4만~6만원 손해</title>
+<desc id="mf-mat2-d">월 급여 400만원 기준. 상여금이 기본급과 무관하면 연 57만원 이득, 상여금이 기본급 400% 연동이면 연 4만~6만원 손해.</desc>
+<style>
+#mf-mat2 .lbl{font:700 26px/1 sans-serif;fill:#222}
+#mf-mat2 .sub{font:400 22px/1 sans-serif;fill:#666}
+#mf-mat2 .num{font:800 38px/1 sans-serif}
+#mf-mat2 .barA{fill:#2e7d5b;transform-origin:120px 0;animation:mf-mat2-grow 6s ease-out infinite both}
+#mf-mat2 .barB{fill:#c0392b;transform-origin:120px 0;animation:mf-mat2-grow 6s ease-out .4s infinite both}
+#mf-mat2 .fade{animation:mf-mat2-fade 6s ease-out .9s infinite both}
+@keyframes mf-mat2-grow{0%{transform:scaleX(0);opacity:1}25%,90%{transform:scaleX(1);opacity:1}100%{transform:scaleX(1);opacity:0}}
+@keyframes mf-mat2-fade{0%,20%{opacity:0}35%,90%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){#mf-mat2 *{animation:none!important}}
+</style>
+<g id="mf-mat2">
+<text class="lbl" x="40" y="56">기본급 20만원을 식대로 돌리면 (연간)</text>
+<text class="sub" x="40" y="96">월 급여 400만원 기준 · 총액은 동일</text>
+<text class="lbl" x="40" y="160">상여 연동 없음</text>
+<rect class="barA" x="120" y="180" width="430" height="48" rx="6"/>
+<text class="num fade" x="566" y="218" fill="#2e7d5b">+57만원</text>
+<text class="lbl" x="40" y="285">상여 400% 연동</text>
+<rect class="barB" x="120" y="305" width="40" height="48" rx="6"/>
+<text class="num fade" x="176" y="343" fill="#c0392b">−4만~6만원</text>
+<line x1="120" y1="170" x2="120" y2="365" stroke="#999" stroke-width="2"/>
+</g></svg>
+<figcaption style="font-size:13px;color:#777;margin-top:6px">그림: 본문 계산표(2026년 요율) 기준 재구성</figcaption>
+</figure>
+```
+
+- 이 템플릿을 복사해 ID(`mf-mat2` 전부)·텍스트·막대 너비·색만 바꾼다. 구조는 바꾸지 않는다
+- 막대 최대 폭은 430 (x=120 → 550, 오른쪽에 수치 라벨 자리 확보)
+
+**⑦ 정적 검증 (필수 · 설명컷마다 1회)**
+
+WP admin 탭에서 아래 검증기를 한 번 정의하고, 만든 figure 문자열을 넣어 `PASS` 가 나와야 다음 단계로 간다.
+
+```javascript
+// (v7.0) 설명컷 정적 검증 — figure HTML 문자열 하나를 받아 결과 문자열을 돌려준다
+window._mfCheck = (fig) => {
+  const svg = (fig.match(/<svg[\s\S]*?<\/svg>/) || [''])[0];
+  const css = (svg.match(/<style>([\s\S]*?)<\/style>/) || ['', ''])[1];
+  const id  = (svg.match(/<g id="(mf-[a-z0-9-]+)"/) || [])[1] || '';
+  const sizes = [...svg.matchAll(/font:\s*\d{3}\s+(\d+)px|font-size(?:="|:\s*)(\d+)/g)].map(m => +(m[1] || m[2]));
+  const sels = [...css.replace(/@media[^{]*\{([\s\S]*?\})\s*\}/g, '$1').matchAll(/(?:^|\})\s*([^@{}][^{}]*)\{/g)]
+    .map(m => m[1].trim()).filter(s => !/^@|^\d|^from|^to/.test(s));
+  const kfNames = [...css.matchAll(/@keyframes\s+([\w-]+)/g)].map(m => m[1]);
+  const kfOpacityBad = [...css.matchAll(/@keyframes\s+[\w-]+\{([\s\S]*?\})\}/g)].filter(m => {
+    const frames = m[1].split('}').filter(Boolean);
+    const withOp = frames.filter(f => /opacity/.test(f)).length;
+    return withOp > 0 && withOp < frames.length;           // opacity를 일부 키프레임에만 쓴 경우
+  }).length;
+  const r = {
+    bytes:     new Blob([fig]).size,                                        // ≤ 12288
+    cls:       /class="motion-figure"/.test(fig),                           // true
+    forbidden: /<script|<foreignObject|<image|href="http|@import|url\(/i.test(fig), // false
+    viewBox:   /viewBox="0 0 720 405"/.test(svg),                           // true
+    a11y:      /role="img"/.test(svg) && /<title id="/.test(svg) && /<desc id="/.test(svg), // true
+    reduced:   !/@keyframes/.test(css) || /prefers-reduced-motion:\s*reduce/.test(css), // true — (v7.1) 정적 그림은 자동 통과
+    scoped:    !!id && sels.every(s => s.split(',').every(x => x.trim().startsWith('#' + id))), // true
+    kfScoped:  kfNames.every(k => k.startsWith(id)),                         // true
+    kfOpacity: kfOpacityBad,                                                 // 0
+    minFont:   sizes.length ? Math.min(...sizes) : 0,                        // ≥ 22
+    caption:   /<figcaption[^>]*>그림:/.test(fig)                            // true
+  };
+  const ok = r.bytes <= 12288 && r.cls && !r.forbidden && r.viewBox && r.a11y && r.reduced
+          && r.scoped && r.kfScoped && r.kfOpacity === 0 && r.minFont >= 22 && r.caption;
+  return (ok ? 'PASS ' : 'FAIL ') + JSON.stringify(r);
+};
+// 사용: window._motionSvg = {'2': '<figure class="motion-figure" ...>...</figure>'};
+//       Object.entries(window._motionSvg).map(([n, f]) => n + ' ' + window._mfCheck(f)).join('\n')
+```
+
+**⑧ 렌더 검증 (필수 · 저장 전에 클라우드 Bash에서)**
+
+정적 검증만으로는 글자 겹침·잘림을 못 잡는다. 클라우드 작업 공간의 Playwright로 **1280px·375px 두 폭에서 완성 상태를 찍어 Read로 직접 본다.** Chromium이 미리 설치돼 있으므로 설치는 필요 없다.
+
+```bash
+# scratchpad에 figure를 mf.html로 저장한 뒤 실행 (Bash 도구 · cwd는 scratchpad)
+cat > shot.js <<'JS'
+const {chromium} = require('playwright');
+(async () => {
+  const b = await chromium.launch();
+  for (const w of [1280, 375]) {
+    const p = await b.newPage({viewport: {width: w, height: 900}});
+    await p.setContent('<meta charset="utf-8"><body style="margin:0;background:#fff;font-family:sans-serif"><div style="max-width:728px;margin:20px auto">'
+      + require('fs').readFileSync('mf.html', 'utf8') + '</div>');
+    await p.waitForTimeout(2800);                       // 6초 주기 중 정지 구간(25~90%)
+    await p.locator('figure').screenshot({path: 'mf_' + w + '.png'});
+  }
+  await b.close();
+})();
+JS
+NODE_PATH=$(npm root -g) node shot.js && ls mf_*.png
+```
+
+- 두 장을 Read로 열어 ⓐ 글자끼리 겹치지 않는가 ⓑ 오른쪽이 잘리지 않는가 ⓒ 375px에서 가장 작은 글자를 읽을 수 있는가 ⓓ 막대 비율이 숫자와 맞는가 ⓔ 정지 구간에서 흐리지 않은가를 확인한다
+- 하나라도 걸리면 고치고 다시 찍는다. 2회 수정 후에도 안 되면 그 슬롯은 촬영컷으로 돌리거나 비워 두고 STEP 8에 보고한다
+- figure 문자열을 브라우저 탭으로 옮길 때는 `javascript_tool` 에 **문자열 리터럴로 직접** 넣는다 (`window._motionSvg['2'] = String.raw\`...\``). 백틱이 문자열 안에 없으므로 안전하다
+
+---
+
 ### STEP 4: 글 구조 분석 → 이미지 삽입 위치 3곳 결정
 
 STEP 3-1에서 확보한 `window._rawContent`(반드시 raw)를 사용한다.
@@ -530,6 +808,8 @@ h2.map((x, n) => n + ' ' + Math.round(x.i / L * 100) + '% @' + x.i + (banned(x.i
 
 ℹ️ **(v4.0) `hasStockImg`로 히어로를 만드는 글은 글 맨 위(0%)가 히어로로 이미 채워진다.** 이때 본문 3장의 목표 비율은 `[0.10, 0.45, 0.72]` 대신 **`[0.30, 0.55, 0.72]`** 로 뒤로 밀어 잡는 편이 분포가 고르다 (2026-08-18 실측: 히어로 2% + 본문 29%/47%/60%로 균등 배치 성공).
 
+(v7.0) `window._insertPoints` 의 각 위치에는 STEP 3-0의 `window._slotTypes` 가 같은 순서로 대응한다. **슬롯 유형은 위치를 정한 뒤 섹션 주제를 보고 확정한다** — 수치·계산을 다루는 섹션 앞이면 설명컷, 장소·행동을 다루는 섹션 앞이면 촬영컷.
+
 (v3) `genCount`가 3 미만이면 `window._insertPoints`에서 앞의 genCount개 위치만 사용한다 — 우선순위는 STEP 2의 이미지 1→3→2 순서를 따른다.
 
 🆕 **(v5.0) 스톡 플레이스홀더가 2개 이상이면 삽입 개수를 그만큼 줄인다.**
@@ -553,6 +833,9 @@ window._insertPoints = window._insertPoints.slice(0, window._insertN);
 ---
 
 ### STEP 5: Google Flow에서 이미지 생성 및 캡처 (v5.1 — 그리드 상주 · 일괄 처리)
+
+> 🆕 **(v7.0) 이 단계는 촬영컷(히어로 포함)만 만든다.** 촬영컷이 0장이면 STEP 5·6을 건너뛰고 STEP 7로 간다. 설명컷은 STEP 3-10에서 이미 완성돼 있어야 한다.
+> ⛔ **(v7.0) 비용 0원 원칙** — Flow는 **Nano Banana 2 · x2(0크레딧)** 고정이다. Nano Banana Pro 등 크레딧 차감이 표시되는 옵션, Higgsfield 같은 외부 유료 생성 서비스는 쓰지 않는다 (2026-10-02 사용자 지시). 프롬프트는 3-2-R 골격과 3-5 v7.0 제외 조건 세트로 쓴다.
 
 Chrome MCP로 새 탭을 열고 사용자의 Flow 프로젝트로 이동한다:
 
@@ -597,7 +880,7 @@ const cfg = bs.find(x => /설정 트리거/.test(x.getAttribute('aria-label') ||
 - 모드: **이미지** (동영상 아님)
 - 비율: **16:9**
 - 장수: **x2** — 2026-08-25는 `x1`(동영상 모드), 2026-08-26은 `x1`(이미지 모드), **2026-09-08도 `x1`(이미지 모드)** 이었다. 칩이 `x1 x2 x3 x4` 로 붙어 있어 **x3를 잘못 누르기 쉬우니** 재확인
-- 모델: **Nano Banana 2** — 2026-08-26 실측 기본값은 **`Nano Banana 2 Lite`** 였다. 드롭다운에 `Nano Banana Pro / Nano Banana 2 / Nano Banana 2 Lite` 셋이 뜨므로 **가운데**를 고른다
+- 모델: **Nano Banana 2** — 2026-08-26 실측 기본값은 **`Nano Banana 2 Lite`** 였다. 드롭다운에 `Nano Banana Pro / Nano Banana 2 / Nano Banana 2 Lite` 셋이 뜨므로 **가운데**를 고른다. ⛔ (v7.0) **Pro는 쓰지 않는다** — 비용 0원 원칙
 
 🆕 **(v6.2) `x2` 는 좌표 클릭 대신 아래 JS로 교정한다 — 호출 2회로 끝나고 x3 오클릭 위험이 없다.**
 
@@ -766,7 +1049,8 @@ window._pollPrev = now;
 - 그래도 판별이 안 되면 **5-5의 RGB 서명**으로 쌍을 먼저 확정한 뒤, 애매한 카드 1장만 **canvas로 뽑아 dataURL로 확인**한다 (캔버스 경로는 뷰포트와 무관하다)
 - **이미 고착됐다면 유일한 복구는 탭 폐기·재생성이다** — `tabs_close_mcp` 로 닫고 새 탭에서 프로젝트 URL을 다시 연다. `window._img*` 는 사라지지만 **그리드의 생성물은 그대로 남아 있으므로 재생성은 불필요**하고, 캡처만 다시 하면 된다 (그리드 재로딩 약 20초)
 
-- 🆕 **(v5.0) 밋밋함 판정 — 이 항목을 가장 먼저 본다.** 이미지를 보고 **"지금 무슨 일이 벌어지는가"를 한 문장으로 말할 수 있는가**(3-2 ①). 말할 수 없거나 문장이 '있다/놓여 있다'로 끝나면 **정확해도 탈락**이다
+- 🆕 **(v7.0) AI 티 판정 — 밋밋함보다 먼저 본다.** 하나라도 보이면 탈락: **어둡고 무거운 분위기(v7.1)** · 공중에 뜬 물체 · 매끈한 플라스틱 질감의 피부·표면 · 배경이 통째로 뭉개진 보케 · 테두리 역광(rim light) · 손가락 개수·관절 이상 · 영화 같은 색보정(틸·오렌지) · 서구식 기물. 판정 질문: **"지인이 단톡방에 올린 사진이라고 하면 믿겠는가?"** 두 장 모두 탈락이면 수정 프롬프트는 '더 극적으로'가 아니라 **'더 밝고 자연스럽게'**(창가 자연광·밝은 실내·초점 깊게) 고친다. (v7.1) 판정 질문에 하나 더: **"블로그 독자가 이 사진을 보고 싶어 하겠는가?"**
+- 🆕 **(v5.0) 밋밋함 판정 — 이 항목을 가장 먼저 본다.** (v7.0: AI 티 판정 다음으로 본다) 이미지를 보고 **"지금 무슨 일이 벌어지는가"를 한 문장으로 말할 수 있는가**(3-2 ①). 말할 수 없거나 문장이 '있다/놓여 있다'로 끝나면 **정확해도 탈락**이다
 - 🆕 **(v5.0) 훅 문장이 화면에 실제로 구현됐는가** — ③ 물리량(길이·높이·두께 배수)이 눈으로 비교되는가. 배수가 애매하면 탈락
 - 핵심 피사체가 **글 내용·실제 한국 환경**과 일치하는가 (STEP 3-3 기준)
 - 글 제목을 아는 독자가 봤을 때 "글 내용과 맞는 이미지"라고 느낄 것인가
@@ -804,6 +1088,7 @@ window._imgWin = window.open(urls[0] + '#' + encodeURIComponent(JSON.stringify(u
 // ⓑ 이미지 탭(출처 flow-content.google)에서 실행 — 4장을 same-origin 으로 그려 크롭·다운스케일·WebP 변환
 const urls = JSON.parse(decodeURIComponent(location.hash.slice(1)));
 const KEYS = ['_imgHero', '_img1', '_img2', '_img3'];   // hasStockImg 가 아니면 '_imgHero' 를 빼고 PICK 도 3개로
+const GRAIN = 0;                                        // (v7.1) 기본 0(끔) — 밝은 톤에서는 칙칙해진다. 플라스틱 질감이 심한 컷에만 2~3
 const TARGET_W = 1100;                                  // (v5.4) 목표 폭 — 아래 '왜 1100인가' 참조
 const out = [];
 for (let k = 0; k < urls.length; k++) {
@@ -819,15 +1104,21 @@ for (let k = 0; k < urls.length; k++) {
     const ctx = c.getContext('2d');
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';   // (v5.4) 축소 화질 보존
     ctx.drawImage(im, 0, 0, cw, ch, 0, 0, c.width, c.height);   // 크롭 + 축소를 한 번에
+    if (GRAIN > 0) {                                             // (v7.0) 단색 미세 노이즈 — 매끈한 AI 질감 완화 (캔버스가 0~255로 자동 클램프)
+      const id = ctx.getImageData(0, 0, c.width, c.height), px = id.data;
+      for (let p = 0; p < px.length; p += 4) { const n = (Math.random() + Math.random() - 1) * GRAIN; px[p] += n; px[p + 1] += n; px[p + 2] += n; }
+      ctx.putImageData(id, 0, 0);
+    }
     const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.85));
     window[KEYS[k]] = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
     out.push(KEYS[k] + ':' + c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB');
   } catch (e) { out.push(KEYS[k] + ':ERR ' + e.message.slice(0, 60)); }
 }
 window._capDims = out.join(' | ');
-window._capDims   // 전부 1100x689 이어야 정상 (2026-09-04 실측: 45/64/65/40KB)
+window._capDims   // 전부 1100x689 이어야 정상 (2026-09-04 실측: 45/64/65/40KB · v7.1 그레인 기본 0)
 ```
 
+- (v7.0) `PICK`·`KEYS`·STEP 6의 `SEND` 는 **촬영컷 슬롯만** 만든다. 설명컷 슬롯 번호는 비워 둔다 (예: 슬롯 1·3만 촬영컷이면 `['_imgHero', '_img1', '_img3']`)
 - 이제 `window._img*` 는 **이미지 탭**에 있다. STEP 6의 `window.open(WP)` 과 postMessage 는 **이 탭에서** 실행한다 (Flow 그리드 탭이 아니다)
 - 이미지 탭은 STEP 6-3 전송이 끝난 뒤 `tabs_close_mcp` 로 닫는다. 그리드 탭은 STEP 7.5 뒷정리 때 닫는다
 
@@ -1061,22 +1352,34 @@ WordPress의 `wp_filter_content_tags()` 는 **`wp-image-{ID}` 클래스가 붙�
 > 2026-08-19 실측: 발행분 751·894·1095 전부 `srcset 0 / wp-image 클래스 0 / lazy 0`. Post 1175도 동일 — 표시 폭 728px 자리에 1226px 원본이 그대로 전송되고 있었다. **Flow 전환 이전부터 있던 결함**이며, v4.0의 해상도 증가가 이를 두 배로 키웠다.
 
 ```javascript
-// 2) 역순으로 이미지 삽입 (뒤→앞 순서로 삽입해야 인덱스가 밀리지 않음)
-// (v6.1) 도착 순이 아니라 태그 순으로 — 6-3 하단 참조
-window._byTag = {}; window._uploadedIds.forEach(u => { const m = u.tag.match(/-(hero|\d)\.webp$/); window._byTag[m[1]] = u; });
-const uploads = [window._byTag['1'], window._byTag['2'], window._byTag['3']].filter(Boolean); // 본문용 3장, 본문 순서
-const pts = window._insertPoints;    // [pos1, pos2, pos3]
+// 2) 역순으로 슬롯 삽입 (v7.0 — 촬영컷은 <img>, 설명컷은 인라인 SVG figure · 뒤→앞 순서라 인덱스가 밀리지 않음)
+// (v6.1) 촬영컷은 도착 순이 아니라 태그 순으로 — 6-3 하단 참조
+window._byTag = {}; (window._uploadedIds || []).forEach(u => { const m = u.tag.match(/-(hero|\d)\.webp$/); window._byTag[m[1]] = u; });
+// window._slotTypes = ['photo', 'motion', 'still']  (STEP 3-0 · v7.1)
+// window._motionSvg = {'2': '<figure class="motion-figure" ...>...</figure>'}  (STEP 3-10, 키는 슬롯 번호 · ⑦ PASS 필수)
+const pts = window._insertPoints;
+const types = window._slotTypes || pts.map(() => 'photo');
 let c = window._finalContent;
-
-for (let i = 2; i >= 0; i--) {
-  const {id, url, alt} = uploads[i];                       // (v5.4) id 필수 — srcset 주입의 열쇠
-  const imgBlock = '\n<figure style="margin:20px 0">\n  <img class="wp-image-' + id + '" loading="lazy" decoding="async" style="width:100%;display:block;height:auto;border-radius:8px;" src="' + url + '" alt="' + alt + '" />\n</figure>\n';
-  c = c.slice(0, pts[i]) + imgBlock + c.slice(pts[i]);
+const skipped = [];
+for (let i = pts.length - 1; i >= 0; i--) {
+  const n = String(i + 1); let block = null;
+  if (types[i] === 'motion' || types[i] === 'still') {          // (v7.1) 정적 제작컷도 같은 경로
+    const f = (window._motionSvg || {})[n];
+    if (f && /^PASS/.test(window._mfCheck(f))) block = '\n' + f + '\n';
+  } else {
+    const u = window._byTag[n];                              // (v5.4) id 필수 — srcset 주입의 열쇠
+    if (u) block = '\n<figure style="margin:20px 0">\n  <img class="wp-image-' + u.id + '" loading="lazy" decoding="async" style="width:100%;display:block;height:auto;border-radius:8px;" src="' + u.url + '" alt="' + u.alt + '" />\n</figure>\n';
+  }
+  if (!block) { skipped.push(n + ':' + types[i]); continue; }
+  c = c.slice(0, pts[i]) + block + c.slice(pts[i]);
 }
 window._newContent = c;
-'inserted, new len: ' + c.length + ' order:' + uploads.map(u => u.tag.slice(-6)).join(',')
+'inserted len:' + c.length + ' types:' + types.join(',') + ' skipped:' + (skipped.join(',') || 'none')
  + ' wpImgClass:' + ((c.match(/wp-image-\d+/g) || []).length)
+ + ' motionFig:' + ((c.match(/class="motion-figure"/g) || []).length)
 ```
+
+ℹ️ **(v7.0) `skipped` 가 비어 있지 않으면** 그 슬롯은 비운 채 진행하고 STEP 8에 사유를 남긴다. 설명컷은 `_mfCheck` 가 `PASS` 가 아니면 절대 삽입하지 않는다. 블록 에디터 글(`blocks` 가 2 이상)도 기존 촬영컷 figure와 같은 방식(블록 사이 raw HTML)으로 넣는다 — 블록 수는 변하지 않는다.
 
 ⚠️ **히어로(첫 화면 이미지)에는 `loading="lazy"` 를 붙이지 않는다.** LCP 요소를 지연 로딩하면 오히려 느려진다. 7-2.5의 스톡 교체 코드가 히어로를 다루므로 그쪽에서 `fetchpriority="high"` 를 넣는다.
 
@@ -1276,12 +1579,16 @@ window._evGuard = {
   absCap:  cnt(after, /<figcaption[^>]*position\s*:\s*absolute/g),                   // (v6.0) 0이어야 함
   gridArea:cnt(after, /grid-area:1\/1/g),                                            // (v6.0) 히어로 있으면 3
   clampCnt:cnt(after, /clamp\(/g),                                                   // (v6.0) 히어로 있으면 4
-  fixed26: cnt(after, /font-size:26px/g)                                             // (v6.0) 0이어야 함 — 고정 26px 잔존
+  fixed26: cnt(after, /font-size:26px/g),                                            // (v6.0) 0이어야 함 — 고정 26px 잔존
+  motionFig: cnt(before, /class="motion-figure"/g) + '->' + cnt(after, /class="motion-figure"/g), // (v7.0) 이번 설명컷 수만큼 늘어야 함
+  svgBad:  (after.match(/<svg[\s\S]*?<\/svg>/g) || []).filter(x => /<script|foreignObject|<image|href="http|@import|url\(/i.test(x)).length, // (v7.0) 0이어야 함
+  mfIdDup: (() => { const ids = (after.match(/<g id="(mf-[a-z0-9-]+)"/g) || []); return ids.length - new Set(ids).size; })() // (v7.0) 0이어야 함 — 설명컷 ID 충돌
 };
 Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ```
 
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
+🆕 **(v7.0) `svgBad` · `mfIdDup` 이 0이 아니거나 `motionFig` 증가분이 이번 설명컷 수와 다르면 저장 금지.**
 🆕 **(v5.4) `noWpCls` 가 0이 아니면 그 이미지는 srcset을 못 받는다** — 클래스 주입이 빠진 것이므로 저장 금지. `wpImgCls` 증가분이 이번에 넣은 이미지 수와 다른 경우도 마찬가지다.
 🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
 🚨 **(v6.0) `absCap` 또는 `fixed26` 이 0이 아니면 저장 금지.** 전자는 절대위치 캡션이, 후자는 고정 26px 폰트가 남아 있다는 뜻이고 **둘 다 모바일에서 제목이 잘리는 원인**이다. 히어로가 있는 글이라면 `gridArea` 는 **3**, `clampCnt` 는 **4** 여야 한다 (히어로가 없는 글은 둘 다 0).
@@ -1313,6 +1620,21 @@ fetch('/wp-json/wp/v2/posts/POST_ID', {
 ```
 
 복구 사실은 STEP 8 보고에 **반드시 명시**한다.
+
+```javascript
+// 3.5) (v7.0) 저장 후 SVG 생존 확인 — 설명컷을 넣은 회차에는 필수. WP가 SVG·style을 걸러내지 않았는지 raw를 다시 읽어 본다
+const saved = await fetch('/wp-json/wp/v2/posts/POST_ID?context=edit&_fields=content,status', {headers: {'X-WP-Nonce': window._nonce}}).then(r => r.json());
+const cnt2 = (s, re) => (s.match(re) || []).length;
+const A = window._newContent, B = saved.content.raw;
+'svg:' + cnt2(A, /<svg/g) + '->' + cnt2(B, /<svg/g)
+ + ' style:' + cnt2(A, /<style>/g) + '->' + cnt2(B, /<style>/g)
+ + ' keyframes:' + cnt2(A, /@keyframes/g) + '->' + cnt2(B, /@keyframes/g)
+ + ' motionFig:' + cnt2(A, /class="motion-figure"/g) + '->' + cnt2(B, /class="motion-figure"/g)
+ + ' same:' + (A === B) + ' status:' + saved.status
+```
+
+- 네 항목 모두 좌우가 같아야 한다. `same:false` 여도 개수가 같으면 WP의 공백 정규화일 뿐이므로 정상이다
+- **줄어들었다면 WP가 필터링한 것이다.** 즉시 설명컷 figure를 전부 뺀 본문(`window._newContent` 에서 `<figure class="motion-figure"[\s\S]*?</figure>` 제거)을 `status: window._origStatus` 와 함께 다시 저장하고, STEP 8에 🔴 「설명컷 저장 실패 — 인라인 SVG 필터링」으로 보고한다. 다음 회차부터는 사용자 결정 전까지 설명컷을 만들지 않는다
 
 ```javascript
 // 4) 대표이미지(featured image) 설정 — (v3.4) status 동봉. 실패해도 전체 태스크는 중단하지 않음
@@ -1437,6 +1759,20 @@ f.remove(); out
   - **여유가 0 이상이면 통과.** 음수면 제목 윗줄이 잘린 것이므로 7-2.6b를 다시 돌린다
   - 여유가 **10px 미만이면 320px(구형 아이폰 SE)에서 위험**하므로 `f.style.width` 를 `320px` 로 바꿔 한 번 더 본다
   - 2026-08-31 기준 정상 예시: 375px에서 `figH204 capH145 여유60px fs16.5px ✅`, 320px에서 여유 6px
+- 🆕 **(v7.0) 설명컷이 실제로 그려지고 움직이는가?** 프리뷰에서 실행:
+
+```javascript
+Array.from(document.querySelectorAll('.entry-content figure.motion-figure')).map((f, n) => {
+  const svg = f.querySelector('svg'); const r = svg ? svg.getBoundingClientRect() : {width: 0, height: 0};
+  const anim = svg ? Array.from(svg.querySelectorAll('*')).filter(e => getComputedStyle(e).animationName !== 'none').length : 0;
+  return n + ' ' + (f.dataset.mf || '-') + ' w' + Math.round(r.width) + ' h' + Math.round(r.height) + ' animEls:' + anim
+    + ' @' + Math.round((f.getBoundingClientRect().top + scrollY) / document.documentElement.scrollHeight * 100) + '%';
+}).join('\n') || 'no motion-figure'
+```
+
+  - `w` 가 본문 폭(약 728)이고 `h` 가 그 9/16 안팎, `animEls` 가 1 이상이면 정상이다. `animEls:0` 이면 테마·최적화 플러그인이 `<style>` 을 걸러낸 것이다 — STEP 8에 🔴 보고
+  - 스크린샷 1장으로 설명컷이 **정지 구간에서** 또렷하게 보이는지 눈으로 확인한다 (스크롤해 화면 가운데 두고 3초 뒤 촬영)
+  - 설명컷 위치도 STEP 4의 증빙 ±5%pt 규칙과 인접 이미지 간격 5%pt 이상 규칙을 똑같이 따른다
 - 증빙 캡처가 원래 자리에 그대로 있는가? (`window._evGuard` 확인)
 - **워터마크 흔적(✦)이 남아 있지 않은가?** — 남아 있으면 STEP 5-4의 `cropRight` 값을 늘려 재캡처하거나, 이미 업로드된 파일을 0and1life.com **동일 출처**에서 canvas로 다시 읽어 재크롭·재업로드한다.
 - 표·TOC·내부링크 등 기존 요소가 삽입으로 깨지지 않았는가?
@@ -1474,6 +1810,9 @@ f.remove(); out
 - 🆕 **(v5.5) UI 오탐 발생 여부**: ⓐ 5-3 폴링의 `same` 이 2 이상으로 올라가 스크린샷 폴백을 썼는지 ⓑ 5-2 포커스 검증에서 상단 검색창이 잡혀 재클릭했는지 ⓒ 필터 칩 해제가 필요했는지. **세 항목 모두 "없음"이면 한 줄로 "UI 오탐 없음"만 적는다**
 - 🆕 **(v5.9) 뷰포트·전송 사고 기록**: ⓐ `zoom` 호출 횟수(**0이어야 정상**) ⓑ 뷰포트 고착이 발생했다면 그 시점과 탭 재생성 여부 ⓒ 전송 검증(`boxLen`)에서 실패로 잡혀 재클릭한 건수 ⓓ 인덱스 확정에 쓴 방법(`outline` 마킹 / RGB 서명). **모두 정상이면 한 줄로 "뷰포트·전송 사고 없음"만 적는다**
 - 🆕 **(v6.0) 모바일 히어로 검증 결과**: 375px 아이프레임 실측의 `figH`/`capH`/`여유`/`fs` 를 그대로 적고, 여유가 10px 미만이면 320px 재측정 값도 함께 남긴다. `_evGuard` 의 `absCap`·`fixed26`(둘 다 0) · `gridArea`(3) · `clampCnt`(4)도 명시한다
+- 🆕 **(v7.0) 슬롯 유형표**: 슬롯별 `photo/motion`, 판정 이유 한 줄("찍을 수 있는 장면인가"), 설명컷은 형식(막대·흐름·분기·타임라인·체크리스트)과 `_mfCheck` 결과·렌더 검증(1280/375) 결과·저장 후 생존 확인 결과
+- 🆕 **(v7.0) 촬영컷 사실감 판정**: 이미지별 AI 티 판정 통과 여부와 탈락 사유, 채택한 쪽. 그레인 강도(`GRAIN`)와 장당 KB
+- 🆕 **(v7.0) 비용**: 사용한 도구와 크레딧 차감 여부 — **0이어야 정상**
 - **삭제 대기 미디어**: 재크롭 등으로 남은 원본 미디어 ID를 나열하고 **사용자 확인을 요청**한다 (임의 삭제 금지)
 - 루틴 자체의 오류·개선점이 발견됐다면 **수정할 조항 번호와 교체용 전문(前文)**을 함께 제시한다 — 사용자가 붙여넣기만 하면 되도록
 
@@ -1481,13 +1820,17 @@ f.remove(); out
 
 ### 중요 주의사항
 
+- 🎞 **(v7.1) 이미지는 촬영컷과 Claude 제작컷(모션·정적) 두 종류다** (STEP 3-0). 판정 질문은 하나 — **"이 자리에서 독자에게 더 잘 설명하는 것은 사진인가, Claude 그래픽인가?"** 설명(수치·계산·분기·기한·순서)이면 Claude 제작컷, 분위기·실제 모습이면 Flow 촬영컷, 애매하면 Claude 제작컷. 히어로만 촬영컷 고정, 본문은 전부 Claude 제작컷이어도 된다
+- 💸 **(v7.0) 비용 0원.** Flow Nano Banana 2 · x2(0크레딧)만 쓴다. Nano Banana Pro, Higgsfield 등 크레딧이 드는 도구는 쓰지 않는다 (2026-10-02 사용자 지시)
+- 📷 **(v7.1) 촬영컷은 '밝은 일상 사진'이다** (STEP 3-2-R). 지인이 인스타에 올린 듯한 자연광·밝은 실내·high-key·장면 대부분 선명. 손해·경고성 글만 흐린 날 자연광의 차분한 톤. ⛔ 어둡고 무거운 분위기, 밤·단일 조명·강한 그림자, 공중에 뜬 물체, `the only bright accent`, 강한 보케, 풀프레임·대구경 렌즈 명시, 노이즈·JPEG·사용감 강조
+- 🧩 **(v7.0) 설명컷은 3-10 규격을 그대로 따른다** — `viewBox 0 0 720 405`, 최소 글자 22, 모든 선택자·keyframes를 고유 ID로 시작, opacity는 모든 프레임에 명시, `prefers-reduced-motion` 필수, `<script>`·외부 URL 금지, 12KB 이하. **`_mfCheck` PASS + Playwright 1280/375 렌더 확인 + 저장 후 생존 확인** 세 관문을 모두 통과해야 한다. 숫자는 본문 그대로 쓰고 새로 계산하지 않는다
 - 📸 **(v5.8) 이 루틴은 Flow 생성 이미지만 쓰는 루틴이 아니다** (STEP 3-9). 글에 실제로 존재하는 제품·앱·서비스·기관이 나오고 실물 이미지가 필요하면 **넣는다.** 규칙은 셋 — ① **공식 출처**(프레스킷·공식 사이트 캡처·공식 채널)는 그냥 쓴다 ② **아마존 이미지는 핫링크만**, 자체 업로드 금지 ③ **출처 불명 이미지는 쓰지 않는다**(유일한 금지선). figcaption에 출처+확인일 병기, 개인정보 화면 제외. 실물 1장은 증빙으로 계산돼 생성이 1장 줄어든다
 - Chrome이 열려 있고, 0and1life.com WP admin에 로그인되어 있어야 함
 - **(v4.0 · v6.1) Google Flow(`flow.google.com`, 舊 labs.google)에 로그인되어 있어야 함** — Flow 프로젝트 URL은 STEP 5 상단 참조. `labs.google` URL은 `flow.google.com` 으로 리다이렉트된다
 - 🌐 **(v6.1) 그리드 탭에서 canvas 캡처를 하지 않는다.** 이미지가 `flow-content.google` 교차 출처라 반드시 taint 된다. 5-5의 ⓐ(그리드 탭에서 `window.open(URL#URL들)`) → ⓑ(이미지 탭에서 `new Image()` 캡처) 경로만 쓰고, STEP 6은 **이미지 탭에서** 실행한다
 - ⛔ **(v6.1) Flow 동시 생성은 2건까지다.** 3번째부터 전송 버튼이 `disabled` 로 잠긴다. 타이핑 → `disabled` 해제 폴링 → 클릭 → `boxLen` 검증을 **건별로** 돌리고, **한 배치에 두 번의 타이핑을 넣지 않는다** (2026-09-04: 프롬프트 2+3 병합 전송 실측)
 - 🆕 **(2026-08-26) Flow가 계정 선택 화면으로 튕기면 `leejc0404@gmail.com` 을 클릭해 진행한다** (사용자 사전 승인). **비밀번호 입력 화면이 나오면 즉시 중단**하고 STEP 5 상단의 세션 만료 대응 절차를 따른다
-- 🎛 **(v5.6) Flow 설정 `에이전트 OFF / 이미지 / 16:9 / Nano Banana 2 / x2` 를 매 실행 눈으로 확인한다 (STEP 5-1).** '최초 1회'가 아니다 — 기본값이 실행마다 `x1`·`Nano Banana 2 Lite`·`동영상` 으로 돌아가 있었다. **에이전트 ON이면 프롬프트가 별도 채팅 세션으로 넘어가 재해석되고 생성이 전량 실패한다** (2026-08-26 KoreaPlug 실측: 2장 모두 `실패`, 세션 패널이 그리드를 덮어 인지도 늦었다 — 같은 Flow 프로젝트를 공유하므로 이 루틴도 동일 위험). 설정 변경 후 **저장** 버튼 필수
+- 🎛 **(v5.6) Flow 설정 `에이전트 OFF / 이미지 / 16:9 / Nano Banana 2 / x2` 를 매 실행 눈으로 확인한다 (STEP 5-1).** '최초 1회'가 아니다 — 기본값이 실행마다 `x1`·`Nano Banana 2 Lite`·`동영상` 으로 돌아가 있었다. **에이전트 ON이면 프롬프트가 별도 채팅 세션으로 넘어가 재해석되고 생성이 전량 실패한다** (2026-08-26 KoreaPlug 실측: 2장 모두 `실패`, 세션 패널이 그리드를 덮어 인지도 늦었다 — 같은 Flow 프로젝트를 공유하므로 이 루틴도 동일 위험). 설정 변경은 칩 텍스트로 반영을 확인한다 (v6.2: 저장 버튼 없음)
 - **(v4.0) 워터마크는 `cropRight = 150` 으로 잘라낸다** (Flow 워터마크는 상대좌표 0.925W·0.875H의 이미지 안쪽에 있음). 덮기(fillRect) 방식은 배경에 디테일이 있으면 사각형이 눈에 띄므로 금지
 - 🆕 **(v5.4) 크롭 뒤 `TARGET_W = 1100` 으로 다운스케일한다.** 1024 미만으로 줄이면 WP가 `large` 사이즈를 만들지 않아 2배 DPI 화면이 뭉개진다 — 900 이하로 낮췄다면 STEP 8에 명시
 - 🚨 **(v5.4) 삽입하는 모든 `<img>` 에 `class="wp-image-{미디어ID}"` 를 넣는다.** 이 클래스가 없으면 WordPress가 `srcset`·`sizes` 를 주입하지 않아 **리사이즈본이 전혀 쓰이지 않는다.** 저장 전 `_evGuard.noWpCls === 0` 을 반드시 확인

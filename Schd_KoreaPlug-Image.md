@@ -1,8 +1,28 @@
-# KoreaPlug 자동 이미지 삽입 태스크 (v6.1 — 장소 오인 배제 + 전송 실패 시 재타이핑 금지 + 업로드 대기 20초 + Flow 교차출처 캡처 + DOM 기반 제출 + 다중 글 연속 처리 + zoom 뷰포트 보호 + 세션 사전 점검 + 사건 설계 + 한국성 + 신체 결손 방지 + 반응형 전송 + Google Flow)
+# KoreaPlug 자동 이미지 삽입 태스크 (v7.1 — 밝은 낮·즐거운 사람 무드 + Flow 글당 2장 상한 / v7.0 — 무료 실사 3원화(무료 라이선스 실사진 / Flow 기록 사진 문법 / Claude 모션 그래픽) + 전송 폴백 재정렬 + 장소 오인 배제 + 전송 실패 시 재타이핑 금지 + 업로드 대기 20초 + Flow 교차출처 캡처 + DOM 기반 제출 + 다중 글 연속 처리 + zoom 뷰포트 보호 + 세션 사전 점검 + 사건 설계 + 한국성 + 신체 결손 방지 + 반응형 전송 + Google Flow)
 
 ### 목적
 
-Notion 글 현황 테이블에서 오늘 날짜에 작성된 WordPress 글을 찾아, **데코(생성) 이미지가 3장 미만인 글**에 **Google Flow(Nano Banana 2)** 로 생성한 이미지를 WebP 형식으로 삽입한다 — 단, **증빙+데코 합계가 5장을 넘지 않는 범위**에서만 (생성 수를 3→2→1장으로 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다.
+Notion 글 현황 테이블에서 오늘·어제 작성된 WordPress 글을 찾아, **데코 이미지가 3장 미만인 글**에 이미지를 WebP(설명용 모션은 MP4)로 삽입한다 — 단, **증빙+데코 합계가 5장을 넘지 않는 범위**에서만 (3→2→1장 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다.
+
+**(v7.0) 이미지는 슬롯 성격에 따라 세 경로로 조달하며, 모두 비용 0원이어야 한다.**
+
+| 슬롯 유형 | 1순위 | 2순위 | 근거 절 |
+|---|---|---|---|
+| **A. 실재 장소·시설·음식 컷** (글이 특정 장소·시설을 다룸) | **무료 라이선스 실사진** — 공공누리 제1유형, Wikimedia Commons CC0·PD·CC BY·CC BY-SA | Flow 생성(기록 사진 문법) | 3-5 |
+| **B. 생활 장면·사건 컷** (사람이 무언가를 하는 순간) | **Flow 생성(기록 사진 문법 + 그레인)** | — | 3-2·3-3·STEP 5 |
+| **C. 설명 컷** (일정·수치·비교·절차·동선) | **Claude 모션 그래픽**(코드로 그린 MP4 + 포스터) | Claude 정지 그래픽(WebP) | 3-6 |
+
+⛔ **유료 경로 금지**: 크레딧이 차감되는 생성 서비스(유료 MCP 포함), 유료 스톡, 유료 플랜 전용 모델은 쓰지 않는다. Flow도 **0크레딧으로 확인된 설정(Nano Banana 2 · x2)** 만 쓴다.
+
+> 🚀 **v7.0 변경 (2026-10-02) — '사진 같은' 이미지를 비용 없이 얻기 위해 조달 경로를 3원화한다.**
+> 2026-10-01 #180(Post 4516) 실측: Flow 4장은 화질·한국 지표·해부 검사를 모두 통과했지만 **광고 화보처럼 보였다.** 원인은 도구가 아니라 지침서의 촬영 문법이었다 — `cinematic`·카메라 브랜드·골든/블루아워·얕은 심도·`the only bright accent` 가 모든 컷을 '연출된 결정적 순간'으로 만들었다. 실제로 찍은 사진은 평범한 빛, 눈높이, 약간 기운 수평, 프레임 가장자리의 잡동사니를 갖는다.
+> 또한 Claude는 실사 이미지를 생성하는 모델이 아니다. 대신 **코드로 그리는 설명 그래픽·모션은 글자·수치가 깨지지 않는다**는 고유 강점이 있다 (2026-10-02 실측: Playwright 프레임 렌더 → ffmpeg로 1226×768·7초·24fps MP4 **104KB**, 렌더 11초, 비용 0원).
+> → v7.0은 ① 실재 장소는 **무료 라이선스 실사진 우선**(3-5) ② 생성 컷은 **기록 사진 문법 + 그레인 후처리**(3-3 ⑤·5-4) ③ 설명 컷은 **Claude 모션 그래픽**(3-6) ④ Flow 전송 폴백을 10-01 실측대로 재정렬(5-2)한다. 슬롯 판정은 3-0에서 프롬프트보다 먼저 한다.
+
+> ☀️ **v7.1 변경 (2026-10-02) — 무드를 '무겁고 비현실적'에서 '밝고 가 보고 싶은'으로 바꾼다.**
+> 사용자 평가: Flow 이미지가 "분위기가 무겁고 현실감이 떨어지고 보고 싶은 이미지가 아니다." 원인은 세 가지였다 — ① 해질녘·야간·흐린 날 위주의 빛 ② 뒷모습만 있는 사람(쓸쓸하고 연출된 느낌) ③ 빈 무대·빈 잔디 같은 '부재'의 장면.
+> 같은 날 같은 장소(반포한강공원·현장 접수 텐트)를 **맑은 낮 + 웃고 즐기는 사람(¾ 측면) + 폰 스냅** 문법으로 다시 생성하자 4장 모두 밝고 생활감 있는 결과가 나왔다 (0크레딧).
+> → v7.1은 ① 3-3 ⑤의 기본 빛을 **맑은 낮**으로 고정하고 무드 문장을 추가 ② 3-3 ③ 인물 정책에 **즐기는 표정의 ¾ 측면 인물**을 허용 ③ **Flow(B)는 글당 최대 2장**, 나머지는 실사진(A)·모션(C)으로 채운다 ④ 「가 보고 싶은가」 무드 테스트를 채택 조건에 넣는다.
 
 > 🚀 **v4.0 변경 (2026-08-18) — 이미지 생성처를 gemini.google.com에서 Google Flow로 교체한다.**
 > 2026-08-18 동일 프롬프트(지하철 좌석 위 밀폐 냉음료 vs 개봉 뜨거운 음식) 실측 비교:
@@ -243,6 +263,15 @@ window._cls = window._postData.map(p => {
     detail.push(base.slice(0, 44).replace(/[?&=]/g, '_') + ' => ' + k + ' [' + why + ']');
   }
 
+  // (v7.0) 모션 그래픽(<video>)도 데코로 센다 — 이 루프가 없으면 모션을 넣은 글이 다음 실행에서 또 3장을 받는다
+  for (const v of Array.from(div.querySelectorAll('video'))) {
+    const s0 = v.getAttribute('src') || ((v.querySelector('source') || {}).getAttribute ? v.querySelector('source').getAttribute('src') : '') || '';
+    const vb = (s0.split('/').pop() || '').split('?')[0];
+    deco++;
+    if (/^koreaplug-motion-/i.test(vb)) detail.push(vb.slice(0, 44) + ' => deco [motion]');
+    else { unknown.push(vb); detail.push(vb.slice(0, 44) + ' => deco [video-UNKNOWN]'); }
+  }
+
   const genCount = deco >= 3 ? 0 : Math.max(0, Math.min(3 - deco, 5 - evidence - deco)); // 총량 상한 5장
   return {id: p.id, title: p.title.raw || p.title.rendered, status: p.status, date: p.date, fm: p.featured_media, slug: p.slug,
           evidence, stock, deco, genCount, hasStockImg: stock > 0, unknown, detail};
@@ -278,6 +307,24 @@ window._origStatus + ' / ' + window._origDate + ' / fm:' + window._curFeatured
 ---
 
 ### STEP 3: 글 본문 분석 및 이미지 프롬프트 생성
+
+#### 3-0. 슬롯 유형 판정 (v7.0 신설 — 프롬프트보다 먼저 한다)
+
+STEP 4에서 정할 삽입 위치(와 히어로)마다, 그 자리에 올 이미지가 **A·B·C 중 무엇인지** 먼저 정한다. 기준은 「이 자리에서 독자가 봐야 하는 것이 무엇인가」다. 본문은 3-1에서 읽고, 판정은 3-1 직후에 한다.
+
+| 독자가 봐야 하는 것 | 유형 | 예 (#180 한강 가을축제) |
+|---|---|---|
+| 그 장소가 실제로 어떻게 생겼나 | **A** 무료 실사진 (없으면 Flow) | 반포한강공원·세빛섬, 잠원 운동장 |
+| 거기서 사람들이 무엇을 하나 | **B** Flow | 현장 접수대에서 손목밴드를 받는 순간 |
+| 언제·얼마·어떤 순서·어디로 | **C** Claude 모션 | 날짜별 육상/수상 프로그램 달력, 공원별 지하철역 동선 |
+
+- **히어로·대표이미지는 A 또는 B만** 쓴다. C(모션·그래픽)는 제목 오버레이와 겹치고 썸네일에서 정보가 읽히지 않는다.
+- **(v7.1) Flow(B)는 글당 최대 2장**(히어로 포함). 나머지 슬롯은 A(실사진)·C(모션)로 채운다. 실사진을 못 찾아 B로 내려가는 경우에도 이 상한을 넘으면 그 슬롯은 C 또는 생략으로 처리한다.
+- **C는 글당 1장이 기본, 최대 2장.** 본문에 표가 있어도 C를 쓸 수 있다 — 표를 옮기지 말고 **표가 말하는 결론 하나**(예: "월~목은 배만 운영")를 움직임으로 보여준다.
+- A 슬롯에서 3-5 조건을 만족하는 실사진을 **찾지 못하면 B 방식(Flow)으로 내려간다.** 검색은 슬롯당 2~3회로 제한한다.
+- 4장 중 **최소 1장은 사람의 흔적**(v4.1 원칙)을 유지한다. A 실사진에 원경 사람이 있으면 그것으로 충족된다.
+- 판정 결과를 기록한다: `window._slotPlan = {hero: 'A', 1: 'C', 2: 'B', 3: 'A'}` — STEP 8에 그대로 남긴다.
+- 파일명 규칙: Flow `koreaplug-{slug}-{n}.webp` · 실사진 `koreaplug-photo-{slug}-{n}.webp` · 모션 `koreaplug-motion-{slug}-{n}.mp4` + `koreaplug-motion-{slug}-{n}-poster.webp` (`n` = 슬롯 번호 1·2·3 또는 `hero`). 셋 다 `koreaplug-` 로 시작해 STEP 2 분류기 ④단계에서 데코로 잡힌다.
 
 #### 3-1. 본문을 먼저 읽는다 (필수)
 
@@ -360,7 +407,7 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 다음 중 하나 이상이 프롬프트에 명시돼야 한다 — 기울어짐 / 떨어지는 중 / 반쯤 열림·찢김 / 김이 막 오르는 / 한쪽만 켜짐 / 넘치기 직전 / 손이 막 놓거나 집는 순간 / 고개가 막 돌아가는 / 문이 닫히는 중.
 
 **⑤ 시선 유도점은 1개만 둔다**
-화면에서 가장 밝은 곳(또는 가장 채도가 높은 곳)이 **훅 문장의 주어와 일치**해야 한다. `the only bright accent in the frame is X` 처럼 못 박는다.
+화면에서 눈이 처음 닿는 곳이 **훅 문장의 주어와 일치**해야 한다. **(v7.0) 조명으로 강조하지 않고 초점·위치로 지정한다** — `X is the sharpest thing in the frame, slightly off-centre` 처럼 쓴다. 舊 표현 `the only bright accent in the frame is X` 는 스포트라이트를 받은 광고 컷을 만들므로 **사용 금지**(2026-10-01 #180 실측).
 
 **⑥ 범용 은유 금지 목록 (글이 그 물건 자체를 다루지 않는 한 사용 금지)**
 ⛔ 모래시계 · 저울 · 전구 · 퍼즐 조각 · 체스말 · 화살표 그래픽 · 돼지저금통 · 악수 · 계산기와 안경 플랫레이 · 창밖 도시야경 단독 컷 · **텅 빈 지하철/거리/로비** · 정렬된 문구류 톱뷰 · 여권과 지도 플랫레이.
@@ -467,6 +514,8 @@ integrated into the lower section of the same panel, absolutely no separate roun
 
 - ✅ **적극 허용**: 손·팔·뒷모습·실루엣·군중의 흐름·움직임 블러로 흐른 행인, 우산 쓴 사람들의 무리
 - ✅ 인물은 **행위 중**이어야 한다 — 가위로 고기를 자르는 손, 개찰구를 통과하는 뒷모습, 젓가락으로 반찬을 집는 손
+- ✅ **(v7.1) 즐기는 사람을 보여준다.** 중간 거리의 **¾ 측면·옆모습 인물이 웃거나 대화하는 표정**을 허용한다 — `a young couple in three-quarter view laughs while …, relaxed natural expressions, not looking at the camera`. 뒷모습만 있는 컷은 쓸쓸하고 연출된 느낌을 준다 (2026-10-02 사용자 평가). 정면 클로즈업·카메라 응시는 여전히 금지
+- ✅ **(v7.1) 외국인 방문객을 한 명 넣으면** KoreaPlug 독자가 자신을 대입한다 — `a foreign visitor` (국적·인종 묘사는 하지 않는다)
 - ⛔ **금지**: 카메라를 보고 웃는 정면 모델 컷, 스톡사진 느낌의 연출된 포즈, 알아볼 수 있는 특정 인물의 얼굴
 - 3장 중 **최소 1장은 사람의 흔적(손·뒷모습·군중)이 들어가야 한다.** 4장 전부 무인 정물이면 실패다.
 
@@ -497,17 +546,41 @@ a complete and anatomically correct adult figure seen from behind, the whole bac
 - ⛔ **금지**: 화면 안 UI 텍스트, 문서·자막·안내문의 **읽히는 문단**, 브랜드 로고 — `no readable paragraphs, no UI text, no logos`
 - 핵심 피사체 위에 **초점 맞은 글자를 올리지 않는다** (깨진 글자로 생성됨). 글자는 **배경·주변부·아웃포커스**에만 둔다.
 
-**⑤ 그 위에 얹는 촬영 조건 (기존 유지)**
+**⑤ 촬영 문법 — 기록 사진 (v7.0 전면 교체)**
 
-- **시간·날씨·빛** — 한국 특유의 빛을 명시. 예: "late afternoon cinematic side lighting", "rain-slicked asphalt reflecting colorful neon at night", "hazy blue hour over apartment towers"
-- **카메라·렌즈** — 예: "shot on Leica M11 with 35mm f/1.4 lens", "Sony A7R V with 90mm macro lens"
-- **구도·깊이감** — 예: "intense shallow depth of field", "low-angle dramatic perspective showing leading lines"
-- **텍스처·디테일** — 예: "glistening condensation on a cold green soju bottle", "rising steam and fine texture of red chili oil"
-- **제외 조건 (v5.3 표준 세트)** — `no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no anime style, no posed model looking at camera, no generic stock photo look`
+> 🚨 **교체 사유 (2026-10-01 #180 실측)**: 舊 ⑤는 「시간·빛 + 카메라·렌즈 + 얕은 심도 + 텍스처」를 요구했고, 그 결과 4장 모두 **잘 찍힌 광고 화보**로 나왔다. 독자가 '실제로 누가 가서 찍은 사진'으로 믿으려면 사진이 완벽하지 않아야 한다.
+
+**표준 촬영 문장 — B 슬롯과 A 대체 프롬프트의 끝에 그대로 붙인다:**
+
+```
+bright, airy and inviting mood, clear blue sky with a few light clouds, gentle natural daylight, fresh true-to-life colours, cheerful everyday atmosphere, casual snapshot taken by a visitor on a recent smartphone, eye-level handheld framing with a very slightly tilted horizon, most of the scene in focus, everyday clutter such as a bin, a bike rack or a cooler box partly cut off at the edges of the frame
+```
+
+ℹ️ **(v7.1)** 앞 두 마디(`bright, airy and inviting mood …` ~ `cheerful everyday atmosphere`)가 무드 문장이다. v7.0의 `faint sensor noise` 는 뺐다 — 화면을 탁하게 만들고, 질감은 5-4 그레인이 맡는다.
+
+- **(v7.1) 빛의 기본값은 맑은 낮이다.** 실내 장면은 `bright daylight through large windows`. **야간·해질녘·흐린 날은 글의 주제가 그 시간대일 때만**(야시장, 야경 크루즈 등) 쓰고, 그때도 **4장 중 최대 1장**, 불 켜진 가게·사람으로 화면을 밝게 채운다. 빈 무대·빈 거리·빈 객실 같은 **'부재'의 장면은 금지**한다 — 무겁고 쓸쓸해 보인다 (2026-10-02 사용자 평가).
+- **금지어**: `cinematic` · `hyperrealistic` · `ultra realistic` · `8k` · `masterpiece` · `award-winning` · `dramatic lighting` · `studio lighting` · 카메라·렌즈 브랜드명(`Leica`, `Sony A7R V`, `85mm f/1.2` 등) · `the only bright accent`. 얕은 심도(`shallow depth of field`, `bokeh`)는 **음식·손 접사에서만** 허용한다.
+- **구도**: 피사체를 정중앙에 두지 않는다. 프레임 가장자리에 사물(가로등, 쓰레기통, 가방, 다른 테이블)이 **잘려 들어오게** 둔다. 완벽한 대칭 금지. 사람은 잘리게 두지 않는다(아래 해부 조건과 충돌).
+- **제외 조건 (v7.0 표준 세트)**: `no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no illustration, no cinematic colour grading, no HDR look, no studio lighting, no moody dark tones, no posed model looking at camera, no stock photo look`
   **인물이 들어가는 컷에는 아래를 반드시 덧붙인다** — `complete natural human anatomy with no missing or cropped body parts, no headless figures, no floating clothing`
   ⚠️ 이 세트에 **`no people` 과 `no text` 는 들어 있지 않다.** 무인·무텍스트가 정말 필요한 정물 컷에서만 개별적으로 추가한다.
+- **후처리**: 캡처 단계(5-4)에서 **약한 휘도 그레인(±5)** 을 입힌다. AI 특유의 매끈한 질감을 줄이는 마지막 단계다.
 
 > 아래 예시는 모두 **한국 지표 2개 이상 + 사람의 흔적 또는 아웃포커스 한글**을 포함하도록 v4.1에서 다시 쓴 것이다. 舊 예시(무인·무텍스트 정물)는 Nowhere 테스트를 통과하지 못해 폐기했다.
+
+> ⚠️ **(v7.0) 아래 예시들의 마지막 촬영 문장**(`Shot on …`, `cinematic`, `hyperrealistic`, `ultra realistic documentary …`, `the only bright accent …`, `shallow depth of field` 등)**은 舊 문법이다.** 장면·사건·한국 지표 묘사만 참고하고, 마지막 촬영 문장과 제외 조건은 ⑤의 v7.0 세트로 **바꿔 쓴다.**
+
+**프롬프트 예시 (v7.1 — 밝은 무드 + 폰 스냅, 2026-10-02 실측 채택 수준):**
+
+```
+A festival registration tent on the lawn of a Han River park in Seoul on a bright sunny autumn afternoon. Under the white tent, a smiling young staff member in a festival vest hands a coral paper wristband across a folding table to a foreign visitor, both seen in three-quarter view at medium distance, relaxed natural expressions, not looking at the camera. On the table: a clipboard sign-up sheet, a small cash tray, a stack of printed schedules. Behind them, a short cheerful queue of friends chatting, a few holding takeaway coffees. A tall festival banner with Hangul lettering on the tent pole. In the background, the sunlit river, a long concrete bridge, grey apartment towers with large painted building numbers and bright yellow ginkgo trees. Bright, airy and inviting mood, clear blue sky, gentle natural daylight, fresh true-to-life colours, cheerful weekend atmosphere. Casual snapshot taken by a visitor on a recent smartphone, eye-level handheld framing, most of the scene in focus, a cooler box partly cut off at the edge of the frame, complete natural human anatomy, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no illustration, no cinematic colour grading, no HDR look, no moody dark tones, no posed model looking at camera
+```
+
+```
+Banpo Hangang Park riverside in Seoul on a clear sunny autumn afternoon. On the wide Han River, three small round donut-shaped boats with striped parasols carry groups of friends drifting near the colourful Sebitseom floating islands, a white yacht motoring past. On the riverside lawn in the foreground, people sit on picnic mats; a young couple in three-quarter view laughs while unpacking convenience-store snacks and a cup of instant ramen, not looking at the camera. Across the river, grey and beige Korean apartment towers with large painted building numbers and the long low Banpo Bridge. Bright, airy and inviting mood, soft blue sky, gentle natural daylight, fresh true-to-life colours, cheerful weekend atmosphere. Casual snapshot taken by a visitor on a recent smartphone, eye-level handheld framing, most of the scene in focus, a bike rack partly cut off at the edge of the frame, complete natural human anatomy, no readable paragraphs, no UI text, no logos, no watermark, no 3d render, no illustration, no cinematic colour grading, no HDR look, no moody dark tones, no posed model looking at camera
+```
+
+> 같은 장면의 v6.1 산출(해질녘 빈 무대 + 뒷모습 2명)과 비교하면, 무드 문장과 ¾ 측면의 즐기는 사람 두 가지만으로 인상이 완전히 달라진다 (2026-10-02).
 
 **프롬프트 예시 (Food 카테고리) — 지표: 스테인리스 반상기 + 반찬 + 소주병 + 자르는 손**
 
@@ -581,6 +654,8 @@ A straight-on wide photograph of the interior of a Seoul metro train car, center
 
 **이미지 3장의 역할 분담 (v4.1 개정):**
 
+> (v7.0) 아래는 「무엇을 보여줄지」의 기준이다. **어떤 경로로 만들지는 3-0 슬롯 판정을 따른다** — 예: 이미지 1(실제 한국 공간)이 A 슬롯이면 무료 실사진으로 채운다.
+
 - **이미지 1 (글 도입부)**: 글의 무대가 되는 **실제 한국 공간의 생활 장면** — 사람·간판·거리가 살아 있는 와이드 컷. 텅 빈 공간이 아니라 **쓰이고 있는 공간**을 그린다. 핵심 피사체는 이 안에도 정확한 형태로 들어가야 한다.
 - **이미지 2 (글 중반)**: 핵심 소재의 클로즈업 — 음식 디테일, 문화 오브젝트, **행위 중인 손**. 한국 지표(스테인리스 식기·반찬·한복 소매 등)를 프레임 안에 반드시 포함한다.
 - **이미지 3 (글 후반)**: 감성적 마무리 — 저녁빛, 계절감, 여운. **계절 지표(벚꽃·은행잎·단풍·장마)나 한강·아파트 스카이라인** 중 하나를 넣어 장소를 못 박는다.
@@ -612,11 +687,15 @@ v4.1 한국성 규칙만으로는 부족했다는 증거다. 아래 4장은 전�
 3. 물리량 번역 — 길이·높이·개수의 구체적 배수 (해당하는 글만)
 4. **한국 지표 2개 이상** — 3-3 ② 표에서 물리적 형태로 (KoreaPlug 고유 항목)
 5. 인물 흔적 — 손·뒷모습·군중 중 하나 (3장 중 최소 1장 필수)
-6. 시선 유도점 1개 — `the only bright accent is ...`
-7. 카메라·렌즈·빛
-8. 제외 조건 세트 (3-3 ⑤ 말미 문장 그대로 — `no people`·`no text` 금지)
+6. 초점 피사체 1개 — `X is the sharpest thing in the frame, slightly off-centre` (조명 강조 금지, v7.0)
+7. **무드 + 기록 사진 촬영 문장** — 3-3 ⑤ 표준 문장 그대로 (맑은 낮 기본, 카메라 브랜드·`cinematic` 금지, v7.1)
+8. 제외 조건 세트 (3-3 ⑤ v7.0 표준 세트 그대로 — `no people`·`no text` 금지)
 
-**최종 통과 조건 = ① 한 문장 테스트(사건) + ⑦ 썸네일 3초 테스트 + Nowhere 테스트(한국성).** 셋 중 하나라도 걸리면 채택하지 않는다.
+**최종 통과 조건 = ① 한 문장 테스트(사건) + ⑦ 썸네일 3초 테스트 + Nowhere 테스트(한국성) + (v7.0) 실사 테스트 + (v7.1) 무드 테스트.** 다섯 중 하나라도 걸리면 채택하지 않는다.
+
+**(v7.0) 실사 테스트**: "이 사진을 여행자가 폰으로 찍어 올린 사진이라고 하면 믿겠는가?" 광고·화보·영화 스틸처럼 보이면 탈락이다. 5-3 채택 판정에서도 같은 질문을 한다.
+
+**(v7.1) 무드 테스트**: "이 사진을 보고 **저기 가서 저렇게 해 보고 싶어지는가?**" 어둡거나, 텅 비었거나, 사람이 쓸쓸해 보이면 탈락이다.
 
 또한 각 이미지에 대한 **영문 alt text** (60자 내외)도 미리 작성해 둔다.
 
@@ -679,6 +758,195 @@ window._featuredReason = "이유";
 **⑤ 보고**
 
 STEP 8 보고에 실물 이미지별로 ⓐ 조달 경로(프레스킷 / 공식 캡처 / 공식 채널 / 아마존) ⓑ 출처 도메인 ⓒ 확인일 ⓓ **개인정보 노출 없음 확인** 을 남긴다. 판단이 애매하면 넣지 말고 보고에만 적어 사용자 판단을 받는다.
+
+---
+
+#### 3-5. 무료 실사진 조달 — A 슬롯 (v7.0 신설)
+
+> 실재하는 장소를 다루는 글에서 **가장 사진 같은 이미지는 진짜 사진**이다. 장소 오인(2026-09-08 설악산 → 황산 사고)도 원천 차단된다. 단, KoreaPlug는 애드센스·제휴 수익 사이트이므로 **상업적 이용과 변경(크롭·WebP 변환)이 허용된 라이선스만** 쓴다.
+> 3-4(공식 출처 = 증빙)와 다르다. 3-4는 제품·화면·요금표처럼 **사실을 증명하는 이미지**이고, 이 절은 **장소의 모습을 보여주는 데코 사진**이다.
+
+**① 허용 라이선스 — 이 목록 밖은 전부 금지**
+
+| 출처 | 허용 | 금지 |
+|---|---|---|
+| 공공누리(KOGL) | **제1유형**(출처표시만 하면 상업·변경 가능) | 제2유형(상업 금지) · 제3유형(변경 금지) · 제4유형 |
+| Wikimedia Commons | **CC0 · Public domain · CC BY · CC BY-SA** | CC BY-NC · CC BY-ND · Fair use · 라이선스 미표기 |
+| 그 외 | — | 구글 이미지 검색 결과, 블로그·SNS 사진, 워터마크 스톡, 유료 스톡, Unsplash(분류기가 스톡 교체 대상으로 잡는다) |
+
+라이선스는 **사진 개별 페이지에서** 확인한다. 같은 사이트라도 사진마다 유형이 다르다. 확인하지 못하면 쓰지 않는다.
+
+**② 어디서 찾나 (우선순위)**
+
+1. **Wikimedia Commons API** — 라이선스·저작자·원본 크기를 기계적으로 받을 수 있고, `upload.wikimedia.org` 가 CORS를 허용해 **WP 탭에서 바로 fetch** 된다. 자동화에 가장 적합하다.
+2. **한국관광공사(포토코리아·한국관광 콘텐츠랩)·공공누리 포털·지자체 사진** — 한국 장소 커버리지가 가장 넓다. 사진 페이지의 공공누리 마크가 **제1유형**인지 눈으로 확인한다.
+
+Wikimedia 검색 (WP media-new 탭 `javascript_tool`, 1회 호출):
+
+```javascript
+const q = 'Banpo Hangang Park';   // 영문 장소명. 결과가 부족하면 한글명(반포한강공원)으로 재시도
+const api = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*'
+  + '&generator=search&gsrnamespace=6&gsrlimit=20&gsrsearch=' + encodeURIComponent(q)
+  + '&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1600';
+const d = await fetch(api).then(r => r.json());
+window._wm = Object.values((d.query || {}).pages || {}).map(p => {
+  const ii = p.imageinfo[0], m = ii.extmetadata || {};
+  const v = k => ((m[k] || {}).value || '').replace(/<[^>]*>/g, '').trim();
+  return {title: p.title, w: ii.width, h: ii.height, thumb: ii.thumburl, page: ii.descriptionurl,
+          lic: v('LicenseShortName'), artist: v('Artist').slice(0, 60), date: v('DateTimeOriginal').slice(0, 10)};
+}).filter(x => x.w >= 1600 && x.w / x.h >= 1.3 && /^(CC0|Public domain|CC BY(-SA)? [\d.]+)/i.test(x.lic));
+window._wm.map((x, i) => i + ' ' + x.title.slice(5, 60).replace(/[?&=]/g, ' ') + ' | ' + x.w + 'x' + x.h + ' | ' + x.lic + ' | ' + x.date).join('\n')
+```
+
+- 후보는 **이미지를 직접 보고** 고른다 (제목만 보고 고르지 않는다). 후보 썸네일 URL을 탭에 띄워 원본 스크린샷 1장씩 본다 (scale 없이)
+- **촬영 시기**를 본다 — 철거·리모델링 전 사진, 다른 계절 사진(가을 축제 글에 벚꽃) 금지. `date` 가 비어 있으면 화면 속 간판·차량으로 판단한다
+- **식별 가능한 사람 얼굴이 크게 나온 사진은 쓰지 않는다** (초상권). 원경 군중은 무방
+- 원본 폭 **1600px 이상**만 쓴다 (16:9 크롭 후 1226px 확보). **확대 보간 금지**
+- 장소 오인 테스트(3-2B ⑤)는 실사진에도 적용한다 — 같은 이름의 다른 장소·다른 지점 사진을 집지 않았는지 본다
+
+**③ 가공·업로드**
+
+**CORS 허용 호스트(Wikimedia 등)** — WP media-new 탭에서 바로 처리한다 (postMessage 불필요):
+
+```javascript
+const K = 0, slot = 'SLOT', slug = 'SLUG', ALT = 'ALT', CREDIT = 'CREDIT';   // slot = '1'|'2'|'3'|'hero'
+const src = window._wm[K].thumb;
+const bmp = await createImageBitmap(await fetch(src, {mode: 'cors', credentials: 'omit'}).then(r => r.blob()));
+const W = 1226, H = 768, r = Math.max(W / bmp.width, H / bmp.height);
+if (r > 1) throw new Error('too small — 다른 후보');                       // 확대 금지
+const sw = W / r, sh = H / r, sx = (bmp.width - sw) / 2, sy = (bmp.height - sh) / 2;   // 16:9 중앙 크롭
+const c = document.createElement('canvas'); c.width = W; c.height = H;
+c.getContext('2d').drawImage(bmp, sx, sy, sw, sh, 0, 0, W, H);
+const blob = await new Promise(res => c.toBlob(res, 'image/webp', 0.86));
+const name = 'koreaplug-photo-' + slug + '-' + slot + '.webp';
+const fd = new FormData(); fd.append('file', blob, name);
+const j = await fetch('/wp-json/wp/v2/media', {method: 'POST', headers: {'X-WP-Nonce': window._nonce}, body: fd}).then(r => r.json());
+await fetch('/wp-json/wp/v2/media/' + j.id, {method: 'POST', headers: {'X-WP-Nonce': window._nonce, 'Content-Type': 'application/json'},
+  body: JSON.stringify({alt_text: ALT, caption: CREDIT})});
+(window._uploadedIds = window._uploadedIds || []).push({id: j.id, url: j.source_url, alt: ALT, tag: name});
+(window._caps = window._caps || {})[slot] = CREDIT;
+'photo ' + slot + ' -> ' + j.id + ' ' + Math.round(blob.size / 1024) + 'KB'
+```
+
+- 중앙 크롭이 피사체를 자르면 `sx`·`sy` 를 손으로 조정한다 (예: 하늘이 많으면 `sy` 를 아래로)
+- **CORS 미허용 호스트(공공누리 사이트 등)**: 그 이미지의 **직접 URL을 새 탭으로 열면** 페이지와 이미지가 동일 출처가 되어 canvas taint가 없다. 그 탭에서 같은 크롭을 하고, `window.open('https://koreaplug.com/wp-admin/media-new.php')` → STEP 6의 postMessage 리스너 경로로 올린다 (Flow와 같은 방식)
+- 실사진에는 **그레인을 넣지 않는다.** 이미 진짜다
+
+**④ 출처 표기 — 라이선스 의무다**
+
+figcaption을 `Photo:` 로 시작하는 아래 형식으로 **반드시** 넣는다. 빠지면 저장 금지(7-2.9 `photoCap` 검증).
+
+```
+Photo: {저작자} / {출처}, {라이선스}
+```
+
+- 공공누리: `Photo: Korea Tourism Organization, KOGL Type 1`
+- Wikimedia: `Photo: {Artist} / <a href="{page}">Wikimedia Commons</a>, <a href="{라이선스 URL}">CC BY-SA 4.0</a>` — CC BY·CC BY-SA는 원본 페이지와 라이선스 링크를 함께 건다. 크롭·변환한 경우 `, cropped` 를 덧붙인다
+- CC0·PD도 저작자를 적는다 (의무는 아니지만 신뢰도가 오른다)
+
+**⑤ 분류·총량**
+
+- 파일명 `koreaplug-photo-{slug}-{n}.webp` → STEP 2 분류기 ④단계에서 **데코**로 계산된다. 증빙(`evidence-*`)이 아니다
+- Draft 루틴의 증빙 캡처가 이미 같은 장소를 보여줬다면 A 슬롯은 다른 지점·각도로 바꾼다
+
+---
+
+#### 3-6. Claude 모션 그래픽 — C 슬롯 (v7.0 신설)
+
+> 설명 컷은 **사진일 필요가 없다.** Claude는 실사 이미지를 생성하지 못하지만, **코드로 그린 그래픽은 글자·숫자가 깨지지 않고 본문 수치와 정확히 일치**한다. 생성 이미지가 원리적으로 못 하는 일이다. 비용도 0원이다 (클라우드 작업공간의 Chromium·ffmpeg 사용).
+
+**① 무엇을 그리나** — 본문의 **표·수치·일정·절차가 말하는 결론 하나**를 움직임으로 보여준다. 표를 통째로 옮기지 않는다.
+
+| 본문 | 모션 |
+|---|---|
+| 날짜별 프로그램 표 | 9일 달력이 하루씩 채워지고, 마지막에 '월~목은 배만' 구간이 강조된다 |
+| 요금 비교 | 막대가 자라고, 가장 싼 선택지에 표시가 붙는다 |
+| 이동 동선 | 노선 위 점이 역에서 공원까지 이동하며 소요 시간이 쌓인다 |
+| 절차(예약 → 현장 접수) | 단계 카드가 순서대로 넘어가고, 외국인이 막히는 단계에 경고 표시가 뜬다 |
+
+**② 디자인 규칙**
+
+- **1226×768**(사진과 같은 비율), **5~8초 루프**, 24fps. **마지막 2초는 완성 상태로 정지** — 이 프레임이 포스터가 된다
+- 글자는 **영어**(독자가 외국인). 한국 고유명사는 로마자 표기, 필요하면 한글 병기(`Noto Sans CJK`)
+- 숫자·날짜·요금은 **본문 raw에서 그대로 복사**한다. 새 숫자를 만들지 않는다. 하단에 `Source: …, checked YYYY-MM-DD` 한 줄
+- 배경 오프화이트 `#f6f4ef`, 글자 `#1d232b`, 보조 글자 `#6b7280`, 강조색 1개(`#c2410c`), 범주색 최대 2개(`#2f7d5b`·`#2b6cb0`). 그림자·그라데이션·3D 금지
+- 움직임은 **나타나기·채워지기·강조 테두리**만. 회전·튕김·깜빡임 금지 (광고처럼 보이고 눈이 피로하다)
+- 최소 글자 크기 **18px** (본문 표시폭 788px로 줄어도 읽혀야 한다). 라벨과 도형 사이 여백 **12px 이상**
+
+**③ 제작 파이프라인 — 클라우드 `Bash` (Flow 생성 대기 시간에 병행한다)**
+
+```bash
+D=/tmp/kp_motion_SLUG && mkdir -p $D/f && cd $D
+# scene.html : <canvas id="c" width="1226" height="768"> + window.render(t) (t = 초). 시간에만 의존하는 순수 함수로 짠다
+cat > rec.py <<'EOF'
+import asyncio, os
+from playwright.async_api import async_playwright
+FPS, DUR = 24, 7.0
+async def main():
+    async with async_playwright() as p:
+        b = await p.chromium.launch(); pg = await b.new_page(viewport={'width': 1226, 'height': 768})
+        await pg.goto('file://' + os.path.abspath('scene.html'))
+        for i in range(int(FPS * DUR)):
+            await pg.evaluate(f'render({i / FPS})'); await pg.screenshot(path=f'f/{i:04d}.png')
+        await b.close()
+asyncio.run(main())
+EOF
+python3 rec.py
+N=$(ls f | wc -l); LAST=$(printf 'f/%04d.png' $((N-1)))
+ffmpeg -y -loglevel error -framerate 24 -i f/%04d.png -c:v libx264 -pix_fmt yuv420p -crf 26 -preset slow -movflags +faststart -an koreaplug-motion-SLUG-N.mp4
+ffmpeg -y -loglevel error -i $LAST -c:v libwebp -quality 85 koreaplug-motion-SLUG-N-poster.webp
+mkdir -p /mnt/user-data/outputs/kp_motion && cp koreaplug-motion-SLUG-N* /mnt/user-data/outputs/kp_motion/ && ls -la /mnt/user-data/outputs/kp_motion
+```
+
+- 프레임 단위로 렌더하므로 **실시간·탭 가시성과 무관**하다. 브라우저 `MediaRecorder` 방식은 백그라운드 탭에서 프레임이 멈출 수 있어 쓰지 않는다
+- 용량 목표 **600KB 이하** (2026-10-02 실측: 7초 104KB). 넘으면 `-crf 30`
+- ⛔ **업로드 전 `Read` 로 프레임 3장(시작·중간·마지막)을 직접 본다.** 글자 겹침·잘림·오타를 여기서 잡는다. 2026-10-02 시험 렌더에서 행 라벨(`ON THE WATER`)이 위 칸과 겹친 것을 이 단계에서 발견했다
+- 렌더 실패(Chromium·ffmpeg 오류)면 마지막 프레임을 정지 WebP로 대체하거나(⑥), 슬롯을 B로 바꾼다. 유료 대안으로 우회하지 않는다
+
+**④ WP 업로드 — `file_upload` 경로 (postMessage 불필요)**
+
+`mcp__claude-in-chrome__file_upload` 는 세션 outputs 폴더(`/mnt/user-data/outputs/…`)의 파일을 브라우저의 파일 입력에 넣는다 (2026-10-02 실측: 104,119바이트 그대로 전달).
+
+1. WP media-new 탭에 **전용 파일 입력을 직접 만든다**:
+```javascript
+const i = document.createElement('input'); i.type = 'file'; i.multiple = true;
+i.setAttribute('aria-label', 'kp motion picker'); i.style.cssText = 'position:fixed;top:120px;left:20px;z-index:99999';
+document.body.appendChild(i); 'added'
+```
+2. `find` 로 **`kp motion picker`** 라벨을 정확히 지정해 ref를 얻는다. ⛔ WP 기본 `업로드` 버튼(plupload 입력)을 잡으면 **즉시 미디어 라이브러리에 자동 업로드**된다 — 2026-10-02 `find` 가 일반 질의에 이 버튼을 먼저 돌려줬다. 반환된 요소 이름이 `kp motion picker` 인지 확인하고 넣는다
+3. `file_upload` 로 mp4와 poster 두 파일을 한 번에 넣는다
+4. 같은 탭에서 REST로 올린다:
+```javascript
+const i = document.querySelector('input[aria-label="kp motion picker"]'), out = [], ALT = 'ALT';
+for (const f of i.files) {
+  const fd = new FormData(); fd.append('file', f, f.name);
+  const j = await fetch('/wp-json/wp/v2/media', {method: 'POST', headers: {'X-WP-Nonce': window._nonce}, body: fd}).then(r => r.json());
+  if (!j.id) { out.push(f.name + ' FAIL ' + JSON.stringify(j).slice(0, 120)); continue; }
+  await fetch('/wp-json/wp/v2/media/' + j.id, {method: 'POST', headers: {'X-WP-Nonce': window._nonce, 'Content-Type': 'application/json'},
+    body: JSON.stringify({alt_text: ALT})});
+  (window._uploadedIds = window._uploadedIds || []).push({id: j.id, url: j.source_url, alt: ALT, tag: f.name});
+  out.push(f.name + ' -> ' + j.id);
+}
+i.remove(); out.join(' | ')
+```
+5. 모션 슬롯의 figcaption 한 줄을 `window._caps[n]` 에 넣는다 (예: `Mon–Thu, only the boat programs run.`)
+
+- STEP 6 리스너 탭과 **같은 media-new 탭**을 써도 된다. 두 경로 모두 `window._uploadedIds` 에 쌓인다
+
+**⑤ 삽입 마크업** — STEP 7의 `_buildSlot` 이 아래 형태를 만든다:
+
+```html
+<figure class="kp-motion" style="margin:20px 0">
+  <video src="MP4_URL" poster="POSTER_URL" width="1226" height="768" autoplay muted loop playsinline preload="metadata"
+         aria-label="ALT" style="width:100%;height:auto;display:block;border-radius:8px;"></video>
+  <figcaption>한 줄 설명</figcaption>
+</figure>
+```
+
+- `muted` + `playsinline` 이 없으면 모바일에서 자동재생되지 않는다
+- 같은 정보가 본문 텍스트·표에도 있어야 한다 (모션만으로 정보를 전달하지 않는다 — 접근성·검색)
+
+**⑥ 정지 그래픽 대체** — 움직임이 의미 없는 정보(단일 비교 1장 등)는 마지막 프레임만 `koreaplug-motion-{slug}-{n}.webp` 로 올려 일반 이미지처럼 삽입한다 (`srcset` 적용).
 
 ---
 
@@ -750,7 +1018,7 @@ Array.from(document.querySelectorAll('button')).find(b => (b.getAttribute('aria-
 - 모드: **이미지** (동영상 아님)
 - 비율: **16:9**
 - 장수: **x2** — 기본값은 실행마다 **x1** 으로 돌아가 있었다 (2026-08-26·09-04 두 번 모두). 칩이 `x1 x2 x3 x4` 로 붙어 있어 **x3를 잘못 누르기 쉬우니** 재확인
-- 모델: **Nano Banana 2** — 기본값이 **매번 다르다.** 2026-08-26은 `Nano Banana 2 Lite`, 2026-09-04는 **`Nano Banana Pro`** 였다. 드롭다운에 `Nano Banana Pro / Nano Banana 2 / Nano Banana 2 Lite` 셋이 뜨므로 **가운데**를 고른다
+- 모델: **Nano Banana 2** — 기본값이 **매번 다르다.** 2026-08-26은 `Nano Banana 2 Lite`, 2026-09-04는 **`Nano Banana Pro`** 였다. 드롭다운에 `Nano Banana Pro / Nano Banana 2 / Nano Banana 2 Lite` 셋이 뜨므로 **가운데**를 고른다. **(v7.0) 무료 원칙**: 크레딧 차감이 표시되는 모델·설정은 쓰지 않는다 — NB2·x2는 0크레딧으로 확인됨(2026-08-18·10-01)
 - **(v6.0) 「저장」 버튼은 없다.** 칩을 고르는 즉시 반영된다. 舊 v5.6의 "저장을 누르지 않으면 반영되지 않는다"는 現 UI에 해당하지 않는다 — 저장 버튼을 찾느라 호출을 낭비하지 않는다
 
 확인 후 입력바에 **`Nano Banana 2 ▭ x2`** 가 표시되면 정상이다. 이 표시가 5-2 제출 전 마지막 관문이며, **유일한 반영 확인 수단**이다. 스크린샷 대신 아래 한 줄로도 읽을 수 있다:
@@ -791,7 +1059,7 @@ ed.focus();
 - `focused:true` 이고 `top` 이 `ih` 의 70% 이상이면 정상이다
 - `focused:false` 거나 편집기가 없으면(설정 패널·세션 패널이 덮은 경우) 패널을 닫고 다시 실행한다. **타이핑하지 않는다**
 
-**「전송」 — (v6.1) `Return` 키를 1순위로 한다.**
+**「전송」 — (v7.0) `Return` → 좌표 클릭 → `.click()` 순서로 폴백한다.** (v6.1은 `Return` → `.click()` → 좌표였다)
 
 타이핑 직후 `computer: key "Return"` → `computer: wait 4~5` → 아래 검증 스니펫.
 
@@ -816,8 +1084,22 @@ Flow 편집기는 기존 텍스트를 **지우지 않고 이어붙인다.** 2026
 | 순서 | 수단 | 확인 |
 |---|---|---|
 | 1 | 편집기 `.focus()` → `computer: key "Return"` | `len:14` |
-| 2 | `aria-label="생성 시작"` 버튼 `.click()` | `len:14` |
-| 3 | 스크린샷 1장(**scale 없이**) 찍어 전송 화살표(→) 위치를 확인하고 그 좌표를 `left_click` | `len:14` |
+| 2 | **(v7.0) 전송 화살표 좌표 `left_click`** — 아래 스니펫으로 좌표를 계산한다 | `len:14` |
+| 3 | `aria-label="생성 시작"` 버튼 `.click()` | `len:14` |
+
+> **(v7.0) 재정렬 사유 (2026-10-01 #180 실측)**: 4건 중 `Return` 성공 2건·실패 2건. 실패 2건은 **좌표 클릭으로 2/2 즉시 전송**됐고, 버튼 `.click()` 과 합성 pointer 이벤트(`pointerdown→mouseup→click`)는 **0/2**였다.
+
+```javascript
+// 전송 화살표 좌표 계산 — 타이핑 후 실행. 결과 x,y를 그대로 left_click 에 쓴다
+const b = Array.from(document.querySelectorAll('button')).find(b => (b.getAttribute('aria-label')||'') === '생성 시작');
+const r = b.getBoundingClientRect(), k = SHOT_W / innerWidth;   // SHOT_W: 이 탭 스크린샷의 폭(예: 1568)
+'x:' + Math.round((r.left + r.width / 2) * k) + ' y:' + Math.round((r.top + r.height / 2) * k)
+// 10-01 실측: innerWidth 1920 · 스크린샷 1568 → k 0.8167 → (1008, 704)
+```
+- 이 좌표는 **입력바 안**이므로 v6.1의 「그리드 카드 위 좌표 클릭 금지」에 해당하지 않는다
+- 10-01 실측: 타이핑으로 입력창이 커져도 화살표 좌표는 그대로였다
+- **(v7.1) 첫 전송은 씹힐 수 있다 — 같은 텍스트를 둔 채 다른 수단으로 즉시 한 번 더.** 2026-10-02 실측 3건: `Return` 실패 → 좌표 성공, 좌표 실패 → `Return` 성공, `Return` 이 편집기를 비웠는데 생성이 시작되지 않은 1건. 어느 수단이든 **두 번째 시도는 매번 성공**했다. 진행률 카드 확인(`NO-PROGRESS-CARD`)은 반드시 한다
+- ⛔ **(v7.1) `Runtime.evaluate timed out` 으로 Flow 탭이 멈추면** 그 탭을 닫고 새 탭에서 프로젝트 URL을 다시 연다. 생성물은 서버에 남는다 (2026-10-02 실측: 그리드 이미지가 50장 이상 쌓인 상태에서 발생)
 
 - 3까지 실패하면 그 프롬프트는 **건너뛰고** STEP 8에 보고한다. 재타이핑으로 우회하지 않는다
 - 이미 이어붙은 상태라면 **`ctrl+a` 로 전체 선택한 뒤 새 프롬프트를 타이핑**한다(선택 영역이 치환된다). `Delete` 후 길이를 읽으면 DOM 반영 전이라 옛 길이가 그대로 나오니, 그 값으로 판단하지 않는다
@@ -955,7 +1237,12 @@ for (let k = 0; k < pick.length; k++) {
   const c = document.createElement('canvas');
   c.width  = bmp.width - cropRight;
   c.height = bmp.height;
-  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height, 0, 0, c.width, c.height);
+  const g = c.getContext('2d');
+  g.drawImage(bmp, 0, 0, c.width, c.height, 0, 0, c.width, c.height);
+  // (v7.0) 약한 휘도 그레인 — AI 특유의 매끈한 질감을 줄인다. 진폭 ±5 (±10 이상은 노이즈가 눈에 띈다)
+  const id = g.getImageData(0, 0, c.width, c.height), px = id.data;
+  for (let j = 0; j < px.length; j += 4) { const n = (Math.random() - 0.5) * 10; px[j] += n; px[j + 1] += n; px[j + 2] += n; }
+  g.putImageData(id, 0, 0);
   const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.85));
   window[names[k]] = await new Promise(r => { const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(blob); });
   out.push(names[k] + ' src' + bmp.width + 'x' + bmp.height + ' -> ' + c.width + 'x' + c.height + ' ' + Math.round(blob.size / 1024) + 'KB');
@@ -963,6 +1250,8 @@ for (let k = 0; k < pick.length; k++) {
 out.join(' | ')
 // 정상 출력 예: _img1 src1376x768 -> 1226x768 203KB | _img2 … | _img3 … | _imgHero …
 ```
+
+ℹ️ **(v7.0) Flow 캡처 대상은 3-0 슬롯 계획에서 B(또는 A 대체)로 정해진 슬롯뿐이다.** `pick`·`names` 는 그 슬롯 수만큼만 쓰고, 6-3 전송 파일명의 번호(`koreaplug-SLUG-n.webp`)는 **실제 슬롯 번호**와 맞춘다. 그레인 때문에 파일이 10~20% 커지는 것은 정상이다.
 
 - `src` 가 1376×768이 아니면 엉뚱한(옛) 이미지를 집은 것이다 — `pick` 을 다시 대조한다
 - `fetch` 가 `Failed to fetch` 면 `credentials` 가 `include` 로 들어갔거나 이미지 호스트가 또 바뀐 것이다. 먼저 `new URL(u).host` 를 찍어 보고(2026-09-04 기준 `flow-content.google`), CORS가 막혀 있으면 舊 v3.5의 blob 복구 절차를 검토하되 **임의로 되살리지 말고 STEP 8-A로 보고**한다
@@ -1205,7 +1494,7 @@ md.forEach(m => {
 Object.entries(window._srcset).map(([k, v]) => k + ' ' + v.w + 'x' + v.h + ' n=' + v.srcset.split(',').length).join('\n')
 ```
 
-⛔ `n` 이 1이면 사이즈 사본이 아직 안 만들어졌거나 WebP 변환이 꺼져 있다. 그대로 진행하지 말고 **몇 초 뒤 재조회**한다.
+⛔ `n` 이 1이면 사이즈 사본이 아직 안 만들어졌거나 WebP 변환이 꺼져 있다. 그대로 진행하지 말고 **몇 초 뒤 재조회**한다. **(v7.0) 모션 mp4·poster는 이 검사에서 제외한다** (영상에는 사이즈 사본이 없고, 포스터는 `<img>` 로 쓰지 않는다).
 
 ```javascript
 // 2) 역순으로 이미지 삽입 (뒤→앞 순서로 삽입해야 인덱스가 밀리지 않음)
@@ -1231,10 +1520,24 @@ window._buildImg = (u, opt) => {
                                      : 'width:100%;display:block;height:auto;border-radius:8px;') + '" />';
 };
 
-for (let i = 2; i >= 0; i--) {
-  const imgBlock = '\n<figure style="margin:20px 0">\n  ' + window._buildImg(uploads[i]) + '\n</figure>\n';
-  c = c.slice(0, pts[i]) + imgBlock + c.slice(pts[i]);
-}
+// (v7.0) 슬롯 단위 빌더 — Flow(koreaplug-SLUG-n) · 실사진(koreaplug-photo-…-n) · 모션(koreaplug-motion-…-n.mp4 + -n-poster.webp) 공통
+// window._caps = {1: '…', 2: 'Photo: … , KOGL Type 1', 3: 'Mon–Thu, only the boat programs run.'}  ← 슬롯별 figcaption (Flow 컷은 비워 둔다)
+const bySlot = (n, re) => window._uploadedIds.find(u => new RegExp('-' + n + re).test(u.tag));
+window._buildSlot = (n) => {
+  const cap = (window._caps || {})[n] ? '\n  <figcaption style="font-size:13px;color:#666;margin-top:6px">' + window._caps[n] + '</figcaption>' : '';
+  const mp4 = bySlot(n, '\\.mp4$');
+  if (mp4) {
+    const p = bySlot(n, '-poster\\.webp$');
+    return '\n<figure class="kp-motion" style="margin:20px 0">\n  <video src="' + mp4.url + '"' + (p ? ' poster="' + p.url + '"' : '')
+      + ' width="1226" height="768" autoplay muted loop playsinline preload="metadata" aria-label="' + mp4.alt + '"'
+      + ' style="width:100%;height:auto;display:block;border-radius:8px;"></video>' + cap + '\n</figure>\n';
+  }
+  const u = bySlot(n, '\\.webp$');
+  if (!u) return '';
+  return '\n<figure' + (/koreaplug-photo-/.test(u.tag) ? ' class="kp-photo"' : '') + ' style="margin:20px 0">\n  ' + window._buildImg(u) + cap + '\n</figure>\n';
+};
+const slots = [1, 2, 3].slice(0, pts.length);
+for (let i = slots.length - 1; i >= 0; i--) c = c.slice(0, pts[i]) + window._buildSlot(slots[i]) + c.slice(pts[i]);
 window._newContent = c;
 'inserted, new len: ' + c.length + ' order:' + uploads.map(u => u.tag.slice(-6)).join(',')
 ```
@@ -1248,7 +1551,7 @@ window._newContent = c;
 //    (2026-08-18 0and1Life #88 Post 1160에서 실측 — [FEATURED_IMAGE_URL] 2곳)
 // img 태그의 src와 alt만 바꾸고 나머지 마크업(제목 오버레이 등)은 유지한다
 const hero = window._uploadedIds.find(u => u.tag && u.tag.includes('hero'));
-const body = window._uploadedIds.filter(u => u.tag && !u.tag.includes('hero'));
+const body = window._uploadedIds.filter(u => u.tag && !u.tag.includes('hero') && !/-poster\.webp$|\.mp4$/.test(u.tag));   // (v7.0) 모션 파일 제외
 if (hero) {
   let n = 0;
   window._newContent = window._newContent.replace(/<img[^>]*>/g, (tag) => {
@@ -1294,6 +1597,9 @@ window._evGuard = {
   stock:   cnt(before, /unsplash\.com|FEATURED_IMAGE/g) + '->' + cnt(after, /unsplash\.com|FEATURED_IMAGE/g), // (v5.0) 교체 시 →0
   dupImg:  (() => { const s = (after.match(/src="[^"]*"/g) || []); return s.length - new Set(s).size; })(),   // (v5.0) 0이어야 함
   noAlt:   cnt(after, /<img(?![^>]*alt=)/g),                                           // 0이어야 함
+  video:   cnt(before, /<video/g)          + '->' + cnt(after, /<video/g),            // (v7.0) 모션 슬롯 수만큼 늘어야 함
+  vidAttr: (after.match(/<video[^>]*>/g) || []).filter(t => !/autoplay/.test(t) || !/muted/.test(t) || !/playsinline/.test(t) || !/poster=/.test(t)).length,  // (v7.0) 0이어야 함
+  photoCap: cnt(after, /class="kp-photo"/g) + ' figs / ' + cnt(after, /<figcaption[^>]*>Photo:/g) + ' credits',   // (v7.0) 두 수가 같아야 함
   // (v5.4) 생성 이미지(koreaplug-)만 대상 — 증빙 캡처는 세지 않는다
   genImg:  (after.match(/<img[^>]*koreaplug-[^>]*>/g) || []).length,
   noSrcset:(after.match(/<img[^>]*koreaplug-[^>]*>/g) || []).filter(t => !/srcset=/.test(t)).length,   // 0이어야 함
@@ -1306,6 +1612,7 @@ Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
 🆕 **(v5.4) `noSrcset`·`noWH`·`noLoad` 중 하나라도 0이 아니면 저장 금지다.** 반응형 속성이 빠진 이미지가 있다는 뜻이고, 그 상태로 저장하면 WordPress가 만들어 둔 사이즈 사본이 전부 사장돼 **모든 기기가 full 파일을 내려받는다.** 7-2-0의 `window._srcset` 이 채워졌는지부터 확인한다.
 🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
+🆕 **(v7.0) `photoCap` 의 두 수가 다르거나 `vidAttr` 가 0이 아니면 저장 금지다.** 출처 표시 없는 실사진은 라이선스 위반이고, 속성이 빠진 영상은 모바일에서 재생되지 않는다.
 
 ```javascript
 // 3) content 저장 — (v3.4) status를 명시 동봉해 상태 전환을 막는다
@@ -1394,6 +1701,21 @@ g.map(i => i.currentSrc.split('/').pop().split('?')[0].replace(/^koreaplug-/, '~
   + ' ' + (i.getAttribute('loading') || 'NONE')).join('\n')
  + '\n--- full받은수:' + g.filter(i => !/-\d+x\d+\.webp$/.test(i.currentSrc.split('?')[0])).length + ' (히어로 1장만 정상)'
 ```
+- 🎞 **(v7.0) 모션이 재생되는가?** 아래를 돌려 `rs` 2 이상 · `paused:false` · `1226x768` 이어야 한다. 이어서 2초 간격 스크린샷 2장으로 **포스터가 아니라 움직이는지** 확인한다
+```javascript
+const vs = Array.from(document.querySelectorAll('article video'));
+if (vs[0]) vs[0].scrollIntoView({block: 'center'});
+await new Promise(r => setTimeout(r, 3000));
+vs.map(v => 'rs' + v.readyState + ' t' + v.currentTime.toFixed(1) + '/' + Math.round(v.duration) + 's ' + v.videoWidth + 'x' + v.videoHeight + ' paused:' + v.paused).join('\n') || 'no video'
+```
+- ℹ️ **(v7.1) MCP 탭이 백그라운드(`document.visibilityState === 'hidden'`)이면 Chrome이 미디어 로딩을 미뤄 `rs0 · 0x0` 이 나온다 — 고장이 아니다** (2026-10-02 실측). 이때는 아래로 **서버 응답을 대신 검증**하고, 포스터가 화면에 보이는지만 스크린샷으로 확인한다. `206 · video/mp4 · ftyp · moovEarly:true` 면 통과다
+```javascript
+const u = document.querySelector('article video, .entry-content video').getAttribute('src');
+const r = await fetch(u, {headers: {Range: 'bytes=0-1023'}}); const b = new Uint8Array(await r.arrayBuffer());
+'status:' + r.status + ' type:' + r.headers.get('content-type') + ' ftyp:' + String.fromCharCode(...b.slice(4, 8)) + ' moovEarly:' + (String.fromCharCode(...b).indexOf('moov') >= 0)
+```
+- 📷 **(v7.0) 실사진 figcaption의 출처 표기가 화면에 보이고, 링크가 살아 있는가?**
+- 📱 **(v7.0) Flow 컷이 '폰으로 찍은 사진'처럼 보이는가?** 4장 중 광고·화보처럼 보이는 컷이 있으면 3-3 ⑤ 문법으로 그 1장만 다시 만든다
 - h2·표 개수가 삽입 전과 같은가?
 
 **이어서 육안으로 확인한다:**
@@ -1471,6 +1793,7 @@ g.map(i => i.currentSrc.split('/').pop().split('?')[0].replace(/^koreaplug-/, '~
 완료 후 아래 내용을 출력:
 
 - 처리한 글 제목 및 Post ID
+- **(v7.0) 슬롯 계획·조달 경로 표**: 슬롯별 유형(A/B/C) · 경로(실사진/Flow/모션) · media ID · 실사진이면 **출처 페이지·저작자·라이선스·촬영일**, 모션이면 **길이·용량·프레임 검수 결과**. A 슬롯에서 실사진을 못 찾아 Flow로 내려갔다면 그 이유(검색어·후보 수)
 - **STEP 2 분류 결과 표**: 이미지별 `파일명 => 증빙/스톡/데코 [판정근거]`, 그리고 evidence/stock/deco/genCount
 - `unknown`이 있었다면 수동 확인 결과와 재계산된 genCount
 - 삽입·교체된 이미지 (media ID + 렌더 기준 위치 %)
@@ -1490,6 +1813,13 @@ g.map(i => i.currentSrc.split('/').pop().split('?')[0].replace(/^koreaplug-/, '~
 
 ### 중요 주의사항
 
+- 💸 **(v7.0) 비용 0원 원칙.** 이미지는 ① 무료 라이선스 실사진(공공누리 제1유형·Wikimedia CC0/PD/CC BY/CC BY-SA) ② Flow 0크레딧 설정(Nano Banana 2·x2) ③ Claude 코드 그래픽(클라우드 Chromium·ffmpeg)으로만 조달한다. 크레딧이 차감되는 서비스·유료 스톡·유료 모델은 어떤 경우에도 쓰지 않는다
+- 🧭 **(v7.0) 프롬프트보다 슬롯 판정(3-0)이 먼저다.** 장소 = A(실사진 우선), 사람의 순간 = B(Flow), 일정·수치·동선 = C(모션). 히어로·대표이미지는 A/B만
+- 📷 **(v7.0) 실사진은 개별 페이지에서 라이선스를 확인한 것만 쓰고, `Photo:` figcaption 출처 표기는 의무다** (3-5). 공공누리 2~4유형·NC·ND·출처 불명 금지. 식별 가능한 얼굴이 크게 나온 사진 금지. 확대 보간 금지
+- ☀️ **(v7.1) Flow는 밝은 낮 + 즐기는 사람 + 폰 스냅으로, 글당 최대 2장.** 야간·해질녘·흐린 날·빈 장면·뒷모습만 있는 사람은 '무겁고 보기 싫은' 이미지의 원인이었다 (2026-10-02 사용자 평가). 무드 테스트: "저기 가서 저렇게 해 보고 싶어지는가?"
+- 📱 **(v7.0) Flow 프롬프트는 기록 사진 문법으로 쓴다** (3-3 ⑤). `cinematic`·`hyperrealistic`·카메라 브랜드·`the only bright accent`·골든아워 남발 금지 — 2026-10-01 #180 4장이 전부 광고 화보처럼 나온 원인이다. 캡처 시 그레인 ±5를 입힌다 (5-4)
+- 🎞 **(v7.0) 설명 컷은 Claude 모션 그래픽으로 만든다** (3-6). 클라우드에서 프레임 렌더 → ffmpeg MP4 + 포스터 → `/mnt/user-data/outputs/kp_motion` → **전용 입력(`kp motion picker`)에 `file_upload`** → REST 업로드. WP 기본 `업로드` 입력은 즉시 자동 업로드되므로 쓰지 않는다. 업로드 전 프레임 3장을 `Read` 로 검수한다
+- ⌨ **(v7.0) Flow 전송 폴백은 `Return` → 좌표 클릭(DOM 좌표 × 스크린샷 배율) → `.click()`** (5-2). 2026-10-01 실측: 좌표 클릭 2/2, `.click()` 0/2
 - 🗺 **(v6.1) 실재 장소가 나오는 글은 「무엇과 헷갈리는가」를 먼저 정하고 그것을 갈라내는 지리적 사실을 프롬프트에 박는다** (STEP 3-2B ⑤). 2026-09-08 #154 실측: `granite spires + mist + pine` 만으로 설악산 히어로가 **중국 황산**으로 생성됐다. Nowhere 테스트는 "어느 나라도 아닌 곳"만 걸러내고 **"다른 나라의 유명한 곳"은 통과시킨다.** 설악의 결정적 요소는 **원경의 동해 수평선과 속초 시내**였다. 국가·지명을 부정문(`no Chinese ... style`)에 쓰면 생성이 통째로 실패하므로 **형태만 부정**한다. 케이블카·버스처럼 나라마다 모양이 다른 인공물은 **운영사 공식 사이트로 실물을 확인**한 뒤 쓴다
 - ⌨ **(v6.1) 전송은 `Return` 1순위 → 버튼 `.click()` 2순위 → 좌표 클릭 3순위로 폴백한다. 어느 것도 100%가 아니다** (STEP 5-2). 2026-09-08 실측: v6.0이 유일 수단으로 지정한 `.click()` 이 **11회 중 4회 무반응**이었고, 실패해도 버튼은 `disabled:false` 로 정상처럼 보여 **사전 판별이 불가능**하다
 - 🚫 **(v6.1) 미전송 상태에서 다음 프롬프트를 타이핑하지 않는다. 편집기는 지우지 않고 이어붙인다** (STEP 5-2). 2026-09-08 실측: 1,379자 + 1,609자가 합쳐진 **2,988자 잡탕 프롬프트**가 만들어졌다. 미전송이면 **텍스트는 두고 전송만 재시도**하고, 치환이 필요하면 `ctrl+a` 후 타이핑한다(`Delete` 직후의 길이 판독은 DOM 반영 전이라 신뢰할 수 없다)
