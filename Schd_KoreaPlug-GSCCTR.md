@@ -1,6 +1,6 @@
 # Schd_KoreaPlug-GSCCTR — 구글 "노출 많고 CTR 낮은 글" 개선 루틴 (Cowork 예약 작업용)
 
-*매일 07:00 KST 실행 (2026-09-24 개정: 편수 고정 폐지 · 본문 재작성 허용 · 검색봇 점검 후 공개 · 시간 마감 폐지 · Rank Math 점수 유지 의무 · 수정 후 7일 일자별 모니터링 · 제외·건너뜀·보류 폐지 / 2026-09-26 개정: **찾은 원인은 그 회차에 모두 고친다(원인-수정 대응표 의무)** · 수정 수준은 원인이 정한다(L1 은 '빠진 것 0건'이 증명될 때만) · 롱테일은 대부분을 뜯어고쳐서라도 CTR 을 올린다 · 숏테일은 수요가 끝나기 전 조기 재수정 · 트래킹 표는 데이터가 없어도 매 보고에 포함 · GA4 방문 수를 조기 신호로 추가 · 수정 전 기준 구간 통일). 예약 시각이 되면 같은 날 이미 실행됐더라도 다시 진행한다(판정·잠금은 `state.json` 이 막아 주므로 같은 글을 두 번 고치지 않는다).
+*매일 07:00 KST 실행 (2026-09-24 개정: 편수 고정 폐지 · 본문 재작성 허용 · 검색봇 점검 후 공개 · 시간 마감 폐지 · Rank Math 점수 유지 의무 · 수정 후 7일 일자별 모니터링 · 제외·건너뜀·보류 폐지 / 2026-09-26 개정: **찾은 원인은 그 회차에 모두 고친다(원인-수정 대응표 의무)** · 수정 수준은 원인이 정한다(L1 은 '빠진 것 0건'이 증명될 때만) · 롱테일은 대부분을 뜯어고쳐서라도 CTR 을 올린다 · 숏테일은 수요가 끝나기 전 조기 재수정 · 트래킹 표는 데이터가 없어도 매 보고에 포함 · GA4 방문 수를 조기 신호로 추가 · 수정 전 기준 구간 통일 / 2026-10-02 개정: **모니터링 표 누락 방지 — 보고용 표 파일을 스크립트로 만들고(4-B ⑦) 마지막 응답·알림에 그대로 붙인다. 보고 전 자기 점검에서 표가 빠졌으면 보고를 다시 쓴다(STEP 10)** · 서치콘솔 일자별 값은 같은 화면 iframe 일괄 읽기 허용(4-B ①)). 예약 시각이 되면 같은 날 이미 실행됐더라도 다시 진행한다(판정·잠금은 `state.json` 이 막아 주므로 같은 글을 두 번 고치지 않는다).
 
 날짜: 실행 시점의 실제 KST 날짜를 쓴다. 이 프롬프트에 적힌 고정 날짜는 무시한다.
 
@@ -15,13 +15,14 @@
 8. 수정은 버전(v1·v2·v3)으로 기록해 다음 날 같은 글을 다시 고치지 않는다
 9. **수정한 모든 글은 최소 7일간 매일 트래킹**한다 — **같은 글을 한 표에 날짜순으로 이어서**(수정 전 7일 → 수정일 → 수정 후 D+1, D+2 …) 클릭(조회)·노출·CTR·순위를 보여 주고, **날마다 수정 전 7일 평균과 비교해 ▲좋아짐/▼나빠짐/≈비슷을 표시**하며, 수정 후 누적값으로 '현재 판정'을 매일 갱신한다(`track.py`, `monitor/_daily.md`). 또 1·3·7일째에 "잘 수정됐는지" 품질 확인(구글에 새 제목이 뜨는지·순위·색인 상태)을 하고, 7일째에 수정 전 7일과 비교한 **요약과 판정(좋아짐/비슷/나빠짐 + 다음 조치)** 을 남긴다(STEP 4-B, `monitor/{slug}.md`, 전체 요약판 `monitor/_summary.md`). 데이터가 모자라면 14일·28일째에 다시 요약한다
 10. **Rank Math 점수를 떨어뜨리지 않는다** — 제목·본문이 바뀌면 Focus Keyword·서브 키워드와의 매칭(제목·설명·첫 문단·소제목·밀도)을 같이 맞춘다. 수정 전·후를 `rm_check.py` 로 비교해 통과 수가 줄면 반영하지 않는다(STEP 8-0)
-11. 결과는 **누적 성적표가 붙은 쉬운 한글 보고(STEP 10)** 로 끝낸다
+11. 결과는 **누적 성적표와 모니터링 표(요약판·한눈에·글별 일자별 표)가 붙은 쉬운 한글 보고(STEP 10)** 로 끝낸다. **표는 4-B ⑦ 스크립트가 만든 `monitor/_report-{TODAY}.md` 를 그대로 붙인다 — 손으로 요약하거나 개수로 대신하지 않는다**
 
 ### 이 시스템의 원칙 (2026-09-24 사용자 확정)
 **기본은 노출·클릭·CTR 이다.** 데이터로 "클릭이 낮은 글" 을 찾고, 시기성으로 순서를 정해, **그 글의 검색어를 기준으로 잘 되는 글을 벤치마킹해 더 클릭되고 더 노출되도록 고친다.** 고친 뒤에는 트래킹으로 결과를 확인하고 다시 피드백한다.
 - ⛔ **제외·건너뜀·보류는 없다.** 클릭이 낮은 글은 전부 수정 대상이다. 어려운 사정(구글 AI 답변, 시기 지남, 검색어가 가려짐, 순위 낮음)은 **빼는 이유가 아니라 수정 방법을 바꾸는 이유**다(STEP 7-3 표).
 - 유일한 대기: **이미 고친 글이 트래킹·판정 중일 때**(측정이 끝나야 다음 수정의 근거가 생긴다). 단, **이벤트가 10일 이내로 남은 숏테일 글은 기다리지 않는다** — 수정 후 데이터 2일치로 바로 재수정한다(STEP 6-2b). 판정이 나면(좋아짐=유지 후 14일 뒤 다시 후보 / 비슷=재수정 / 나빠짐=되돌림 후 재수정) 곧바로 다시 흐름에 들어간다.
 - 하루에 고치는 편수는 처리량(MAX_EDITS_PER_RUN)일 뿐이다. 남은 글은 다음 회차에 같은 순서로 이어서 고친다.
+- **모니터링 표는 보고의 본체다(2026-10-02 사용자 확정).** 트래킹 중인 글이 1편이라도 있으면 요약판·한눈에·글별 일자별 표를 매 보고에 넣는다. 표를 빼거나 "파일 참조"·"n편 측정 중" 같은 개수 요약으로 대신한 보고는 실패로 본다.
 
 ### 원인을 알면 그 원인을 고친다 (2026-09-26 사용자 확정)
 **교훈 — 0and1life '9월 재산세 카드 혜택' 글**: 09-24 v1 에서 벤치마킹으로 "상위 글은 카드사별 비교 목록형인데 우리 본문엔 카드사별 표가 없다" 는 원인을 이미 찾고도, 제목·메타·첫 문단만 고치고 표는 '보강 후보' 로 미뤘다. 그 결과 CTR 이 0.83% → 0.29% 로 오히려 떨어졌고, 납부 마감(9/30)을 나흘 앞둔 09-26 에야 사용자 지시로 표를 넣었다(v2). **알고 있는 원인을 남겨 둔 부분 수정은 하루치 기회를 버리는 것**이다.
@@ -47,6 +48,7 @@
 - `rm_check.py` — Rank Math 테스트 20항목 근사 점검(브라우저 불필요). 수정 전·후 비교용
 - `monitor/{slug}.md` — 수정한 글의 수정 내용·품질 확인·7일 요약
 - `track.py` · `monitor/data/{slug}.json` · `monitor/_daily.md` — **일자별 트래킹**: 글마다 하루치 값을 쌓고(add), 같은 글을 날짜순 한 표로 보여 주며 매일 좋아졌는지 표시(report)
+- `monitor/_report-{TODAY}.md` — **보고용 모니터링 표 묶음**(4-B ⑦ 이 매 회차 생성: 요약판 + 한눈에 + 글별 일자별 표 + GA4). STEP 10 은 이 파일을 그대로 붙인다
 - `snapshots/{데이터 종료일}.json` — 28일 페이지 표 · `after/` — 반영 후 구간 조회값 · `backups/` — 수정 전 원본 · `bench/` — 기준 CTR·검색어 점수·국가 분포·벤치마킹 기록 · `log.md` — 사람이 읽는 기록
 
 ⚠️ [무인 실행 원칙 — 최우선] 사람이 없는 시간에 실행된다. 승인이 필요한 도구 호출은 "그것 없이는 진행할 수 없음을 실측으로 확인한 뒤"에만 한다. 승인 창이 응답 없이 닫히면 재시도하지 않고 오류로 기록한 뒤 STEP 10으로 간다.
@@ -126,6 +128,7 @@ const t=document.body.innerText; const tot=t.match(/총 클릭수\s*\n?\s*([\d,.
 ({rows:window.__rows.length, kept:window.__rows.filter(r=>r.impr>=100).length, len:window.__f.length, site:tot&&[tot[1],tot[2],tot[3]]})
 ```
 이어서 `window.__f.slice(0,900)`, `slice(900,1800)`, … 을 `len` 까지 차례로 호출해 이어 붙인다. 행 형식 `slug|clicks|impr|pos`. 같은 slug 가 여러 행이면(URL 변형) 엔진이 합친다. 900자 경계에서 잘린 행은 앞뒤를 이어 붙여 복원한다. `site`(사이트 전체 클릭·노출·CTR, "만" 단위는 ×10,000)는 STEP 10 에 쓴다.
+- 반환값에 `=`·`&`·`?` 가 섞이면 도구가 `[BLOCKED: Cookie/query string data]` 로 막는다(2026-10-02 실측). 검색어·URL 이 들어가는 반환값은 `.replace(/[=&?]/g,' ')` 를 붙여 돌려받는다.
 
 [3-3] 로그인 화면이거나 `rows` 가 0이면 STEP 10에 `GSC 읽기 실패 — 크롬 구글 로그인 확인` 을 적고 종료한다. 로그인 버튼을 대신 누르지 않는다.
 
@@ -157,9 +160,10 @@ const top=[...document.querySelectorAll('table tbody tr')].slice(0,5).map(r=>[..
 ({clicks:m&&m[1], impr:m&&m[2], top})
 ```
 `1.12만` 처럼 "만" 단위로 나오면 ×10,000 으로 환산한다. `after/{TODAY}.json` 에 `{"slug": {"start","end","impr","clicks"}}` 로 모아 저장한다. 조회 실패한 글은 넣지 않는다(엔진이 WAIT 처리). `need[]` 가 비어 있으면 `{}` 로 저장한다.
+- 4-B ① 에서 일자별 값을 이미 저장했다면, 일자별 값을 `start~end` 로 더해 `after/{TODAY}.json` 을 만들어도 된다(같은 값, 화면 이동 절약).
 
 [4-B] **수정 글 트래킹 (필수 — 수정일 다음날부터 최소 7일, 측정 연장이면 28일까지)**
-대상: `monitor/*.md` 중 상태가 `트래킹 중` 인 글 전부. 글마다 ①~⑤ 를 한다.
+대상: `monitor/*.md` 중 상태가 `트래킹 중` 인 글 전부. 글마다 ①~⑥ 를 하고, 끝에 ⑦ 로 보고용 표 파일을 만든다.
 
 ① **일자별 지표** — 크롬으로 날짜별 화면(`breakdown=date`, 수정일 −14일 ~ LATEST):
 `…/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&breakdown=date&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION&page=*https%3A%2F%2Fkoreaplug.com%2F{slug}%2F&start_date={수정일-14}&end_date={LATEST}`
@@ -167,6 +171,16 @@ const top=[...document.querySelectorAll('table tbody tr')].slice(0,5).map(r=>[..
 await new Promise(r=>setTimeout(r,7000));
 [...document.querySelectorAll('table tbody tr')].map(r=>[...r.querySelectorAll('td')].map(td=>td.innerText.trim().split('\n')[0])).filter(r=>r.length>=5).map(r=>r.join('|')).join('\n')
 ```
+- **일괄 읽기(권장, 2026-10-02 실측: 25편을 화면 이동 2번으로 읽음)** — 서치콘솔 화면 안에 같은 주소의 iframe 을 글 수만큼 만들고, **20~25초 뒤 다른 호출에서** 한꺼번에 읽는다. 한 호출 안에서 setTimeout 으로 기다리면 백그라운드 타이머가 느려져 45초 제한에 걸리므로 기다리기는 클라우드 `Bash sleep 25` 로 한다. 13편 정도씩 나눠 만든다.
+```javascript
+// (1) 만들기 — S 는 트래킹 중인 slug 목록, sd/ed 는 YYYYMMDD
+window.__mk=(s,sd,ed)=>{const f=document.createElement('iframe');f.dataset.k=s;f.style.width='1200px';f.style.height='900px';f.src=`https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&breakdown=date&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION&page=*https%3A%2F%2Fkoreaplug.com%2F${s}%2F&start_date=${sd}&end_date=${ed}`;document.body.appendChild(f);};
+S.forEach(s=>__mk(s,'{수정일-14 중 가장 이른 날}','{LATEST}')); 'ok'
+// (2) 읽기 — 숫자의 쉼표를 지우고 'm-d/클릭/노출/순위' 로 압축, 900자씩 돌려받는다
+window.__out=[...document.querySelectorAll('iframe[data-k]')].map(f=>{const d=f.contentDocument;return f.dataset.k+':'+[...d.querySelectorAll('table tbody tr')].map(r=>[...r.querySelectorAll('td')].map(td=>td.innerText.trim().split('\n')[0].replace(/,/g,''))).filter(r=>r.length>=5).map(p=>{const m=p[0].match(/(\d+)\. (\d+)\. (\d+)/);return m[2]+'-'+m[3]+'/'+p[1]+'/'+p[2]+'/'+p[4]}).join(';')}).join('\n'); __out.length
+// (3) 다 읽은 뒤 iframe 제거: document.querySelectorAll('iframe[data-k]').forEach(f=>f.remove())
+```
+  각 글의 행 수가 기간 일수와 맞는지 확인한다(노출 0인 날은 표에 없을 수 있음 → 0 0 0 저장). 같은 방식으로 `breakdown=query`·`country` 도 읽을 수 있다.
 - 행 형식 `2026. 9. 22.|클릭|노출|CTR|순위`. **읽은 날마다 전부** 저장한다(이미 있는 날도 다시 저장 — 늦게 집계된 값으로 덮어씀). 표에 없는 날(노출 0)은 `0 0 0` 으로 저장:
 ```bash
 cd $W && python3 track.py add {slug} 2026-09-22 {클릭} {노출} {순위}
@@ -177,6 +191,7 @@ cd $W && python3 track.py report --today {TODAY}
 ```
   → `monitor/_daily.md` 가 만들어진다. **같은 글을 한 표에 날짜순으로**: 수정 전 7일(기준) → 수정일(비교 제외) → 수정 후 D+1 ~ D+7(이후 계속). 수정 후 각 날에 **CTR 비교·노출 비교(▲ 좋아짐 / ▼ 나빠짐 / ≈ 비슷, 기준 = 수정 전 7일 평균)** 과 **누적 CTR** 이 붙고, 글마다 맨 아래 한 줄 "수정 전 7일 → 수정 후 n일 누적 → 현재 판정(좋아짐/비슷/나빠짐/측정 부족/데이터 대기)" 이 붙는다. 하루치 ▲▼ 는 흔들리므로 **판정은 누적 기준**으로만 한다(④ 와 같은 기준).
 - 구글 데이터가 약 2일 늦으므로 최근 이틀은 "데이터 대기" 로 표시된다(오류 아님).
+- ⚠️ `track.py report` 는 `_daily.md` 를 새로 쓴다. ⑥ GA4 표는 report 실행 **뒤에** 붙인다.
 
 ② **타깃 검색어 추적** (3일째·7일째, 이후 14·28일째) — 같은 화면을 `breakdown=query`, 기간 = 수정 다음날 ~ LATEST 로 열어 TARGET_QUERY 와 상위 5개 검색어의 클릭·노출·순위를 읽고, 수정 전(수정일 −7일 ~ −1일) 같은 검색어 값과 나란히 적는다. → "노리던 검색어에서 실제로 클릭이 늘었나" 를 본다.
 
@@ -203,12 +218,13 @@ cd $W && python3 track.py report --today {TODAY}
 | 글 | 수정일 | 수준 | 상태 | N일째 | 수정 전 7일 CTR | 수정 후 누적 CTR | 클릭 전(7일)→후(누적) | 순위 전→후 | 타깃 검색어 순위 전→후 | 구글 새 제목 반영 | 판정 | 다음 조치 |
 ```
 맨 위에 "마지막 갱신: {TODAY}" 와 한 줄 총평(예: "트래킹 중 3편 · 좋아짐 1 · 비슷 1 · 측정 연장 1").
+- 숫자 칸(N일째·수정 전 7일 CTR·수정 후 누적 CTR·클릭·순위·판정)은 손으로 쓰지 않고 `monitor/data/{slug}.json` 에서 `track.py` 의 `agg`·`verdict` 로 다시 계산해 넣는다(⑦ 표와 숫자가 어긋나지 않게).
 
 - **글을 새로 반영할 때마다 `monitor/{slug}.md` 를 만든다**(STEP 9-1b). 같은 글을 재수정하면 기존 파일 아래에 "v{n} 수정" 구간을 새로 붙이고 N일째를 0 부터 다시 센다.
 - 조회수 = 서치콘솔 클릭 수(구글 검색 유입). 판정은 서치콘솔 기준으로만 한다.
 - **수정 전 기준 구간은 하나로 통일한다: `수정일 −7일 ~ −1일`**(track.py 와 같은 정의). `_summary.md`·`monitor/{slug}.md`·`_daily.md`·STEP 10 모두 이 구간의 클릭·노출·CTR·순위를 쓴다. 수정일 −1일 데이터가 아직 없으면(2일 지연) 들어오는 회차에 다시 계산해 세 파일을 함께 고친다. 수정 전 7일 값이 파일마다 다르면 오류로 보고 STEP 10 "확인 필요" 에 올린다.
 
-⑥ **GA4 방문 수 — 조기 신호 (판정에는 쓰지 않는다)** — 서치콘솔은 2일 늦지만 GA4 는 당일까지 나온다. 트래킹 중인 글의 **수정 전 7일 ~ 오늘** 방문 수를 매일 읽어 `monitor/_daily.md` 각 글 표 옆에 "GA4 방문" 열로 붙인다(오늘 값은 '집계 중' 표시).
+⑥ **GA4 방문 수 — 조기 신호 (판정에는 쓰지 않는다)** — 서치콘솔은 2일 늦지만 GA4 는 당일까지 나온다. 트래킹 중인 글의 **수정 전 7일 ~ 오늘** 방문 수를 매일 읽어 `monitor/_daily.md` 의 '한눈에' 표 바로 아래에 `## GA4 방문` 표(날짜 × 글)로 붙인다(오늘 값은 '집계 중' 표시).
 - 속성: KoreaPlug (계정 WP_분석 a393066616 · 속성 p535142552). 방문 페이지 보고서를 하루 단위로 연다(`{YYYYMMDD}` 를 날짜마다 바꿈):
   `https://analytics.google.com/analytics/web/#/a393066616p535142552/reports/explorer?r=landing-page&params=_u..nav%3Dmaui%26_u.date00%3D{YYYYMMDD}%26_u.date01%3D{YYYYMMDD}%26_r.explorerCard..rowsPerPage%3D250`
 ```javascript
@@ -218,8 +234,43 @@ const d=(document.body.innerText.match(/\d+월 \d+일~2026년 \d+월 \d+일/)||[
 const rows=[...document.querySelectorAll('[role=row]')].map(r=>r.innerText.replace(/\s+/g,' ').trim());
 d+' | '+S.map(s=>{const r=rows.find(x=>x.includes('/'+s+' ')||x.endsWith('/'+s));return s+':'+(r?r.split(' ')[2]:0)}).join(' ')
 ```
-- 값은 '세션수(모든 유입 경로 합계)' 다. 구글 검색 유입만의 값이 아니므로 추세(늘었나·줄었나)만 본다. 서치콘솔에 노출이 있는데 GA4 방문이 계속 0 인 글은 추적 누락 의심으로 STEP 10 "확인 필요" 에 올린다(2026-09-26 실측: koreans-cover-their-mouth 가 10일간 GA4 0건).
+- 값은 '세션수(모든 유입 경로 합계)' 다. 구글 검색 유입만의 값이 아니므로 추세(늘었나·줄었나)만 본다. 서치콘솔에 노출이 있는데 GA4 방문이 계속 0 인 글은 추적 누락 의심으로 STEP 10 "확인 필요" 에 올린다(2026-09-26 실측: koreans-cover-their-mouth 가 10일간 GA4 0건 → 2026-10-01 1건 확인, 추적 정상).
 - GA4 화면이 열리지 않으면(로그인 풀림) 이 항목만 건너뛰고 STEP 10 에 적는다.
+
+⑦ **보고용 모니터링 표 파일 만들기 (필수 — STEP 10 의 재료. 매 회차, 수정한 글이 없어도)**
+①~⑥ 과 STEP 9 기록을 모두 마친 뒤(새로 반영한 글도 들어가도록) 실행한다:
+```bash
+cd $W && python3 - <<'PY'
+import re,json,glob
+T='{TODAY}'; L='{LATEST}'[5:]          # 예: T='2026-10-02', L='09-30'
+S=open('monitor/_summary.md',encoding='utf-8').read().split('\n')
+D=open('monitor/_daily.md',encoding='utf-8').read()
+out=[f'# KoreaPlug 수정 글 모니터링 표 {T}','',f'서치콘솔 최신 데이터: {L} (구글 2일 지연) · ▲ 좋아짐 / ▼ 나빠짐 / ≈ 비슷 (기준 = 수정 전 7일 평균) · 판정은 누적 기준','']
+out+=['## ■ 수정 글 트래킹 요약판','']+[l for l in S[1:6] if l.strip() and not l.startswith('|') and not l.startswith('#')]+['']+[l for l in S if l.startswith('|')]+['']
+n_post=0
+for sec in re.split(r'\n(?=## )',D):
+    h=sec.split('\n',1)[0]
+    if h.startswith('## 한눈에'):
+        out+=['## ■ 일자별 경과 — 한눈에','']+[l for l in sec.split('\n') if l.startswith('|')]+['']
+    elif h.startswith('## GA4'):
+        out+=['## ■ '+h[3:],'']+sec.split('\n',1)[1].strip().split('\n')+['']
+    elif h.startswith('## ') and '### 일자별' in sec:
+        n_post+=1
+        tg=re.search(r'노리는 검색어: (.*)',sec)
+        body=sec.split('### 일자별',1)[1].split('\n')
+        rows=[]
+        for l in body:
+            if l.startswith(f'| {L} |'): l=l.replace(f'| {L} |',f'| {L} (오늘 추가) |',1)
+            if l.startswith('|') or l.startswith('**수정 전'): rows.append(l)
+        out+=['### '+h[3:]]+([f'노리는 검색어: {tg.group(1)}'] if tg and tg.group(1).strip() else [])+['']+rows+['']
+txt='\n'.join(out)
+open(f'monitor/_report-{T}.md','w',encoding='utf-8').write(txt)
+tracking=sum(1 for l in S if l.startswith('| ') and '[상세]' in l and '트래킹 중' in l)
+print(json.dumps({'요약판_트래킹중_행':tracking,'글별_일자별_표':n_post,'한눈에_포함':'■ 일자별 경과 — 한눈에' in txt,'글자수':len(txt)},ensure_ascii=False))
+PY
+```
+- 출력의 `요약판_트래킹중_행` 과 `글별_일자별_표` 가 같아야 한다(트래킹 중인 글마다 일자별 표 1개). 다르면 `track.py add`·`report` 를 다시 돌려 빠진 글을 채운 뒤 ⑦ 을 다시 실행한다. 그래도 다르면 STEP 10 "확인 필요" 에 빠진 글 이름을 적는다.
+- 이 파일은 **요약하지 않는다.** STEP 10 에서 그대로 붙인다.
 
 ---
 
@@ -280,7 +331,7 @@ python3 gsc_engine.py set-event {slug} 2026-10-03   # 또는 none
 await new Promise(r=>setTimeout(r,6000));
 const n=s=>parseFloat(String(s).replace(/[,%]/g,''))||0;
 const q=[...document.querySelectorAll('table tbody tr')].slice(0,10).map(r=>[...r.querySelectorAll('td')].map(td=>td.innerText.trim().split('\n')[0])).filter(r=>r.length>=5).map(r=>({q:r[0],clicks:n(r[1]),impr:n(r[2]),ctr:n(r[3]),pos:n(r[4])}));
-q.map(x=>[x.q,x.clicks,x.impr,x.ctr,x.pos].join('|')).join('\n')
+q.map(x=>[x.q,x.clicks,x.impr,x.ctr,x.pos].join('|')).join('\n').replace(/[=&?]/g,' ')
 ```
 점수 규칙 (bash python 으로 계산해 `bench/{slug}-{TODAY}.md` 에 표로 저장):
 - `score = 노출 × (1 − 현재CTR/기준CTR) × 순위가중` — 순위가중: 1~10위 = 1.0 / 11~20위 = 0.4 / 21위 밖 = 0.1 (제목을 고쳐도 2페이지 밖은 클릭이 거의 안 늘기 때문)
@@ -306,9 +357,9 @@ const tot=c.reduce((s,x)=>s+x.impr,0); const kr=c.find(x=>/대한민국|한국|K
 ```javascript
 await new Promise(r=>setTimeout(r,3000));
 const t=document.body.innerText; const aio=/AI Overview|AI 개요/.test(t);
-const items=[...document.querySelectorAll('a h3')].map(h=>{const a=h.closest('a');const box=a&&a.closest('div[data-hveid],div.g,div[jscontroller]');return {url:(a||{}).href||'',title:h.innerText.trim(),snippet:box?box.innerText.replace(h.innerText,'').replace(/\n+/g,' ').trim().slice(0,220):''}}).filter(x=>x.url.startsWith('http')&&!x.url.includes('google.com'));
+const items=[...document.querySelectorAll('a h3')].map(h=>{const a=h.closest('a');const box=a&&a.closest('div[data-hveid],div.g,div[jscontroller]');return {url:((a||{}).href||'').replace(/[?#].*/,''),title:h.innerText.trim(),snippet:box?box.innerText.replace(h.innerText,'').replace(/\n+/g,' ').trim().slice(0,220):''}}).filter(x=>x.url.startsWith('http')&&!x.url.includes('google.com'));
 window.__serp=items;
-({aio, aioText: aio? t.slice(t.search(/AI Overview|AI 개요/),t.search(/AI Overview|AI 개요/)+250).replace(/\n+/g,' '):'', ours: items.findIndex(x=>x.url.includes('koreaplug.com'))+1, top: items.slice(0,8), captcha:/unusual traffic|로봇이 아닙니다/.test(t)})
+JSON.stringify({aio, aioText: aio? t.slice(t.search(/AI Overview|AI 개요/),t.search(/AI Overview|AI 개요/)+250).replace(/\n+/g,' '):'', ours: items.findIndex(x=>x.url.includes('koreaplug.com'))+1, top: items.slice(0,8), captcha:/unusual traffic|로봇이 아닙니다/.test(t)}).replace(/[=&?]/g,' ')
 ```
 - `aio` 가 true 이고 **aioText 가 그 검색어의 핵심 답(정의·가부·날짜)을 이미 말하고 있으면** `set-aio {slug} yes`, 아니면 `no`. **yes 여도 빼지 않는다** — STEP 7-3 의 'AIO' 수정 방법으로 고친다(AI 답변이 주지 못하는 것을 제목·도입부에서 약속하고, 롱테일 검색어를 함께 노린다). aioText 는 그대로 `bench/` 에 적어 7-4 에서 "AI 답변과 겹치지 않는 각도" 를 고르는 근거로 쓴다.
 - TARGET_QUERY 가 MAIN_QUERY 와 다르면 TARGET_QUERY 로도 1회 더 검색해 상위 8 을 읽는다(벤치마킹은 이 결과를 우선).
@@ -343,7 +394,7 @@ window.__serp=items;
 curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/posts?slug={slug}&context=edit&_fields=id,date,status,meta,content,categories,featured_media"
 ```
 - `meta.rank_math_title` · `meta.rank_math_description` · `meta.rank_math_focus_keyword`(변경 금지 — 쉼표 앞 첫 항목이 Focus Keyword)
-- `content.raw` 전체. 구조를 기록한다: H1·H2 목록, 단어 수, `<p` 개수, 내부 링크(`href="https://koreaplug.com/…"`) 목록, `<img>` 목록(src·alt), 표·FAQ 블록 유무, JSON-LD(FAQ) 유무.
+- `content.raw` 전체. 구조를 기록한다: H1·H2 목록, 단어 수, `<p` 개수, 내부 링크(`href="https://koreaplug.com/…"` 와 상대 경로 `href="/…"` 모두) 목록, `<img>` 목록(src·alt), 표·FAQ 블록 유무, JSON-LD(FAQ) 유무.
 - **도입 첫 문단** = `<p><!-- INTRO --></p>` 바로 다음 `<p>…</p>`. 마커가 없으면 히어로 블록 다음의 **텍스트 80자 이상인 첫 `<p>`**(style 속성이 있어도 됨). 히어로 블록 안의 `<h1>`·부제·"Last updated" 줄은 손대지 않는다(날짜는 L2·L3 수정 시 "Last updated: {Month YYYY}" 로만 갱신 가능).
 - 5-3 검색어 점수표(TARGET_QUERY·MAIN_QUERY)와 **나머지 검색어 목록** · 5-4 국가 분포.
 
@@ -357,15 +408,17 @@ const h1=(document.querySelector('h1')||{}).innerText||'';
 const ps=[...root.querySelectorAll('p')].map(p=>p.innerText.trim()).filter(x=>x.length>=80);
 const h2=[...root.querySelectorAll('h2')].map(h=>h.innerText.trim()).slice(0,15);
 const h3=[...root.querySelectorAll('h3')].map(h=>h.innerText.trim()).slice(0,20);
-({url:location.href, title:document.title, desc:g('meta[name="description"]')||g('meta[property="og:description"]'), h1, first_p:(ps[0]||'').slice(0,400), h2, h3,
+JSON.stringify({url:location.href, title:document.title, desc:g('meta[name="description"]')||g('meta[property="og:description"]'), h1, first_p:(ps[0]||'').slice(0,400), h2, h3,
   words:root.innerText.split(/\s+/).length, tables:root.querySelectorAll('table').length, lists:root.querySelectorAll('ul,ol').length, imgs:root.querySelectorAll('img').length,
   faq:/FAQ|Frequently Asked/i.test(t), updated:(t.match(/(Updated|Last updated)[^\n]{0,40}/i)||[''])[0],
-  prices:(root.innerText.match(/(₩|KRW|\$)\s?[\d,]+|[\d,]+\s?won/gi)||[]).slice(0,8), places:(root.innerText.match(/\b[A-Z][a-z]+-(dong|gu|ro|gil)\b/g)||[]).slice(0,10)})
+  prices:(root.innerText.match(/(₩|KRW|\$)\s?[\d,]+|[\d,]+\s?won/gi)||[]).slice(0,8), places:(root.innerText.match(/\b[A-Z][a-z]+-(dong|gu|ro|gil)\b/g)||[]).slice(0,10)}).replace(/[=&?]/g,' ').slice(0,1800)
 ```
+- 본문 단어 수가 1~50 처럼 비정상이면(본문이 article 밖에 있음) `get_page_text` 로 한 번 더 읽는다.
 2. 표로 정리해 `bench/{slug}-{TODAY}.md` 에 저장한다:
 ```
 | 순위 | 도메인 | 검색결과 제목 | 단어 수 | H2 수 | 표 | FAQ | 가격 | 지명 | 첫 문장이 답인가 |
 ```
+- ⚠️ 이 표의 순위 칸은 `1위`·`7위` 처럼 **숫자 뒤에 '위'를 붙여** 쓴다(숫자만 쓰면 8-0 의 대응표 점검이 이 표를 대응표로 잘못 읽는다 — 2026-10-02 실측).
 그리고 **항목 대조표** — 상위 글들의 H2·H3 에서 다루는 주제를 모아 "상위 n편이 다룸 / 우리 글에 있음·없음" 으로 적는다.
 3. **패턴 결론** (수정의 근거) — "8편 중 n편", "본문을 연 3편 중 n편" 형식으로:
    - 제목·설명의 공통 형태
@@ -395,7 +448,7 @@ const h3=[...root.querySelectorAll('h3')].map(h=>h.innerText.trim()).slice(0,20)
 | 2 | TARGET 답이 본문 4번째 H2 중간 | 첫 문단 첫 문장 + 첫 H2 로 이동 | 해결 |
 | 3 | 상위 과반이 FAQ, 우리는 없음 | FAQ 3문항 + FAQPage 스키마 | 해결 |
 ```
-- 원인 목록은 **항목 대조표의 "우리 글에 없음" 줄 전부 + 답의 위치 + 답의 형식 + 검색의도(5-3 상위 검색어별) + AI 답변이 못 주는 것(5-5) + 지역(5-4) + 날짜·최신성** 에서 빠짐없이 옮긴다.
+- 원인 목록은 **항목 대조표의 "우리 글에 없음" 줄 전부 + 답의 위치 + 답의 형식 + 검색의도(5-3 상위 검색어별) + AI 답변이 못 주는 것(5-5) + 지역(5-4) + 날짜·최신성** 에서 빠짐없이 옮긴다. 본문에서 발견한 **근거 없는 장면·인용, 낡은 수치, 사실 오류**도 원인 줄로 넣고 같은 회차에 고친다.
 - 상태는 `해결` 또는 `확인 불가(1차 출처 시도: …)` 만 쓴다. `보강 후보`·`다음에`·`미해결` 은 쓰지 않는다. `확인 불가` 줄은 그 사실 대신 할 수 있는 구조적 수정을 같은 줄에 적는다.
 - 대응표의 '해결' 줄 수가 많아 글의 대부분이 바뀌어도 된다(롱테일 원칙). 분량 상한(L2 ±40%)을 넘으면 L3 로 올려 기록한다.
 
@@ -413,7 +466,7 @@ const h3=[...root.querySelectorAll('h3')].map(h=>h.innerText.trim()).slice(0,20)
   - `KoreaPlug-Draft.md` 5-4 관문 준수: 가짜 경험 0건, 본문 삽입 금지 자료(SEO 리서치·SERP·검색량·서치콘솔 이야기) 0건, 이미지 출처 규칙.
   - H2 가 바뀌면 TOC 는 플러그인이 자동 생성하므로 수동 목차 텍스트가 있으면 그것도 맞춘다.
 - ⛔ 금지: 본문에 없고 1차 출처로 확인도 안 된 사실 / 키워드 반복(Focus Keyword 밀도 2.5% 초과) / 슬러그·Focus Keyword·카테고리·발행일·대표 이미지 변경 / 벤치마킹 문장 복사(연속 8단어 이상 일치 금지) / 기존 1급 자료·내부 링크·이미지 삭제.
-- 결과물: `work/{slug}-{TODAY}-v{n}.html`(새 content.raw) 과 `work/{slug}-{TODAY}-v{n}.json`(`{"title","desc"}`).
+- 결과물: `work/{slug}-{TODAY}-v{n}.html`(새 content.raw) 과 `work/{slug}-{TODAY}-v{n}.json`(`{"title","desc","level"}`), `work/{slug}-{TODAY}-v{n}.meta.json`(`{"meta":{"rank_math_title":..,"rank_math_description":..}}`). 편집은 `work/edit-{이름}.py` 스크립트로 하고 남겨 둔다.
 
 [7-5] 수정안 요약을 `bench/{slug}-{TODAY}.md` 끝에 붙인다 — 수준(L1/L2/L3), **원인-수정 대응표(7-3b) 최종본**, 바뀐 H2 전·후, 추가한 항목과 각 항목의 1차 출처, 단어 수 전·후. 쓰기를 마친 뒤 대응표의 '해결' 줄마다 새 본문(work 파일)에서 해당 H2·블록이 실제로 있는지 다시 확인한다.
 
@@ -431,7 +484,7 @@ raw=open(f'work/{slug}-{T}-v{n}.html').read(); m=json.load(open(f'work/{slug}-{T
 fk=old['meta']['rank_math_focus_keyword'].split(',')[0].strip().lower()
 txt=lambda h: html.unescape(re.sub(r'<[^>]+>',' ',re.sub(r'<script.*?</script>','',h,flags=re.S)))
 w0=len(txt(raw0).split()); w1=len(txt(raw).split())
-links=lambda h:set(re.findall(r'href="(https://koreaplug\.com/[^"#?]+)',h))
+links=lambda h:set(re.findall(r'href="([^"#?]+)',h))
 imgs=lambda h:set(re.findall(r'<img[^>]+src="([^"]+)"',h))
 h1e=raw.find('</h1>'); aft=raw[h1e:] if h1e>=0 else raw; aft=aft[aft.find('</p>')+4:] if h1e>=0 else aft   # 히어로 부제 건너뜀
 first_p=next((txt(p) for p in re.findall(r'<p[^>]*>(.*?)</p>',aft,re.S) if len(txt(p).strip())>=80),'')
@@ -452,7 +505,7 @@ chk={
  'no_seo_talk':not re.search(r'search console|autocomplete|search volume|SERP|ranking on google',txt(raw),re.I),
  'no_external_img':all(re.match(r'https://(koreaplug\.com|images\.unsplash\.com)/',s) for s in imgs(raw)),
  'kw_density<=2.5%':txt(raw).lower().count(fk)*len(fk.split())/max(w1,1)<=0.025,
- 'no_fake_testimonial':not re.search(r'Verified (Traveler|Visitor|Reader)|— (A |Our )?(reader|traveler), 20\d\d',txt(raw),re.I),
+ 'no_fake_testimonial':not re.search(r'Verified (Traveler|Visitor|Reader)|— (A |Our )?(reader|traveler), 20\d\d|Real example from r/',txt(raw),re.I),
 }
 # 원인-수정 대응표(7-3b): 표가 있고, 모든 줄의 상태가 '해결' 또는 '확인 불가' 여야 한다
 bench=open(f'bench/{slug}-{T}.md').read() if __import__('os').path.exists(f'bench/{slug}-{T}.md') else ''
@@ -470,6 +523,7 @@ cd $W && python3 rm_check.py backups/{slug}-{TODAY}-v{n-1}.raw.html "{이전 tit
 cd $W && python3 rm_check.py work/{slug}-{TODAY}-v{n}.html "{새 title}" "{새 desc}" "{focus 목록}" {slug}
 ```
   새 `pass` 가 이전보다 **작으면 반영 금지** → 7-4 로 돌아가 떨어진 항목(`fail`)을 고친다. B1~B5(제목·설명·URL·앞 10%·본문 키워드)는 하나라도 실패하면 반영 금지. (Rank Math 편집기 점수는 편집 화면 저장 때만 갱신되고, 크롬에서 wp-admin 편집 화면이 열리지 않는 경우가 있어(2026-09-24 실측) 이 근사 점검을 기준으로 한다. 편집 화면이 열리면 점수만 읽고 저장하지 않는다.)
+  - 참고: rm_check 의 'R1 TOC' 는 본문에 'toc' 글자(예: 'autocomplete')가 있으면 잘못 통과한다. SEO 문장을 지워 R1 만 떨어진 경우는 실제 하락이 아니므로, 전체 pass 가 줄지 않았으면 통과로 본다(보고에 그 사실을 적는다).
 - 벤치마킹 복사 검사: 7-2 에서 읽은 상위 글 첫 문단·H2 와 우리 새 본문을 비교해 **연속 8단어 일치 0건**인지 python 으로 확인한다.
 - L1 은 `<p` 개수가 원본과 같아야 한다. L2·L3 은 `fail` 목록이 비어 있으면 통과.
 - `work/{slug}-{TODAY}-v{n}.json` 에 `"level":"L1|L2|L3"` 를 함께 적는다. L1 이면 bench 파일에 `빠진 항목 0 · 답 위치 OK · 답 형식 OK` 세 문구와 각각의 근거가 있어야 통과한다(7-3 A).
@@ -487,12 +541,13 @@ curl -s -u "$U:$P" -X POST -H "Content-Type: application/json" "https://koreaplu
   --data-binary @work/{slug}-{TODAY}-v{n}.meta.json -o /dev/null -w "%{http_code}\n"   # {"meta":{"rank_math_title":..,"rank_math_description":..}}
 ```
 재조회 검증: 두 값이 새 값이고 `rank_math_focus_keyword` 가 그대로인지. 어긋나면 1회 재시도 → 실패면 본문·메타 모두 백업 값으로 되돌리고 기록.
+- 8-2·8-3·재조회는 `work/apply.sh {slug} {n} {TODAY}` 로 한 번에 실행할 수 있다(2026-10-02 작성).
 
 [8-4] **공개 페이지 재점검 (검색봇 관점)** — 구글봇 UA 로 `?nc={epoch}` 요청:
 ```bash
 curl -s -D /tmp/h.txt -A "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" "https://koreaplug.com/{slug}/?nc=$(date +%s)" -o /tmp/pub.html
 ```
-확인 항목(python): HTTP 200 · `X-Robots-Tag` 에 noindex 없음 · `<meta name="robots">` 에 `index` 있고 `noindex` 없음 · canonical = 글 주소 · `<title>`·description = 새 값 · H1 정확히 1개 · JSON-LD 전부 파싱 성공(BlogPosting 포함, FAQ 가 있으면 FAQPage 포함) · 새 첫 문장이 HTML 에 있음 · 본문 이미지 URL 전부 200(koreaplug.com 은 curl HEAD, unsplash 는 ID 형식만) · robots.txt 가 글 경로를 막지 않음.
+확인 항목(python): HTTP 200 · `X-Robots-Tag` 에 noindex 없음 · `<meta name="robots">` 에 `index` 있고 `noindex` 없음 · canonical = 글 주소 · `<title>`·description = 새 값 · H1 정확히 1개 · JSON-LD 전부 파싱 성공(BlogPosting 포함, FAQ 가 있으면 FAQPage 포함) · 새 첫 문장이 HTML 에 있음 · 본문 이미지 URL 전부 200(koreaplug.com 은 curl HEAD, unsplash 는 ID 형식만) · robots.txt 가 글 경로를 막지 않음. (`work/pubcheck.py {slug} work/{slug}-{TODAY}-v{n}.json "{새 첫 문장 일부}"` 로 실행 가능)
 - 캐시 때문에 title·첫 문장만 다르면 `캐시 반영 대기` 로 기록(원복하지 않음).
 - noindex·canonical 불일치·JSON-LD 파싱 실패·H1 개수 이상은 **즉시 백업으로 원복**하고 기록.
 
@@ -515,7 +570,7 @@ cd $W && python3 gsc_engine.py record --file /tmp/v.json
 ```
 반영에 실패해 원복했으면 기록하지 않는다.
 
-[9-1b] **모니터링 파일 생성** — 반영한 글마다 4-B ① 화면으로 읽은 수정 전 14일을 `track.py add` 로 저장하고(`monitor/data/{slug}.json` 생성, 파일 맨 처음엔 `python3 track.py seed` 도 가능), `monitor/{slug}.md` 를 만든다: 상태 `트래킹 중` · 수정 내용 요약(전·후 제목·설명·바꾼 소제목·분량) · rm_check 전·후 점수 · TARGET_QUERY 와 수정 전 7일 검색어 표 · **수정 전 14일 일자별 표**(4-B ①과 같은 화면) · 수정 후 경과 빈 표(1~7일) · 품질 확인 빈 표(1·3·7일) · 7일 요약·판정 빈 칸. 그리고 `monitor/_summary.md` 에 한 줄 추가.
+[9-1b] **모니터링 파일 생성** — 반영한 글마다 4-B ① 화면으로 읽은 수정 전 14일을 `monitor/data/{slug}.json`(`{"slug","name","edit_date","target","days":{"YYYY-MM-DD":[클릭,노출,순위]}}`)으로 저장하고(`track.py add` 는 파일이 있어야 동작하므로 새 글은 이 JSON 을 직접 만든다), `monitor/{slug}.md` 를 만든다: 상태 `트래킹 중` · 수정 내용 요약(전·후 제목·설명·바꾼 소제목·분량) · rm_check 전·후 점수 · TARGET_QUERY 와 수정 전 7일 검색어 표 · **수정 전 14일 일자별 표**(4-B ①과 같은 화면) · 수정 후 경과 빈 표(1~7일) · 품질 확인 빈 표(1·3·7일) · 7일 요약·판정 빈 칸. 그리고 `monitor/_summary.md` 에 한 줄 추가. 그 뒤 `track.py report` 를 다시 돌려 새 글이 `_daily.md` 에 들어가게 한다(4-B ⑦ 보다 먼저).
 
 [9-2] `log.md` 맨 위에 추가 — 글마다: 선정 근거(숫자·기준 CTR) / 검색어 점수표(TARGET·MAIN) / 국가 분포 / 구글 상위8·우리 순위·AIO / **벤치마킹 표·항목 대조표·패턴 결론** / 원인·수정 수준 / **원인-수정 대응표(남긴 원인 0건 확인)** / 전·후(제목·메타·첫 문장·H2 목록·단어 수) / 8-0·8-4 점검 결과. 오늘 처리량을 넘어 다음 회차로 넘어간 글은 순서만 한 줄로.
 
@@ -532,7 +587,7 @@ for p in st['posts'].values():
             k=v.get('verdict') or 'WAIT'; vd[k]=vd.get(k,0)+1
 done=[e for e in ev if e.get('ctr_after') is not None]
 b=sum(e['ctr_before'] for e in done)/len(done) if done else None; a=sum(e['ctr_after'] for e in done)/len(done) if done else None
-print(json.dumps({'applied_total':n,'verdicts':vd,'avg_ctr_before':b and round(b,2),'avg_ctr_after':a and round(a,2),'measured':len(done)},ensure_ascii=False))
+print(json.dumps({'applied_total':n,'posts':len(st['posts']),'verdicts':vd,'avg_ctr_before':b and round(b,2),'avg_ctr_after':a and round(a,2),'measured':len(done)},ensure_ascii=False))
 PY
 ```
 (`plan` 출력을 `/tmp/plan.json` 에 저장해 두고 쓴다.)
@@ -541,7 +596,21 @@ PY
 
 ## STEP 10 — 완료 보고 (앞 단계 성공 여부와 무관하게 반드시 실행)
 
-보고는 두 가지를 한다. ① PushNotification(아래 형식 그대로) ② 마지막 응답도 같은 형식.
+### 10-0 보고 절차 (이 순서 그대로)
+1. **4-B ⑦ 을 실행했는지 확인**한다. 오늘 날짜의 `monitor/_report-{TODAY}.md` 가 없으면 지금 실행한다(앞 단계가 실패했어도 `_summary.md`·`_daily.md` 가 있으면 만든다).
+2. **보고용 파일을 대화에 첨부**한다: `device_stage_files` 로 `C:\Users\win\Documents\Claude\gsc-ctr\monitor\_report-{TODAY}.md` 를 가져와 `SendUserFile`(status: proactive)로 보낸다. 실패하면 이 항목만 건너뛰고 "확인 필요" 에 적는다.
+3. **알림(PushNotification)**: `<routine_summary>` 안에 아래 서식의 **■ 한 줄 요약 ~ ■ 수정 글 트래킹 요약판(표 전체) ~ ■ 일자별 경과 — 한눈에(표 전체) ~ ■ 오늘 고친 글 ~ ■ 확인이 필요한 것** 을 넣는다. 첫 문장이 휴대폰 배너, 전체가 이메일 본문이 된다. 글별 일자별 표는 길어서 알림에는 "첨부 파일·세션 마지막 응답에 전체 있음" 한 줄로 대신할 수 있다(요약판·한눈에 표는 알림에서도 생략 금지).
+4. **마지막 응답**: 아래 서식 전체. `{…_report 파일의 … 구간}` 자리에는 `_report-{TODAY}.md` 의 해당 구간을 **한 줄도 빼지 않고 그대로** 붙인다. 표를 다시 쓰거나 줄이거나 "n편 측정 중" 같은 개수로 바꾸지 않는다.
+
+### 10-1 보고 전 자기 점검 (하나라도 '아니오'면 보고를 고쳐 다시 쓴다)
+- [ ] 마지막 응답에 `■ 수정 글 트래킹 요약판` 표가 있고, 행 수 = 4-B ⑦ 출력의 `요약판_트래킹중_행` 이상인가
+- [ ] 마지막 응답에 `■ 일자별 경과 — 한눈에` 표가 있는가
+- [ ] 마지막 응답에 트래킹 중인 글마다 `### {글 이름}` 일자별 표가 있고, 개수 = `글별_일자별_표` 인가
+- [ ] 오늘 새로 들어온 날짜 행에 "(오늘 추가)" 가 보이는가(데이터 지연으로 없는 날은 "데이터 대기" 로 보이면 된다)
+- [ ] 알림 본문에 요약판 표와 한눈에 표가 들어갔는가
+- [ ] 표 대신 "파일 참조"·"생략"·"요약" 이라고만 쓴 곳이 없는가
+
+### 10-2 보고 서식
 **전문 용어·영문 키·slug 만 나열하지 않는다. 사용자가 SEO 를 모른다고 가정하고, 숫자와 "그래서 무엇을 어떻게 바꿨는지"를 우리말로 설명한다.** 슬러그는 글 설명 뒤에 괄호로 붙인다.
 
 ```
@@ -558,18 +627,24 @@ PY
 고친 글 {n}편 → 좋아짐 {n} · 다시 수정 {n} · 되돌림 {n} · 아직 측정 중 {n}
 측정 끝난 글 평균 클릭률: 고치기 전 {a}% → 고친 후 {b}%
 
-■ 수정 글 트래킹 요약판 (monitor/_summary.md 그대로 — ⚠️ 트래킹 중인 글이 1편이라도 있으면 **수정 후 데이터가 아직 없어도 반드시 넣는다**. 데이터가 없으면 각 행에 수정 전 7일 값 + '수정 후 첫 데이터 {날짜} 회차 · 7일 요약 {날짜} 회차' 를 적는다)
-{표: 글 · N일째 · 수정 전 7일 CTR → 수정 후 누적 CTR · 클릭 전→후 · 순위 전→후 · 구글 새 제목 반영 · 판정/상태}
+■ 수정 글 트래킹 요약판
+{_report 파일의 '## ■ 수정 글 트래킹 요약판' 구간 — 총평 줄 + 표 전체를 그대로}
+(데이터가 아직 없는 행도 빼지 않는다: 수정 전 7일 값 + '수정 후 첫 데이터 {날짜} 회차 · 7일 요약 {날짜} 회차')
 
-■ 트래킹 중인 글 일자별 경과 (monitor/_daily.md 그대로 — 글마다 한 표, 날짜순)
-{맨 위 "한눈에" 표: 글 · 수정일 · 경과(D+n) · 수정 전 7일 CTR · 수정 후 누적 CTR · 순위 전→후 · 현재 판정}
-{글마다 표: | 날짜 | 구분(수정 전 D-7…D-1 / 수정일 / 수정 후 D+1…) | 클릭 | 노출 | CTR | 순위 | CTR 비교 ▲▼≈ | 노출 비교 ▲▼≈ | 누적 CTR |
- + 맨 아래 한 줄: 수정 전 7일 → 수정 후 n일 누적 → 현재 판정}
-{오늘 새로 들어온 날은 그 행 끝에 "(오늘 추가)" 를 붙여 말로 한 줄 설명: 예 "회식 글 D+3: 노출 60·클릭 2(3.3%) — 수정 전 평균 0.25%보다 ▲, 누적 3.3%로 좋아지는 중"}
-{GA4 방문(조기 신호): 글마다 수정 전 7일 일평균 → 수정 후 일별 방문 수 (오늘은 집계 중)}
+■ 일자별 경과 — 한눈에
+{_report 파일의 '## ■ 일자별 경과 — 한눈에' 표 전체를 그대로}
+
+■ 오늘 달라진 점 (말로 설명 — 표를 대신하지 않고 표 아래에 덧붙인다)
+{오늘 새로 들어온 날("(오늘 추가)" 행)이 있는 글마다 한 줄: 예 "회식 글 D+3: 노출 60·클릭 2(3.3%) — 수정 전 평균 0.25%보다 ▲, 누적 3.3%로 좋아지는 중"}
 {숏테일 조기 재수정(6-2b)을 한 글: 이벤트까지 남은 일수 · 수정 후 2일 CTR vs 수정 전 · 무엇을 더 고쳤는지}
 {오늘 품질 확인을 한 글: "구글 표시 제목: 새 제목 반영됨/아직 옛 제목 · 우리 순위 {n}위"}
 {오늘 7일 요약·판정이 난 글: 판정 + "잘 수정됐나" 한 단락}
+
+■ GA4 방문 (조기 신호 · 판정에는 쓰지 않음)
+{_report 파일의 '## ■ GA4 방문' 구간 그대로}
+
+■ 글별 일자별 표 (수정 전 7일 → 수정일 → 수정 후, 날짜순)
+{_report 파일의 '### {글 이름}' 구간 전부 — 글마다 표 + 맨 아래 '수정 전 7일 → 수정 후 n일 누적 → 현재 판정' 줄까지 그대로}
 
 ■ 지난번 고친 글은 어떻게 됐나
 {없으면 "아직 판정할 글이 없습니다." / 있으면 글마다 한 줄: "{글 설명}: 고치기 전 {a}% → 고친 후 {b}% (노출 {n}·클릭 {n}) → 유지/다시 수정/되돌림/아직 데이터 부족({n}/{기준})"}
@@ -585,11 +660,11 @@ PY
 - 바꾼 것: 제목 {전} → {후} / 설명문 {후} / 첫 문장 {후} / 새로 넣은 소제목 {목록} / 분량 {전}→{후}단어
 - Rank Math 점검: 수정 전 {a}/20 → 수정 후 {b}/20 (떨어진 항목 없음 / {있으면 무엇})
 - 검색봇 점검: {통과 항목 수}/{전체} 통과 {실패가 있었으면 무엇을 어떻게 고쳤는지}
-- 효과 확인 예정: 약 {n}일 뒤 자동 판정
+- 효과 확인 예정: 첫 데이터 {날짜} 회차 · 7일 요약 {날짜} 회차
 [2] …
 
 ■ 트래킹 중이라 대기 중인 글
-{글 설명}: 수정일 · N일째 · 판정 예정일
+{글 설명}: 수정일 · N일째 · 7일 요약 예정 회차 (요약판 표의 '다음 조치' 칸과 같은 내용)
 
 ■ 다음 차례 3편
 1. {글 설명}: 노출 {n} · 클릭 {n} · 순위 {x} (기준 {y}%) · 놓친 클릭 {n} · {시기성}
@@ -597,7 +672,7 @@ PY
 3. …
 
 ■ 확인이 필요한 것
-{없으면 "없음". 있으면 쉬운 말로}
+{없으면 "없음". 있으면 쉬운 말로. 4-B ⑦ 의 행 수 불일치·첨부 실패·GA4 미확인도 여기에}
 ```
 
 ---
@@ -617,7 +692,9 @@ PY
 | 상황 | 처리 |
 |---|---|
 | Claude 폴더 미연결 | bash 확인 → 실패 시에만 `device_request_folder_access` 1회 → 실패면 STEP 10 |
-| GSC 화면 로그인 풀림·행 0 | 판정·수정 건너뜀, STEP 10에 `GSC 읽기 실패` |
+| GSC 화면 로그인 풀림·행 0 | 판정·수정 건너뜀, STEP 10에 `GSC 읽기 실패` (기존 `_summary.md`·`_daily.md` 로 4-B ⑦ 은 실행해 표는 보고에 넣는다) |
+| javascript 반환이 `[BLOCKED: Cookie/query string data]` | 반환 문자열에 `.replace(/[=&?]/g,' ')` 를 붙여 다시 읽는다 |
+| iframe 일괄 읽기에서 45초 시간 초과 | 한 호출 안에서 기다리지 않는다 — 만들기·읽기를 다른 호출로 나누고 사이에 `Bash sleep 25` |
 | 5-0 기준 CTR 계산 실패 | 엔진 `queue[]` 순서(고정 목표 2.5%)로 진행하고 STEP 10 에 기록 |
 | 검색어 표·국가 표 읽기 실패 | MAIN_QUERY = TARGET_QUERY 로 두고 진행, 국가 판정은 "미확인" |
 | 구글 검색 캡차 | 그 회차 AIO 확인·벤치마킹 중단, 해당 글 `미확인` 유지 |
@@ -631,4 +708,7 @@ PY
 | 본문 반영 후 불일치 | 백업 raw 로 원복, 기록 |
 | 8-4 공개 페이지 noindex·canonical·JSON-LD·H1 이상 | 즉시 백업(본문·메타)으로 원복, 기록 |
 | 8-4 캐시로 title·첫 문장만 다름 | `캐시 반영 대기` 기록(원복 안 함) |
+| 4-B ⑦ 행 수 불일치(요약판 트래킹 중 행 ≠ 글별 일자별 표) | `track.py add`·`report` 재실행 후 ⑦ 재실행 → 그래도 다르면 빠진 글 이름을 STEP 10 "확인 필요" 에 |
+| 보고에 모니터링 표 누락(10-1 점검 실패) | 보고를 끝내지 않는다 — `_report-{TODAY}.md` 를 다시 열어 해당 구간을 붙여 넣고 10-1 을 다시 점검 |
+| 보고용 파일 첨부 실패 | 마지막 응답에 표 전체가 있으면 진행, "확인 필요" 에 첨부 실패 기록 |
 | 구글 API 접근 | 시도 금지(네트워크 정책 403 확인됨) |
