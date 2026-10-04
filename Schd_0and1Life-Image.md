@@ -1,74 +1,13 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v7.2 — Flow 모델은 Nano Banana Pro 우선(0크레딧일 때만) · v7.1 설명은 Claude 제작컷(모션·정적 SVG) 우선 · 촬영컷은 밝은 일상 톤 · 비용 0원)
+# 0and1Life 자동 이미지 삽입 태스크 (v7.3 — Claude 제작컷은 인라인 SVG 금지, MP4(모션)·WebP(정적)로 렌더해 업로드 · v7.2 — Flow 모델은 Nano Banana Pro 우선(0크레딧일 때만) · v7.1 설명은 Claude 제작컷(모션·정적 SVG) 우선 · 촬영컷은 밝은 일상 톤 · 비용 0원)
 
 ### 목적
 
 Notion 글 현황 테이블에서 오늘 날짜에 draft된 WordPress 글을 찾아, **데코 이미지(촬영컷+설명컷)가 3장 미만인 글**에 이미지를 채운다. 이미지는 두 종류다 (v7.0).
 
 - **촬영컷(photo)**: 사람이 휴대폰으로 실제로 찍을 수 있는 장면. **Google Flow(Nano Banana Pro 우선 · 0크레딧일 때만, 아니면 Nano Banana 2)** 로 '실제로 찍은 사진'처럼 생성해 WebP로 업로드한다. 히어로는 항상 촬영컷이다.
-- **설명컷(motion)**: 수치 비교·계산 흐름·조건 분기·타임라인·체크리스트처럼 사진으로 찍을 수 없는 내용. **Claude가 인라인 SVG 모션 그래픽으로 직접 만들어** 본문에 넣는다 (업로드 없음).
+- **설명컷(motion)**: 수치 비교·계산 흐름·조건 분기·타임라인·체크리스트처럼 사진으로 찍을 수 없는 내용. **Claude가 직접 그려**(SVG를 설계 원본으로 사용) **모션은 MP4 + 포스터 WebP, 정적은 WebP로 렌더해 WP 미디어에 업로드**한 뒤 본문에 넣는다 (v7.3 — 인라인 SVG는 본문에 넣지 않는다).
 
 단, **증빙+데코+스톡 합계가 5장을 넘지 않는 범위**에서만 채운다 (생성 수를 3→2→1장으로 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다. **비용이 드는 도구(유료 모델·크레딧 차감 옵션·유료 생성 서비스)는 쓰지 않는다** (2026-10-02 사용자 지시).
-
-> 🆕 **v7.2 변경 (2026-10-03 사용자 지시) — Flow 모델은 `Nano Banana Pro` 를 우선 쓴다. 단 크레딧이 차감되지 않을 때만이다.**
-> - Flow를 쓰는 회차는 STEP 5-1 ③에서 **Pro의 크레딧 표시를 먼저 확인**하고, **0크레딧이면 Pro**, 크레딧 차감이 표시되거나 확인이 안 되면 **Nano Banana 2(0크레딧)로 폴백**한다.
-> - 비용 0원 원칙은 그대로다. Pro를 쓰기 위해 크레딧을 쓰지 않는다.
-> - 어느 모델로 생성했는지와 크레딧 잔액 변화(생성 전→후)를 STEP 8에 반드시 남긴다.
-
-> 🚨 **v4.0 일괄 개정 (2026-08-18) — 이 파일은 v3.1에 머물러 있어 KoreaPlug 대비 3세대(v3.2·v3.3·v3.4) 뒤처져 있었다.** KoreaPlug에서 실전으로 검증된 아래 수정을 **전부 백포트**하고, 여기에 v4.0(Flow 교체)을 함께 적용한다. 두 사이트의 루틴은 이제 사이트 고유값(도메인·Notion 페이지·파일명 prefix·프롬프트 철학)을 제외하면 동일한 구조다.
->
-> - **v3.2 백포트**: STEP 2 분류기를 정규식 훑기에서 **DOM 기반 8단계 우선순위 분류기**로 교체하고, **미분류(unknown) 존재 시 skip 금지** 가드를 신설. 이 결함이 최초로 실측된 곳이 바로 0and1Life다 — #70 결혼식 보증인원(Post 894)은 공공 출처(price.go.kr) 조회 캡처 2장이 데코로 오분류돼 deco=4 → genCount 0 → skip 처리되었고, **이미지가 필요한 글을 3일 내내 그냥 지나쳤다.**
-> - **v3.3 백포트**: `window.open(url, '_blank')` 의 **`'_blank'` 제거**. 이 인자가 있으면 탭이 Chrome MCP 그룹 밖에 생성돼 `tabs_context_mcp` 에 안 잡히고, postMessage 리스너 주입이 불가능해져 업로드 경로 전체가 막힌다.
-> - **v3.4 백포트 (가장 중요)**: 모든 본문 fetch에 **`context=edit` 필수**, 모든 저장 POST에 **원래 status 동봉**, 저장 전 **불가침 검증(`_evGuard`)**, 삽입 위치를 **문자 위치 기준**으로 산출. 舊 `d.content.raw || d.content.rendered` 폴백은 **본문 원본을 파괴한다** (Gutenberg 블록 주석 소실 + ez-toc 목차가 정적 HTML로 본문에 박제). KoreaPlug에서 4편이 오염된 채 발행된 뒤에야 발견됐다.
->
-> ⚠️ **선행 점검 권고**: 이 루틴이 v3.1로 돌던 기간에 처리된 0and1Life 글들도 **동일하게 오염됐을 가능성이 높다.** STEP 3-1의 raw 건강 검진(`ezToc`/`blocks`)을 최근 처리분에 먼저 돌려보고, 오염이 확인되면 리비전 복구 절차를 적용한다.
-
-> 🚀 **v4.0 변경 (2026-08-18) — 이미지 생성처를 gemini.google.com에서 Google Flow로 교체한다.**
-> 2026-08-18 KoreaPlug에서 동일 프롬프트로 실측한 비교:
->
-> | 항목 | 舊 Gemini 웹 UI | **新 Google Flow (Nano Banana 2)** |
-> |---|---|---|
-> | 생성 속도 | 60~90초, **당일 2회는 3~4분 지연** | **약 20초에 2장** (진행률 % 실시간 표시) |
-> | 1회 산출 | 1장 | **2장** (x2 설정, 0크레딧) |
-> | 전송 안정성 | 첫 클릭 씹힘 **4회 중 2회** | 첫 클릭 **즉시 전송** |
-> | 원본 해상도 | 1024×559 | **1376×768 (16:9)** |
-> | 이미지 호스트 | `blob:` → 리로드 시 `lh3` **taint** | **`labs.google` 동일 출처** |
-> | 워터마크 | 우하단 모서리, `cropBottom 150` | 상대좌표 **(0.925W, 0.875H) 고정**, `cropRight 150` |
-> | 크롭 후 크기 | 984×409 (402k px) | **1226×768 (942k px, 2.34배)** |
-> | 4장 총 소요 | 약 25분 | **약 3분** |
->
-> 결정적 이점은 속도가 아니라 **구조적 안정성**이다. Flow는 이미지를 `labs.google` **동일 출처**로 서빙하므로 `SecurityError: canvas has been tainted` 가 **원천적으로 발생하지 않는다.** 또 x2로 2장을 받아 **좋은 쪽을 고르는 구조**라 舊 "수정 재시도 1회" 규정이 실제로 발동할 일이 거의 없다.
-
-> ⚡ **v5.1 변경 (2026-08-18) — 실행 시간 단축. 병목은 이미지 생성이 아니라 화면 왕복이었다.**
-> 2026-08-18 회차는 2편·5장에 약 95회의 도구 호출이 들었다. 원인을 재보니 생성(장당 50~56초)보다 **UI 왕복과 대기 방식**이 더 컸다.
->
-> | # | 조치 | 근거 (2026-08-18 실측) | 절감 |
-> |---|---|---|---|
-> | 1 | **에디터 진입 폐지 · 그리드에서 판정·캡처** | 그리드 썸네일이 이미 원본 해상도 `naturalWidth 1376×768`(표시 318px). 에디터에 갈 이유가 없었다 | 호출 **~30회** |
-> | 2 | **프롬프트 N개 연속 투입 후 일괄 수확** | 진행률 87%·99% 중에도 입력창이 비어 있고 활성 (**1회차 큐잉 검증 필요**) | 55초×N 직렬 → **1회 대기** |
-> | 3 | **진행 확인을 스크린샷 → JS 문자열 폴링** | 진행률 확인 스크린샷 12장 중 절반이 "아직 99%" | 호출 ~10회 + 토큰 |
-> | 4 | **`browser_batch` 로 클릭·입력·전송 묶기** | 95회 전부 단발 호출이었다 | 왕복 지연 절반 이하 |
-> | 5 | **업로드 5건 연속 전송 후 1회 폴링** | 건별 8초 대기 ×5 = 40초, 업로드는 서로 독립 | ~35초 + 호출 4회 |
-> | 6 | **대상 탐색을 WP REST 우선으로** | Notion fetch 98,515자 → 한도 초과 → grep 차단 → python 우회로 호출 4회 | 호출 4~5회 + 대용량 덤프 |
->
-> ⛔ **가장 중요한 한 줄: 캡처가 끝날 때까지 Flow 그리드를 떠나지 않는다.** 콜드/복귀 로드 실측이 6초 0개 · 14초 0개 · **26초 18개**였다. 그리드를 한 번 떠날 때마다 이 20여 초를 다시 낸다.
-> 예상 효과: 5장 기준 **약 25~30분 → 8~10분**, 평상시 1편 3~4장은 **5분 안쪽**.
-
-> 🎯 **v5.0 변경 (2026-08-18) — 프롬프트 철학을 '정확한 그림'에서 '읽게 만드는 그림'으로 바꾼다.**
-> v4.0 첫 실전(2026-08-18, Post 1153·1160)에서 5장 전부가 **기술적으로는 통과했는데 사용자 평가는 "무난하고 추상적"** 이었다. 원인을 뜯어보니 프롬프트 규칙 자체에 있었다.
->
-> | 결함 | v4.0 규칙이 유도한 것 | v5.0의 교정 |
-> |---|---|---|
-> | **사건이 없다** | "장소·사물을 정확히 묘사하라"만 있고 **무슨 일이 벌어지는지**에 대한 요구가 없음 → 빈 로비·정리된 책상만 나옴 | 3-2 ① **한 문장 테스트**: "지금 무슨 일이 벌어지는가"를 말할 수 없으면 재설계 |
-> | **글의 숫자가 안 보인다** | 본문의 30배·100만↔50만 같은 **충돌하는 수치**를 프롬프트에 안 넣음 | 3-2 ③ 숫자를 **높이·길이·개수·두께**로 번역해 반드시 화면에 넣는다 |
-> | **사람을 과하게 뺐다** | "인물 최대 1장" → 실무에서 항상 0명 → 온기·긴장 소멸 | 3-4 **손·팔·부분 컷 권장**. 금지 대상은 '카메라 보고 웃는 모델'뿐 |
-> | **범용 은유 남발** | 모래시계·저울·전구가 어느 글에나 붙음 | 3-2 ⑥ **범용 은유 금지 목록** 신설 |
-> | **밋밋해도 채택** | 5-3 채택 기준이 '정확성'뿐 | 5-3에 **밋밋함 탈락 사유** 추가 |
->
-> 함께 고친 기능 결함: **`[FEATURED_IMAGE_URL]` 플레이스홀더가 2곳인 글에서 v4.0 코드가 같은 히어로를 2번 박아 넣었다** (STEP 7-2.5). 2026-08-18 #88에서 수동 회피했고, v5.0에서 정식 조항으로 고쳤다 — 첫 번째만 히어로, 나머지는 본문 이미지로 순차 교체하고 그만큼 STEP 4의 삽입 개수를 줄인다.
-
-> ⚠️ v3 변경 (2026-08-01): Draft 루틴이 발행 관문용 **증빙 캡처**(`figure class="evidence-capture"`, 파일명 `evidence-*`)를 본문에 넣기 시작하면서, 총 이미지 수 기준(舊 imgCount ≥ 3 → skip)으로는 모든 글이 스킵되어 이 루틴이 돌지 않았다. 판정은 **데코 개수**로 하되, 글이 이미지로 과밀해지지 않도록 **총량 상한 5장**(증빙+데코, 히어로 교체는 총량 불변이라 제외)을 함께 둔다. 증빙 캡처는 어떤 단계에서도 교체·이동·삭제하지 않는다.
-
----
 
 ### STEP 1: 대상 글 찾기 (v5.1 — WP 우선, Notion은 보조)
 
@@ -185,8 +124,9 @@ window._cls = window._postData.map(p => {
 
   let evidence = 0, stock = 0, deco = 0;
   const detail = [], unknown = [];
-  // (v7.0) 설명컷(인라인 SVG 모션 그래픽)은 <img>가 아니므로 따로 센다 — 데코로 계산한다
-  const motion = div.querySelectorAll('figure.motion-figure').length;
+  // (v7.0) 설명컷 중 <img>가 아닌 것은 따로 센다 — 데코로 계산한다
+  // (v7.3) MP4 모션 figure(ol-motion)를 센다. 舊 인라인 SVG(motion-figure)도 남아 있을 수 있어 함께 센다
+  const motion = div.querySelectorAll('figure.ol-motion, figure.motion-figure').length;
 
   for (const img of Array.from(div.querySelectorAll('img'))) {
     const src  = img.getAttribute('src') || '';
@@ -323,14 +263,14 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 | 유형 | 고르는 경우 | 예 | 제작 |
 |---|---|---|---|
 | **촬영컷 (photo)** | 장소·상황·분위기를 **눈으로 알아보게** 하는 것이 목적일 때 | 구내식당 단말기에 사원증을 대는 손, 창가 책상에서 계약서를 보는 장면, 병원 접수 창구 | Flow (STEP 5) |
-| **Claude 제작컷 — 모션 (motion)** | 수치·변화·순서처럼 **움직임이 이해를 돕는** 설명 | 연 +57만원 vs 연 −4만~6만원 막대가 자라는 그림, 계산 단계가 차례로 켜지는 흐름도, 기한까지 점이 이동하는 타임라인 | Claude 인라인 SVG + CSS 애니메이션 (STEP 3-10) |
-| **Claude 제작컷 — 정적 (still)** | 움직일 필요가 없는 구조·비교·요약 | 조건별 결과 분기도, 확인 순서 체크리스트, 한눈에 보는 비교표 그림 | Claude 인라인 SVG, 애니메이션 없이 (STEP 3-10) |
+| **Claude 제작컷 — 모션 (motion)** | 수치·변화·순서처럼 **움직임이 이해를 돕는** 설명 | 연 +57만원 vs 연 −4만~6만원 막대가 자라는 그림, 계산 단계가 차례로 켜지는 흐름도, 기한까지 점이 이동하는 타임라인 | Claude가 SVG로 설계 → **MP4 + 포스터 WebP**로 렌더해 업로드 (STEP 3-10) |
+| **Claude 제작컷 — 정적 (still)** | 움직일 필요가 없는 구조·비교·요약 | 조건별 결과 분기도, 확인 순서 체크리스트, 한눈에 보는 비교표 그림 | Claude가 SVG로 설계 → **WebP**로 렌더해 업로드 (STEP 3-10) |
 
 **판정 기준**
 
 - **설명이 목적이면 Claude 제작컷이 우선이다.** 숫자·배수·계산·조건 분기·기한·순서·체크리스트는 사진으로 억지로 표현하지 않는다. 생성 이미지는 정확한 숫자와 한글을 그리지 못하지만, Claude 제작컷은 본문 숫자를 그대로 쓴다
 - **분위기·실제 모습이 목적이면 촬영컷이다.** "이런 곳에서 이런 일이 일어난다"를 보여주는 자리
-- 애매하면 Claude 제작컷을 고른다 — 비용 0, 업로드·캡처 불필요, 실패 위험이 낮다
+- 애매하면 Claude 제작컷을 고른다 — 비용 0, Flow 불필요, 실패 위험이 낮다
 
 **배분 규칙**
 
@@ -339,7 +279,7 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 - 다만 Claude 제작컷이 2장 이상이면 형식(막대·흐름·분기·타임라인·체크리스트)을 서로 다르게 하고, 모션과 정적을 섞는다 — 같은 모양의 그래프가 연달아 나오면 보고서처럼 보인다
 - 3-2 ③의 '숫자를 사물의 물리량으로 번역'은 **이제 Claude 제작컷이 맡는다.** 촬영컷에서 숫자를 억지로 사물 배수로 표현하지 않는다
 - 증빙 캡처 ±5%pt 구간에는 Claude 제작컷도 넣지 않는다 (STEP 4 배제 규칙 동일 적용)
-- 판정 결과를 STEP 4 삽입 순서대로 기록한다: `window._slotTypes = ['photo', 'motion', 'still']` — 코드에서 `still` 은 `motion` 과 같은 경로(인라인 SVG figure)로 삽입된다
+- 판정 결과를 STEP 4 삽입 순서대로 기록한다: `window._slotTypes = ['photo', 'motion', 'still']` — 코드에서 `motion` 은 `<video>` figure, `still` 은 일반 `<img>` figure로 삽입된다 (v7.3)
 - **Flow 생성 장수 = (hasStockImg ? 1 : 0) + photo 슬롯 수.** 이 값이 0이면 STEP 5·6을 건너뛰고 STEP 7로 간다
 - Claude 제작컷도 데코로 계산한다 — 총량 상한 5장(`evidence + deco + stock + genCount ≤ 5`)에 그대로 포함된다
 
@@ -560,20 +500,22 @@ STEP 8 보고에 실물 이미지별로 ⓐ 조달 경로(프레스킷 / 공식 
 
 ---
 
-#### 3-10. Claude 제작컷 규격 — 인라인 SVG 모션·정적 그래픽 (v7.0 신설 · v7.1 정적 추가)
+#### 3-10. Claude 제작컷 규격 — SVG로 설계 → MP4·WebP로 렌더해 업로드 (v7.0 신설 · v7.1 정적 추가 · v7.3 파일 렌더 전환)
+
+> 🚨 **(v7.3) 인라인 SVG를 본문에 넣지 않는다.** 2026-10-04 Post 2049의 인라인 SVG 2장이 사용자 화면에서 보이지 않았다. 아래 ①~⑧은 **설계 원본(SVG)** 을 만드는 규격으로 그대로 쓰고, 완성된 SVG는 ⑨에서 **모션 → MP4 + 포스터 WebP, 정적 → WebP** 로 렌더해 ⑩에서 업로드하고 ⑪의 마크업으로 넣는다. KoreaPlug 3-6과 같은 구조다.
 
 > 🆕 **(v7.1) 정적(still) 제작컷도 같은 규격을 따른다.** 차이는 `<style>` 안에 `@keyframes`·`animation` 을 넣지 않는 것뿐이다. 이때 `prefers-reduced-motion` 블록은 생략해도 된다(⑦ 검증기가 애니메이션이 없으면 그 항목을 통과시킨다). 분기도·체크리스트·요약 비교처럼 움직임이 이해를 돕지 않는 그림은 정적으로 만든다. 본문에서 이 문서의 '설명컷'은 모션·정적을 모두 가리킨다.
 
 > 사진으로 찍을 수 없는 설명(수치·배수·흐름·분기·기한)은 생성 모델에 맡기지 않고 **Claude가 직접 그린다.**
-> Flow·업로드·캡처가 필요 없고, 글자와 숫자가 **본문과 정확히 일치**한다. 비용 0원. 생성 이미지가 원리적으로 못 하는 일(정확한 숫자·한글)을 하는 것이 설명컷의 존재 이유다.
+> Flow가 필요 없고, 글자와 숫자가 **본문과 정확히 일치**한다. 비용 0원. 생성 이미지가 원리적으로 못 하는 일(정확한 숫자·한글)을 하는 것이 설명컷의 존재 이유다.
 
-**① 형식 — 인라인 SVG + 내부 CSS 애니메이션 (WP 미디어 업로드 없음)**
+**① 형식 — 설계는 SVG + 내부 CSS 애니메이션, 게시는 파일 (v7.3)**
 
-- 본문에 `<figure class="motion-figure">` 로 직접 삽입한다
-- 근거: 0and1life 관리자 계정 `unfiltered_html: true` (2026-10-02 REST `users/me?context=edit` 확인). 최근 100편 중 `<style>` 태그가 저장된 글이 1건 있다 — 관리자 저장 시 필터링되지 않는다
+- 설계 원본은 `<figure class="motion-figure">` 로 감싼 SVG 문자열이다. 이 문자열은 ⑦·⑧ 검증과 ⑨ 렌더에만 쓰고 **본문에는 넣지 않는다**
+- ⛔ (v7.3) 舊 근거(`unfiltered_html: true` 라 저장은 된다)는 유효하지만, **저장되는 것과 화면에 보이는 것은 다르다** — 2026-10-04 실측으로 인라인 게시를 폐지했다
 - ⛔ `<script>`, `<foreignObject>`, `<image>`, 외부 URL(`href="http…"`, `@import`, `url(`), 웹폰트 로드 금지 — **자급자족 SVG만**
 - 용량 상한 **12KB** (보통 2~6KB)
-- 파일이 아니므로 WebP 변환·`srcset`·`wp-image` 클래스 규칙(STEP 7)은 적용하지 않는다
+- (v7.3) 렌더한 파일은 일반 이미지와 같다 — 정적 WebP는 `srcset`·`wp-image` 클래스 규칙(STEP 7)을 그대로 적용한다. MP4는 `<video>` 라 해당하지 않는다
 
 **② 무엇을 그리나 — 5가지 형식 중 하나**
 
@@ -714,7 +656,96 @@ NODE_PATH=$(npm root -g) node shot.js && ls mf_*.png
 
 - 두 장을 Read로 열어 ⓐ 글자끼리 겹치지 않는가 ⓑ 오른쪽이 잘리지 않는가 ⓒ 375px에서 가장 작은 글자를 읽을 수 있는가 ⓓ 막대 비율이 숫자와 맞는가 ⓔ 정지 구간에서 흐리지 않은가를 확인한다
 - 하나라도 걸리면 고치고 다시 찍는다. 2회 수정 후에도 안 되면 그 슬롯은 촬영컷으로 돌리거나 비워 두고 STEP 8에 보고한다
-- figure 문자열을 브라우저 탭으로 옮길 때는 `javascript_tool` 에 **문자열 리터럴로 직접** 넣는다 (`window._motionSvg['2'] = String.raw\`...\``). 백틱이 문자열 안에 없으므로 안전하다
+- figure 문자열은 ⑦ 검증을 위해 `javascript_tool` 에 **문자열 리터럴로 직접** 넣는다 (`window._motionSvg['2'] = String.raw\`...\``). 백틱이 문자열 안에 없으므로 안전하다. 본문 삽입에는 쓰지 않는다 (v7.3)
+
+**⑨ 파일 렌더 — 클라우드 `Bash` (v7.3 · Flow 생성 대기 시간에 병행해도 된다)**
+
+슬롯 번호 `N`, 설계 원본 `mfN.html`(⑧과 같은 figure 문자열)을 scratchpad에 두고 실행한다. 프레임 단위로 렌더하므로 **탭 가시성·실시간과 무관**하다.
+
+```bash
+cd SCRATCHPAD && S=SLUG && N=2 && rm -rf f && mkdir -p f
+cat > rec.js <<'JS'
+const {chromium} = require('playwright'); const fs = require('fs');
+const [file, mode] = [process.argv[2], process.argv[3]];          // mode: motion | still
+(async () => {
+  const b = await chromium.launch(); const p = await b.newPage({viewport: {width: 1280, height: 720}});
+  const svg = fs.readFileSync(file, 'utf8').match(/<svg[\s\S]*?<\/svg>/)[0]
+    .replace(/style="display:block;height:auto;border-radius:8px;background:#f7f8f6"/, 'style="display:block;width:1280px;height:720px;background:#f7f8f6"');
+  await p.setContent('<meta charset="utf-8"><body style="margin:0;font-family:sans-serif">' + svg + '</body>');
+  await p.waitForTimeout(300);
+  if (mode === 'still') { await p.screenshot({path: 'still.png'}); await b.close(); return console.log('still'); }
+  const FPS = 24; let i = 0;
+  for (let t = 0; t <= 5.4; t += 1 / FPS) {                        // 6초 주기 중 90% 지점(완성 상태)까지
+    await p.evaluate(ms => document.getAnimations().forEach(a => { a.pause(); a.currentTime = ms; }), t * 1000);
+    await p.screenshot({path: 'f/' + String(i++).padStart(4, '0') + '.png'});
+  }
+  const last = 'f/' + String(i - 1).padStart(4, '0') + '.png';
+  for (let k = 0; k < 48; k++) fs.copyFileSync(last, 'f/' + String(i++).padStart(4, '0') + '.png');   // 완성 상태 2초 정지
+  await b.close(); console.log('frames', i);
+})();
+JS
+# 모션 슬롯
+NODE_PATH=$(npm root -g) node rec.js mf$N.html motion
+LAST=$(ls f | tail -1)
+ffmpeg -y -loglevel error -framerate 24 -i f/%04d.png -c:v libx264 -pix_fmt yuv420p -crf 26 -preset slow -movflags +faststart -an 0and1life-motion-$S-$N.mp4
+ffmpeg -y -loglevel error -i f/$LAST -c:v libwebp -quality 85 0and1life-motion-$S-$N-poster.webp
+# 정적 슬롯
+# NODE_PATH=$(npm root -g) node rec.js mf$N.html still && ffmpeg -y -loglevel error -i still.png -c:v libwebp -quality 88 0and1life-motion-$S-$N.webp
+mkdir -p /mnt/user-data/outputs/ol_motion && cp 0and1life-motion-$S-* /mnt/user-data/outputs/ol_motion/ && ls -la /mnt/user-data/outputs/ol_motion
+```
+
+- 결과는 1280×720 · 약 7.4초 루프(등장 5.4초 + 완성 상태 2초 정지). 2026-10-04 실측: MP4 59KB · 포스터 27KB · 정적 WebP 33KB
+- ⛔ **업로드 전 `Read` 로 프레임 2장(중간·마지막)과 정적 PNG를 직접 본다.** 글자 겹침·잘림·막대 비율을 여기서 잡는다
+- 용량 목표 600KB 이하. 넘으면 `-crf 30`
+- 렌더 실패(Chromium·ffmpeg 오류)면 그 슬롯을 촬영컷으로 돌리거나 비워 두고 STEP 8에 보고한다. **인라인 SVG로 되돌리지 않는다**
+
+**⑩ WP 업로드 — `file_upload` 전용 파일 입력 경로 (v7.3 · postMessage 불필요)**
+
+1. WP media-new 탭에 전용 파일 입력을 만든다:
+```javascript
+const i = document.createElement('input'); i.type = 'file'; i.multiple = true;
+i.setAttribute('aria-label', 'ol motion picker'); i.style.cssText = 'position:fixed;top:120px;left:20px;z-index:99999';
+document.body.appendChild(i); 'added'
+```
+2. `find` 로 **`ol motion picker`** 를 정확히 지정해 ref를 얻는다. ⛔ WP 기본 `업로드` 버튼(plupload 입력)을 잡으면 즉시 자동 업로드된다 — 반환된 이름이 `ol motion picker` 인지 확인한다
+3. `file_upload` 로 `/mnt/user-data/outputs/ol_motion/` 의 파일을 한 번에 넣는다 (MP4·포스터·정적 WebP)
+4. 같은 탭에서 REST로 올린다:
+```javascript
+const i = document.querySelector('input[aria-label="ol motion picker"]'), out = [];
+const ALT = {'2': 'ALT_2', '3': 'ALT_3'};                        // 슬롯 번호별 alt
+window._mv = window._mv || {};
+for (const f of i.files) {
+  const fd = new FormData(); fd.append('file', f, f.name);
+  const j = await fetch('/wp-json/wp/v2/media', {method: 'POST', headers: {'X-WP-Nonce': window._nonce}, body: fd}).then(r => r.json());
+  if (!j.id) { out.push(f.name + ' FAIL ' + JSON.stringify(j).slice(0, 120)); continue; }
+  const m = f.name.match(/-(\d)(-poster)?\.(mp4|webp)$/); const n = m[1];
+  const key = m[2] ? 'poster' : (m[3] === 'mp4' ? 'mp4' : 'still');
+  if (key !== 'poster') await fetch('/wp-json/wp/v2/media/' + j.id, {method: 'POST', headers: {'X-WP-Nonce': window._nonce, 'Content-Type': 'application/json'}, body: JSON.stringify({alt_text: ALT[n]})});
+  (window._mv[n] = window._mv[n] || {alt: ALT[n]})[key] = {id: j.id, url: j.source_url};
+  out.push(f.name.slice(-24) + ' -> ' + j.id + ' ' + j.mime_type);
+}
+i.remove(); out.join(' | ')
+```
+5. 슬롯별 figcaption을 `window._mvCap[n]` 에 넣는다 (예: `그림: 본문 증여세 계산표(2026년 세율, 신고 시) 기준 재구성`)
+
+**⑪ 삽입 마크업 (v7.3) — STEP 7-2가 아래 형태를 만든다**
+
+```html
+<!-- 모션 -->
+<figure class="ol-motion" style="margin:20px 0">
+  <video src="MP4_URL" poster="POSTER_URL" width="1280" height="720" autoplay muted loop playsinline preload="metadata"
+         aria-label="ALT" style="width:100%;height:auto;display:block;border-radius:8px;"></video>
+  <figcaption style="font-size:13px;color:#777;margin-top:6px">그림: …</figcaption>
+</figure>
+<!-- 정적 -->
+<figure style="margin:20px 0">
+  <img class="wp-image-ID" loading="lazy" decoding="async" width="1280" height="720" style="width:100%;display:block;height:auto;border-radius:8px;" src="WEBP_URL" alt="ALT" />
+  <figcaption style="font-size:13px;color:#777;margin-top:6px">그림: …</figcaption>
+</figure>
+```
+
+- `muted` + `playsinline` 이 없으면 모바일에서 자동재생되지 않는다
+- 같은 정보가 본문 텍스트·표에도 있어야 한다 (모션만으로 정보를 전달하지 않는다 — 접근성·검색)
 
 ---
 
@@ -1322,20 +1353,24 @@ WordPress의 `wp_filter_content_tags()` 는 **`wp-image-{ID}` 클래스가 붙�
 > 2026-08-19 실측: 발행분 751·894·1095 전부 `srcset 0 / wp-image 클래스 0 / lazy 0`. Post 1175도 동일 — 표시 폭 728px 자리에 1226px 원본이 그대로 전송되고 있었다. **Flow 전환 이전부터 있던 결함**이며, v4.0의 해상도 증가가 이를 두 배로 키웠다.
 
 ```javascript
-// 2) 역순으로 슬롯 삽입 (v7.0 — 촬영컷은 <img>, 설명컷은 인라인 SVG figure · 뒤→앞 순서라 인덱스가 밀리지 않음)
+// 2) 역순으로 슬롯 삽입 (v7.3 — 촬영컷·정적은 <img>, 모션은 <video> figure · 뒤→앞 순서라 인덱스가 밀리지 않음)
 // (v6.1) 촬영컷은 도착 순이 아니라 태그 순으로 — 6-3 하단 참조
 window._byTag = {}; (window._uploadedIds || []).forEach(u => { const m = u.tag.match(/-(hero|\d)\.webp$/); window._byTag[m[1]] = u; });
 // window._slotTypes = ['photo', 'motion', 'still']  (STEP 3-0 · v7.1)
-// window._motionSvg = {'2': '<figure class="motion-figure" ...>...</figure>'}  (STEP 3-10, 키는 슬롯 번호 · ⑦ PASS 필수)
+// window._mv = {'2': {alt, mp4:{id,url}, poster:{id,url}}, '3': {alt, still:{id,url}}}  (STEP 3-10 ⑩, 키는 슬롯 번호)
+// window._mvCap = {'2': '그림: …', '3': '그림: …'}
 const pts = window._insertPoints;
 const types = window._slotTypes || pts.map(() => 'photo');
 let c = window._finalContent;
 const skipped = [];
 for (let i = pts.length - 1; i >= 0; i--) {
   const n = String(i + 1); let block = null;
-  if (types[i] === 'motion' || types[i] === 'still') {          // (v7.1) 정적 제작컷도 같은 경로
-    const f = (window._motionSvg || {})[n];
-    if (f && /^PASS/.test(window._mfCheck(f))) block = '\n' + f + '\n';
+  const cap = '\n  <figcaption style="font-size:13px;color:#777;margin-top:6px">' + ((window._mvCap || {})[n] || '') + '</figcaption>';
+  const mv = (window._mv || {})[n];
+  if (types[i] === 'motion') {                                    // (v7.3) MP4 + 포스터
+    if (mv && mv.mp4 && mv.poster) block = '\n<figure class="ol-motion" style="margin:20px 0">\n  <video src="' + mv.mp4.url + '" poster="' + mv.poster.url + '" width="1280" height="720" autoplay muted loop playsinline preload="metadata" aria-label="' + mv.alt + '" style="width:100%;height:auto;display:block;border-radius:8px;"></video>' + cap + '\n</figure>\n';
+  } else if (types[i] === 'still') {                              // (v7.3) 정적 WebP
+    if (mv && mv.still) block = '\n<figure style="margin:20px 0">\n  <img class="wp-image-' + mv.still.id + '" loading="lazy" decoding="async" width="1280" height="720" style="width:100%;display:block;height:auto;border-radius:8px;" src="' + mv.still.url + '" alt="' + mv.alt + '" />' + cap + '\n</figure>\n';
   } else {
     const u = window._byTag[n];                              // (v5.4) id 필수 — srcset 주입의 열쇠
     if (u) block = '\n<figure style="margin:20px 0">\n  <img class="wp-image-' + u.id + '" loading="lazy" decoding="async" style="width:100%;display:block;height:auto;border-radius:8px;" src="' + u.url + '" alt="' + u.alt + '" />\n</figure>\n';
@@ -1346,10 +1381,11 @@ for (let i = pts.length - 1; i >= 0; i--) {
 window._newContent = c;
 'inserted len:' + c.length + ' types:' + types.join(',') + ' skipped:' + (skipped.join(',') || 'none')
  + ' wpImgClass:' + ((c.match(/wp-image-\d+/g) || []).length)
- + ' motionFig:' + ((c.match(/class="motion-figure"/g) || []).length)
+ + ' olMotion:' + ((c.match(/class="ol-motion"/g) || []).length)
+ + ' video:' + ((c.match(/<video[^>]*autoplay muted loop playsinline/g) || []).length)
 ```
 
-ℹ️ **(v7.0) `skipped` 가 비어 있지 않으면** 그 슬롯은 비운 채 진행하고 STEP 8에 사유를 남긴다. 설명컷은 `_mfCheck` 가 `PASS` 가 아니면 절대 삽입하지 않는다. 블록 에디터 글(`blocks` 가 2 이상)도 기존 촬영컷 figure와 같은 방식(블록 사이 raw HTML)으로 넣는다 — 블록 수는 변하지 않는다.
+ℹ️ **(v7.0) `skipped` 가 비어 있지 않으면** 그 슬롯은 비운 채 진행하고 STEP 8에 사유를 남긴다. 설명컷은 ⑦ `_mfCheck` PASS · ⑧ 렌더 확인 · ⑨ 프레임 육안 확인을 통과해 ⑩에서 업로드된 것만 삽입한다 (v7.3). 블록 에디터 글(`blocks` 가 2 이상)도 기존 촬영컷 figure와 같은 방식(블록 사이 raw HTML)으로 넣는다 — 블록 수는 변하지 않는다.
 
 ⚠️ **히어로(첫 화면 이미지)에는 `loading="lazy"` 를 붙이지 않는다.** LCP 요소를 지연 로딩하면 오히려 느려진다. 7-2.5의 스톡 교체 코드가 히어로를 다루므로 그쪽에서 `fetchpriority="high"` 를 넣는다.
 
@@ -1550,15 +1586,15 @@ window._evGuard = {
   gridArea:cnt(after, /grid-area:1\/1/g),                                            // (v6.0) 히어로 있으면 3
   clampCnt:cnt(after, /clamp\(/g),                                                   // (v6.0) 히어로 있으면 4
   fixed26: cnt(after, /font-size:26px/g),                                            // (v6.0) 0이어야 함 — 고정 26px 잔존
-  motionFig: cnt(before, /class="motion-figure"/g) + '->' + cnt(after, /class="motion-figure"/g), // (v7.0) 이번 설명컷 수만큼 늘어야 함
-  svgBad:  (after.match(/<svg[\s\S]*?<\/svg>/g) || []).filter(x => /<script|foreignObject|<image|href="http|@import|url\(/i.test(x)).length, // (v7.0) 0이어야 함
-  mfIdDup: (() => { const ids = (after.match(/<g id="(mf-[a-z0-9-]+)"/g) || []); return ids.length - new Set(ids).size; })() // (v7.0) 0이어야 함 — 설명컷 ID 충돌
+  olMotion: cnt(before, /class="ol-motion"/g) + '->' + cnt(after, /class="ol-motion"/g),   // (v7.3) 이번 모션 슬롯 수만큼 늘어야 함
+  videoOk: (after.match(/<video[^>]*>/g) || []).filter(x => !/autoplay/.test(x) || !/muted/.test(x) || !/playsinline/.test(x) || !/poster="/.test(x)).length, // (v7.3) 0이어야 함
+  svgAdded: cnt(after, /<svg/g) - cnt(before, /<svg/g)          // (v7.3) 0이어야 함 — 인라인 SVG를 새로 넣지 않는다
 };
 Object.entries(window._evGuard).map(([k, v]) => k + ': ' + v).join('\n')
 ```
 
 ⛔ 위 검증에서 하나라도 어긋나면 **저장하지 않는다.** 원인을 해결한 뒤 다시 만든다.
-🆕 **(v7.0) `svgBad` · `mfIdDup` 이 0이 아니거나 `motionFig` 증가분이 이번 설명컷 수와 다르면 저장 금지.**
+🆕 **(v7.3) `svgAdded` · `videoOk` 가 0이 아니거나 `olMotion` 증가분이 이번 모션 슬롯 수와 다르면 저장 금지.** 정적 제작컷은 일반 이미지라 `wpImgCls`·`noWpCls` 규칙을 그대로 따른다.
 🆕 **(v5.4) `noWpCls` 가 0이 아니면 그 이미지는 srcset을 못 받는다** — 클래스 주입이 빠진 것이므로 저장 금지. `wpImgCls` 증가분이 이번에 넣은 이미지 수와 다른 경우도 마찬가지다.
 🆕 **(v5.0) `dupImg` 가 0이 아니면 같은 이미지가 본문에 두 번 들어간 것이다** — STEP 7-2.5의 순차 교체가 제대로 돌지 않았다는 뜻이므로 저장 금지. `stock` 이 →0이 아니면 교체되지 않은 플레이스홀더가 남은 것이다.
 🚨 **(v6.0) `absCap` 또는 `fixed26` 이 0이 아니면 저장 금지.** 전자는 절대위치 캡션이, 후자는 고정 26px 폰트가 남아 있다는 뜻이고 **둘 다 모바일에서 제목이 잘리는 원인**이다. 히어로가 있는 글이라면 `gridArea` 는 **3**, `clampCnt` 는 **4** 여야 한다 (히어로가 없는 글은 둘 다 0).
@@ -1592,19 +1628,18 @@ fetch('/wp-json/wp/v2/posts/POST_ID', {
 복구 사실은 STEP 8 보고에 **반드시 명시**한다.
 
 ```javascript
-// 3.5) (v7.0) 저장 후 SVG 생존 확인 — 설명컷을 넣은 회차에는 필수. WP가 SVG·style을 걸러내지 않았는지 raw를 다시 읽어 본다
+// 3.5) (v7.3) 저장 후 모션 생존 확인 — 모션을 넣은 회차에는 필수. WP가 <video> 속성을 걸러내지 않았는지 raw를 다시 읽어 본다
 const saved = await fetch('/wp-json/wp/v2/posts/POST_ID?context=edit&_fields=content,status', {headers: {'X-WP-Nonce': window._nonce}}).then(r => r.json());
 const cnt2 = (s, re) => (s.match(re) || []).length;
 const A = window._newContent, B = saved.content.raw;
-'svg:' + cnt2(A, /<svg/g) + '->' + cnt2(B, /<svg/g)
- + ' style:' + cnt2(A, /<style>/g) + '->' + cnt2(B, /<style>/g)
- + ' keyframes:' + cnt2(A, /@keyframes/g) + '->' + cnt2(B, /@keyframes/g)
- + ' motionFig:' + cnt2(A, /class="motion-figure"/g) + '->' + cnt2(B, /class="motion-figure"/g)
+'video:' + cnt2(A, /<video[^>]*autoplay muted loop playsinline/g) + '->' + cnt2(B, /<video[^>]*autoplay muted loop playsinline/g)
+ + ' olMotion:' + cnt2(A, /class="ol-motion"/g) + '->' + cnt2(B, /class="ol-motion"/g)
+ + ' poster:' + cnt2(A, /poster="/g) + '->' + cnt2(B, /poster="/g)
  + ' same:' + (A === B) + ' status:' + saved.status
 ```
 
-- 네 항목 모두 좌우가 같아야 한다. `same:false` 여도 개수가 같으면 WP의 공백 정규화일 뿐이므로 정상이다
-- **줄어들었다면 WP가 필터링한 것이다.** 즉시 설명컷 figure를 전부 뺀 본문(`window._newContent` 에서 `<figure class="motion-figure"[\s\S]*?</figure>` 제거)을 `status: window._origStatus` 와 함께 다시 저장하고, STEP 8에 🔴 「설명컷 저장 실패 — 인라인 SVG 필터링」으로 보고한다. 다음 회차부터는 사용자 결정 전까지 설명컷을 만들지 않는다
+- 세 항목 모두 좌우가 같아야 한다. `same:false` 여도 개수가 같으면 WP의 공백 정규화일 뿐이므로 정상이다
+- **줄어들었다면 WP가 `<video>` 속성을 걸러낸 것이다.** 즉시 모션 figure 자리를 포스터 WebP `<img>` figure로 바꿔 `status: window._origStatus` 와 함께 다시 저장하고, STEP 8에 🔴 「모션 저장 실패 — video 필터링」으로 보고한다
 
 ```javascript
 // 4) 대표이미지(featured image) 설정 — (v3.4) status 동봉. 실패해도 전체 태스크는 중단하지 않음
@@ -1729,19 +1764,26 @@ f.remove(); out
   - **여유가 0 이상이면 통과.** 음수면 제목 윗줄이 잘린 것이므로 7-2.6b를 다시 돌린다
   - 여유가 **10px 미만이면 320px(구형 아이폰 SE)에서 위험**하므로 `f.style.width` 를 `320px` 로 바꿔 한 번 더 본다
   - 2026-08-31 기준 정상 예시: 375px에서 `figH204 capH145 여유60px fs16.5px ✅`, 320px에서 여유 6px
-- 🆕 **(v7.0) 설명컷이 실제로 그려지고 움직이는가?** 프리뷰에서 실행:
+- 🆕 **(v7.3) 설명컷(모션 MP4·정적 WebP)이 실제로 보이는가?** 프리뷰에서 실행:
 
 ```javascript
-Array.from(document.querySelectorAll('.entry-content figure.motion-figure')).map((f, n) => {
-  const svg = f.querySelector('svg'); const r = svg ? svg.getBoundingClientRect() : {width: 0, height: 0};
-  const anim = svg ? Array.from(svg.querySelectorAll('*')).filter(e => getComputedStyle(e).animationName !== 'none').length : 0;
-  return n + ' ' + (f.dataset.mf || '-') + ' w' + Math.round(r.width) + ' h' + Math.round(r.height) + ' animEls:' + anim
-    + ' @' + Math.round((f.getBoundingClientRect().top + scrollY) / document.documentElement.scrollHeight * 100) + '%';
-}).join('\n') || 'no motion-figure'
+const H = document.documentElement.scrollHeight, out = [];
+for (const v of document.querySelectorAll('.entry-content figure.ol-motion video')) {
+  v.scrollIntoView({block: 'center'}); await new Promise(r => setTimeout(r, 2500));
+  const r = await fetch(v.currentSrc || v.src, {headers: {Range: 'bytes=0-63'}});
+  const s = String.fromCharCode(...new Uint8Array(await r.arrayBuffer()));
+  out.push('video ' + r.status + ' ' + r.headers.get('content-type') + ' ftyp:' + s.includes('ftyp') + ' moovEarly:' + s.includes('moov')
+    + ' rs' + v.readyState + ' paused:' + v.paused + ' w' + Math.round(v.getBoundingClientRect().width)
+    + ' @' + Math.round((v.getBoundingClientRect().top + scrollY) / H * 100) + '%');
+}
+for (const im of Array.from(document.querySelectorAll('.entry-content img')).filter(i => /0and1life-motion-/.test(i.src) && !/poster/.test(i.src)))
+  out.push('still srcset:' + (im.getAttribute('srcset') ? 'Y' : 'N') + ' @' + Math.round((im.getBoundingClientRect().top + scrollY) / H * 100) + '%');
+out.join('\n') + '\nsvgInBody:' + document.querySelectorAll('.entry-content svg').length + ' vis:' + document.visibilityState
 ```
 
-  - `w` 가 본문 폭(약 728)이고 `h` 가 그 9/16 안팎, `animEls` 가 1 이상이면 정상이다. `animEls:0` 이면 테마·최적화 플러그인이 `<style>` 을 걸러낸 것이다 — STEP 8에 🔴 보고
-  - 스크린샷 1장으로 설명컷이 **정지 구간에서** 또렷하게 보이는지 눈으로 확인한다 (스크롤해 화면 가운데 두고 3초 뒤 촬영)
+  - `206 · video/mp4 · ftyp:true · moovEarly:true` 면 통과다. MCP 탭이 백그라운드(`vis:hidden`)이면 Chrome이 미디어 로딩을 미뤄 `rs0 · paused:true` 가 나온다 — **고장이 아니다** (2026-10-04 실측, KoreaPlug 10-02 동일)
+  - 스크린샷 1장으로 모션 자리에 **포스터(완성 상태)** 가, 정적 자리에 그림이 보이는지 눈으로 확인한다
+  - `svgInBody` 가 이번 회차에 늘었다면 인라인 SVG가 잘못 들어간 것이다 — 🔴 보고
   - 설명컷 위치도 STEP 4의 증빙 ±5%pt 규칙과 인접 이미지 간격 5%pt 이상 규칙을 똑같이 따른다
 - 증빙 캡처가 원래 자리에 그대로 있는가? (`window._evGuard` 확인)
 - **워터마크 흔적(✦)이 남아 있지 않은가?** — 남아 있으면 STEP 5-4의 `cropRight` 값을 늘려 재캡처하거나, 이미 업로드된 파일을 0and1life.com **동일 출처**에서 canvas로 다시 읽어 재크롭·재업로드한다.
@@ -1780,7 +1822,7 @@ Array.from(document.querySelectorAll('.entry-content figure.motion-figure')).map
 - 🆕 **(v5.5) UI 오탐 발생 여부**: ⓐ 5-3 폴링의 `same` 이 2 이상으로 올라가 스크린샷 폴백을 썼는지 ⓑ 5-2 포커스 검증에서 상단 검색창이 잡혀 재클릭했는지 ⓒ 필터 칩 해제가 필요했는지. **세 항목 모두 "없음"이면 한 줄로 "UI 오탐 없음"만 적는다**
 - 🆕 **(v5.9) 뷰포트·전송 사고 기록**: ⓐ `zoom` 호출 횟수(**0이어야 정상**) ⓑ 뷰포트 고착이 발생했다면 그 시점과 탭 재생성 여부 ⓒ 전송 검증(`boxLen`)에서 실패로 잡혀 재클릭한 건수 ⓓ 인덱스 확정에 쓴 방법(`outline` 마킹 / RGB 서명). **모두 정상이면 한 줄로 "뷰포트·전송 사고 없음"만 적는다**
 - 🆕 **(v6.0) 모바일 히어로 검증 결과**: 375px 아이프레임 실측의 `figH`/`capH`/`여유`/`fs` 를 그대로 적고, 여유가 10px 미만이면 320px 재측정 값도 함께 남긴다. `_evGuard` 의 `absCap`·`fixed26`(둘 다 0) · `gridArea`(3) · `clampCnt`(4)도 명시한다
-- 🆕 **(v7.0) 슬롯 유형표**: 슬롯별 `photo/motion`, 판정 이유 한 줄("찍을 수 있는 장면인가"), 설명컷은 형식(막대·흐름·분기·타임라인·체크리스트)과 `_mfCheck` 결과·렌더 검증(1280/375) 결과·저장 후 생존 확인 결과
+- 🆕 **(v7.0) 슬롯 유형표**: 슬롯별 `photo/motion`, 판정 이유 한 줄("찍을 수 있는 장면인가"), 설명컷은 형식(막대·흐름·분기·타임라인·체크리스트)과 `_mfCheck` 결과·렌더 검증(1280/375) 결과·(v7.3) 업로드 미디어 ID(MP4·포스터·정적)·용량·프리뷰 `206/ftyp` 결과
 - 🆕 **(v7.0) 촬영컷 사실감 판정**: 이미지별 AI 티 판정 통과 여부와 탈락 사유, 채택한 쪽. 그레인 강도(`GRAIN`)와 장당 KB
 - 🆕 **(v7.0) 비용**: 사용한 도구와 크레딧 차감 여부 — **0이어야 정상**
 - 🆕 **(v7.2) Flow 모델**: 사용한 모델(`Nano Banana Pro` / `Nano Banana 2`), 선택 근거(드롭다운의 Pro 크레딧 표시 내용), 크레딧 잔액 생성 전→후. 폴백했다면 그 사유
@@ -1795,7 +1837,8 @@ Array.from(document.querySelectorAll('.entry-content figure.motion-figure')).map
 - 💸 **(v7.0) 비용 0원.** 크레딧이 드는 도구(Higgsfield 등 유료 생성 서비스, 크레딧 차감 옵션)는 쓰지 않는다 (2026-10-02 사용자 지시)
 - 🍌 **(v7.2) Flow 모델은 `Nano Banana Pro` 우선 — 단 0크레딧일 때만** (2026-10-03 사용자 지시). 드롭다운에서 Pro의 크레딧 표시를 확인하고, 차감 표시가 있거나 애매하면 `Nano Banana 2` 로 폴백한다. 첫 쌍 생성 뒤 잔액이 줄었으면 즉시 Nano Banana 2로 전환하고 보고한다 (STEP 5-1 ③)
 - 📷 **(v7.1) 촬영컷은 '밝은 일상 사진'이다** (STEP 3-2-R). 지인이 인스타에 올린 듯한 자연광·밝은 실내·high-key·장면 대부분 선명. 손해·경고성 글만 흐린 날 자연광의 차분한 톤. ⛔ 어둡고 무거운 분위기, 밤·단일 조명·강한 그림자, 공중에 뜬 물체, `the only bright accent`, 강한 보케, 풀프레임·대구경 렌즈 명시, 노이즈·JPEG·사용감 강조
-- 🧩 **(v7.0) 설명컷은 3-10 규격을 그대로 따른다** — `viewBox 0 0 720 405`, 최소 글자 22, 모든 선택자·keyframes를 고유 ID로 시작, opacity는 모든 프레임에 명시, `prefers-reduced-motion` 필수, `<script>`·외부 URL 금지, 12KB 이하. **`_mfCheck` PASS + Playwright 1280/375 렌더 확인 + 저장 후 생존 확인** 세 관문을 모두 통과해야 한다. 숫자는 본문 그대로 쓰고 새로 계산하지 않는다
+- 🧩 **(v7.0) 설명컷은 3-10 규격을 그대로 따른다** — `viewBox 0 0 720 405`, 최소 글자 22, 모든 선택자·keyframes를 고유 ID로 시작, opacity는 모든 프레임에 명시, `prefers-reduced-motion` 필수, `<script>`·외부 URL 금지, 12KB 이하. **`_mfCheck` PASS + Playwright 1280/375 렌더 확인 + 저장 후 생존 확인** 세 관문을 모두 통과해야 한다.
+- 🎬 **(v7.3) 인라인 SVG를 본문에 넣지 않는다.** SVG는 설계 원본일 뿐이고, 모션은 **MP4 + 포스터 WebP**(`<figure class="ol-motion"><video autoplay muted loop playsinline poster>`), 정적은 **WebP `<img>`** 로 렌더·업로드해 넣는다 (3-10 ⑨⑩⑪). 2026-10-04 Post 2049에서 인라인 SVG가 사용자 화면에 보이지 않아 폐지했다 숫자는 본문 그대로 쓰고 새로 계산하지 않는다
 - 📸 **(v5.8) 이 루틴은 Flow 생성 이미지만 쓰는 루틴이 아니다** (STEP 3-9). 글에 실제로 존재하는 제품·앱·서비스·기관이 나오고 실물 이미지가 필요하면 **넣는다.** 규칙은 셋 — ① **공식 출처**(프레스킷·공식 사이트 캡처·공식 채널)는 그냥 쓴다 ② **아마존 이미지는 핫링크만**, 자체 업로드 금지 ③ **출처 불명 이미지는 쓰지 않는다**(유일한 금지선). figcaption에 출처+확인일 병기, 개인정보 화면 제외. 실물 1장은 증빙으로 계산돼 생성이 1장 줄어든다
 - Chrome이 열려 있고, 0and1life.com WP admin에 로그인되어 있어야 함
 - **(v4.0 · v6.1) Google Flow(`flow.google.com`, 舊 labs.google)에 로그인되어 있어야 함** — Flow 프로젝트 URL은 STEP 5 상단 참조. `labs.google` URL은 `flow.google.com` 으로 리다이렉트된다
