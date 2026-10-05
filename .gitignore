@@ -17,3 +17,8 @@ desktop.ini
 *.tmp
 *.bak
 ~$*
+
+# ── GSC 수집기 (tools/gsc_pull.py) — 서비스 계정 키·산출물 커밋 금지 ──
+koreaplug-shorts-*.json
+sa.json
+out/
