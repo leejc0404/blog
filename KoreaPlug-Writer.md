@@ -1,6 +1,8 @@
 # ✏️ KoreaPlug Writer 지침
 
-**v13.2 · 2026-09-27**
+**v13.3 · 2026-10-05**
+
+> **v13.3 변경 — 애드센스 2차 반려(2026-10-05, "가치가 별로 없는 콘텐츠") 전수 진단 반영.** 진단 원문: `Documents/Claude/koreaplug_audit_2026-10-05/`. 실측: 발행 156편 중 제목 콜론형 141편 · "Last updated | min read" 114편 · 포커스 키워드 본문 평균 10.5회 · 같은 골격 공유(질문형 H2→Breaks Down→Quick Answers→Key points) · TF-IDF 0.45+ 중복 25편(추석 9편 최대 0.71) · 외부링크 0건 27편 · 28일 0클릭 84편. 템플릿이 가장 강했던 7월 발행 27편의 28일 클릭 합계 6. **바뀐 조항**: `0-4` 허브+위성 상한 · `0-6 ⑤` 주간 상한 · `0-8` 심사 중 모드 · `1-3` 같은 대상 2편 금지 · `2-1`·`2-2` 제목(콜론 선택·호기심 갭 금지) · `2-3` 히어로 메타 줄 삭제·AEO 박스 라벨 삭제·공통 H2 금지·질문형 H2 2개+ · `2-5` 키워드 밀도 3~6회·정확일치 강제 금지·반박형 오프너 금지·사진 1장 · `2-6` 채점 축 교체·Key points 삭제.
 
 > **v13.2 변경**: 내부 링크 대상은 **`status=publish`(공개) 글만** 허용합니다. `future`(예약) · `pending`(검토 대기) · `draft`(임시) · `private`(비공개) 글에 링크를 걸면 공개 전까지 404가 납니다. 조항: `2-1` Internal Link 행 · `2-5` 내부 링크 · `0-5` 관련글 교체 · `5-3` 체크리스트
 
@@ -193,14 +195,16 @@
 - 창이 열리기 전(D-36 이전)의 시즌 후보는 백로그에 앵커 날짜와 함께 적재하고 창 진입 시 꺼냅니다
 - **일회성 이벤트의 자격**: ① 1차 출처에서 날짜가 확정 ② 방한자·체류자의 이동·예약·구매가 실제로 바뀜 ③ 종료 후 다음 연도 갱신이 가능하거나, 아니면 종료와 함께 글을 남겨도 되는 것. 근거: `seoul-bus-strike` 발행 6일 19클릭 — 파업 자체가 아니라 "9/16 아침 무엇을 타야 하나"를 썼다
 
-**⛔ 이벤트별 발행 규칙 — 편수 상한 없음, 성과로 정지**
+**⛔ 이벤트별 발행 규칙 — 허브 1편 + 위성 최대 4편, 성과로 정지**
 
-1. **7일 간격** — 같은 이벤트로 7일 이내 연속 발행 금지
-2. **실행 수식 비중복** — 같은 이벤트의 기존 글과 제목·H2가 겹치는 실행 수식은 쓰지 않습니다(`1-3` 자기잠식 선확인)
-3. **정지 규칙** — 같은 이벤트의 **직전 2편이 각각 발행 7일 시점에 GSC 클릭 2 미만**이면 그 이벤트는 그해 정지합니다. 정지 전까지는 편수를 제한하지 않습니다
+1. **허브 1편** — 이벤트마다 연도 없는 슬러그의 허브 1편(예: `chuseok-closures`)이 그해 날짜·휴무 총론·교통 개요를 **혼자** 갖습니다. 다음 해에는 새 글이 아니라 허브를 갱신합니다
+2. **위성은 이벤트당 최대 4편** — 허브와 **검색 결정이 다른** 질문(특정 시장 영업시간 · 특정 궁 휴관일 · 특정 도시)만 위성이 됩니다. 위성은 허브의 공통 개요(연휴 날짜 표 · "banks closed, palaces open" 총론)를 **반복하지 않고 허브로 링크**합니다. 근거: 2026 추석 9편이 TF-IDF 0.45~0.71로 서로 겹쳐 애드센스 반려 진단의 1순위 원인이 됐다. 클릭은 위성(are-malls-open 170 · gwangjang 127)이 냈고, 총론을 반복한 3편(seoul-during · bank-holiday · closures)은 합계 25클릭이었다
+3. **7일 간격** — 같은 이벤트로 7일 이내 연속 발행 금지
+4. **실행 수식 비중복** — 같은 이벤트의 기존 글과 제목·H2가 겹치는 실행 수식은 쓰지 않습니다(`1-3` 자기잠식 선확인)
+5. **정지 규칙** — 같은 이벤트의 **직전 2편이 각각 발행 7일 시점에 GSC 클릭 2 미만**이면 그 이벤트는 그해 정지합니다
 
 - 편수·직전 2편 성과는 발행 목록 현황표에서 이벤트명으로 세고, 7일 클릭은 `0-9` GSC 데이터로 읽습니다
-- 근거: 추석 클러스터 7편은 순위 5.9~10.3에 각자 다른 쿼리군으로 앉아 있고 자기잠식이 관측되지 않았다. 4편째(20클릭)·7편째(31클릭)가 최고 성과였다
+- 허브가 없는 이벤트의 첫 글은 허브입니다. 허브 슬러그는 `{이벤트}-{실행수식}` 형태로 연도를 넣지 않습니다
 
 ### 0-5. 업그레이드 회차
 
@@ -254,6 +258,12 @@
 
 현황표의 최근 작성일자와 오늘 사이에 목표 미달 날짜가 있으면 `⚠️ 미달 회차 {날짜} {실제}/{목표}`로 보고합니다. 과거 날짜의 목표를 알 수 없으면 1로 간주합니다.
 
+**⑤ 주간 상한 — 일일 목표보다 우선**
+
+- `WEEKLY_CAP` = **4건** (월~일, KST). 현황표에서 이번 주 작성일자 행을 세어 `WEEK_COUNT >= WEEKLY_CAP`이면 그날 목표와 무관하게 **no-op 종료**합니다
+- 4건 중 **신규는 최대 2건**, 나머지는 `0-5` 업그레이드입니다. 신규 2건을 채웠으면 그 주의 남은 회차는 엔진 G (a) 업그레이드 후보만 봅니다(없으면 no-op)
+- 근거: 5개월간 매일 1편(156편)의 결과가 28일 0클릭 84편·CTR 1.3%·애드센스 2회 반려였다. 미달 보고(④)는 주간 상한에 걸린 날을 미달로 세지 않습니다
+
 ### 0-7. WP REST 조회 규격 · 소프트404 · 기존 글 확인
 
 **기존 글 확인의 원천은 Notion 현황표가 아니라 워드프레스입니다.**
@@ -275,13 +285,14 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 - ⚠️ 포커스 키워드 대조는 `?search=`가 제목·본문을 모두 훑으므로 실질 대체됩니다. 정밀 확인은 **라이브 URL의 H2 목록 대조**(`1-3`)로 합니다
 - **자동 탈락 (예외 없음)**: 한국 국내 정치 / 해외 인지도 없는 연예인 스캔들 / 한국어로만 도는 밈 / 외국인 접점 없는 국내 제도 / K-콘텐츠 작품 자체 뉴스(시즌 갱신·캐스팅·배우) / 플롯 질문(ending explained · villain · season 2)
 
-### 0-8. 예산 세 줄
+### 0-8. 예산 네 줄
 
-1. **시즌 창이 열려 있으면 엔진 C 후보를 먼저 검토**합니다 — 7일 간격·정지 규칙 안에서 후보가 있으면 그것이 그날의 글입니다. 근거: 편당 10.6 vs 1.5
+1. **시즌 창이 열려 있으면 엔진 C 후보를 먼저 검토**합니다 — `0-4` 허브·위성 상한과 7일 간격·정지 규칙 안에서 후보가 있으면 그것이 그날의 글입니다. 근거: 편당 10.6 vs 1.5
 2. **제도 헤드(시행일 확정 규제 변경)는 주 1편 상한** — 편당 1.0으로 아직 실적이 없고, 8월 이후 발행분의 40%를 차지해 과잉 생산됐습니다. 실적이 확인되면 상한을 풉니다
-3. **정의형 0편 · 거주 행정 0편** — 후보 생성 자체를 하지 않습니다
+3. **정의형 0편 · 거주 행정 0편 · 문화 설명글 0편** — 후보 생성 자체를 하지 않습니다. 문화 설명글(예절·호칭·미신·"why do koreans")은 28일 실측에서 노출은 있으나 클릭 0~5(sajangnim 942·0, cover-mouth 1,248·5, hoesik 1,325·4)이고, 레딧·위키·TTMIK가 1페이지를 점유합니다
+4. **심사 중 모드** — 애드센스 재검토를 요청한 날부터 결과가 나올 때까지 **신규 0편, 업그레이드만** 수행합니다(`0-5` 주 3회 상한 유지). 해제는 사용자가 전제 조건 표에서 합니다. 근거: 심사관이 보는 "지속적 큐레이션·구조적 유지관리"는 신규 발행 수가 아니라 기존 글의 수정 이력입니다
 
-이 세 줄이 v12의 30일 유형 예산 6종·커버리지 좌표계를 대체합니다. 좌표계 페이지는 참고용으로 남기되 **후보 발굴 입력으로 쓰지 않습니다.**
+이 네 줄이 v12의 30일 유형 예산 6종·커버리지 좌표계를 대체합니다. 좌표계 페이지는 참고용으로 남기되 **후보 발굴 입력으로 쓰지 않습니다.**
 
 ### 0-9. GSC · GA4 데이터 규격 (SSOT)
 
@@ -347,6 +358,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 - [ ] **WP REST 중복 대조**를 모든 검증보다 먼저 끝냈는가? 조회 규격 3종(`status=any` · `per_page=100` · `_fields`) 준수 · 절단 확인
 - [ ] **자기잠식 선확인 — 본문 H2까지**: 인접 주제의 기존 글이 있으면 **라이브 URL(REST `slug` 그대로)의 H2 목록을 대조**합니다. 겹치면 신규가 아니라 `0-5` 업그레이드 대상인지 먼저 봅니다
   - 근거: `no-4th-floor-korea`가 있는데 슬러그에 `elevator`가 없어 백로그를 중복 적재한 사고
+- [ ] **같은 대상에 두 번째 글을 쓰지 않는가?** 같은 장소(시장·산·동네·공항) · 같은 제도 · 같은 매장 유형(무인점포·PC방) · 같은 서류(e-arrival card)를 다루는 공개 글이 이미 있으면 **각도가 달라도 신규 금지** — 그 글에 H2 섹션을 추가하는 `0-5` 업그레이드로 돌립니다. 예외는 `0-4` 시즌 위성뿐입니다. 근거: 2026-10-05 진단에서 설악산 4편·무인점포 4편·광장시장 3편·PC방 2편·e-arrival 2편이 TF-IDF 0.46~0.59로 겹쳐 한 묶음당 1편만 클릭을 받았다
 - [ ] `0-0` 두 방향 중 하나에 해당하고, 두 금지(뉴스 각도·정의형)에 걸리지 않는가?
 - [ ] `0-2` 관문 3개를 전부 통과했는가? — 클릭 필연성 / (다) 1페이지 구성 / 각도 분기(첫 H2 확정)
 - [ ] `0-3` 채점에서 1점 축이 없는가?
@@ -406,10 +418,10 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 |---|---|---|
 | Focus Keyword | S: 하이브리드 2~4단어 / L: 3~5단어 질문형 | `danggeun market` |
 | Sub Keywords | 구글 자동완성 기반 2~4개, `" / "` 구분 | `danggeun korea / carrot market app` |
-| SEO Title | Title Case + `:` • 호기심 후크 (시즌·제도 헤드는 연도 필수) | `Danggeun Market: How Foreigners Actually Buy Secondhand in Korea` |
+| SEO Title | Title Case. **콜론 부제는 선택**이며 직전 10편 중 3편 이하. 부제는 본문에 있는 사실(숫자·날짜·조건)만 (`2-2`). 시즌·제도 헤드는 연도 필수 | `Is Gwangjang Market Open on Chuseok 2026? Food Alley Yes, Fabric Halls No` |
 | H1 | SEO Title과 반드시 동일 | (위와 동일) |
 | Slug | Focus Keyword 하이픈 연결, 40자 이하 (**연도 미포함**) | `danggeun-market` |
-| Meta Description | Focus Keyword로 시작 + 호기심 갭 카피, 130~155자 | |
+| Meta Description | Focus Keyword로 시작 + **직답 한 문장 + 글이 다루는 범위**, 130~155자. 호기심 갭 카피 금지 | |
 | Theme Color | Culture=`#7e22ce` / Lifestyle=`#16a34a` / Food=`#dc2626` / Travel=`#ca8a04` | `#7e22ce` |
 | Internal Link 1 | 관련 슬러그 (상대경로 `/slug/`) — **REST `status=publish` 확인값만** (`2-5`) | `/tipping-in-korea/` |
 | Internal Link 2 | 관련 슬러그 (상대경로 `/slug/`) — **REST `status=publish` 확인값만** (`2-5`) | `/korean-hoesik-culture/` |
@@ -431,8 +443,10 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 
 ### 2-2. 제목 규칙
 
-- Focus Keyword를 제목 앞쪽에 유지 (Title Case 변환)
-- 콜론 뒤 부제는 "호기심 후크": Why / How / What / The Real Reason 등
+- Focus Keyword를 제목 앞쪽에 유지 (Title Case 변환). 질문형 키워드는 **질문 그대로** 제목이 됩니다
+- **콜론 부제는 선택입니다** — 직전 10편 중 콜론형이 3편이면 이번 글은 콜론 없이 씁니다. 근거: 2026-10-05 진단에서 156편 중 141편이 `X: Y`형이었고, 이것이 "찍어낸 글" 신호의 1순위였다
+- 부제를 쓸 때는 **본문에 적힌 사실**(숫자·날짜·조건·장소)만 씁니다. 좋은 예: `Food Alley Yes, Fabric Halls Shut Sunday` · `₩3,000 Free Ticket, Oct 24 Deadline`
+- ⛔ **호기심 갭 금지**: `The Real Reason …` · `What Nobody Tells You` · `Every Guide Gets Wrong` · `Your 2025 Guide Is Already Wrong` · `The Mistake Every Foreigner Makes` · `… Doesn't Exist` 류. 근거: 7월 "The Real Reason" 7편 연속 발행분 27편의 28일 클릭 합계 6
 - **직역 제도 용어 전면 금지**: Civil Act / Age of Majority / Equipment 등 관공서식 표현
 - 미국인이 실제로 구글에 칠 만한 표현만 사용
 - **직전 10개 제목 중 동일 훅 표현이 이미 2회 이상이면 해당 훅 사용 금지**
@@ -450,8 +464,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
   <img decoding="async" src="UNSPLASH_URL" alt="ALT_TEXT" style="width:100%;height:100%;object-fit:cover;display:block;">
   <div style="position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);z-index:1;">
     <div style="position:absolute;bottom:0;left:0;right:0;padding:clamp(16px, 4vw, 32px);z-index:2;box-sizing:border-box;">
-      <h1 style="color:#ffffff !important;font-size:clamp(20px, 4.5vw, 32px);font-weight:800;line-height:1.25;margin:0 0 10px;text-shadow:0 2px 8px rgba(0,0,0,0.6);word-break:keep-all;">SEO_TITLE</h1>
-      <p style="color:rgba(255,255,255,0.9) !important;font-size:14px;margin:0;">Last updated: MONTH YEAR &nbsp;|&nbsp; N min read</p>
+      <h1 style="color:#ffffff !important;font-size:clamp(20px, 4.5vw, 32px);font-weight:800;line-height:1.25;margin:0;text-shadow:0 2px 8px rgba(0,0,0,0.6);word-break:keep-all;">SEO_TITLE</h1>
     </div>
   </div>
 </div>
@@ -486,18 +499,20 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 - ⛔ **본문 래퍼(`max-width` + `margin:0 auto`)를 가진 최상위 `<div>`가 반드시 있어야 합니다.** 이것이 모든 후속 삽입 위치 판정의 기준점입니다. 래퍼가 없으면 Draft 루틴이 업로드를 중단합니다
 - ⛔ **금지 블록**: `<!-- wp:post-content` · `<!-- wp:template-part` · `<!-- wp:query` 를 본문에 넣지 않습니다. 본문 안에 본문을 다시 렌더해 글이 두 번 출력됩니다
 - ⛔ **`div`/`table`/`ul`/`figure` 여는 태그 수와 닫는 태그 수가 일치**해야 합니다
-- ⛔ **플레이스홀더를 남기지 않습니다**: `UNSPLASH_URL` `SEO_TITLE` `THEME_COLOR` `WRAPPER_ID` `ALT_TEXT` `INTRO_PARAGRAPH` `SECTION_TITLE` `FOOTER_CTA_TEXT` `EXTERNAL_URL` `AUTHORITY_SOURCE` `RELATED_SLUG` `MONTH YEAR`
+- ⛔ **플레이스홀더를 남기지 않습니다**: `UNSPLASH_URL` `SEO_TITLE` `THEME_COLOR` `WRAPPER_ID` `ALT_TEXT` `INTRO_PARAGRAPH` `SECTION_TITLE` `FOOTER_CTA_TEXT` `EXTERNAL_URL` `AUTHORITY_SOURCE` `RELATED_SLUG`
 - ⛔ **본문 `<h1>`은 정확히 1개**입니다
-- ⭐ **상황 질문형 H2를 4개 이상 둡니다** — `What if …` · `Can I … when …` · `Which … should I …` · `How much … on …`처럼 독자가 서 있는 상황이 문장에 박힌 H2. 클릭의 약 90%가 자동완성에 없는 희귀 롱테일에서 오므로, 한 글이 걸릴 수 있는 상황 질문의 수가 곧 클릭 모수입니다. 정의형 H2(`What is …`)는 이 개수에 세지 않습니다
+- ⛔ **히어로에 "Last updated · N min read" 줄을 넣지 않습니다.** 날짜는 Rank Math 스키마(`dateModified`)가 이미 내보냅니다. 갱신 사실을 본문에 적을 때는 인트로 안에 문장으로("Hours below were checked on Oct 3, 2026 at the market's office") 씁니다. 근거: 114편이 같은 줄을 갖고 있어 템플릿 지문이 됐다
+- ⛔ **사이트 공통 H2 금지**: `Where This Guide Breaks Down` · `Where This Stops Working` · `Quick Answers` · `What Won't … Give You` · `Key points` · `N Tips …` 같은 **글의 내용과 무관하게 매번 들어가는 섹션 이름**을 쓰지 않습니다. H2는 그 글의 사실에서만 나옵니다. 한계·주의 사항은 해당 섹션 안의 단락으로 씁니다
+- ⭐ **상황 질문형 H2를 2개 이상 둡니다** — `Can I … when …` · `Which … if …` · `How much … on …`처럼 독자가 서 있는 상황이 문장에 박힌 H2. 단, **같은 문형을 두 번 쓰지 않습니다**(`What if …` 4연속 금지). 나머지 H2는 평서문(`Food Alley Hours: 9 am to 11 pm, No Closing Day`)으로 섞습니다. 정의형 H2(`What is …`)는 이 개수에 세지 않습니다. 근거: 질문형 H2 골격이 156편에 공통이라 롱테일 효과보다 템플릿 신호가 커졌다
 - ⚠️ **4열 이상 표는 `<div style="overflow-x:auto;">`로 감쌉니다.** 감싸지 않으면 모바일에서 표가 화면 밖으로 넘칩니다
-- ⭐ **[AEO] 인트로 직후 3줄 요약 박스를 넣습니다** — 0and1life에서 검증된 구조를 KoreaPlug에도 적용합니다. AI 검색·구글 스니펫이 그대로 인용하는 자리입니다. 마크업 고정:
+- ⭐ **[AEO] 인트로 직후 3줄 요약 박스를 넣습니다** — AI 검색·구글 스니펫이 그대로 인용하는 자리입니다. 마크업은 고정하되 **라벨 없이 문장 3개만** 씁니다 (순서: ① 숫자·날짜가 든 사실 ② 검색자가 놓치는 조건 ③ 지금 할 행동). 근거: `Core Fact / Primary Insight / Actionable Tip` 굵은 라벨이 19편에 똑같이 들어가 템플릿 지문이 됐다:
 
 ```html
 <div class="ai-knowledge-snippet" style="background:#f8fafc;border-radius:14px;padding:22px 26px;margin-bottom:28px;border-left:5px solid #THEME_COLOR;">
   <ul style="margin:0;padding-left:18px;">
-    <li><strong>Core Fact:</strong> 한 문장 사실 (숫자·날짜 포함)</li>
-    <li><strong>Primary Insight:</strong> 검색자가 놓치는 핵심 한 문장</li>
-    <li><strong>Actionable Tip:</strong> 지금 할 일 한 문장</li>
+    <li>한 문장 사실 (숫자·날짜 포함)</li>
+    <li>검색자가 놓치는 조건 한 문장</li>
+    <li>지금 할 일 한 문장</li>
   </ul>
 </div>
 ```
@@ -506,15 +521,17 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 
 ### 2-5. 콘텐츠 작성 규칙
 
-- **분량**: 1,500~2,000 단어 (영어 기준)
-- **키워드 밀도**: Focus Keyword 0.5~0.8% (1,500단어 기준 7~12회)
-- **외부 링크**: 권위 있는 소스 최소 2개 (Wikipedia, 정부기관, 주요 언론)
+- **분량**: 1,500~2,000 단어 (영어 기준). 내용이 1,200단어에서 끝나면 늘리지 않습니다 — 같은 요지를 섹션마다 반복해 2,600단어로 늘린 글(`sajangnim-meaning`)이 28일 942노출 0클릭이었다
+- **키워드 밀도**: Focus Keyword **0.2~0.4% (1,500단어 기준 3~6회)**. 제목·메타·첫 100단어·첫 H2·alt에 들어가면 이미 5회입니다. ⛔ **문법을 깨는 정확일치 삽입 금지** (`the korean 3 date rule means this` · `a korea pension refund isn't…`). 자연 문장에서 어순이 바뀌거나 단어가 끼어도 됩니다. 근거: 2026-10-05 진단에서 본문 평균 10.5회, 28편이 15회 이상 — 전 글 공통이라 기계 삽입 신호였다
+- ⛔ **반박형 오프너 금지**: `Every guide says …` · `Search for X and you get a wall of …` · `Most blogs tell you …` 로 글을 열지 않습니다(28편 공통). 첫 문장은 **독자가 서 있는 상황이나 직답**으로 엽니다
+- **사진·캡처 1장 이상**: 직접 찍은 사진, 직접 캡처한 웹 화면, 직접 만든 표 이미지 중 하나를 본문에 넣습니다(`(나)` 원본 자료와 겸할 수 있음). 스톡 히어로 이미지는 이 1장에 세지 않습니다. 조달 불가 주제는 `1급 자료 조달 계획`에 `사용자필요`로 적고, 사용자 캡처 전까지 발행하지 않습니다
+- **외부 링크**: 권위 있는 소스 최소 2개 (정부기관 `.go.kr`·`.or.kr` · 공식 운영사 · 주요 언론). ⚠️ Wikipedia는 2개 중 1개로만 — 23편이 위키 단독 인용이었다
 - **내부 링크**: 기존 KoreaPlug 글 최소 1개 (상대경로)
   - 슬러그는 **WP REST로 실존을 확인한 값만** 씁니다. 반환된 `slug`를 그대로 쓰고 **추측하지 않습니다**
   - ⛔ **공개(`status=publish`) 글에만 링크를 겁니다 — 예외 없음.** `future`(예약) · `pending`(검토 대기) · `draft`(임시) · `private`(비공개)는 전부 금지입니다. 공개 전까지 404이고, 그 404가 사이트 전체 크롤에 누적됩니다
     - "곧 공개될 예정"이어도 금지합니다. 같은 주제의 공개 글이 없으면 인접 주제의 공개 글로 대체하고, 그것도 없으면 내부 링크 1개(최소 요건)만 공개 글로 채웁니다
     - 후보 조회는 `status=any`로 하되, **링크로 쓰는 값은 반환된 `status`가 `publish`인 행만** 고릅니다. 인증 실패로 `status` 없이 조회했다면 그 결과는 발행분만이므로 그대로 써도 됩니다
-    - ⚠️ 실측: 2026-09-27 기준 사이트에 `pending` 9편 · `future` 8편이 있습니다 — 검색 결과 상위에 섞여 나오므로 `status` 열을 반드시 확인합니다
+    - ⚠️ 실측: 2026-09-27 기준 사이트에 `pending` 9편 · `future` 8편이 있습니다 — 검색 결과 상위에 섞여 나오므로 `status` 열을 반드시 확인합니다. 2026-10-05 GSC 404 목록에서 선링크로 생긴 404(`korean-apartment-entryway-floor` 8/11 크롤)가 실제로 확인됐다
     - **HTML 완성 후 본문의 모든 `href="/…/"`를 추출해 슬러그마다 REST로 `status`를 다시 조회**하고, 하나라도 `publish`가 아니면 교체한 뒤에 Notion에 올립니다
   - ⚠️ **이 사이트는 소프트404(존재하지 않는 슬러그에도 HTTP 200)를 반환합니다.** 상태코드가 아니라 **REST 조회 결과(id 존재 + status)**를 근거로 삼습니다
 - **문체**: 구어체 연결어는 유지하되, **1인칭(I, My)은 실제로 수행한 행위에만** 씁니다. 직접 조회·계산·비교·촬영·문의한 것은 1인칭 가능(단, 그 결과물을 본문에 함께 싣습니다). 겪지 않은 상황은 2인칭(you) 또는 3인칭 일반화로 씁니다
@@ -544,7 +561,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 
 **① `create-viral-content` 스킬 — 구조·훅 단계 (초안 작성 시)**
 
-- SEO Title·H1: 제목 후보 10개 이상 생성 후 호기심/구체성/감정 3축 스코어링(각 0~3점, **합 7점 이상만 채택**). `2-2` 중복 검사를 먼저 통과한 후보만 스코어링 대상
+- SEO Title·H1: 제목 후보 10개 이상 생성 후 **검색어 일치 / 구체성(숫자·날짜·조건) / 사실성(본문에 근거가 있는가)** 3축 스코어링(각 0~3점, **합 7점 이상만 채택**). 호기심·감정 축은 쓰지 않습니다(`2-2` 호기심 갭 금지). `2-2` 중복·콜론 비율 검사를 먼저 통과한 후보만 스코어링 대상
 - INTRO 첫 문장: Hook Architecture(Prediction+Stakes / Before-After Compression / 문제 직격 중 택1)
 - 마무리: engagement bait 금지, 독자가 지금 할 행동 중심 클로저
 - 정제 패스 최소 3개: Skeptic → Scroller → Editor
@@ -563,8 +580,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 - **기계적 전환어 0** — `Furthermore` `Moreover` `In conclusion` `Additionally` `It is worth noting` `Importantly`
 - **실용 정보 선배치** — 조건·금액·소요시간·준비물을 서두에
 - **단점·한계 최소 한 단락** — 경쟁 대상이 낫다는 서술도 합니다
-- **마무리는 행동 지시** — engagement bait 금지
-- **끝에 `*Key points : A, B, C`** 3~4개 요약
+- **마무리는 행동 지시** — engagement bait 금지. ⛔ `*Key points : A, B, C` 꼬리 요약은 쓰지 않습니다 (v13.3 삭제 — 전 글 공통 꼬리가 템플릿 지문이 됐다)
 
 ---
 
@@ -603,6 +619,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 - [ ] EEAT (가)·(나) 두 조건이 모두 충족되어 있는가?
 - [ ] **`2-3` 구조 규칙을 전부 지켰는가?** — 본문 래퍼 존재 · 금지 블록 없음 · 태그 개폐 균형 · 플레이스홀더 0 · `<h1>` 1개 · 4열 이상 표 래퍼
 - [ ] **본문의 모든 내부 링크가 REST 재조회에서 `status=publish`인가?** (`future`·`pending`·`draft`·`private` 0개 — `2-5`)
+- [ ] **v13.3 템플릿 지문 0건인가?** — 히어로 "Last updated · min read" 줄 없음 · AEO 박스에 `Core Fact/Primary Insight/Actionable Tip` 라벨 없음 · 사이트 공통 H2(`Where This … Breaks Down`·`Quick Answers`·`Key points`) 없음 · `*Key points` 꼬리 없음 · 반박형 오프너 없음 · 제목 호기심 갭 금지어 없음 · 포커스 키워드 본문 3~6회 · 사진·캡처 1장 · 같은 대상 기존 글 없음(`1-3`)
 
 ---
 
