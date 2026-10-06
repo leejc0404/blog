@@ -397,7 +397,7 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 | 한국어 슬러그 URL 깨짐 | 한국어 슬러그 | 슬러그는 반드시 영어 |
 | `await` 오류 | Console 직접 실행 | `.then()` 콜백으로 변환 |
 | 제목 배경 흰색 | WP Customizer `::before` 오버레이 | 추가 CSS에서 `::before background`를 `rgba(0,0,0,0.35)`으로 변경 |
-| CTR 0% (1페이지인데 클릭 없음) | 뻔한 설명형 제목 | 호기심 갭+파워워드 포함 제목으로 재작성 |
+| CTR 0% (1페이지인데 클릭 없음) | 뻔한 설명형 제목 | Writer 2-2(검색 욕망 + 훅 6형, 요약형 금지) 기준으로 제목 재작성 |
 | TOC 프론트엔드 미표시 | rank-math/toc-block 렌더링 실패 | `core/html` 블록으로 수동 목차 삽입 |
 | **행정규칙 별표 캡처 실패** | **별표는 HTML 렌더링 없이 HWP 첨부로만 제공** | **법령(法令) 조문으로 대체. law.go.kr `lawService` iframe은 HTML 인라인 렌더링됨 (8/4·8/6·8/8 3회 검증)** |
 
