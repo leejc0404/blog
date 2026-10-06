@@ -1,4 +1,8 @@
-# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.1 2026-10-03)
+# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.2 2026-10-06)
+
+**v3.2에서 바뀐 것**(지침 v3.2 대응): ① **쉬운 3초 훅**(지침 I-2-1-B) — 첫 3초는 일상어·숫자 1개 이하·문장 2개 이하, 대상은 넓게 ② **5막 구조**(쉬운 훅 → 답 하나 → 반전 → 내 경우 → CTA, 지침 I-2-0) ③ 엔진 **v12** — 콜라주 장면 `hook_story`·`story`·`cta(style: paper)`, 견본 `relay\examples\story_spec.json` ④ STEP 7 ⑨에 쉬운 말 검사 ⑤ **사용자 폴더에 백업·보관 사본을 만들지 않는다**(사용자 지시 10/6) — 엔진을 바꿀 때 이전 판은 클라우드 작업 공간에만 두고 회귀 검사에 쓴다.
+
+**v3.1.1에서 바뀐 것**(지침 v3.1.1 대응): 허브 카드를 **전달할 때(STEP 10-3) 먼저 넣고**, 게시가 확인되면(STEP 10-5) 같은 카드에 `ig_url` 만 채운다. 근거: 10/6 사용자 지적 — 게시 당일 프로필 링크 페이지에 그 글이 없었다. 알림에 `🗂 허브 카드` 줄 추가.
 
 **v3.1에서 바뀐 것**(지침 v3.1 대응): ① **캐릭터 없음** — 엔진 v11은 `REEL_MASCOT` 미설정 시 마스코트를 그리지 않고 소품·숫자·카드로 화면을 채운다(지침 I-3-2). `robot.py`·`clay.py` 같은 3D 캐릭터 코드는 쓰지 않는다 ② **속도** — 매 회차 spec의 `dur`·`beats` 로 비트를 앞당긴다(지침 I-3-4) ③ STEP 4.5 콘셉트에 **마케팅 장치 3개(지침 I-2-8)·새 연출 1개(지침 I-3-8)** 를 적고 `meta.json.marketing`·`meta.json.fresh` 에 기록 ④ STEP 7 자가검수 **11항목**(⑪ 속도·장치 `R-PACE`) ⑤ 효과음 `build_reel_sfx_v2.py` v2.1(부드러운 소리, 피크 -12dBFS) ⑥ CTA 화살표가 인스타 계정 이름 행을 수직으로 가리킴(엔진 처리, 지침 I-2-5④) ⑦ 알림에 `🧲 장치` `✨ 새 연출` 줄 추가.
 
@@ -23,7 +27,7 @@
 |---|---|---|
 | 자격증명 | `C:\Users\win\Documents\Claude\pw.txt` | `ONEANDZERO_WP_USER` `ONEANDZERO_WP_APP_PASSWORD` `IG_USER_ID` `IG_ACCESS_TOKEN` — **값 출력 금지** |
 | 릴레이 호출 | `instagram\relay\ig.py` | `me / limit / refresh / container / carousel / reel / status / media / publish / insights / my_media` |
-| **장면 엔진 v11** | `instagram\relay\reel_engine.py` | `reel_spec.json` → mp4(무음) + `_timeline.json` + `_cover.jpg` · `--stills <dir>` 로 장면별 대표 프레임 · **캐릭터 없음 레이아웃이 기본**(`REEL_MASCOT=gongil` 은 과거 회차 재현에만) |
+| **장면 엔진 v12** | `instagram\relay\reel_engine.py` | `reel_spec.json` → mp4(무음) + `_timeline.json` + `_cover.jpg` · `--stills <dir>` 로 장면별 대표 프레임 · **캐릭터 없음 레이아웃이 기본**(`REEL_MASCOT=gongil` 은 과거 회차 재현에만) |
 | **효과음 v2.1** | `instagram\relay\build_reel_sfx_v2.py` | `_timeline.json` → wav (16종, 전부 합성음 · 노이즈·사각파 없음 · 피크 -12dBFS) |
 | **검증 v9** | `instagram\relay\verify_reel_v9.py` | `reel_spec.json` 검사 · 종료코드 0만 통과 (싱크·0프레임·훅 사건 시각·CTA·총 길이) |
 | 견본 spec | `instagram\relay\examples\bank_spec.json` | v9 첫 시안(은행 영업시간 편) — 장면 유형별 필드 예시 |
@@ -35,7 +39,7 @@
 | 레퍼런스 | `instagram\refs\inbox.md` · `refs\{YYYY-Www}.md` | |
 | 회차 폴더 | `instagram\{YYYY-MM-DD}\{slug}\` | `reel_spec.json` `concepts.md` `caption.txt` `reel-final.mp4` `*_cover.jpg` `*_timeline.json` `stills.jpg` `meta.json` `wp_media.json` `handoff.json` |
 | (구) v8 자산 | `render_reel_v8.py` `build_reel_sfx.py` `verify_reel_sync.py` | **사용 중지.** 지우지 않고 남겨 둔다(과거 회차 재현용) |
-| 엔진 이전 판 | `instagram\relay\archive\` | `reel_engine_{날짜}[_vN].py` · `build_reel_sfx_v2_{날짜}.py` — 덮어쓰기 전 복사본 |
+| 엔진 이전 판 | (만들지 않음 — v3.2) | 사용자 지시(10/6)로 사용자 폴더에 백업·이전 판 사본을 만들지 않는다. 회귀 검사용 이전 판은 클라우드 작업 공간에만 둔다 |
 
 설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 1` · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음**
 
@@ -51,7 +55,7 @@
 6. 열었던 탭은 모두 닫는다.
 
 ## STEP 0. 지침 읽기·설정 확인
-1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.1 이상**인지 확인한다. v3.0이면 I-2-8·I-3-8·I-5⑪이 없다 — 이 루틴의 v3.1 항목은 그대로 수행하고 알림에 `📐 지침 v3.1 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`).
+1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`).
 2. 설정값을 세션 변수로 둔다. `PUBLISH_MODE`는 이 프롬프트의 값이 기준이며 지침·ledger에서 바꾸지 않는다.
 
 ## STEP 1. 날짜·폴더·자격증명
@@ -104,23 +108,26 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 - `<table>` 0개이고 Core Fact에 수치가 없으면 `X-THIN` — ledger 기록 후 다음 후보로(1회).
 
 ## STEP 4.5. 훅 기획 — 콘셉트 3개 → 1개 (지침 I-0 · I-2-2 · I-3-6)
-1. **"가장 의외인 사실 1개"** 를 고른다: 뉴스 제목이 말하지 않는 숫자, 본문 "근데/함정" 문단. 이것이 TURN이 된다(지침 I-0 예고편 원칙).
-2. **페르소나**를 한 문장으로 → `reel_spec.json` 최상위 `persona`, 12자 내외 호명구 → 훅 장면 `persona`.
-3. **상황극 콘셉트 `CONCEPTS`개**를 `concepts.md` 에 쓴다. 콘셉트마다: 훅 공식(지침 I-2-2) · 무대 · 0초 화면 한 줄(캐릭터 없이 무엇으로 아래 절반을 채우나 — 지침 I-3-2) · 사건(몇 초에 무엇이 바뀌나, ≤0.8초) · 리액션(집중선·펀치·흔들림·"!?") · tease · **마케팅 장치 `MARKETING_MIN`개 이상**(지침 I-2-8 표에서) · **이번 회차에 처음 쓰는 연출 1개**(지침 I-3-8) · 이 페르소나가 넘기지 않을 이유. **세 개는 공식이나 무대가 서로 달라야 한다.**
+1. 세 가지를 고른다(지침 I-0·I-2-0): ⓐ **쉬운 질문 1개** — 이 글을 누구나 아는 말로 물으면?(지침 I-2-1-B, 예: "밥값 20만원, 세금 안 붙는 거 알아요?") ⓑ **답 하나** — 영상만 보고도 써먹을 한 줄(예: "명세서 '식대' 칸 확인") ⓒ **가장 의외인 사실 1개** — 뉴스 제목이 말하지 않는 숫자, 본문 "근데/함정" 문단. 이것이 ③ 반전이 된다.
+2. **페르소나**를 한 문장으로 → `reel_spec.json` 최상위 `persona`. 훅의 대상 스티커는 **넓게**("월급 받는 사람이라면") — 좁은 조건은 ④에서(지침 I-2-2).
+3. **훅 콘셉트 `CONCEPTS`개**를 `concepts.md` 에 쓴다. 콘셉트마다: 훅 공식(지침 I-2-2, 기본은 '쉬운 질문'·'몰랐던 사실') · **0~3초 글자 전부**(지침 I-2-1-B 검사용) · 무대 · 0초 화면 한 줄(캐릭터 없이 무엇으로 아래 절반을 채우나 — 지침 I-3-2) · 사건(몇 초에 무엇이 바뀌나, ≤0.8초) · 리액션(집중선·펀치·흔들림·"!?") · tease · **마케팅 장치 `MARKETING_MIN`개 이상**(지침 I-2-8 표에서) · **이번 회차에 처음 쓰는 연출 1개**(지침 I-3-8) · 이 페르소나가 넘기지 않을 이유. **세 개는 공식이나 무대가 서로 달라야 한다.**
 4. `ledger.reels` 최근 2회차의 `hook_type`·`stage` 를 읽어 **직전 회차와 같은 공식·같은 무대는 고르지 않는다**(지침 I-3-6). 이번 주 `refs/{YYYY-Www}.md` 의 스킵률 비교가 있으면 나쁜 공식을 피한다.
 5. 1개를 고르고 이유를 `meta.json.hook = {type, stage, concept, why}` 에 적는다. 고른 콘셉트의 장치를 `meta.json.marketing = ["열린 고리", "내 경우는?", …]`, 새 연출을 `meta.json.fresh = "한 줄"` 에 적는다.
-6. 기존 장면 유형으로 안 되면 **엔진 확장**(지침 I-3-6): 클라우드 작업 사본 `reel_engine.py` 에 무대·장면·소품·효과음을 추가한다(캐릭터·포즈는 추가하지 않는다 — 지침 I-3-2). 추가했으면 STEP 6에서 **견본 spec(`examples\bank_spec.json`)도 다시 검사**해 기존 결과가 깨지지 않았는지 확인하고, STEP 8에서 `relay\reel_engine.py` 를 **새 파일명 없이 덮어쓰기 전에** `relay\archive\reel_engine_{TODAY}.py` 로 이전 판을 복사해 둔다.
+6. 기존 장면 유형으로 안 되면 **엔진 확장**(지침 I-3-6): 클라우드 작업 사본 `reel_engine.py` 에 무대·장면·소품·효과음을 추가한다(캐릭터·포즈는 추가하지 않는다 — 지침 I-3-2). 추가했으면 STEP 6에서 클라우드에 둔 **이전 판 엔진과 `regress_engine.py`** 로 견본 spec(`examples\bank_spec.json`·`examples\story_spec.json`)과 직전 3회차 spec을 비교해 기존 결과가 그대로인지 확인하고, STEP 8에서 `relay\reel_engine.py` 를 덮어쓴다. **사용자 폴더에 이전 판 사본·백업을 만들지 않는다.**
 
 ## STEP 5. 원고 작성 → `reel_spec.json` · `caption.txt`
-- 지침 I-2(4막·0프레임·숫자 복사·날짜·잠정 표시·유도 4곳·화자·**I-2-8 마케팅 장치**)와 I-4(캡션)를 그대로 적용한다. 캡션 7번 줄에는 보낼 사람과 나중에 꺼내 볼 순간을 함께 적는다.
-- `reel_spec.json` 구조 — 장면 유형별 필드는 지침 I-3-3 표, 실제 예시는 `examples\bank_spec.json`:
+- 지침 I-2(5막·쉬운 3초·0프레임·숫자 복사·날짜·잠정 표시·유도 4곳·화자·**I-2-8 마케팅 장치**)와 I-4(캡션)를 그대로 적용한다. 캡션 7번 줄에는 보낼 사람과 나중에 꺼내 볼 순간을 함께 적는다.
+- `reel_spec.json` 구조 — 장면 유형별 필드는 지침 I-3-3 표, 실제 예시는 `examples\story_spec.json`(v12 기본) · `examples\bank_spec.json`(v9 4막, 과거형):
   ```json
-  {"source": "{원문 명칭} · {modified YYYY.M.D} 기준", "persona": "...", "structure": "HOOK/TURN/PROOF/CTA",
-   "scenes": [ {"type":"hook_*", "dur":2.6, "beats":{...}}, {"type":"slam", "dur":1.8, ...}, {"type":"versus|clock_race|checklist", ...}, {"type":"checklist|versus", ...(조건별 "내 경우는?")}, {"type":"cta", ...} ]}
+  {"source": "{원문 명칭} · {modified YYYY.M.D} 기준", "persona": "...", "structure": "쉬운 훅/답 하나/반전/내 경우/CTA",
+   "scenes": [ {"type":"hook_story", "bg":"paper", "series":"{시리즈} 0n", "dur":2.8, "beats":{"start":[0,"pop"],"trigger":[0.5,"ding"],"react":[0.8,"scratch"],"tease":[1.4,"pop"]}, "els":[...]},
+               {"type":"story", "bg":"paper", ...(답 하나)}, {"type":"story", "bg":"dark", ...(반전 · blog_note)},
+               {"type":"story", ...(checks — 내 경우는?)}, {"type":"cta", "style":"paper", "btn":"프로필 링크 → 맨 위 글", "handle":"@0and1life", ...} ]}
   ```
   - 장면 5~6개, 총 12~16초(지침 I-2-0). 훅 2.4~3.0초·CTA **4.0초**(줄이지 않음). **엔진 기본 `BEATS` 는 느리다(v9 값) — 매 회차 장면마다 `"dur"` 와 `"beats": {"이름": [시각, "효과음"]}` 로 앞당긴다**(지침 I-3-4: 훅 사건 ≤0.8초, 본론 장면 1.6~2.8초, 0.1초 격자). 참고값 — hook_pov `trigger 0.5 · react 0.8 · slam 0.9 · tease 1.6`, slam `label 0.3 · sub 0.7`, versus `right 0.1 · vs 0.3 · delta 0.8 · blog 1.5`, checklist `i0 0.0 · i1 0.2 · i2 0.4 · i3 0.6 · verdict 1.2 · blog 1.8`, cta `h2 0.1 · lock 0.4 · pt0 0.7 · pt1 0.9 · btn 1.2 · handle 1.6`.
   - `mascot` `pose` `mascot_x` `mascot_scale` `mascot_xy` 필드는 쓰지 않는다(써도 무시됨).
-  - PROOF 장면 중 하나에 `blog_note`, CTA에 `locked` · `disclaimer`(잠정·YMYL) 필수.
+  - ③·④ 장면 중 하나에 `blog_note`. CTA(`style: paper`)에는 `doc`(흐린 자료 문서 + `lock_at`) 요소와 `disclaimer` 를 대신하는 `text` 요소(잠정·YMYL 한 줄) 필수.
+  - 훅 장면(`hook_story`)의 글자는 지침 I-2-1-B를 지킨다 — 제도 용어 없음, 숫자 1개 이하, 문장 2개 이하.
   - 커버 시점을 바꿀 때만 최상위 `cover_at`(초).
 - `caption.txt`는 지침 I-4-1 순서를 그대로 따른다.
 - `hub_card.json`: `slug, title, date, category, thumb(커버 URL — STEP 9에서 채움), ig_url(게시 후), points[2~3]`.
@@ -153,14 +160,14 @@ for t in 0.0 0.5 1.0 1.5 2.5; do ffmpeg -y -v error -ss $t -i reel-final.mp4 -fr
 4. **④ 커버**: `_cover.jpg`를 `Read`로 열어 사건·자막이 다 보이는지. 아니면 `cover_at` 조정 → `R-COVER`.
 5. **⑤ 날짜·잠정** — 지침 I-2-4. **⑥ 유도 4곳** — 지침 I-2-5.
 6. **⑦ 화자·금지어·저작권** — 지침 I-2-6 · I-2-7 · I-3-5. 실존 기관·기업 로고·간판 문구가 무대에 없는지 본다.
-7. **⑧ 싱크** 🚨 · **⑨ 훅** 🚨: `verify_reel_v9.py` 가 실패하면 **즉시 중단**(`R-SYNC`/`R-HOOK`). 추가로 `hook_0.0~2.5.jpg` 5장을 `Read`로 보고, **"이 페르소나가 0.5초 안에 넘기지 않을 이유"를 한 문장으로** `meta.json.checks.hook` 에 쓴다. 한 문장이 안 나오면 `R-HOOK`. 훅의 첫 사건(`trigger`/`m2`/`lock`/`stamp`/`check`)이 0.8초보다 늦어도 `R-HOOK`.
+7. **⑧ 싱크** 🚨 · **⑨ 훅** 🚨: `verify_reel_v9.py` 가 실패하면 **즉시 중단**(`R-SYNC`/`R-HOOK`). 추가로 `hook_0.0~2.5.jpg` 5장을 `Read`로 보고, **"이 페르소나가 0.5초 안에 넘기지 않을 이유"를 한 문장으로** `meta.json.checks.hook` 에 쓴다. 한 문장이 안 나오면 `R-HOOK`. 훅의 첫 사건(`trigger`/`m2`/`lock`/`stamp`/`check`)이 0.8초보다 늦어도 `R-HOOK`. **쉬운 3초 검사**(지침 I-2-1-B): 훅 장면 spec의 글자를 모두 뽑아 제도 용어 목록(비과세·통상임금·기준소득월액·보수월액·원천징수·결정세액·비급여·본인부담률 등)이 있거나, 숫자 토큰이 2개 이상이거나, 문장이 3개 이상이면 `R-HOOK`. 통과하면 "초등학교 고학년이 이해하는가"를 한 문장으로 `meta.json.checks.easy` 에 쓴다.
 8. **⑪ 속도·장치**: `_timeline.json` 과 spec으로 본론 장면(CTA 제외)이 전부 ≤2.8초인지, `meta.json.marketing` 이 `MARKETING_MIN`개 이상이고 각 장치가 실제 장면·캡션에 있는지, `meta.json.fresh` 가 비어 있지 않은지 본다. 아니면 `R-PACE` — beats·spec 수정 1회.
 9. 반려가 있으면 STEP 4.5(콘셉트 2순위) 또는 STEP 5로 돌아가 **1회만** 수정·재렌더. 다시 실패하면 전달하지 않고 `ledger.reels.{slug} = {status:"held", held:"R-…"}` 기록 후 STEP 8 → 12 → 11.
 
 ## STEP 8. PC 저장
 - `device_commit_files`로 `instagram\{TODAY}\{slug}\`에 `reel_spec.json concepts.md caption.txt reel-final.mp4 reel-final_cover.jpg reel-final_timeline.json hub_card.json post_text.txt meta.json`과 `stills\` 를 이어 붙인 `stills.jpg` 1장을 저장한다.
 - `meta.json`: `{blog_post_id, blog_url, blog_modified_at_build, persona, hook:{type,stage,concept,why}, marketing:[장치...], fresh:"새 연출 한 줄", scenes:[유형...], dur, engine:"v11.x", status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,typo,pace}}`.
-- 엔진을 확장했다면(STEP 4.5-6) 이전 판을 `relay\archive\` 로 복사한 뒤 `relay\reel_engine.py` 를 덮어쓴다.
+- 엔진을 확장했다면(STEP 4.5-6) 회귀 검사 통과 후 `relay\reel_engine.py` 를 덮어쓴다. 이전 판 사본은 사용자 폴더에 만들지 않는다.
 
 ## STEP 9. WP 업로드 (PC)
 ```bash
@@ -186,12 +193,13 @@ cd "$R" && python3 make_dl_page.py {회차폴더}/handoff.json
 ```
 1. 생성된 페이지 URL이 200인지, `download=` 속성과 복사 버튼이 각각 들어갔는지 `curl | grep -c`로 확인한다. 실패하면 `E-PAGE` — 알림에 영상 URL을 직접 실어 대체한다.
 2. `ledger.reels.{slug} = {date:TODAY, status:"handoff", video_media_id, cover_media_id, dur, scenes, hook_type, stage, concept, marketing, fresh, hub_card:false}`.
-3. STEP 11 알림에 **전달 페이지 URL 하나만** 싣는다.
-4. **사용자가 게시했다고 알리면** (같은 세션 또는 다음 회차 STEP M에서 자동 확인):
+3. **허브 카드 먼저 추가 (지침 I-6 v3.1.1)**: `hub_card.json` 의 `thumb`(STEP 9 커버 URL)을 확인하고 `ig_url` 은 빈 값으로 둔 채 `python3 hub.py add {회차폴더}/hub_card.json` → 8초 뒤 `curl -s https://0and1life.com/ig/?cb=$(date +%s) | grep -c "o1-ig-card:{slug}"` ≥ 1 이면 `ledger.reels.{slug}.hub_card="no_ig_url"`, 아니면 1회 재시도 후 `E-HUB`(전달은 유지). 알림에 `🗂 허브 카드 추가` 한 줄.
+4. STEP 11 알림에 **전달 페이지 URL 하나만** 싣는다.
+5. **사용자가 게시했다고 알리면** (같은 세션 또는 다음 회차 STEP M에서 자동 확인):
    ```bash
    python3 ig.py my_media 5      # 최근 게시물에서 permalink·media_id 확보
    ```
-   → `ledger.reels.{slug}.status="posted"`, `ig_media_id`, `ig_url` 기록 → `metrics.json.{slug}` 에 `posted, dur, hook_type, stage` 기록 → `hub_card.json.ig_url` 채우고 `python3 hub.py add hub_card.json` → 8초 뒤 `curl -s https://0and1life.com/ig/?cb=$(date +%s) | grep -c "o1-ig-card:{slug}"` ≥ 1 이면 `hub_card:true`, 아니면 1회 재시도 후 `E-HUB`.
+   → `ledger.reels.{slug}.status="posted"`, `ig_media_id`, `ig_url` 기록 → `metrics.json.{slug}` 에 `posted, dur, hook_type, stage` 기록 → `hub_card.json.ig_url` 채우고 `python3 hub.py add hub_card.json`(같은 slug 교체 — `ig_url` 만 채워진다) → 8초 뒤 `curl -s https://0and1life.com/ig/?cb=$(date +%s) | grep -c "o1-ig-card:{slug}"` ≥ 1 이면 `hub_card:true`, 아니면 1회 재시도 후 `E-HUB`.
 
 **`PUBLISH_MODE=AUTO` (예외 — 사용자가 그 회차에 명시 지시했을 때만)**
 ```bash
@@ -247,8 +255,8 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 
 | 항목 | 상태 | 비고 |
 |---|---|---|
-| 지침 `0and1Life-Insta.md` **v3.1** GitHub 커밋 | ⬜ **커밋 필요**(blog 폴더에 전문 저장됨) | STEP 0이 v3.0 미만이면 전달하지 않는다, v3.0이면 알림만 |
-| 엔진 v11 `relay\reel_engine.py` · 효과음 v2.1 `build_reel_sfx_v2.py` · `verify_reel_v9.py` · `examples\bank_spec.json` | ✅ 2026-10-03 PC 저장(이전 판 `relay\archive\`) | 없으면 STEP 1에서 `MISSING` |
+| 지침 `0and1Life-Insta.md` **v3.2** GitHub 커밋 | ⬜ **커밋 필요**(blog 폴더에 전문 저장됨, 2026-10-06) | STEP 0이 v3.0 미만이면 전달하지 않는다, v3.0~3.1이면 이 루틴의 v3.2 항목을 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄 |
+| 엔진 v12 `relay\reel_engine.py` · 효과음 v2.1 `build_reel_sfx_v2.py` · `verify_reel_v9.py` · `regress_engine.py` · `examples\bank_spec.json` · `examples\story_spec.json` | ✅ 2026-10-06 PC 저장(v12 — 기존 장면 회귀 동일 확인) | 없으면 STEP 1에서 `MISSING` |
 | WPCode 스니펫 `ig-relay` v1.2 (`reel`·`insights`·`my_media`) | ✅ 동작 확인(2026-10-02 insights 응답) | |
 | Meta 앱 · 장기 토큰 | ✅ pw.txt 보관, 0and1life(MEDIA_CREATOR) | 60일 토큰, 30일마다 자동 갱신 |
 | 프로필 링크 = 허브 `/ig/?utm_...=ig_bio` | ✅ | 모바일 앱에서만 변경 가능 |
@@ -259,4 +267,4 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 
 ## Cowork 원라이너
 
-토큰 확인(2) → **전 회차 스킵률·평균 시청 측정(M)** → 대상 글 1편(3) → 본문 최종본(4) → **가장 의외인 사실 1개 + 상황극 콘셉트 3개(장치 3개·새 연출 1개 포함) → 1개(4.5)** → HOOK/TURN/PROOF×2/CTA 원고·캡션, 비트 앞당김(5) → 검사 → stills(빈 곳 확인) → 엔진 v11 렌더 + 효과음 v2.1 + 커버(6) → **자가검수 11항목, 싱크·훅 실패면 무조건 중단(7)** → PC 저장(8) → WP 업로드(9) → `reel-dl-latest` 덮어쓰기(10) → 알림에 URL 하나(11) → 3일 지난 임시 자산 정리(12). 통과 못 하면 **전달하지 말고** held로 남긴다.
+토큰 확인(2) → **전 회차 스킵률·평균 시청 측정(M)** → 대상 글 1편(3) → 본문 최종본(4) → **쉬운 질문 + 답 하나 + 의외인 사실 1개 → 훅 콘셉트 3개(장치 3개·새 연출 1개 포함) → 1개(4.5)** → 쉬운 훅/답 하나/반전/내 경우/CTA 원고·캡션, 비트 앞당김(5) → 검사 → stills(빈 곳 확인) → 엔진 v12 렌더 + 효과음 v2.1 + 커버(6) → **자가검수 11항목, 싱크·훅 실패면 무조건 중단(7)** → PC 저장(8) → WP 업로드(9) → `reel-dl-latest` 덮어쓰기(10) → 알림에 URL 하나(11) → 3일 지난 임시 자산 정리(12). 통과 못 하면 **전달하지 말고** held로 남긴다.
