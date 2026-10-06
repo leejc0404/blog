@@ -1,6 +1,8 @@
 # ✏️ KoreaPlug Writer 지침
 
-**v13.6 · 2026-10-06**
+**v13.7 · 2026-10-06**
+
+> **v13.7 변경 — 제목 규칙 전면 개정 (사용자 결정 2026-10-06).** 무난한 설명형 제목만 나와 후킹이 안 됐다. 제목은 **검색자의 욕망을 짚고 궁금증으로 클릭을 만든다**(틀 없음). 폐지: 호기심 갭 금지 · 제목·스코어링에서 호기심·감정 축 제외 · Focus Keyword 제목 앞쪽 고정 · 콜론 비율 규칙 · 메타 설명 호기심 카피 금지. 신설: `2-1` 검색자 욕망 행 · `2-2` 욕망→궁금증 원칙 · `2-6 ①` 4축 스코어링(욕망 적중·궁금증·검색어·사실성). 유지: 약속은 본문이 갚는다(사실성 0점 탈락) · 상투 문구 재탕 금지 · 직전 10개와 구조 반복 금지.
 
 > **v13.6 변경 — 검색 제한 폐지 · 시의성 엔진 T 신설 (사용자 결정 2026-10-06).** 글은 **어제·오늘·내일·1~2주 뒤(D-1~D+14)의 화제와 트렌드**로 씁니다. 폐지: WebSearch 횟수 제한(4-B 1~2회) · 4-B "추가 검색 금지" · 리더 프록시 3회 상한 · Reddit 1회 상한 · 공식 공지 "제목만 1회" 스캔 · **뉴스 각도 금지** · Trends·Reddit·언론 헤드라인 읽기 금지 · "핫함·최신성은 채점하지 않음". 신설: `0-1` 엔진 T(시의성, 매 회차 1순위) · `0-3` 동점 순서 T > C > G > D. 유지: 정의형 금지 · Foreigner Test · 중복·재발행 방지 · 구조·EEAT 규칙.
 
@@ -432,10 +434,11 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 |---|---|---|
 | Focus Keyword | S: 하이브리드 2~4단어 / L: 3~5단어 질문형 | `danggeun market` |
 | Sub Keywords | 구글 자동완성 기반 2~4개, `" / "` 구분 | `danggeun korea / carrot market app` |
-| SEO Title | Title Case. **콜론 부제는 선택**이며 직전 10편 중 3편 이하. 부제는 본문에 있는 사실(숫자·날짜·조건)만 (`2-2`). 시즌·제도 헤드는 연도 필수 | `Is Gwangjang Market Open on Chuseok 2026? Food Alley Yes, Fabric Halls No` |
+| SEO Title | `2-2` 욕망→궁금증 제목. 형식 자유, Focus Keyword 포함(위치 자유), 직전 10개와 구조 반복 금지. 시즌·시의성 글은 연도 필수 | `Is Gwangjang Market Open on Chuseok 2026? Food Alley Yes, Fabric Halls No` |
 | H1 | SEO Title과 반드시 동일 | (위와 동일) |
 | Slug | Focus Keyword 하이픈 연결, 40자 이하 (**연도 미포함**) | `danggeun-market` |
-| Meta Description | Focus Keyword로 시작 + **직답 한 문장 + 글이 다루는 범위**, 130~155자. 호기심 갭 카피 금지 | |
+| **검색자 욕망** | 이 검색어 뒤의 진짜 목적 한 줄 (`2-2 ①`) | `매진된 영화를 그래도 보고 싶다` |
+| Meta Description | Focus Keyword 포함 + 제목의 궁금증을 한 번 더 당기고 **무엇을 얻는지 약속**, 130~155자 | |
 | Theme Color | Culture=`#7e22ce` / Lifestyle=`#16a34a` / Food=`#dc2626` / Travel=`#ca8a04` | `#7e22ce` |
 | Internal Link 1 | 관련 슬러그 (상대경로 `/slug/`) — **REST `status=publish` 확인값만** (`2-5`) | `/tipping-in-korea/` |
 | Internal Link 2 | 관련 슬러그 (상대경로 `/slug/`) — **REST `status=publish` 확인값만** (`2-5`) | `/korean-hoesik-culture/` |
@@ -455,16 +458,27 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 > ⚠️ **`배포 우선` 행은 Draft 루틴·사용자에게 보내는 신호입니다.**
 > ⚠️ **발행된 글의 슬러그는 변경하지 않습니다.** 제목·H1을 고치더라도 슬러그는 유지합니다. 변경이 불가피하면 같은 작업 안에서 ① Rank Math 리디렉션(구→신 301)을 만들고 ② 구 슬러그를 가리키는 내부 링크 전부를 신 슬러그로 교정합니다 — 둘 중 하나라도 못 하면 변경하지 않습니다.
 
-### 2-2. 제목 규칙
+### 2-2. 제목 규칙 — 욕망을 건드리고, 답은 본문에 둔다 (v13.7 전면 개정)
 
-- Focus Keyword를 제목 앞쪽에 유지 (Title Case 변환). 질문형 키워드는 **질문 그대로** 제목이 됩니다
-- **콜론 부제는 선택입니다** — 직전 10편 중 콜론형이 3편이면 이번 글은 콜론 없이 씁니다. 근거: 2026-10-05 진단에서 156편 중 141편이 `X: Y`형이었고, 이것이 "찍어낸 글" 신호의 1순위였다
-- 부제를 쓸 때는 **본문에 적힌 사실**(숫자·날짜·조건·장소)만 씁니다. 좋은 예: `Food Alley Yes, Fabric Halls Shut Sunday` · `₩3,000 Free Ticket, Oct 24 Deadline`
-- ⛔ **호기심 갭 금지**: `The Real Reason …` · `What Nobody Tells You` · `Every Guide Gets Wrong` · `Your 2025 Guide Is Already Wrong` · `The Mistake Every Foreigner Makes` · `… Doesn't Exist` 류. 근거: 7월 "The Real Reason" 7편 연속 발행분 27편의 28일 클릭 합계 6
-- **직역 제도 용어 전면 금지**: Civil Act / Age of Majority / Equipment 등 관공서식 표현
-- 미국인이 실제로 구글에 칠 만한 표현만 사용
-- **직전 10개 제목 중 동일 훅 표현이 이미 2회 이상이면 해당 훅 사용 금지**
-- **연도·패턴 획일화 금지**: ① 연도는 최신성이 검색 의도에 중요한 경우에만 표기 ② 최근 10개 제목과 동일 훅·구조 반복 여부 확인 ③ **제목은 템플릿이 아닙니다**
+무난한 설명형 제목(`X Guide: A, B & C`)은 검색 결과에서 옆 글과 구별되지 않습니다. 제목의 일은 **검색자가 이 글에서 진짜 얻고 싶은 것(욕망)을 짚고, 그 답이 여기 있다는 궁금증을 남기는 것**입니다. 정해진 틀은 없습니다.
+
+**① 먼저 욕망 한 줄을 적습니다** (기본 정보 표 `검색자 욕망` 행)
+- 검색어 뒤에 숨은 진짜 목적: 돈·시간을 아끼고 싶다 · 벌금·망신·헛걸음을 피하고 싶다 · 남들이 못 구한 것을 얻고 싶다 · 현지인처럼 하고 싶다 · 지금 당장 결정해야 한다
+- 예: `biff 2026 tickets` → "매진된 영화를 그래도 보고 싶다" / `bukchon hanok village opening hours` → "헛걸음·벌금 없이 그 골목 사진을 찍고 싶다" / `where to stay in jeju without car` → "차 없이도 손해 안 보는 숙소를 고르고 싶다"
+
+**② 그 욕망을 궁금증으로 풉니다** — 형식 자유
+- 열린 고리: 결론의 **조건·숫자·반전**을 보여 주되 방법은 본문에 남깁니다 (`Sold Out at BIFF 2026? The Seats Come Back 60 Minutes Before`)
+- 손실 회피: 놓치면 생기는 비용을 앞에 둡니다 (`Bukchon After 5 pm Costs ₩100,000, Unless You're Sleeping There`)
+- 통념 뒤집기·지름길·내부자 규칙·2인칭 명령·고백형·숫자형 등 무엇이든 됩니다 (`Skip the Rental Car in Jeju. One Bus Line Connects All 3 Bases`)
+- 질문형·명령형·마침표 두 문장·콜론 모두 허용합니다. 단 **직전 10개 제목과 같은 구조·같은 훅 문구를 반복하지 않습니다**(틀을 깨라는 원칙의 유일한 제약)
+
+**③ 지킬 것 (최소한)**
+- **약속은 본문이 갚습니다**: 제목이 건 궁금증의 답은 인트로 직답 또는 첫 H2 첫 문장에 반드시 있습니다. 본문에 없는 숫자·반전으로 낚지 않습니다 — 사실성 0점이면 탈락
+- **Focus Keyword(또는 자연스러운 어순 변형)를 제목 안에 넣습니다** — 위치는 자유. 앞에 두면 좋지만 훅을 죽이면서까지 고집하지 않습니다
+- 상투 문구 재탕 금지: `The Real Reason …` · `What Nobody Tells You` · `Every Guide Gets Wrong` 같은 **어디에나 붙는 문구**는 욕망을 짚지 못합니다(근거: 7월 "The Real Reason" 7편 28일 합계 6클릭). 궁금증은 **이 글의 사실**로 만듭니다
+- 길이는 대략 70자 이내 (검색 결과에서 잘리지 않게)
+- 미국인이 실제로 쓰는 말로. 관공서식 직역 용어(Civil Act / Age of Majority / Equipment 등) 금지
+- 연도는 최신성이 검색 의도에 중요할 때만 (시즌·시의성 글은 필수)
 
 **정의형 진입 키워드는 채택하지 않습니다 (`0-0` 정의형 금지).** 아래 프레임 규칙은 **기존 B-Z 글의 1회 제목 교체**(`1-6`)에만 남겨 둡니다: 제목·INTRO를 정의로 열지 않고 역설·실화·틀린 통념으로 열되, 직답은 본문 첫 H2 첫 문장에 둡니다. 이 처치로 CTR이 오른 실측은 아직 없습니다 — 완치법이 아니라 완화책입니다.
 
@@ -575,7 +589,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 
 **① `create-viral-content` 스킬 — 구조·훅 단계 (초안 작성 시)**
 
-- SEO Title·H1: 제목 후보 10개 이상 생성 후 **검색어 일치 / 구체성(숫자·날짜·조건) / 사실성(본문에 근거가 있는가)** 3축 스코어링(각 0~3점, **합 7점 이상만 채택**). 호기심·감정 축은 쓰지 않습니다(`2-2` 호기심 갭 금지). `2-2` 중복·콜론 비율 검사를 먼저 통과한 후보만 스코어링 대상
+- SEO Title·H1: `2-2 ①` 욕망 한 줄을 먼저 쓰고, **형식이 서로 다른** 제목 후보 10개 이상 생성(열린 고리·손실 회피·통념 뒤집기·지름길·명령형·질문형 등 섞기) → **욕망 적중 / 궁금증(클릭하지 않으면 못 배기는가) / 검색어 포함 / 사실성(본문이 그 약속을 갚는가)** 4축 스코어링(각 0~3점). **합 9점 이상 + 욕망·궁금증 각 2점 이상 + 사실성 1점 이상**만 채택. 동점이면 궁금증 점수가 높은 쪽. 직전 10개 제목과 구조·훅이 겹치는 후보는 스코어링 전에 제외
 - INTRO 첫 문장: Hook Architecture(Prediction+Stakes / Before-After Compression / 문제 직격 중 택1)
 - 마무리: engagement bait 금지, 독자가 지금 할 행동 중심 클로저
 - 정제 패스 최소 3개: Skeptic → Scroller → Editor
@@ -620,7 +634,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 
 ### 5-3. Focus Keyword 배치 체크리스트 (writer 자가검수)
 
-- [ ] SEO Title 앞쪽에 Focus Keyword 포함 (Title Case)
+- [ ] SEO Title에 Focus Keyword 포함(위치 자유) · 욕망을 짚고 궁금증을 남기는가 · 그 답이 인트로/첫 H2에 있는가 (`2-2`)
 - [ ] Meta Description 첫 문장에 Focus Keyword 포함
 - [ ] H1이 SEO Title과 동일한가?
 - [ ] 본문 첫 100단어 내 Focus Keyword 1회 이상 등장
@@ -633,7 +647,7 @@ curl -s -u "$WP_USER:$WP_APP_PASS" \
 - [ ] EEAT (가)·(나) 두 조건이 모두 충족되어 있는가?
 - [ ] **`2-3` 구조 규칙을 전부 지켰는가?** — 본문 래퍼 존재 · 금지 블록 없음 · 태그 개폐 균형 · 플레이스홀더 0 · `<h1>` 1개 · 4열 이상 표 래퍼
 - [ ] **본문의 모든 내부 링크가 REST 재조회에서 `status=publish`인가?** (`future`·`pending`·`draft`·`private` 0개 — `2-5`)
-- [ ] **v13.3 템플릿 지문 0건인가?** — 히어로 "Last updated · min read" 줄 없음 · AEO 박스에 `Core Fact/Primary Insight/Actionable Tip` 라벨 없음 · 사이트 공통 H2(`Where This … Breaks Down`·`Quick Answers`·`Key points`) 없음 · `*Key points` 꼬리 없음 · 반박형 오프너 없음 · 제목 호기심 갭 금지어 없음 · 포커스 키워드 본문 3~6회 · 사진·캡처 1장 · 같은 대상 기존 글 없음(`1-3`)
+- [ ] **v13.3 템플릿 지문 0건인가?** — 히어로 "Last updated · min read" 줄 없음 · AEO 박스에 `Core Fact/Primary Insight/Actionable Tip` 라벨 없음 · 사이트 공통 H2(`Where This … Breaks Down`·`Quick Answers`·`Key points`) 없음 · `*Key points` 꼬리 없음 · 반박형 오프너 없음 · 제목 상투 문구 재탕 없음 · 포커스 키워드 본문 3~6회 · 사진·캡처 1장 · 같은 대상 기존 글 없음(`1-3`)
 
 ---
 
