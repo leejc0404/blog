@@ -246,6 +246,7 @@ if (titleCb && !titleCb.checked) { nativeCheckSetter.call(titleCb, true); titleC
 
 [6d] Rank Math SEO 설정 (JavaScript)
 ⚠️ FOCUS_KEYWORD·SUB_KEYWORDS는 Notion 값 그대로 (재검색·수정 금지)
+⚠️ SEO_TITLE도 Notion 값 그대로다. 단 2026-10-06 이전에 작성된 초안이 Writer 2-2 ④ 금지 틀(요약형 3단·대시 2개·결론 숫자 2개↑)이면 배포 전에 Writer 2-2 ⑦ 절차로 제목을 바꾸고(스킵 조건 ①~④ 적용), Notion 초안의 제목·SEO Title 행·`<h1>`도 같이 바꾼다.
 ⚠️ TOC 강제 인식을 **이 단계에서 미리** 넣는다. 이것만으로 TOC 항목은 통과한다.
 
 if (!wp.data.select('rank-math')) { await new Promise(r => setTimeout(r, 3000)); }

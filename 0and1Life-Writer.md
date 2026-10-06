@@ -402,6 +402,16 @@ R6. 수요 하한 — 7일 창에 0-3 D < 0.3인 글이 발행됐으면 위반(2
 4. 본문 첫 문단이 그 고리를 60단어 안에 닫나?
 5. 스크롤하다 이 제목에서 손가락이 멈추나? 비슷한 기사 제목 10개 사이에 섞어 놓고 읽어본다.
 
+**⑦ 미공개 글 소급 적용 (2026-10-06 신설 — 사용자 지시)**
+제목 규칙이 바뀌면 **아직 공개되지 않은 글**(WP `pending`·`future`·`draft`, Notion에만 있는 초안)도 새 규칙으로 제목을 바꾼다. 공개(`publish`) 글은 손대지 않는다 — 공개 글 제목은 `Schd_0and1Life-NaverCTR`만 고친다.
+- **바꾸는 곳 4개를 한 번에**: WP `title` · 본문 히어로 `<h1>` · Rank Math SEO 제목(`rank_math_title`, REST `rankmath/v1/updateMeta`) · Notion 초안 페이지(제목·`SEO Title` 행·HTML `<h1>`). 슬러그·메타 디스크립션·Focus Keyword는 바꾸지 않는다.
+- **스킵 조건 (하나라도 걸리면 그 글은 기존 제목 유지)**:
+  ① 새 제목이 그 글의 **Focus Keyword를 원문 그대로 맨 앞에** 두지 못함 (Rank Math 'Focus Keyword in SEO title'·'at the beginning' 항목).
+  ② 기존 제목에 숫자가 있었는데 새 제목에 숫자가 없음 (Rank Math 'Number in title' 항목 — 점수 하락).
+  ③ 기존 첫 문단이 새 제목의 고리를 닫지 못함 (본문을 고쳐야 하는 경우 — 제목만 바꾸는 소급은 여기서 멈춘다).
+  ④ 다른 루틴·세션이 같은 날 그 글의 제목을 이미 고침(WP `modified`가 오늘이고 제목이 바뀌어 있음) — 덮어쓰지 않는다.
+- 기록: 바꾼 글은 `구 제목 → 새 제목 · 훅 형`, 스킵한 글은 `스킵(사유 ①~④)`을 실행 로그에 남긴다.
+
 ### 2-3. HTML 구조 (필수 템플릿)
 
 모든 콘텐츠는 `<div id="z-[SLUG_FIRST_WORD]-report">` 안. `max-width:820px; padding:0 16px 40px; box-sizing:border-box` 유지. 본문 이미지는 plain `<figure>/<img>`(Gutenberg 마커 금지).
