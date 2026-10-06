@@ -2,7 +2,7 @@
 """GSC 수집기 (지침서 0-9 SSOT).
   python3 tools/gsc_pull.py --site https://koreaplug.com/ --days 90 --out out/gsc
 
-키: 환경변수 GSC_SA_JSON(JSON 원문) 또는 GSC_SA_JSON_PATH(파일 경로).
+키: 환경변수 GSC_SA_JSON(JSON 원문 한 줄 또는 base64) 또는 GSC_SA_JSON_PATH(파일 경로).
     키 파일은 세션 임시 폴더에만 두고 저장소에 커밋하지 않는다(.gitignore 처리).
 의존성: requests + PyJWT[crypto] (google 클라이언트 라이브러리 불필요)
 
@@ -12,7 +12,7 @@
   engine_g_candidates.csv (노출 ≥ 50 · 순위 5~30 · 비정의형) · summary.md
 기준일 = 오늘 − 3일 (GSC 확정 데이터 지연, dataState=final)
 """
-import argparse, csv, datetime as dt, json, os, re, sys, time, urllib.parse
+import argparse, base64, csv, datetime as dt, json, os, re, sys, time, urllib.parse
 
 import jwt
 import requests
@@ -23,9 +23,13 @@ DEFINITION_URL = re.compile(r"-meaning|why-do-koreans-|-explained")
 
 
 def load_key():
-    raw = os.environ.get("GSC_SA_JSON")
+    raw = os.environ.get("GSC_SA_JSON", "").strip().strip("'")
     if raw:
-        return json.loads(raw)
+        try:
+            return json.loads(raw)
+        except ValueError:
+            # 환경변수 칸에 base64로 넣은 경우
+            return json.loads(base64.b64decode(raw))
     path = os.environ.get("GSC_SA_JSON_PATH")
     if path and os.path.exists(path):
         with open(path) as f:
