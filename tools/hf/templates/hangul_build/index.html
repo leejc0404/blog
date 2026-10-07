@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=__W__, height=__H__" />
+<!--HFV-->
+<script src="vendor/gsap.min.js"></script>
+<link rel="stylesheet" href="common.css" />
+<style>
+  html, body { width: __W__px; height: __H__px; }
+  .grain { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.05) 1.5px, transparent 2px); background-size: 9px 9px; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(100px); opacity: .5; }
+  .kick { position: absolute; left: 0; right: 0; top: 250px; text-align: center; font-weight: 800; font-size: 40px; letter-spacing: .16em; }
+  .syl { position: absolute; top: 340px; font-weight: 900; line-height: 1; text-align: center; }
+  .jamo { position: absolute; font-weight: 800; text-align: center; line-height: 1; }
+  .eq { position: absolute; left: 0; right: 0; top: 700px; text-align: center; font-weight: 800; white-space: pre; }
+  .roman { position: absolute; left: 0; right: 0; top: 820px; text-align: center; font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+  .mean { position: absolute; left: 0; right: 0; top: 920px; text-align: center; font-weight: 900; letter-spacing: -.01em; white-space: nowrap; }
+  .hint { position: absolute; left: 110px; right: 110px; top: 1040px; text-align: center; font-weight: 600; font-size: 36px; line-height: 1.25; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="__DUR__" data-width="__W__" data-height="__H__">
+  <div id="stage" class="clip" data-start="0" data-duration="__DUR__" data-track-index="0"></div>
+</div>
+<script src="common.js"></script>
+<script>
+/* hangul_build — KoreaPlug 쇼츠용 '한글 읽기' B-roll(1080×1920, 기본 6초).
+   자모가 하나씩 날아와 글자로 합쳐지고 → 로마자 → 뜻. 내용은 y 220~1120 (자막 자리 회피).
+   값: word(한글 1~4음절), roman, meaning, hint?, kicker?, accent? */
+const V = HF.V, W = HF.W, H = HF.H, T = HF.theme("dark");
+const acc = HF.color(V.accent, "#FFD640");
+const stage = document.getElementById("stage");
+document.body.style.background = "linear-gradient(170deg, #0f1622 0%, #0a0d14 60%, #1b1424 100%)";
+const tl = gsap.timeline({ paused: true });
+const g1 = HF.el("div", "glow", { width: "640px", height: "640px", left: "220px", top: "200px", background: "#2b6cb0" });
+stage.appendChild(g1); stage.appendChild(HF.el("div", "grain"));
+tl.to(g1, { scale: 1.25, x: 60, duration: HF.DUR, ease: "sine.inOut" }, 0);
+
+const L = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ".split("");
+const Vw = "ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ".split("");
+const Tl = ["", ..."ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ".split("")];
+const split = (ch) => { const c = ch.codePointAt(0) - 0xac00; if (c < 0 || c > 11171) return [ch]; return [L[Math.floor(c / 588)], Vw[Math.floor((c % 588) / 28)], Tl[c % 28]].filter(Boolean); };
+
+const word = [...String(V.word || "")].slice(0, 4);
+const n = Math.max(word.length, 1);
+const size = Math.min(300, Math.floor(860 / n / 0.98));
+const cellW = size * 1.02, x0 = (W - cellW * n) / 2;
+stage.appendChild(HF.el("div", "kick", { color: acc }, HF.esc(V.kicker || "READ IT IN KOREAN")));
+
+const per = Math.min(0.8, 2.0 / n);
+const eqParts = [];
+word.forEach((ch, i) => {
+  const t0 = 0.1 + i * per;
+  const jm = split(ch);
+  const cx = x0 + cellW * i;
+  const syl = HF.el("div", "syl", { left: cx + "px", width: cellW + "px", fontSize: size + "px", color: T.fg }, HF.esc(ch));
+  stage.appendChild(syl);
+  // 자모 조각: 글자 자리 주변에서 날아와 모였다가, 완성 글자로 바뀐다
+  const js = jm.map((j, k) => {
+    const e = HF.el("div", "jamo", { left: cx + "px", width: cellW + "px", top: 340 + size * 0.12 + "px", fontSize: size * 0.62 + "px", color: k === 1 ? acc : "#78BEFF" }, HF.esc(j));
+    stage.appendChild(e); return e;
+  });
+  js.forEach((e, k) => {
+    const dx = (k - (js.length - 1) / 2) * size * 0.55, dy = k === 1 ? -size * 0.25 : size * 0.15;
+    tl.fromTo(e, { opacity: 0, x: dx * 2.2, y: dy * 2.2, scale: 0.6 }, { opacity: 1, x: dx, y: dy, scale: 1, duration: 0.3, ease: "power3.out", immediateRender: false }, t0 + k * 0.12);
+    tl.to(e, { x: 0, y: 0, scale: 0.7, opacity: 0, duration: 0.22, ease: "power2.in" }, t0 + per * 0.62);
+    tl.set(e, { opacity: 0 }, 0);
+  });
+  tl.fromTo(syl, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)", immediateRender: false }, t0 + per * 0.72);
+  tl.set(syl, { opacity: 0 }, 0);
+  eqParts.push(jm.join(" + ") + " = " + ch);
+});
+const tw = 0.1 + n * per + 0.1;
+const eqTxt = eqParts.join("  ·  ");
+const eq = HF.el("div", "eq", { fontSize: HF.fit(eqTxt, 56, 860, 800, 30) + "px", color: T.sub }, HF.esc(eqTxt)); stage.appendChild(eq);
+const roman = HF.el("div", "roman", { fontSize: HF.fit(V.roman || "", 76, 860, 800, 40) + "px", color: "#78BEFF" }, HF.esc(V.roman || "")); stage.appendChild(roman);
+const mean = HF.el("div", "mean", { fontSize: HF.fit(V.meaning || "", 104, 860, 900, 48) + "px", color: acc }, HF.esc(V.meaning || "")); stage.appendChild(mean);
+let hint = null;
+if (V.hint) { hint = HF.el("div", "hint", { color: T.fg }, HF.esc(V.hint)); stage.appendChild(hint); }
+tl.from(eq, { opacity: 0, y: 20, duration: 0.35, ease: "power2.out" }, tw);
+tl.from(roman, { opacity: 0, y: 24, duration: 0.35, ease: "power2.out" }, tw + 0.3);
+tl.from(mean, { opacity: 0, scale: 1.6, duration: 0.3, ease: "power4.out" }, tw + 0.65);
+if (hint) tl.from(hint, { opacity: 0, duration: 0.4 }, tw + 1.0);
+tl.set({}, {}, HF.DUR);
+window.__timelines = window.__timelines || {};
+window.__timelines["main"] = tl;
+tl.seek(0);
+</script>
+</body>
+</html>

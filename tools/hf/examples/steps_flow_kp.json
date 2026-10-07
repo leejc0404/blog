@@ -1,0 +1,13 @@
+{
+  "theme": "kp",
+  "title": "How to get a T-money refund at the airport",
+  "steps": [
+    {"label": "Go to a GS25", "sub": "Arrivals hall, B1"},
+    {"label": "Hand over the card", "sub": "Say \"refund\""},
+    {"label": "Pay ₩500 fee", "sub": "Taken from balance"},
+    {"label": "Get cash back", "sub": "Max ₩20,000"}
+  ],
+  "warn": 3,
+  "warn_text": "Over ₩20,000? Bank only",
+  "source": "Source: example values for template test only"
+}

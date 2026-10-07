@@ -1,4 +1,4 @@
-# KoreaPlug 자동 이미지 삽입 태스크 (v7.2 — Flow 모델 Nano Banana Pro 고정, 크레딧 차감 시 NB2 폴백 / v7.1 — 밝은 낮·즐거운 사람 무드 + Flow 글당 2장 상한 / v7.0 — 무료 실사 3원화(무료 라이선스 실사진 / Flow 기록 사진 문법 / Claude 모션 그래픽) + 전송 폴백 재정렬 + 장소 오인 배제 + 전송 실패 시 재타이핑 금지 + 업로드 대기 20초 + Flow 교차출처 캡처 + DOM 기반 제출 + 다중 글 연속 처리 + zoom 뷰포트 보호 + 세션 사전 점검 + 사건 설계 + 한국성 + 신체 결손 방지 + 반응형 전송 + Google Flow)
+# KoreaPlug 자동 이미지 삽입 태스크 (v7.3 — C 슬롯 요금 비교·절차는 HyperFrames 템플릿 경로(3-6 ③-HF) 우선, 실패하면 그 슬롯만 기존 canvas 경로 / v7.2 — Flow 모델 Nano Banana Pro 고정, 크레딧 차감 시 NB2 폴백 / v7.1 — 밝은 낮·즐거운 사람 무드 + Flow 글당 2장 상한 / v7.0 — 무료 실사 3원화(무료 라이선스 실사진 / Flow 기록 사진 문법 / Claude 모션 그래픽) + 전송 폴백 재정렬 + 장소 오인 배제 + 전송 실패 시 재타이핑 금지 + 업로드 대기 20초 + Flow 교차출처 캡처 + DOM 기반 제출 + 다중 글 연속 처리 + zoom 뷰포트 보호 + 세션 사전 점검 + 사건 설계 + 한국성 + 신체 결손 방지 + 반응형 전송 + Google Flow)
 
 ### 목적
 
@@ -872,6 +872,26 @@ Photo: {저작자} / {출처}, {라이선스}
 - 배경 오프화이트 `#f6f4ef`, 글자 `#1d232b`, 보조 글자 `#6b7280`, 강조색 1개(`#c2410c`), 범주색 최대 2개(`#2f7d5b`·`#2b6cb0`). 그림자·그라데이션·3D 금지
 - 움직임은 **나타나기·채워지기·강조 테두리**만. 회전·튕김·깜빡임 금지 (광고처럼 보이고 눈이 피로하다)
 - 최소 글자 크기 **18px** (본문 표시폭 788px로 줄어도 읽혀야 한다). 라벨과 도형 사이 여백 **12px 이상**
+
+**③-HF HyperFrames 템플릿 경로 (v7.3 · ① 표의 '요금 비교'·'절차' 슬롯만 · 실패하면 그 슬롯은 ③ canvas 경로)**
+
+'요금 비교'와 '절차(예약 → 현장 접수)' 슬롯은 `scene.html` 을 짜지 않고 HyperFrames 템플릿(`stat_bars`·`steps_flow`)에 값만 넣어 렌더한다. 템플릿은 ② 규칙을 이미 지킨다 — 1226×768 · 24fps · 7.4초(마지막 2초 정지) · 배경 `#f6f4ef` · 글자 `#1d232b`·`#6b7280` · 강조 `#c2410c` · 범주 `#2f7d5b`·`#2b6cb0` · 그림자·그라데이션·3D 없음 · 움직임은 나타나기·채워지기·강조 테두리만(튕김·회전·깜빡임 없음) · 1226 폭 기준 최소 30px(788 표시 폭에서 약 19px) · `kp` 테마는 숫자 올라가기를 쓰지 않는다(본문에 없는 숫자를 만들지 않는다).
+
+1. 값 파일 `hfN.json`:
+   - 요금 비교 → `stat_bars`: `{"theme":"kp","title":"English title","subtitle":"Adult ticket, weekday","items":[{"label":"On-site counter","value":31000,"text":"₩31,000","tone":"neutral"}],"highlight":번호,"badge":"Cheapest","source":"Source: …, checked YYYY-MM-DD"}`
+   - 절차 → `steps_flow`: `{"theme":"kp","title":"…","steps":[{"label":"…","sub":"…"}],"warn":번호,"warn_text":"Foreigners get stuck here","source":"Source: …, checked YYYY-MM-DD"}`
+   - 글자는 영어, 한국 고유명사는 로마자(필요하면 한글 병기 — Pretendard 로 렌더). 숫자·날짜·요금은 본문 raw 에서 그대로 복사한다. `value` 는 막대 길이만 정한다.
+2. 렌더 (Bash 도구 `timeout` 은 **600000ms** 로 지정 — 첫 실행은 npm 내려받기가 겹친다):
+```bash
+D=/tmp/kp_motion_SLUG && mkdir -p $D && cd $D
+(test -d hfkit || git clone -q --depth 1 https://github.com/leejc0404/blog hfkit) && K=hfkit/tools/hf
+timeout 300 python3 $K/hf_render.py stat_bars hfN.json koreaplug-motion-SLUG-N.mp4 --size 1226x768 --poster koreaplug-motion-SLUG-N-poster.webp; echo "exit=$?"
+# ⑥ 정지 그래픽이면: timeout 300 python3 $K/hf_render.py stat_bars hfN.json koreaplug-motion-SLUG-N.webp --size 1226x768
+```
+   - 2026-10-08 클라우드 실측: 7.4초 MP4 292KB · 포스터 39KB · 렌더 14초(첫 실행은 npm 내려받기로 1~2분 더). 파일명이 ③과 같아 ④ 업로드·⑤ 마크업·STEP 2 분류가 그대로 맞는다
+   - 용량이 600KB 를 넘으면 그 슬롯은 ③ canvas 경로로 만든다
+3. ⛔ **업로드 전 `Read` 로 프레임 3장(시작 0.5초·중간·포스터)을 직접 본다** — ③과 같은 기준(글자 겹침·잘림·오타·숫자 대조). **통과한 뒤에만** ④ 업로드 폴더에 넣는다: `mkdir -p /mnt/user-data/outputs/kp_motion && cp koreaplug-motion-SLUG-N* /mnt/user-data/outputs/kp_motion/`
+4. **종료코드 2 · 시간 초과 · 3에서 걸림** → 그 슬롯만 ③ canvas 경로로 처음부터 만든다. 같은 슬롯에서 HF 를 다시 시도하지 않는다. STEP 8 에 사유 한 줄.
 
 **③ 제작 파이프라인 — 클라우드 `Bash` (Flow 생성 대기 시간에 병행한다)**
 
@@ -1795,6 +1815,7 @@ const r = await fetch(u, {headers: {Range: 'bytes=0-1023'}}); const b = new Uint
 
 - 처리한 글 제목 및 Post ID
 - **(v7.0) 슬롯 계획·조달 경로 표**: 슬롯별 유형(A/B/C) · 경로(실사진/Flow/모션) · media ID · 실사진이면 **출처 페이지·저작자·라이선스·촬영일**, 모션이면 **길이·용량·프레임 검수 결과**. A 슬롯에서 실사진을 못 찾아 Flow로 내려갔다면 그 이유(검색어·후보 수)
+- **(v7.3) HF 모션**: C 슬롯별 경로(`HF stat_bars` / `HF steps_flow` / `canvas`) · HF 렌더 시간·용량 · HF 가 실패해 canvas 로 돌린 슬롯은 `stage·reason` 한 줄
 - **STEP 2 분류 결과 표**: 이미지별 `파일명 => 증빙/스톡/데코 [판정근거]`, 그리고 evidence/stock/deco/genCount
 - `unknown`이 있었다면 수동 확인 결과와 재계산된 genCount
 - 삽입·교체된 이미지 (media ID + 렌더 기준 위치 %)

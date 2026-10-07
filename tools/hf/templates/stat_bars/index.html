@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=__W__, height=__H__" />
+<!--HFV-->
+<script src="vendor/gsap.min.js"></script>
+<link rel="stylesheet" href="common.css" />
+<style>
+  html, body { width: __W__px; height: __H__px; }
+  .title { position: absolute; font-weight: 800; letter-spacing: -.03em; white-space: nowrap; }
+  .subtitle { position: absolute; font-weight: 600; white-space: nowrap; }
+  .row { position: absolute; display: flex; align-items: center; }
+  .lab { font-weight: 700; white-space: nowrap; text-align: right; letter-spacing: -.02em; }
+  .track { position: relative; flex: 1; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 10px 10px 0; transform-origin: 0 50%; }
+  .val { position: absolute; top: 50%; transform: translateY(-50%); font-weight: 900; white-space: nowrap; letter-spacing: -.03em; }
+  .ring { position: absolute; border-radius: 14px; pointer-events: none; }
+  .badge { position: absolute; font-weight: 800; white-space: nowrap; padding: .18em .55em; border-radius: .4em; color: #fff; }
+  .src { position: absolute; font-weight: 500; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="__DUR__" data-width="__W__" data-height="__H__">
+  <div id="stage" class="clip" data-start="0" data-duration="__DUR__" data-track-index="0"></div>
+</div>
+<script src="common.js"></script>
+<script>
+/* stat_bars — 수치 비교 막대(블로그 설명컷·세로 영상 공용). countup 기본: 블로그(ol·kp) 끔 · 영상(dark·aipick) 켬. 최종 프레임은 항상 text 그대로.
+   값: title, subtitle?, items[{label, value(숫자 — 막대 길이), text(표시 문자열 — 본문 그대로), tone?: gain|loss|neutral|accent|색}],
+       highlight?(번호), badge?(강조 꼬리표), source?, theme: ol|kp|dark|aipick, hold?(마지막 정지 초, 기본 2)
+   움직임은 나타나기·자라기·강조 테두리만(튕김·회전·깜빡임 없음 — KoreaPlug 3-6 ② 규칙). */
+const V = HF.V, W = HF.W, H = HF.H, T = HF.theme(V.theme || "ol");
+const S = Math.min(W / 1280, H / 720) * (W < H ? 1.25 : 1);       // 세로 캔버스면 글자를 키운다
+const stage = document.getElementById("stage");
+document.body.style.background = T.bg;
+const tl = gsap.timeline({ paused: true });
+const items = (V.items || []).slice(0, 5);
+const hold = V.hold != null ? V.hold : 2.0, endAnim = Math.max(1.6, HF.DUR - hold);
+const padX = Math.round(W * 0.055), top0 = W < H ? Math.round(H * 0.16) : Math.round(H * 0.09);
+const minF = Math.round(40 * (W / 1280));                          // 1280폭 기준 최소 40px (모바일 표시 폭에서 읽히게)
+
+const tsz = HF.fit(V.title || "", Math.round(54 * S), W - padX * 2, 800, minF);
+const title = HF.el("div", "title", { left: padX + "px", top: top0 + "px", fontSize: tsz + "px", color: T.fg }, HF.esc(V.title || ""));
+stage.appendChild(title);
+let y = top0 + tsz * 1.35;
+let sub = null;
+if (V.subtitle) {
+  const ssz = Math.max(minF * 0.8, HF.fit(V.subtitle, Math.round(34 * S), W - padX * 2, 600, 24));
+  sub = HF.el("div", "subtitle", { left: padX + "px", top: y + "px", fontSize: ssz + "px", color: T.sub }, HF.esc(V.subtitle));
+  stage.appendChild(sub); y += ssz * 1.5;
+}
+const srcH = V.source ? Math.round(minF * 0.75) * 2.2 : 0;
+const area = H - y - srcH - Math.round(H * 0.06);
+const rowH = Math.min(Math.round(area / Math.max(items.length, 1)), Math.round(150 * S));
+const barH = Math.round(rowH * 0.5);
+const labW = Math.round(Math.min(W * 0.3, Math.max(...items.map((it) => HF.textW(it.label, Math.max(minF, Math.round(38 * S)), 700))) + 24));
+const maxV = Math.max(...items.map((it) => Math.abs(+it.value || 0)), 1e-9);
+const valRoom = Math.round(Math.max(...items.map((it) => HF.textW(it.text || "", Math.round(44 * S), 900))) + 28);
+const trackW = W - padX * 2 - labW - 24 - valRoom;
+const tone = (it) => HF.color(T[it.tone] || it.tone, (+it.value < 0) ? T.loss : T.neutral);
+
+const fills = [], vals = [], rows = [];
+items.forEach((it, k) => {
+  const ry = y + k * rowH + (rowH - barH) / 2;
+  const row = HF.el("div", "row", { left: padX + "px", top: ry + "px", width: W - padX * 2 + "px", height: barH + "px" });
+  const lsz = HF.fit(it.label, Math.max(minF, Math.round(38 * S)), labW - 16, 700, minF);
+  const lab = HF.el("div", "lab", { width: labW + "px", paddingRight: "24px", fontSize: lsz + "px", color: T.fg }, HF.esc(it.label));
+  const track = HF.el("div", "track", { height: barH + "px" });
+  const len = Math.max(6, (trackW * Math.abs(+it.value || 0)) / maxV);
+  const fill = HF.el("div", "fill", { width: len + "px", background: tone(it) });
+  const val = HF.el("div", "val", { left: len + 18 + "px", fontSize: Math.round(44 * S) + "px", color: tone(it) });
+  track.appendChild(fill); track.appendChild(val); row.appendChild(lab); row.appendChild(track);
+  stage.appendChild(row);
+  fills.push(fill); vals.push(val); rows.push({ row, ry, len, lab });
+});
+if (V.source) {
+  stage.appendChild(HF.el("div", "src", { left: padX + "px", bottom: Math.round(H * 0.05) + "px", fontSize: Math.round(minF * 0.75) + "px", color: T.sub }, HF.esc(V.source)));
+}
+
+// ── 움직임: 제목 → 막대가 차례로 자람(숫자 따라 올라감) → 강조 테두리 → 정지 ──
+tl.from(title, { y: 24, opacity: 0, duration: 0.45, ease: "power2.out" }, 0.1);
+if (sub) tl.from(sub, { y: 18, opacity: 0, duration: 0.4, ease: "power2.out" }, 0.3);
+const step = Math.min(0.45, (endAnim - 1.8) / Math.max(items.length, 1));
+items.forEach((it, k) => {
+  const t = 0.6 + k * step, d = 0.9;
+  tl.from(rows[k].lab, { opacity: 0, x: -16, duration: 0.3, ease: "power2.out" }, t);
+  tl.from(fills[k], { scaleX: 0, duration: d, ease: "power3.out" }, t);
+  tl.from(vals[k], { left: 18, duration: d, ease: "power3.out" }, t);           // 숫자가 막대 끝을 따라간다
+  const countup = V.countup != null ? V.countup : ["dark", "aipick"].includes(V.theme);   // 블로그(ol·kp): 본문에 없는 중간 숫자를 보이지 않는다
+  if (!countup) { vals[k].textContent = it.text || ""; tl.from(vals[k], { opacity: 0, duration: 0.3 }, t + d * 0.6); }
+  else { HF.countUp(tl, vals[k], it.text || "", t, d, 10); }
+});
+const hi = V.highlight;
+if (hi != null && rows[hi]) {
+  const r = rows[hi], th = Math.max(4, Math.round(5 * S)), padR = 10 * S;
+  const ring = HF.el("div", "ring", { left: padX - padR + "px", top: r.ry - padR + "px", width: W - padX * 2 + padR * 2 + "px", height: barH + padR * 2 + "px",
+    border: `${th}px solid ${T.accent}` });
+  stage.appendChild(ring);
+  const tr = 0.6 + items.length * step + 0.5;
+  tl.from(ring, { opacity: 0, duration: 0.35, ease: "power1.out" }, tr);
+  if (V.badge) {
+    const bsz = Math.max(Math.round(minF * 0.8), Math.round(30 * S));
+    const badge = HF.el("div", "badge", { right: padX + "px", top: r.ry - padR - bsz * 1.5 + "px", fontSize: bsz + "px", background: T.accent }, HF.esc(V.badge));
+    stage.appendChild(badge);
+    tl.from(badge, { opacity: 0, y: 10, duration: 0.35, ease: "power2.out" }, tr + 0.15);
+  }
+}
+tl.set({}, {}, HF.DUR);
+window.__timelines = window.__timelines || {};
+window.__timelines["main"] = tl;
+tl.seek(0);
+</script>
+</body>
+</html>

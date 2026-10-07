@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=__W__, height=__H__" />
+<!--HFV-->
+<script src="vendor/gsap.min.js"></script>
+<link rel="stylesheet" href="common.css" />
+<style>
+  html, body { width: __W__px; height: __H__px; }
+  .panel { position: absolute; inset: 0; }
+  .brand { position: absolute; left: 60px; top: 300px; font-weight: 800; font-size: 34px; letter-spacing: -.02em; }
+  .disc { position: absolute; left: 60px; right: 120px; top: 1470px; font-weight: 600; font-size: 30px; line-height: 1.35; }
+  .kick { position: absolute; left: 60px; font-weight: 800; letter-spacing: -.03em; white-space: nowrap; }
+  .big { position: absolute; left: 60px; font-weight: 900; letter-spacing: -.05em; white-space: nowrap; line-height: 1.05; }
+  .quote { position: absolute; left: 60px; right: 120px; background: #fff; border-radius: 22px; padding: 56px 52px; box-shadow: 0 14px 0 rgba(0,0,0,.07); }
+  .quote .q { font-weight: 900; font-size: 86px; line-height: 1.22; letter-spacing: -.04em; }
+  .hl { background-repeat: no-repeat; background-position: 0 100%; background-size: 0% 100%; }
+  .grp { position: absolute; left: 60px; right: 120px; }
+  .grp h3 { font-weight: 900; font-size: 52px; letter-spacing: -.03em; margin-bottom: 18px; }
+  .bar { position: relative; height: 92px; margin-bottom: 18px; }
+  .bar .f { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 14px; transform-origin: 0 50%; opacity: .16; }
+  .bar .l { position: absolute; left: 26px; top: 50%; transform: translateY(-50%); font-weight: 800; font-size: 44px; white-space: nowrap; }
+  .bar .p { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); font-weight: 900; font-size: 46px; white-space: nowrap; }
+  .pick { position: absolute; left: 60px; right: 120px; display: flex; align-items: center; gap: 26px; background: #fff; border-radius: 20px; padding: 34px 34px; box-shadow: 0 10px 0 rgba(0,0,0,.06); }
+  .pick .role { flex: none; font-weight: 900; font-size: 36px; color: #fff; padding: 10px 20px; border-radius: 12px; }
+  .pick .nm { font-weight: 800; font-size: 50px; letter-spacing: -.03em; white-space: nowrap; overflow: hidden; }
+  .cta { position: absolute; left: 60px; right: 120px; text-align: center; font-weight: 900; letter-spacing: -.04em; }
+  .arrow { position: absolute; left: 50%; width: 0; height: 0; border-left: 46px solid transparent; border-right: 46px solid transparent; transform: translateX(-50%); }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="__DUR__" data-width="__W__" data-height="__H__">
+  <div id="stage" class="clip" data-start="0" data-duration="__DUR__" data-track-index="0"></div>
+</div>
+<script src="common.js"></script>
+<script>
+/* review_bars — AIPick(ironeye) 리뷰 분석 클립 1080×1920 · 기본 15초.
+   값: group(제품군), n_text("5,932개"), quote, quote_hl?, product(만족·불만 기준 모델 짧은 이름),
+       pros[{label,pct}] ≤3, cons[{label,pct}] ≤3, picks[{role,name}] ≤3, cta?, sticker?, disclosure(필수), brand?
+   글자는 x 60~960 · y 300~1560 안(오른쪽 버튼·아래 설명 영역을 피함). 40대 이상이 읽는 크기(최소 30px, 본문 44px 이상). */
+const V = HF.V, W = HF.W, H = HF.H, T = HF.theme("aipick");
+const stage = document.getElementById("stage");
+document.body.style.background = T.bg;
+stage.appendChild(HF.el("div", "panel", { backgroundImage: "radial-gradient(rgba(181,83,43,.10) 3px, transparent 3.5px)", backgroundSize: "34px 34px" }));
+const tl = gsap.timeline({ paused: true });
+const D = HF.DUR, seg = [0, D * 0.2, D * 0.4, D * 0.7, D * 0.87, D];     // 15초 기준 0·3·6·10.5·13·15
+const panels = [];
+const panel = () => { const p = HF.el("div", "panel"); stage.appendChild(p); panels.push(p); return p; };
+const text = (p, cls, css, t) => { const e = HF.el("div", cls, css, HF.esc(t)); p.appendChild(e); return e; };
+
+// 상시: 브랜드 · 광고 표기(대가성 문구는 영상 내내 보인다)
+text(stage, "brand", { color: T.accent }, V.brand || "먹어보고 따져본 리스트");
+const disc = text(stage, "disc", { color: T.sub }, V.disclosure || "이 영상은 네이버 쇼핑 커넥트 활동의 일환으로, 판매 발생 시 수수료를 제공받습니다.");
+
+// ① 훅 — 0프레임부터 제품군 이름이 보인다
+const p1 = panel();
+text(p1, "kick", { top: "560px", fontSize: "60px", color: T.fg }, V.kicker || "AI가 리뷰를 전부 읽었습니다");
+const g = text(p1, "big", { top: "680px", fontSize: HF.fit(V.group || "", 240, 900, 900, 90) + "px", color: T.fg }, V.group || "");
+const nWrap = HF.el("div", "big", { top: "980px", fontSize: "140px", color: T.accent }); p1.appendChild(nWrap);
+const nLab = HF.el("span", "", { fontSize: "80px", color: T.fg, marginRight: "18px" }, "리뷰"); nWrap.appendChild(nLab);
+const nNum = HF.el("span"); nWrap.appendChild(nNum);
+nNum.textContent = V.n_text || "";                       // 첫 프레임에 완성된 숫자(썸네일·스킵 방지)
+nWrap.style.transformOrigin = "0 50%";
+tl.to(nWrap, { scale: 1.12, duration: 0.18, ease: "power2.out" }, 0.35).to(nWrap, { scale: 1, duration: 0.3, ease: "power2.inOut" }, 0.53);
+
+// ② 가장 많이 나온 말
+const p2 = panel();
+text(p2, "kick", { top: "560px", fontSize: "58px", color: T.sub }, V.quote_kicker || "가장 많이 나온 말");
+const qc = HF.el("div", "quote", { top: "700px" }); p2.appendChild(qc);
+const q = HF.el("div", "q", { color: T.fg }); qc.appendChild(q);
+const qt = String(V.quote || ""), hl = V.quote_hl && qt.includes(V.quote_hl) ? V.quote_hl : null;
+q.innerHTML = "“" + (hl ? HF.esc(qt).replace(HF.esc(hl), `<span class="hl" style="background-image:linear-gradient(transparent 58%, ${HF.PAL.y} 58%, ${HF.PAL.y} 94%, transparent 94%)">${HF.esc(hl)}</span>`) : HF.esc(qt)) + "”";
+q.style.fontSize = HF.fit("“" + qt + "”", 100, 760 * 2, 900, 56) + "px";
+if (V.quote_note) text(p2, "kick", { top: "1240px", fontSize: "42px", color: T.sub }, V.quote_note);
+
+// ③ 만족·불만 TOP3
+const p3 = panel();
+if (V.product) text(p3, "kick", { top: "420px", fontSize: HF.fit(V.product, 50, 900, 800, 34) + "px", color: T.fg }, V.product);
+const bars = (list, top, title, col) => {
+  const box = HF.el("div", "grp", { top: top + "px" }); p3.appendChild(box);
+  box.appendChild(HF.el("h3", "", { color: col }, HF.esc(title)));
+  const mx = Math.max(...list.map((x) => +x.pct || 0), 1);
+  return list.slice(0, 3).map((x) => {
+    const b = HF.el("div", "bar"); box.appendChild(b);
+    const f = HF.el("div", "f", { width: Math.max(8, (100 * (+x.pct || 0)) / mx) + "%", background: col }); b.appendChild(f);
+    b.appendChild(HF.el("div", "l", { color: T.fg, fontSize: HF.fit(x.label, 44, 640, 800, 32) + "px" }, HF.esc(x.label)));
+    const p = HF.el("div", "p", { color: col }); b.appendChild(p);
+    return { f, p, txt: (x.pct_text || (+x.pct).toFixed(1) + "%") };
+  });
+};
+const pros = bars(V.pros || [], 520, V.pros_title || "만족 TOP3", T.gain);
+const cons = bars(V.cons || [], 1000, V.cons_title || "불만 TOP3", T.loss);
+
+// ④ 추천 3선
+const p4 = panel();
+text(p4, "kick", { top: "500px", fontSize: "68px", color: T.fg }, V.picks_title || "따져본 추천 3선");
+const roleCol = [T.accent, T.gain, "#2b6cb0"];
+const picks = (V.picks || []).slice(0, 3).map((x, k) => {
+  const r = HF.el("div", "pick", { top: 660 + k * 250 + "px" }); p4.appendChild(r);
+  r.appendChild(HF.el("div", "role", { background: roleCol[k] }, HF.esc(x.role)));
+  r.appendChild(HF.el("div", "nm", { color: T.fg, fontSize: HF.fit(x.name, 56, 560, 800, 34) + "px" }, HF.esc(x.name)));
+  return r;
+});
+
+// ⑤ CTA
+const p5 = panel();
+const c1 = text(p5, "cta", { top: "700px", fontSize: HF.fit(V.cta || "", 84, 900, 900, 50) + "px", color: T.fg }, V.cta || "자세한 비교는 블로그 글에서");
+const c2 = text(p5, "cta", { top: "880px", fontSize: "64px", color: T.accent }, V.sticker || "상품은 아래 쇼핑 스티커");
+const ar = HF.el("div", "arrow", { top: "1020px", borderTop: `80px solid ${T.accent}` }); p5.appendChild(ar);
+
+// ── 장면 전환: 오른쪽에서 밀고 들어오고 왼쪽으로 빠진다 ──
+panels.forEach((p, k) => {
+  const a = seg[k], b = seg[k + 1];
+  if (k > 0) {
+    tl.set(p, { visibility: "hidden" }, 0);
+    tl.set(p, { visibility: "visible" }, a);
+    tl.fromTo(p, { xPercent: 100 }, { xPercent: 0, duration: 0.32, ease: "power3.out", immediateRender: false }, a);
+  }
+  if (k < panels.length - 1) {
+    tl.to(p, { xPercent: -100, duration: 0.32, ease: "power3.in" }, b - 0.32);
+    tl.set(p, { visibility: "hidden" }, b);
+  }
+});
+tl.to(q.querySelectorAll(".hl"), { backgroundSize: "100% 100%", duration: 0.35, ease: "power2.out" }, seg[1] + 0.7);
+[[pros, seg[2] + 0.4], [cons, seg[2] + 1.9]].forEach(([list, t0]) => list.forEach((x, k) => {
+  const t = t0 + k * 0.28;
+  tl.fromTo(x.f, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out", immediateRender: false }, t);
+  tl.set(x.f, { scaleX: 0 }, 0);
+  HF.countUp(tl, x.p, x.txt, t, 0.6, 8);
+}));
+picks.forEach((r, k) => { tl.fromTo(r, { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.35, ease: "power2.out", immediateRender: false }, seg[3] + 0.35 + k * 0.3); tl.set(r, { opacity: 0 }, 0); });
+tl.fromTo(ar, { y: -20 }, { y: 20, duration: 0.45, yoyo: true, repeat: 3, ease: "sine.inOut", immediateRender: false }, seg[4] + 0.3);
+tl.set({}, {}, D);
+window.__timelines = window.__timelines || {};
+window.__timelines["main"] = tl;
+tl.seek(0);
+</script>
+</body>
+</html>

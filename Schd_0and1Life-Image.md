@@ -1,4 +1,4 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v7.3 — Claude 제작컷은 인라인 SVG 금지, MP4(모션)·WebP(정적)로 렌더해 업로드 · v7.2 — Flow 모델은 Nano Banana Pro 우선(0크레딧일 때만) · v7.1 설명은 Claude 제작컷(모션·정적 SVG) 우선 · 촬영컷은 밝은 일상 톤 · 비용 0원)
+# 0and1Life 자동 이미지 삽입 태스크 (v7.4 — 설명컷 중 막대 비교·단계 흐름은 HyperFrames 템플릿 경로(3-10 ⑨-HF) 우선, 실패하면 그 슬롯만 기존 SVG→MP4 경로 · v7.3 — Claude 제작컷은 인라인 SVG 금지, MP4(모션)·WebP(정적)로 렌더해 업로드 · v7.2 — Flow 모델은 Nano Banana Pro 우선(0크레딧일 때만) · v7.1 설명은 Claude 제작컷(모션·정적 SVG) 우선 · 촬영컷은 밝은 일상 톤 · 비용 0원)
 
 ### 목적
 
@@ -506,6 +506,8 @@ STEP 8 보고에 실물 이미지별로 ⓐ 조달 경로(프레스킷 / 공식 
 
 > 🆕 **(v7.1) 정적(still) 제작컷도 같은 규격을 따른다.** 차이는 `<style>` 안에 `@keyframes`·`animation` 을 넣지 않는 것뿐이다. 이때 `prefers-reduced-motion` 블록은 생략해도 된다(⑦ 검증기가 애니메이션이 없으면 그 항목을 통과시킨다). 분기도·체크리스트·요약 비교처럼 움직임이 이해를 돕지 않는 그림은 정적으로 만든다. 본문에서 이 문서의 '설명컷'은 모션·정적을 모두 가리킨다.
 
+> 🆕 **(v7.4) 막대 비교·단계 흐름 두 형식은 HyperFrames 템플릿으로 먼저 만든다(⑨-HF).** 같은 숫자·같은 파일명·같은 업로드(⑩)·같은 삽입 마크업(⑪)이다. HF 경로가 실패하면 그 슬롯만 아래 ①~⑨ SVG 경로로 만든다. 분기도·타임라인·체크리스트는 지금처럼 SVG 경로다.
+
 > 사진으로 찍을 수 없는 설명(수치·배수·흐름·분기·기한)은 생성 모델에 맡기지 않고 **Claude가 직접 그린다.**
 > Flow가 필요 없고, 글자와 숫자가 **본문과 정확히 일치**한다. 비용 0원. 생성 이미지가 원리적으로 못 하는 일(정확한 숫자·한글)을 하는 것이 설명컷의 존재 이유다.
 
@@ -657,6 +659,29 @@ NODE_PATH=$(npm root -g) node shot.js && ls mf_*.png
 - 두 장을 Read로 열어 ⓐ 글자끼리 겹치지 않는가 ⓑ 오른쪽이 잘리지 않는가 ⓒ 375px에서 가장 작은 글자를 읽을 수 있는가 ⓓ 막대 비율이 숫자와 맞는가 ⓔ 정지 구간에서 흐리지 않은가를 확인한다
 - 하나라도 걸리면 고치고 다시 찍는다. 2회 수정 후에도 안 되면 그 슬롯은 촬영컷으로 돌리거나 비워 두고 STEP 8에 보고한다
 - figure 문자열은 ⑦ 검증을 위해 `javascript_tool` 에 **문자열 리터럴로 직접** 넣는다 (`window._motionSvg['2'] = String.raw\`...\``). 백틱이 문자열 안에 없으므로 안전하다. 본문 삽입에는 쓰지 않는다 (v7.3)
+
+**⑨-HF HyperFrames 템플릿 경로 (v7.4 · '가로 막대 비교'·'단계 흐름' 슬롯만 · 실패하면 그 슬롯은 ①~⑨ SVG 경로)**
+
+②의 **가로 막대 비교**와 **단계 흐름** 슬롯은 SVG 를 설계하지 않고 HyperFrames 템플릿(`stat_bars`·`steps_flow`)에 값만 넣어 렌더한다. 막대가 실제 비율로 자라고, 강조 테두리·꼬리표가 붙고, 마지막 2초 정지 프레임이 포스터가 된다. 숫자·글자 규칙은 ②·③ 그대로다(본문 그대로 복사 · 비교 3개 이하 · 한 그림에 메시지 하나 · 한 줄 약 24자).
+
+1. 값 파일 `hfN.json` (scratchpad · `N` = 슬롯 번호):
+   - 막대 비교 → `stat_bars`: `{"theme":"ol","title":"…","subtitle":"기준 연도·조건","items":[{"label":"…","value":숫자,"text":"본문 표기 그대로","tone":"gain|loss|neutral"}],"highlight":번호,"badge":"…","source":"그림: 본문 …(기준) 재구성"}`
+   - 단계 흐름 → `steps_flow`: `{"theme":"ol","title":"…","steps":[{"label":"…","sub":"…"}],"warn":번호,"warn_text":"…","source":"그림: 본문 …(기준) 재구성"}`
+   - `value` 는 막대 길이만 정한다(범위는 중간값, 음수는 `tone:"loss"` + 크기). 화면 글자는 `text` 가 그대로 나온다. `ol` 테마는 숫자 올라가기 효과가 꺼져 있다 — 본문에 없는 중간 숫자를 보이지 않는다.
+   - 색·글자 크기·여백은 템플릿이 ③ 규격(배경 `#f7f8f6`, 이득 `#2e7d5b`, 손해 `#c0392b`, 1280 폭 기준 최소 40px)으로 처리한다.
+2. 렌더 (Flow 생성 대기 시간에 병행해도 된다 · Bash 도구 `timeout` 은 **600000ms** 로 지정 — 첫 실행은 npm 내려받기가 겹친다):
+```bash
+cd SCRATCHPAD && S=SLUG && N=2
+(test -d hfkit || git clone -q --depth 1 https://github.com/leejc0404/blog hfkit) && K=hfkit/tools/hf
+# 모션 슬롯 (막대 비교 예시 — 단계 흐름은 stat_bars 대신 steps_flow)
+timeout 300 python3 $K/hf_render.py stat_bars hf$N.json 0and1life-motion-$S-$N.mp4 --poster 0and1life-motion-$S-$N-poster.webp; echo "exit=$?"
+# 정적 슬롯 (마지막 프레임 1장)
+# timeout 300 python3 $K/hf_render.py steps_flow hf$N.json 0and1life-motion-$S-$N.webp; echo "exit=$?"
+```
+   - 결과: 1280×720 · 24fps · 7.4초(등장 약 5.4초 + 완성 상태 2초 정지) — ⑨와 같은 규격·같은 파일명이라 ⑩ 업로드·⑪ 마크업·STEP 2 분류가 그대로 맞는다. 2026-10-08 클라우드 실측: MP4 230KB · 포스터 32KB · 렌더 14초(첫 실행은 npm 내려받기로 1~2분 더)
+   - 용량이 600KB 를 넘으면 그 슬롯은 ⑨ SVG 경로로 만든다(HF 출력은 다시 압축하지 않는다)
+3. ⛔ **업로드 전 `Read` 로 직접 본다** — 포스터(완성 상태) 1장, 3초 지점 프레임 1장(`ffmpeg -ss 3 -i …mp4 -frames:v 1 mid.png`), 포스터를 375px 로 줄인 1장(`ffmpeg -i …-poster.webp -vf scale=375:-1 m375.png`). ⓐ 글자 겹침·잘림 ⓑ 375px 에서 가장 작은 글자가 읽히는가 ⓒ 막대 비율·숫자가 본문과 맞는가 ⓓ 오타 — ⑧ 과 같은 기준이다. HF 경로 슬롯은 ⑥~⑧(SVG 템플릿·정적 검증·Playwright 두 폭 촬영)을 하지 않고 이 확인으로 갈음한다. alt 는 ⑤ `<desc>` 기준(수치를 포함한 완결 문장), figcaption 은 ⑤ 형식(`그림: … 재구성`) 그대로다. **통과한 뒤에만** ⑩ 업로드 폴더에 넣는다: `mkdir -p /mnt/user-data/outputs/ol_motion && cp 0and1life-motion-$S-$N* /mnt/user-data/outputs/ol_motion/`
+4. **종료코드 2 · 시간 초과 · 3에서 걸림** → 그 슬롯만 ①~⑨ SVG 경로로 처음부터 만든다. 같은 슬롯에서 HF 를 다시 시도하지 않는다. STEP 8 에 사유 한 줄.
 
 **⑨ 파일 렌더 — 클라우드 `Bash` (v7.3 · Flow 생성 대기 시간에 병행해도 된다)**
 
@@ -1385,7 +1410,7 @@ window._newContent = c;
  + ' video:' + ((c.match(/<video[^>]*autoplay muted loop playsinline/g) || []).length)
 ```
 
-ℹ️ **(v7.0) `skipped` 가 비어 있지 않으면** 그 슬롯은 비운 채 진행하고 STEP 8에 사유를 남긴다. 설명컷은 ⑦ `_mfCheck` PASS · ⑧ 렌더 확인 · ⑨ 프레임 육안 확인을 통과해 ⑩에서 업로드된 것만 삽입한다 (v7.3). 블록 에디터 글(`blocks` 가 2 이상)도 기존 촬영컷 figure와 같은 방식(블록 사이 raw HTML)으로 넣는다 — 블록 수는 변하지 않는다.
+ℹ️ **(v7.0) `skipped` 가 비어 있지 않으면** 그 슬롯은 비운 채 진행하고 STEP 8에 사유를 남긴다. 설명컷은 ⑦ `_mfCheck` PASS · ⑧ 렌더 확인 · ⑨ 프레임 육안 확인을 통과해 ⑩에서 업로드된 것만 삽입한다 (v7.3). (v7.4) ⑨-HF 슬롯은 ⑦·⑧·⑨ 대신 ⑨-HF 3 확인을 통과해 ⑩에서 업로드된 것을 삽입한다. 블록 에디터 글(`blocks` 가 2 이상)도 기존 촬영컷 figure와 같은 방식(블록 사이 raw HTML)으로 넣는다 — 블록 수는 변하지 않는다.
 
 ⚠️ **히어로(첫 화면 이미지)에는 `loading="lazy"` 를 붙이지 않는다.** LCP 요소를 지연 로딩하면 오히려 느려진다. 7-2.5의 스톡 교체 코드가 히어로를 다루므로 그쪽에서 `fetchpriority="high"` 를 넣는다.
 
@@ -1826,6 +1851,7 @@ out.join('\n') + '\nsvgInBody:' + document.querySelectorAll('.entry-content svg'
 - 🆕 **(v7.0) 촬영컷 사실감 판정**: 이미지별 AI 티 판정 통과 여부와 탈락 사유, 채택한 쪽. 그레인 강도(`GRAIN`)와 장당 KB
 - 🆕 **(v7.0) 비용**: 사용한 도구와 크레딧 차감 여부 — **0이어야 정상**
 - 🆕 **(v7.2) Flow 모델**: 사용한 모델(`Nano Banana Pro` / `Nano Banana 2`), 선택 근거(드롭다운의 Pro 크레딧 표시 내용), 크레딧 잔액 생성 전→후. 폴백했다면 그 사유
+- 🆕 **(v7.4) HF 설명컷**: 슬롯별 경로(`HF stat_bars` / `HF steps_flow` / `SVG`) · HF 렌더 시간·용량 · HF 가 실패해 SVG 로 돌린 슬롯은 `stage·reason` 한 줄
 - **삭제 대기 미디어**: 재크롭 등으로 남은 원본 미디어 ID를 나열하고 **사용자 확인을 요청**한다 (임의 삭제 금지)
 - 루틴 자체의 오류·개선점이 발견됐다면 **수정할 조항 번호와 교체용 전문(前文)**을 함께 제시한다 — 사용자가 붙여넣기만 하면 되도록
 
@@ -1837,7 +1863,7 @@ out.join('\n') + '\nsvgInBody:' + document.querySelectorAll('.entry-content svg'
 - 💸 **(v7.0) 비용 0원.** 크레딧이 드는 도구(Higgsfield 등 유료 생성 서비스, 크레딧 차감 옵션)는 쓰지 않는다 (2026-10-02 사용자 지시)
 - 🍌 **(v7.2) Flow 모델은 `Nano Banana Pro` 우선 — 단 0크레딧일 때만** (2026-10-03 사용자 지시). 드롭다운에서 Pro의 크레딧 표시를 확인하고, 차감 표시가 있거나 애매하면 `Nano Banana 2` 로 폴백한다. 첫 쌍 생성 뒤 잔액이 줄었으면 즉시 Nano Banana 2로 전환하고 보고한다 (STEP 5-1 ③)
 - 📷 **(v7.1) 촬영컷은 '밝은 일상 사진'이다** (STEP 3-2-R). 지인이 인스타에 올린 듯한 자연광·밝은 실내·high-key·장면 대부분 선명. 손해·경고성 글만 흐린 날 자연광의 차분한 톤. ⛔ 어둡고 무거운 분위기, 밤·단일 조명·강한 그림자, 공중에 뜬 물체, `the only bright accent`, 강한 보케, 풀프레임·대구경 렌즈 명시, 노이즈·JPEG·사용감 강조
-- 🧩 **(v7.0) 설명컷은 3-10 규격을 그대로 따른다** — `viewBox 0 0 720 405`, 최소 글자 22, 모든 선택자·keyframes를 고유 ID로 시작, opacity는 모든 프레임에 명시, `prefers-reduced-motion` 필수, `<script>`·외부 URL 금지, 12KB 이하. **`_mfCheck` PASS + Playwright 1280/375 렌더 확인 + 저장 후 생존 확인** 세 관문을 모두 통과해야 한다.
+- 🧩 **(v7.0) 설명컷은 3-10 규격을 그대로 따른다** — `viewBox 0 0 720 405`, 최소 글자 22, 모든 선택자·keyframes를 고유 ID로 시작, opacity는 모든 프레임에 명시, `prefers-reduced-motion` 필수, `<script>`·외부 URL 금지, 12KB 이하. **`_mfCheck` PASS + Playwright 1280/375 렌더 확인 + 저장 후 생존 확인** 세 관문을 모두 통과해야 한다. (v7.4) ⑨-HF 슬롯은 앞의 두 관문 대신 ⑨-HF 3 확인, 저장 후 생존 확인은 같다.
 - 🎬 **(v7.3) 인라인 SVG를 본문에 넣지 않는다.** SVG는 설계 원본일 뿐이고, 모션은 **MP4 + 포스터 WebP**(`<figure class="ol-motion"><video autoplay muted loop playsinline poster>`), 정적은 **WebP `<img>`** 로 렌더·업로드해 넣는다 (3-10 ⑨⑩⑪). 2026-10-04 Post 2049에서 인라인 SVG가 사용자 화면에 보이지 않아 폐지했다 숫자는 본문 그대로 쓰고 새로 계산하지 않는다
 - 📸 **(v5.8) 이 루틴은 Flow 생성 이미지만 쓰는 루틴이 아니다** (STEP 3-9). 글에 실제로 존재하는 제품·앱·서비스·기관이 나오고 실물 이미지가 필요하면 **넣는다.** 규칙은 셋 — ① **공식 출처**(프레스킷·공식 사이트 캡처·공식 채널)는 그냥 쓴다 ② **아마존 이미지는 핫링크만**, 자체 업로드 금지 ③ **출처 불명 이미지는 쓰지 않는다**(유일한 금지선). figcaption에 출처+확인일 병기, 개인정보 화면 제외. 실물 1장은 증빙으로 계산돼 생성이 1장 줄어든다
 - Chrome이 열려 있고, 0and1life.com WP admin에 로그인되어 있어야 함

@@ -1,0 +1,13 @@
+/* blog/tools/hf 공통 스타일 — 폰트는 hf_render.py 가 fonts/ 에 넣는다 (외부 로드 없음) */
+@font-face { font-family: "Pretendard"; font-weight: 900; src: url("fonts/Pretendard-Black.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 800; src: url("fonts/Pretendard-ExtraBold.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 700; src: url("fonts/Pretendard-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 600; src: url("fonts/Pretendard-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 500; src: url("fonts/Pretendard-Medium.woff2") format("woff2"); }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow: hidden; }
+body { word-break: keep-all; font-family: "Pretendard", "Noto Sans CJK KR", sans-serif; -webkit-font-smoothing: antialiased; }
+#root, #stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.abs { position: absolute; }
+.nw { white-space: nowrap; }
+.ch { display: inline-block; will-change: transform; }

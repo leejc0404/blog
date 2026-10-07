@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=__W__, height=__H__" />
+<!--HFV-->
+<script src="vendor/gsap.min.js"></script>
+<link rel="stylesheet" href="common.css" />
+<style>
+  html, body { width: __W__px; height: __H__px; }
+  .title { position: absolute; font-weight: 800; letter-spacing: -.03em; white-space: nowrap; }
+  .subtitle { position: absolute; font-weight: 600; white-space: nowrap; }
+  .card { position: absolute; border-radius: 16px; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .num { font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; }
+  .lab { font-weight: 800; letter-spacing: -.02em; line-height: 1.2; word-break: keep-all; }
+  .sub { font-weight: 600; line-height: 1.25; word-break: keep-all; }
+  .conn { position: absolute; transform-origin: 0 50%; border-radius: 4px; }
+  .warn { position: absolute; font-weight: 800; white-space: nowrap; padding: .2em .6em; border-radius: .45em; color: #fff; }
+  .src { position: absolute; font-weight: 500; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="__DUR__" data-width="__W__" data-height="__H__">
+  <div id="stage" class="clip" data-start="0" data-duration="__DUR__" data-track-index="0"></div>
+</div>
+<script src="common.js"></script>
+<script>
+/* steps_flow — 절차·계산 흐름(2~5단계). 단계 카드가 순서대로 켜지고, 막히는 단계(warn)에 강조 테두리와 꼬리표.
+   값: title, subtitle?, steps[{label, sub?}], warn?(번호), warn_text?, source?, theme: ol|kp|dark|aipick, hold?(기본 2)
+   움직임은 나타나기·채워지기·강조 테두리만. */
+const V = HF.V, W = HF.W, H = HF.H, T = HF.theme(V.theme || "ol");
+const stage = document.getElementById("stage");
+document.body.style.background = T.bg;
+const tl = gsap.timeline({ paused: true });
+const steps = (V.steps || []).slice(0, 5), n = Math.max(steps.length, 1);
+const hold = V.hold != null ? V.hold : 2.0, endAnim = Math.max(2, HF.DUR - hold);
+const padX = Math.round(W * 0.055), S = W / 1280, minF = Math.round(36 * S);
+const tsz = HF.fit(V.title || "", Math.round(52 * S), W - padX * 2, 800, minF);
+const title = HF.el("div", "title", { left: padX + "px", top: Math.round(H * 0.09) + "px", fontSize: tsz + "px", color: T.fg }, HF.esc(V.title || ""));
+stage.appendChild(title);
+let y0 = Math.round(H * 0.09) + tsz * 1.4, sub = null;
+if (V.subtitle) {
+  const ssz = HF.fit(V.subtitle, Math.round(32 * S), W - padX * 2, 600, Math.round(28 * S));
+  sub = HF.el("div", "subtitle", { left: padX + "px", top: y0 + "px", fontSize: ssz + "px", color: T.sub }, HF.esc(V.subtitle));
+  stage.appendChild(sub); y0 += ssz * 1.6;
+}
+const gap = Math.round(46 * S);
+const cw = Math.floor((W - padX * 2 - gap * (n - 1)) / n);
+const srcH = V.source ? Math.round(30 * S) * 2.4 : 0;
+const ch = Math.min(Math.round(H - y0 - srcH - H * 0.12), Math.round(cw * 1.1));
+const cy = y0 + Math.round(H * 0.05);
+const cards = [], conns = [];
+steps.forEach((st, k) => {
+  const x = padX + k * (cw + gap);
+  const isWarn = V.warn === k;
+  const card = HF.el("div", "card", { left: x + "px", top: cy + "px", width: cw + "px", height: ch + "px",
+    boxShadow: `0 0 0 ${Math.round(3 * S)}px ${T.line}`, padding: Math.round(18 * S) + "px" });
+  const nsz = Math.round(54 * S);
+  card.appendChild(HF.el("div", "num", { width: nsz + "px", height: nsz + "px", fontSize: Math.round(30 * S) + "px",
+    background: isWarn ? T.accent : T.fg, marginBottom: Math.round(14 * S) + "px" }, String(k + 1)));
+  const words = String(st.label || "").split(/\s+/);
+  const lsz = Math.max(minF, Math.min(Math.round(40 * S), ...words.map((w) => HF.fit(w, Math.round(40 * S), cw - 30 * S, 800, minF))));
+  card.appendChild(HF.el("div", "lab", { fontSize: lsz + "px", color: T.fg }, HF.esc(st.label || "")));
+  if (st.sub) card.appendChild(HF.el("div", "sub", { fontSize: Math.max(Math.round(28 * S), Math.round(lsz * 0.72)) + "px", color: T.sub, marginTop: Math.round(10 * S) + "px" }, HF.esc(st.sub)));
+  stage.appendChild(card); cards.push(card);
+  if (k < steps.length - 1) {
+    const c = HF.el("div", "conn", { left: x + cw + 6 * S + "px", top: cy + ch / 2 - 4 * S + "px", width: gap - 12 * S + "px", height: 8 * S + "px", background: T.sub });
+    stage.appendChild(c); conns.push(c);
+  }
+});
+if (V.source) stage.appendChild(HF.el("div", "src", { left: padX + "px", bottom: Math.round(H * 0.05) + "px", fontSize: Math.round(28 * S) + "px", color: T.sub }, HF.esc(V.source)));
+
+tl.from(title, { y: 24, opacity: 0, duration: 0.45, ease: "power2.out" }, 0.1);
+if (sub) tl.from(sub, { y: 18, opacity: 0, duration: 0.4, ease: "power2.out" }, 0.3);
+const step = Math.min(0.7, (endAnim - 1.4) / n);
+cards.forEach((c, k) => {
+  const t = 0.6 + k * step;
+  tl.from(c, { opacity: 0, y: 26 * S, duration: 0.4, ease: "power2.out" }, t);
+  if (conns[k]) tl.from(conns[k], { scaleX: 0, duration: 0.3, ease: "power1.out" }, t + 0.35);
+});
+if (V.warn != null && cards[V.warn]) {
+  const c = cards[V.warn], tw = 0.6 + n * step + 0.2;
+  tl.to(c, { boxShadow: `0 0 0 ${Math.round(6 * S)}px ${T.accent}`, duration: 0.35, ease: "power1.out" }, tw);
+  if (V.warn_text) {
+    const k = V.warn, x = padX + k * (cw + gap) + cw / 2;
+    const wsz = Math.max(Math.round(28 * S), HF.fit(V.warn_text, Math.round(30 * S), Math.max(cw * 1.4, 260 * S), 800, Math.round(26 * S)));
+    const bw = HF.textW(V.warn_text, wsz, 800) + wsz * 1.3;
+    const bx = Math.min(Math.max(x, padX / 2 + bw / 2), W - padX / 2 - bw / 2);
+    const b = HF.el("div", "warn", { left: bx + "px", top: cy + ch + Math.round(20 * S) + "px", fontSize: wsz + "px", background: T.accent, transform: "translateX(-50%)" }, HF.esc(V.warn_text));
+    stage.appendChild(b);
+    tl.from(b, { opacity: 0, y: -10, duration: 0.35, ease: "power2.out" }, tw + 0.15);
+  }
+}
+tl.set({}, {}, HF.DUR);
+window.__timelines = window.__timelines || {};
+window.__timelines["main"] = tl;
+tl.seek(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "theme": "ol",
+  "title": "같은 1박인데 프로포즈 비용은 이렇게 갈린다",
+  "subtitle": "시그니엘 서울 · 2026년 7월 평일 기준",
+  "items": [
+    {"label": "호텔 연계 꽃 세팅", "value": 250, "text": "최대 250만원", "tone": "loss"},
+    {"label": "외부 꽃집 세팅", "value": 35, "text": "35만원", "tone": "gain"},
+    {"label": "AI 영상 툴", "value": 3, "text": "3만원", "tone": "neutral"}
+  ],
+  "highlight": 1,
+  "badge": "실제로 쓴 방법",
+  "source": "그림: 본문 실제 지출표(2026.7 평일 1박) 재구성"
+}

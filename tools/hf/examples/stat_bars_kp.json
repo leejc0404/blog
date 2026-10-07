@@ -1,0 +1,13 @@
+{
+  "theme": "kp",
+  "title": "Seoul Sky Deck: what you actually pay",
+  "subtitle": "Adult ticket, weekday, checked 2026-10-08",
+  "items": [
+    {"label": "On-site counter", "value": 31000, "text": "₩31,000", "tone": "neutral"},
+    {"label": "Online (Klook)", "value": 27900, "text": "₩27,900", "tone": "neutral"},
+    {"label": "Foreigner promo", "value": 24800, "text": "₩24,800", "tone": "gain"}
+  ],
+  "highlight": 2,
+  "badge": "Cheapest",
+  "source": "Source: example values for template test only"
+}

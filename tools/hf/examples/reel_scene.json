@@ -1,0 +1,18 @@
+{
+  "bg": "paper",
+  "series": "시그니엘 프로포즈 실전",
+  "beats": {"start": 0.0, "trigger": 0.5, "react": 0.8, "tease": 1.4},
+  "els": [
+    {"kind": "head", "y": 520, "size": 104, "at": "start",
+     "lines": [[["시그니엘 프로포즈,"]], [["진짜 "], ["얼마 들까?", "y"]]]},
+    {"kind": "card", "x": 540, "y": 1050, "w": 660, "rot": -2, "at": "start", "title": "프로포즈 영수증", "sub": "잠실 · 1박",
+     "rows": [["객실", "···"], ["꽃 세팅", "···"], ["합계", "???", true]]},
+    {"kind": "circle", "x": 700, "y": 1352, "w": 300, "h": 110, "color": "r", "at": "trigger"},
+    {"kind": "burst", "x": 700, "y": 1352, "r0": 170, "r1": 330, "n": 14, "color": "r", "at": "trigger"},
+    {"kind": "sticker", "text": "패키지 안 씀", "x": 800, "y": 1500, "color": "r", "size": 48, "rot": -6, "at": "react"},
+    {"kind": "zoom", "at": "react", "amount": 0.06},
+    {"kind": "spark", "x": 950, "y": 700, "r": 46, "color": "p", "at": "start"},
+    {"kind": "bar", "text": "제가 실제로 쓴 돈 공개", "y": 1610, "at": "tease"}
+  ],
+  "foot": "0and1life 시그니엘 프로포즈 실전기 · 2026.9.26 기준"
+}

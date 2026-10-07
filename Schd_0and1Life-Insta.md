@@ -1,4 +1,6 @@
-# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.2 2026-10-06)
+# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.4 2026-10-08)
+
+**v3.4에서 바뀐 것**(지침 v3.4 I-3-9 대응): ① **STEP 6-HF 신설(선택)** — 엔진 렌더 뒤 장면 1개를 HyperFrames 템플릿으로 다시 그려 끼운다(`tools/hf/hf_reel_insert.py`). 실패·검사 불통과·STEP 7 반려면 그 단계만 건너뛰거나 되돌리고 엔진판으로 v3.2와 똑같이 진행한다 ② STEP 0 — 지침 v3.4 미만이면 6-HF 건너뜀 ③ STEP 4.5-7 HF 장면 선택 · STEP 5 `hf_vars.json` ④ STEP 8 `meta.json.hf`·`hf_vars.json` 저장 ⑤ STEP 11 알림 `🎞 HF` 한 줄 ⑥ 실행 자산·오류 처리·전제조건 표에 한 줄씩. **그 밖의 단계·문구는 v3.2 그대로다.**
 
 **v3.2에서 바뀐 것**(지침 v3.2 대응): ① **쉬운 3초 훅**(지침 I-2-1-B) — 첫 3초는 일상어·숫자 1개 이하·문장 2개 이하, 대상은 넓게 ② **5막 구조**(쉬운 훅 → 답 하나 → 반전 → 내 경우 → CTA, 지침 I-2-0) ③ 엔진 **v12** — 콜라주 장면 `hook_story`·`story`·`cta(style: paper)`, 견본 `relay\examples\story_spec.json` ④ STEP 7 ⑨에 쉬운 말 검사 ⑤ **사용자 폴더에 백업·보관 사본을 만들지 않는다**(사용자 지시 10/6) — 엔진을 바꿀 때 이전 판은 클라우드 작업 공간에만 두고 회귀 검사에 쓴다.
 
@@ -31,6 +33,7 @@
 | **효과음 v2.1** | `instagram\relay\build_reel_sfx_v2.py` | `_timeline.json` → wav (16종, 전부 합성음 · 노이즈·사각파 없음 · 피크 -12dBFS) |
 | **검증 v9** | `instagram\relay\verify_reel_v9.py` | `reel_spec.json` 검사 · 종료코드 0만 통과 (싱크·0프레임·훅 사건 시각·CTA·총 길이) |
 | 견본 spec | `instagram\relay\examples\bank_spec.json` | v9 첫 시안(은행 영업시간 편) — 장면 유형별 필드 예시 |
+| **HF 키트 (선택 · v3.4)** | GitHub `leejc0404/blog` 의 `tools/hf/` — STEP 6-HF 에서 클라우드로 `git clone` | `hf_reel_insert.py`(장면 1개 교체·싱크·규격 검사) · `templates/reel_scene` · `examples/reel_scene.json` · 실패 시 종료코드 2 → 엔진판 그대로 |
 | **전달 페이지** | `instagram\relay\make_dl_page.py` | `handoff.json` → `reel-dl-latest` 덮어쓰기 |
 | **임시 자산 정리** | `instagram\relay\cleanup_reel_temp.py` | 3일 경과분 휴지통 |
 | 허브 카드 | `instagram\relay\hub.py` | `add <card.json>` · `seo <seo.json>` · `get` |
@@ -41,7 +44,7 @@
 | (구) v8 자산 | `render_reel_v8.py` `build_reel_sfx.py` `verify_reel_sync.py` | **사용 중지.** 지우지 않고 남겨 둔다(과거 회차 재현용) |
 | 엔진 이전 판 | (만들지 않음 — v3.2) | 사용자 지시(10/6)로 사용자 폴더에 백업·이전 판 사본을 만들지 않는다. 회귀 검사용 이전 판은 클라우드 작업 공간에만 둔다 |
 
-설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 1` · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음**
+설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 1` · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음** · `HF_INSERT = 선택(최대 1장면, CTA 제외)` · `HF_TIMEOUT = 420초`
 
 ---
 
@@ -55,7 +58,7 @@
 6. 열었던 탭은 모두 닫는다.
 
 ## STEP 0. 지침 읽기·설정 확인
-1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`).
+1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
 2. 설정값을 세션 변수로 둔다. `PUBLISH_MODE`는 이 프롬프트의 값이 기준이며 지침·ledger에서 바꾸지 않는다.
 
 ## STEP 1. 날짜·폴더·자격증명
@@ -114,6 +117,7 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 4. `ledger.reels` 최근 2회차의 `hook_type`·`stage` 를 읽어 **직전 회차와 같은 공식·같은 무대는 고르지 않는다**(지침 I-3-6). 이번 주 `refs/{YYYY-Www}.md` 의 스킵률 비교가 있으면 나쁜 공식을 피한다.
 5. 1개를 고르고 이유를 `meta.json.hook = {type, stage, concept, why}` 에 적는다. 고른 콘셉트의 장치를 `meta.json.marketing = ["열린 고리", "내 경우는?", …]`, 새 연출을 `meta.json.fresh = "한 줄"` 에 적는다.
 6. 기존 장면 유형으로 안 되면 **엔진 확장**(지침 I-3-6): 클라우드 작업 사본 `reel_engine.py` 에 무대·장면·소품·효과음을 추가한다(캐릭터·포즈는 추가하지 않는다 — 지침 I-3-2). 추가했으면 STEP 6에서 클라우드에 둔 **이전 판 엔진과 `regress_engine.py`** 로 견본 spec(`examples\bank_spec.json`·`examples\story_spec.json`)과 직전 3회차 spec을 비교해 기존 결과가 그대로인지 확인하고, STEP 8에서 `relay\reel_engine.py` 를 덮어쓴다. **사용자 폴더에 이전 판 사본·백업을 만들지 않는다.**
+7. **(선택 · 지침 I-3-9)** 고른 콘셉트의 새 연출이 **글자·숫자가 움직이는 연출**이면 HF 인서트 장면을 쓸지 정한다. 쓰면 `concepts.md` 끝에 `HF: s{장면 번호(0부터)} {장면 유형} — {이유 한 줄}` 을 적는다. CTA 장면은 고르지 않는다. 쓰지 않으면 아무것도 적지 않는다.
 
 ## STEP 5. 원고 작성 → `reel_spec.json` · `caption.txt`
 - 지침 I-2(5막·쉬운 3초·0프레임·숫자 복사·날짜·잠정 표시·유도 4곳·화자·**I-2-8 마케팅 장치**)와 I-4(캡션)를 그대로 적용한다. 캡션 7번 줄에는 보낼 사람과 나중에 꺼내 볼 순간을 함께 적는다.
@@ -131,6 +135,7 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
   - 커버 시점을 바꿀 때만 최상위 `cover_at`(초).
 - `caption.txt`는 지침 I-4-1 순서를 그대로 따른다.
 - `hub_card.json`: `slug, title, date, category, thumb(커버 URL — STEP 9에서 채움), ig_url(게시 후), points[2~3]`.
+- **(선택 · STEP 4.5-7 에서 HF 장면을 골랐을 때만)** `hf_vars.json` — 템플릿 `reel_scene` 값. 그 장면 spec 과 **같은 문구·숫자**, `els[].at` 은 그 장면 beats 이름(효과음이 붙은 beat 마다 요소 1개 이상), `bg`·`series`·`foot` 은 비워 두면 spec 에서 가져온다. 형식은 `tools/hf/examples/reel_scene.json`. **`reel_spec.json` 의 그 장면은 그대로 둔다**(엔진판이 대체 경로다).
 
 ## STEP 6. 렌더 (클라우드)
 ```bash
@@ -147,6 +152,23 @@ mv reel-final-sfx.mp4 reel-final.mp4
 ```
 - **stills를 먼저 보고 고친 뒤** 본 렌더를 돌린다(본 렌더는 14초 기준 약 1분). stills 단계에서 겹침·잘림·**아래 절반이 빈 장면**(지침 I-3-2)을 잡는다. `REEL_MASCOT` 환경변수를 설정하지 않는다.
 - 산출: `reel-final.mp4`(효과음 포함), `reel-final_cover.jpg`(훅 `slam` 직후 자동 추출), `reel-final_timeline.json`, `stills\`.
+
+## STEP 6-HF. HyperFrames 인서트 장면 (선택 · 지침 I-3-9 — 실패하면 이 STEP 만 건너뛴다)
+`hf_vars.json` 이 없거나 지침이 v3.4 미만이면 건너뛴다(`meta.json.hf` 를 쓰지 않는다). **회차당 1회만** — `meta.json.hf` 가 이미 있으면(STEP 5·6 을 다시 돌린 경우 포함) 건너뛴다. STEP 6 이 끝난 `reel-final.mp4`(효과음 포함)에 적용한다. 아래 블록은 Bash 도구 `timeout` 을 **600000ms** 로 지정해 실행한다(기본 120초로는 끝나기 전에 끊긴다).
+```bash
+cd ~/ig_work
+rm -rf hfkit && git clone -q --depth 1 https://github.com/leejc0404/blog hfkit && K=hfkit/tools/hf && test -f $K/hf_reel_insert.py \
+  && cp reel-final.mp4 eng-final.mp4 && cp reel-final_cover.jpg eng-cover.jpg && rm -rf eng-stills && cp -r stills eng-stills \
+  && timeout 420 python3 $K/hf_reel_insert.py --spec reel_spec.json --scene {N} --vars hf_vars.json \
+       --video reel-final.mp4 --timeline reel-final_timeline.json --out reel-final-hf.mp4 \
+       --stills stills --cover reel-final_cover.jpg --cover-t {커버 초} --engine reel_engine.py
+echo "exit=$?"
+```
+- `{N}` = `concepts.md` 의 HF 장면 번호(0부터), `{커버 초}` = STEP 6 본 렌더 마지막 줄 `커버 {초}s` 의 값.
+- **종료코드 0** (마지막 줄 JSON `"ok": true`): `mv reel-final-hf.mp4 reel-final.mp4`. 스틸(`stills\s{N}_*`)·커버는 스크립트가 이미 HF 장면으로 바꿨다. 지침 I-3-1 BGM판(`reel-final-bgm.mp4`)을 **이미 만들었다면** 영상만 바꿔 다시 합친다 — `ffmpeg -y -v error -i reel-final.mp4 -i reel-final-bgm.mp4 -map 0:v -map 1:a -c copy -movflags +faststart bgm-new.mp4 && mv bgm-new.mp4 reel-final-bgm.mp4`(아직 안 만들었으면 평소대로 나중에 만든다). `meta.json.hf = {scene: N, type, status: "applied"}`.
+- **종료코드 2 · 시간 초과 · clone 실패**: 아무것도 바꾸지 않는다(스크립트는 실패하면 결과 파일·스틸·커버를 건드리지 않는다). `meta.json.hf = {scene: N, type, status: "skipped", reason: "JSON 의 stage·reason"}` 을 남기고 STEP 7 로 간다.
+- **STEP 7 에서 HF 장면이 반려 사유면**(그 장면 스틸의 ②·⑩ 겹침·잘림·빈 곳, ④ 커버 등): `mv -f eng-final.mp4 reel-final.mp4 && mv -f eng-cover.jpg reel-final_cover.jpg && rm -rf stills && mv eng-stills stills` 로 되돌리고, BGM판을 HF 뒤에 다시 합쳤다면 같은 방법으로 엔진 영상과 다시 합친 뒤 STEP 7 을 처음부터 다시 한다. **이것은 STEP 7-9 의 수정 1회로 세지 않는다.** `meta.json.hf.status = "reverted"`.
+- 이 STEP 은 PC 파일을 쓰지 않는다(클라우드 작업 사본만 바꾼다). `eng-*` 는 클라우드에만 둔다 — **사용자 폴더에 백업을 만들지 않는다.**
 
 ## STEP 7. 자가검수 (지침 I-5 — 11항목 전부)
 ```bash
@@ -165,8 +187,8 @@ for t in 0.0 0.5 1.0 1.5 2.5; do ffmpeg -y -v error -ss $t -i reel-final.mp4 -fr
 9. 반려가 있으면 STEP 4.5(콘셉트 2순위) 또는 STEP 5로 돌아가 **1회만** 수정·재렌더. 다시 실패하면 전달하지 않고 `ledger.reels.{slug} = {status:"held", held:"R-…"}` 기록 후 STEP 8 → 12 → 11.
 
 ## STEP 8. PC 저장
-- `device_commit_files`로 `instagram\{TODAY}\{slug}\`에 `reel_spec.json concepts.md caption.txt reel-final.mp4 reel-final_cover.jpg reel-final_timeline.json hub_card.json post_text.txt meta.json`과 `stills\` 를 이어 붙인 `stills.jpg` 1장을 저장한다.
-- `meta.json`: `{blog_post_id, blog_url, blog_modified_at_build, persona, hook:{type,stage,concept,why}, marketing:[장치...], fresh:"새 연출 한 줄", scenes:[유형...], dur, engine:"v11.x", status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,typo,pace}}`.
+- `device_commit_files`로 `instagram\{TODAY}\{slug}\`에 `reel_spec.json concepts.md caption.txt reel-final.mp4 reel-final_cover.jpg reel-final_timeline.json hub_card.json post_text.txt meta.json`과 `stills\` 를 이어 붙인 `stills.jpg` 1장을 저장한다. STEP 6-HF 를 시도한 회차는 `hf_vars.json` 도 함께 저장한다.
+- `meta.json`: `{blog_post_id, blog_url, blog_modified_at_build, persona, hook:{type,stage,concept,why}, marketing:[장치...], fresh:"새 연출 한 줄", scenes:[유형...], dur, engine:"v11.x", status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,typo,pace}}`. STEP 6-HF 를 시도한 회차는 `hf:{scene, type, status: applied|skipped|reverted, reason}` 를 더한다.
 - 엔진을 확장했다면(STEP 4.5-6) 회귀 검사 통과 후 `relay\reel_engine.py` 를 덮어쓴다. 이전 판 사본은 사용자 폴더에 만들지 않는다.
 
 ## STEP 9. WP 업로드 (PC)
@@ -215,7 +237,7 @@ PushNotification 1회. 첫 문장은 한 줄 요약, 그 뒤 줄들. 모두 한�
 - 전달함: `📱 인스타 릴스 {TODAY} — {slug} 준비 완료 · {길이}초 · 훅 {공식}/{무대} · 검증 통과 · 저장 https://0and1life.com/reel-dl-latest/`
 - 대상 없음: `📱 인스타 릴스 {TODAY} — 대상 글 없음`
 - 반려·오류: `📱 인스타 릴스 {TODAY} — {slug} 보류({코드}) · {한 줄 원인}`
-- 덧붙이는 줄(해당 시): `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `📐 지침-루틴 상충: {조항}`
+- 덧붙이는 줄(해당 시): `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}` · `📐 지침-루틴 상충: {조항}`
 
 ## STEP 12. 임시 자산 정리 (지침 I-9 — 대상 글 유무와 무관하게 매 회차)
 ```bash
@@ -245,6 +267,7 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 | 본론 장면 >2.8초 · 장치 <3개 · `fresh` 없음 | `R-PACE` — spec `dur`·`beats`·콘셉트 수정 1회 → 재렌더. 다시 실패면 held |
 | stills에서 아래 절반이 빈 장면 | `R-TYPO` — 지침 I-3-2대로 소품·숫자·카드 확대(엔진 기본 레이아웃이 처리하므로 보통 spec 내용 보강으로 해결) |
 | 엔진 확장 후 견본 spec 검사 실패 | `E-ENGINE` — 확장을 되돌리고 기존 장면 유형으로 재구성 |
+| HF 장면(STEP 6-HF) 실패·시간 초과·STEP 7 반려 | **반려 아님** — 엔진판으로 진행(STEP 7 반려면 되돌린 뒤 STEP 7 다시, 수정 1회로 세지 않음) · 알림 `🎞 HF` 한 줄 |
 | 렌더·효과음·먹싱 실패 | 글꼴 재설치 1회 → 실패 시 `E-RENDER`로 held |
 | 전달 페이지 생성 실패 | `E-PAGE` — 알림에 영상 URL 직접 기재 |
 | 허브 카드 검증 실패 | 1회 재시도 → `E-HUB`(게시 유지) |
@@ -263,8 +286,9 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 | 허브 페이지 1922 공개·index | ✅ | 제목·메타 고정, 카드만 추가 |
 | 전달 페이지 `reel-dl-latest` | ✅ page 1980 | 구글 문서가 가리키는 고정 주소 — 삭제 금지 |
 | Cowork 예약 `0and1life 인스타 릴스`(03:30 KST, PC 연결, `C:\Users\win\Documents\Claude` 연결) | ✅ 2026-10-03 v3.1 전문으로 교체(이름도 '인스타 릴스'로) | 다음 개정 때 이 파일 전문으로 다시 교체 |
+| HF 키트 `blog\tools\hf\` · 지침 `0and1Life-Insta.md` **v3.4** GitHub 커밋 | ⬜ **커밋 필요**(2026-10-08) | 둘 중 하나라도 없으면 STEP 6-HF 만 건너뛴다 — 나머지는 v3.2 와 같다 |
 | `PUBLISH_MODE` | `HANDOFF` | 유행 음원 때문에 기본은 반자동. AUTO는 회차별 지시로만 |
 
 ## Cowork 원라이너
 
-토큰 확인(2) → **전 회차 스킵률·평균 시청 측정(M)** → 대상 글 1편(3) → 본문 최종본(4) → **쉬운 질문 + 답 하나 + 의외인 사실 1개 → 훅 콘셉트 3개(장치 3개·새 연출 1개 포함) → 1개(4.5)** → 쉬운 훅/답 하나/반전/내 경우/CTA 원고·캡션, 비트 앞당김(5) → 검사 → stills(빈 곳 확인) → 엔진 v12 렌더 + 효과음 v2.1 + 커버(6) → **자가검수 11항목, 싱크·훅 실패면 무조건 중단(7)** → PC 저장(8) → WP 업로드(9) → `reel-dl-latest` 덮어쓰기(10) → 알림에 URL 하나(11) → 3일 지난 임시 자산 정리(12). 통과 못 하면 **전달하지 말고** held로 남긴다.
+토큰 확인(2) → **전 회차 스킵률·평균 시청 측정(M)** → 대상 글 1편(3) → 본문 최종본(4) → **쉬운 질문 + 답 하나 + 의외인 사실 1개 → 훅 콘셉트 3개(장치 3개·새 연출 1개 포함) → 1개(4.5)** → 쉬운 훅/답 하나/반전/내 경우/CTA 원고·캡션, 비트 앞당김(5) → 검사 → stills(빈 곳 확인) → 엔진 v12 렌더 + 효과음 v2.1 + 커버(6) → (선택) HF 장면 1개 끼우기 — 실패면 엔진판 그대로(6-HF) → **자가검수 11항목, 싱크·훅 실패면 무조건 중단(7)** → PC 저장(8) → WP 업로드(9) → `reel-dl-latest` 덮어쓰기(10) → 알림에 URL 하나(11) → 3일 지난 임시 자산 정리(12). 통과 못 하면 **전달하지 말고** held로 남긴다.

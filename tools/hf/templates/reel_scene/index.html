@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=__W__, height=__H__" />
+<!--HFV-->
+<script src="vendor/gsap.min.js"></script>
+<link rel="stylesheet" href="common.css" />
+<style>
+  html, body { width: __W__px; height: __H__px; }
+  #stage { transform-origin: 50% 45%; }
+  .bgfill { position: absolute; inset: 0; }
+  .grid { background-image: linear-gradient(rgba(20,22,27,.07) 2px, transparent 2px), linear-gradient(90deg, rgba(20,22,27,.07) 2px, transparent 2px); background-size: 54px 54px; }
+  .dots { background-image: radial-gradient(rgba(255,255,255,.10) 3px, transparent 3.5px); background-size: 26px 26px; }
+  .tape { position: absolute; width: 190px; height: 54px; background: rgba(255,214,64,.78); box-shadow: 0 2px 0 rgba(0,0,0,.06); }
+  .series { position: absolute; left: 60px; top: 432px; font-weight: 700; font-size: 30px; letter-spacing: -.02em; }
+  .series b { font-weight: 900; margin-right: 12px; }
+  .head { position: absolute; font-weight: 900; letter-spacing: -.045em; line-height: 1.16; white-space: nowrap; }
+  .hl { position: relative; display: inline-block; isolation: isolate; }
+  .hl .mk { position: absolute; left: -6px; right: -6px; bottom: 4%; height: 46%; transform-origin: 0 50%; z-index: -1; border-radius: 6px; }
+  .big { position: absolute; left: 0; right: 0; text-align: center; font-weight: 900; letter-spacing: -.05em; white-space: nowrap; line-height: 1; }
+  .sticker { position: absolute; padding: .28em .62em; border-radius: .38em; font-weight: 800; white-space: nowrap; box-shadow: 0 6px 0 rgba(0,0,0,.14); transform-origin: 50% 50%; }
+  .bar { position: absolute; left: 60px; right: 60px; height: 112px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-weight: 800; white-space: nowrap; transform-origin: 0 50%; }
+  .card { position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 14px 0 rgba(20,22,27,.10), 0 0 0 2px rgba(20,22,27,.08); padding: 34px 40px 30px; }
+  .card h4 { font-weight: 900; font-size: 44px; letter-spacing: -.03em; }
+  .card .sub { font-weight: 600; font-size: 28px; color: #6b6f78; margin-top: 4px; }
+  .card .row { display: flex; justify-content: space-between; align-items: baseline; font-size: 38px; font-weight: 700; padding: 14px 0; border-top: 2px dashed rgba(20,22,27,.16); }
+  .card .row.total { border-top: 4px solid #14161B; font-weight: 900; }
+  .meme { position: absolute; font-weight: 900; color: #fff; white-space: nowrap; transform-origin: 50% 50%; }
+  .flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+  .foot { position: absolute; left: 60px; bottom: 380px; font-size: 24px; font-weight: 600; opacity: .55; white-space: nowrap; }
+  svg.layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="__DUR__" data-width="__W__" data-height="__H__">
+  <div id="stage" class="clip" data-start="0" data-duration="__DUR__" data-track-index="0"></div>
+</div>
+<script src="common.js"></script>
+<script>
+/* reel_scene — 0and1life 릴스 한 장면(1080×1920). 엔진 장면 하나와 같은 길이·같은 beats 로 만든다.
+   els[].at 은 beats 이름 또는 초. 모든 효과음 beat 에는 반드시 요소 하나가 그 시각에 움직인다(hf_reel_insert.py 가 검사). */
+const V = HF.V, W = HF.W, H = HF.H;
+const stage = document.getElementById("stage");
+const tl = gsap.timeline({ paused: true });
+const R = HF.rng(V.seed || 7);
+const C = (c, d) => HF.color(c, d);
+
+// ── 배경 ─────────────────────────────────────────
+const BG = { paper: "#FFF8EA", sky: "#78BEFF", dark: "#14161B", yellow: "#FFE27A", pink: "#FFC9DE", mint: "#BFEBB4" };
+const bgName = V.bg || "paper", dark = bgName === "dark";
+const ink = dark ? "#FFFFFF" : "#14161B";
+document.body.style.background = BG[bgName] || bgName;
+stage.appendChild(HF.el("div", "bgfill " + (dark ? "dots" : "grid")));
+(V.tapes || [[60, 250, -8], [760, 1760, 6]]).forEach(([x, y, r]) => {
+  stage.appendChild(HF.el("div", "tape", { left: x + "px", top: y + "px", transform: `rotate(${r}deg)` }));
+});
+if (V.series) {
+  stage.appendChild(HF.el("div", "series", { color: ink }, `<b>0and1life</b>${HF.esc(V.series)}`));
+}
+if (V.foot) stage.appendChild(HF.el("div", "foot", { color: ink }, HF.esc(V.foot)));
+const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+svg.setAttribute("class", "layer"); svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+stage.appendChild(svg);
+const flash = HF.el("div", "flash"); stage.appendChild(flash);
+
+// 텍스트가 우측 액션 버튼 구간(y 700~1500)에 걸치면 오른쪽 끝을 880 으로 제한 (Insta I-3-1)
+const maxRight = (y, h) => (y + h > 700 && y < 1500 ? 880 : 1020);
+
+const pop = (targets, t, extra) => {
+  if (HF.atZero(t)) return;                           // 0초 beat 요소는 0프레임부터 완성형
+  tl.from(targets, Object.assign({ scale: 0, opacity: 0, duration: 0.26, ease: "back.out(2.6)" }, extra || {}), t);
+};
+
+(V.els || []).forEach((el, idx) => {
+  const t = HF.t(el.at, 0);
+  const col = C(el.color, null);
+  if (el.kind === "head") {
+    const size = el.size || 96, x = el.x || 60, y = el.y || 520;
+    const box = HF.el("div", "head", { left: x + "px", top: y + "px", color: ink });
+    stage.appendChild(box);
+    const lines = el.lines || [[[el.text || ""]]];
+    let fsz = size;
+    lines.forEach((ln) => { const s = ln.map((p) => p[0]).join(""); fsz = Math.min(fsz, HF.fit(s, size, maxRight(y, size * 1.2 * lines.length) - x, 900, 40)); });
+    box.style.fontSize = fsz + "px";
+    const all = [], marks = [];
+    lines.forEach((ln) => {
+      const row = HF.el("div"); box.appendChild(row);
+      ln.forEach(([txt, hl, fg]) => {
+        if (hl) {
+          const w = HF.el("span", "hl"); row.appendChild(w);
+          const mk = HF.el("i", "mk", { background: C(hl, "#FFD640") }); w.appendChild(mk); marks.push(mk);
+          if (fg) w.style.color = C(fg);
+          all.push(...HF.chars(w, txt));
+        } else all.push(...HF.chars(row, txt));
+      });
+    });
+    pop(all, t, { y: 60, stagger: Math.min(0.03, 0.5 / Math.max(all.length, 1)) });
+    const tm = HF.t(el.hl_at, t + (HF.atZero(t) ? 0 : 0.18));
+    if (!HF.atZero(tm)) tl.from(marks, { scaleX: 0, duration: 0.22, ease: "power3.out", stagger: 0.06 }, tm);
+  } else if (el.kind === "big") {
+    const size = el.size || 230, y = el.y || 790;
+    const fsz = HF.fit(el.text, size, 960, 900, 80);
+    const b = HF.el("div", "big", { top: y + "px", fontSize: fsz + "px", color: col || "#E0483A" });
+    if (el.stroke) b.style.textShadow = HF.outline(el.stroke, dark ? "#000" : "#fff");
+    stage.appendChild(b);
+    if (el.count) { HF.countUp(tl, b, el.text, t, 0.45, 9); tl.from(b, { scale: 1.6, duration: 0.45, ease: "power3.out" }, t); }
+    else { b.textContent = el.text; if (!HF.atZero(t)) tl.from(b, { scale: 2.8, opacity: 0, duration: 0.18, ease: "power4.out" }, t); }
+    if (el.shake !== false && !HF.atZero(t)) {
+      const st = t + (el.count ? 0.45 : 0.18);
+      for (let k = 0; k < 6; k++) tl.to(stage, { x: (k % 2 ? -1 : 1) * (14 - k * 2), duration: 0.035, ease: "none" }, st + k * 0.035);
+      tl.to(stage, { x: 0, duration: 0.04 }, st + 0.21);
+    }
+  } else if (el.kind === "sticker") {
+    const size = el.size || 40;
+    const s = HF.el("div", "sticker", { left: (el.x || 540) + "px", top: (el.y || 1300) + "px", fontSize: size + "px",
+      background: col || "#7CD678", color: el.text_color ? C(el.text_color) : (["r", "k", "ink"].includes(el.color) ? "#fff" : "#14161B"),
+      transform: `translate(-50%,-50%) rotate(${el.rot || 0}deg)` }, HF.esc(el.text));
+    stage.appendChild(s);
+    pop(s, t, { rotation: (el.rot || 0) - 22, duration: 0.3 });
+  } else if (el.kind === "bar") {
+    const size = el.size || 44, y = el.y || 1420;
+    const b = HF.el("div", "bar", { top: y + "px", fontSize: HF.fit(el.text, size, 900, 800, 30) + "px",
+      background: el.fill ? C(el.fill) : "#14161B", color: el.color ? C(el.color) : "#fff" }, HF.esc(el.text));
+    stage.appendChild(b);
+    if (!HF.atZero(t)) tl.from(b, { scaleX: 0, duration: 0.28, ease: "power3.out" }, t).from(b.childNodes, { opacity: 0, duration: 0.15 }, t + 0.12);
+  } else if (el.kind === "card") {
+    const w = el.w || 700, x = el.x || 540, y = el.y || 1100;
+    const c = HF.el("div", "card", { left: x - w / 2 + "px", top: y - 60 + "px", width: w + "px", transform: `rotate(${el.rot || 0}deg)` });
+    c.innerHTML = (el.title ? `<h4>${HF.esc(el.title)}</h4>` : "") + (el.sub ? `<div class="sub">${HF.esc(el.sub)}</div>` : "");
+    const rows = (el.rows || []).map(([k, v, tot]) => { const r = HF.el("div", "row" + (tot ? " total" : ""), {}, `<span>${HF.esc(k)}</span><span>${HF.esc(v)}</span>`); c.appendChild(r); return r; });
+    stage.appendChild(c);
+    if (!HF.atZero(t)) {
+      tl.from(c, { y: 140, rotation: (el.rot || 0) + 5, opacity: 0, duration: 0.3, ease: "back.out(1.8)" }, t);
+      tl.from(rows, { x: -40, opacity: 0, duration: 0.18, stagger: el.stagger || 0.09 }, t + 0.12);
+    }
+  } else if (el.kind === "meme") {
+    const size = el.size || 120;
+    const m = HF.el("div", "meme", { left: (el.x || 540) + "px", top: (el.y || 900) + "px", fontSize: size + "px",
+      textShadow: HF.outline(Math.max(6, size / 14)), transform: `translate(-50%,-50%) rotate(${el.rot || -6}deg)` }, HF.esc(el.text));
+    stage.appendChild(m);
+    pop(m, t, { scale: 2.2, duration: 0.2, ease: "power4.out" });
+  } else if (el.kind === "circle") {
+    const e = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    const cx = el.x || 540, cy = el.y || 1000, rx = (el.w || 300) / 2, ry = (el.h || 110) / 2;
+    let d = "";
+    for (let k = 0; k <= 64; k++) { const a = -0.4 + (k / 64) * Math.PI * 2.15, j = 1 + (R() - 0.5) * 0.05; d += (k ? "L" : "M") + (cx + Math.cos(a) * rx * j).toFixed(1) + " " + (cy + Math.sin(a) * ry * j).toFixed(1); }
+    e.setAttribute("d", d); e.setAttribute("fill", "none"); e.setAttribute("stroke", col || "#E0483A");
+    e.setAttribute("stroke-width", el.width || 10); e.setAttribute("stroke-linecap", "round");
+    const len = Math.PI * (3 * (rx + ry) - Math.sqrt((3 * rx + ry) * (rx + 3 * ry))) * 1.1;
+    e.setAttribute("stroke-dasharray", len); svg.appendChild(e);
+    if (HF.atZero(t)) e.setAttribute("stroke-dashoffset", 0);
+    else { e.setAttribute("stroke-dashoffset", len); tl.to(e, { attr: { "stroke-dashoffset": 0 }, duration: 0.32, ease: "power2.out" }, t); }
+  } else if (el.kind === "burst") {
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const cx = el.x || 540, cy = el.y || 900, n = el.n || 18, r0 = el.r0 || 260, r1 = el.r1 || 620;
+    for (let k = 0; k < n; k++) {
+      const a = (k / n) * Math.PI * 2 + R() * 0.12, ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      ln.setAttribute("x1", cx + Math.cos(a) * r0); ln.setAttribute("y1", cy + Math.sin(a) * r0);
+      ln.setAttribute("x2", cx + Math.cos(a) * r1); ln.setAttribute("y2", cy + Math.sin(a) * r1);
+      ln.setAttribute("stroke", col || ink); ln.setAttribute("stroke-width", 10 + R() * 8); ln.setAttribute("stroke-linecap", "round");
+      g.appendChild(ln);
+    }
+    g.style.transformOrigin = `${cx}px ${cy}px`; g.style.opacity = 0; svg.insertBefore(g, svg.firstChild);
+    tl.fromTo(g, { opacity: 0.9, scale: 0.6 }, { opacity: 0, scale: 1.25, duration: 0.42, ease: "power2.out", immediateRender: false }, t);
+  } else if (el.kind === "spark") {
+    const s = HF.el("div", "abs", { left: (el.x || 900) + "px", top: (el.y || 700) + "px", width: (el.r || 40) * 2 + "px", height: (el.r || 40) * 2 + "px",
+      transform: "translate(-50%,-50%)" });
+    s.innerHTML = `<svg viewBox="-50 -50 100 100" width="100%" height="100%"><path d="M0-50 C6-8 8-6 50 0 C8 6 6 8 0 50 C-6 8 -8 6 -50 0 C-8-6 -6-8 0-50Z" fill="${col || "#F49AC1"}"/></svg>`;
+    stage.appendChild(s);
+    pop(s, t, { rotation: -90, duration: 0.3 });
+    tl.to(s, { scale: 0.75, duration: 0.5, yoyo: true, repeat: Math.max(1, Math.floor((HF.DUR - t) / 0.5) - 1), ease: "sine.inOut" }, t + 0.3);
+  } else if (el.kind === "zoom") {
+    tl.to(stage, { scale: 1 + (el.amount || 0.08), duration: 0.08, ease: "power2.out" }, t).to(stage, { scale: 1, duration: 0.26, ease: "power2.inOut" }, t + 0.08);
+  } else if (el.kind === "flash") {
+    tl.fromTo(flash, { opacity: el.amount || 0.7 }, { opacity: 0, duration: 0.22, ease: "power1.out", immediateRender: false }, t);
+  }
+});
+
+window.__timelines = window.__timelines || {};
+window.__timelines["main"] = tl;
+tl.seek(0);
+</script>
+</body>
+</html>

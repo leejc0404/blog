@@ -1,0 +1,12 @@
+{
+  "kicker": "PRICE CHECK",
+  "title": "Seoul Sky Deck tickets",
+  "rows": [
+    {"label": "On-site", "value": "₩31,000", "sub": "about $23"},
+    {"label": "Online", "value": "₩27,900", "sub": "about $21"},
+    {"label": "Foreigner promo", "value": "₩24,800", "sub": "passport needed"}
+  ],
+  "highlight": 2,
+  "note": "Show your passport at gate B1",
+  "source": "Example values for template test only"
+}
