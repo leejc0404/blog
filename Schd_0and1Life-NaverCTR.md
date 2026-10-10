@@ -1,3 +1,5 @@
+> ⛔ **폐지 (2026-10-10 사용자 지시)** — 이 루틴은 `Schd_0and1Life-Revenue.md`(네이버 쇼핑커넥트 상품 블록 · 수익 레이더)로 대체됐다. Cowork 예약 `6. 0and1life 네이버 CTR 개선`은 같은 예약을 `6. 0and1life 수익 루틴`으로 바꿔 새 본문을 넣었다. 이 파일은 기록용으로만 남긴다(`naver-ctr\` 엔진의 `ingest`·`naver_volume.py`·`naver_trend.py` 는 새 루틴이 계속 쓴다).
+
 # Schd_0and1Life-NaverCTR — 네이버 "노출 많고 CTR 낮은 글" 개선 루틴 (Cowork 예약 작업용)
 
 *매일 06:30 KST 실행. 예약 시각이 되면 같은 날 이미 실행됐더라도 다시 진행한다(판정·잠금은 `state.json` 이 막아 주므로 같은 글을 두 번 고치지 않는다).
