@@ -1,3 +1,5 @@
+> ⛔ **폐지 (2026-10-10 사용자 결정)** — 이 주간 성과 점검 루틴은 지금 연결된 예약 작업이 없다(짝이던 예약 `weekly-koreaplug-seo-check` 가 예약 목록에 없음). 이 파일은 기록용으로만 남긴다. 되살릴 때는 이 문서를 읽는 진입점 방식으로 새 예약을 만든다.
+
 # 📊 GSC-Weekly-Report-Routine (주간 성과 점검) — v3
 
 > **이 문서는 Cowork 예약 작업 `weekly-koreaplug-seo-check`의 본문이다.**

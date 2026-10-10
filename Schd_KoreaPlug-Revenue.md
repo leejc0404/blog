@@ -2,7 +2,7 @@
 
 *v1.0 · 2026-10-10 신설 — `Schd_KoreaPlug-GSCCTR`(7. KoreaPlug 구글 CTR 개선)을 대체하고, `쇼츠) KoreaPlug 대본 2편 만들기 (주간)` 작업을 흡수한다.*
 *매일 06:30 KST 실행 · **07:50 마감**(사용자 PC가 08:00 전후 꺼진다) · 요일마다 한 가지 일만 깊게 한다.*
-*원본 문서: `C:\Users\win\Documents\Claude\blog\Schd_KoreaPlug-Revenue.md` (이 본문과 같다. 고칠 때는 문서와 예약 본문을 함께 바꾼다)*
+*원본 문서: `C:\Users\win\Documents\Claude\blog\Schd_KoreaPlug-Revenue.md` — 예약 작업은 이 문서를 읽는 진입점만 갖는다. 고칠 때는 이 문서만 바꾼다.*
 
 날짜: 실행 시점의 실제 KST 날짜와 요일을 쓴다. 이 프롬프트에 적힌 고정 날짜는 무시한다.
 
@@ -265,7 +265,7 @@ ls -la $S/queue $S/queue/_done $S/queue/_failed; tail -5 $S/episodes.csv; tail -
 ```
 KoreaPlug 수익·유입 {TODAY}({요일}) — {모듈}: {가장 중요한 결과 한 문장}
 - 실행: {승인 항목 n건 처리 · 새 제안 n건 · 대본 n편 등}
-- 승인 기다리는 것: A {n} · B {n} · C {n} (revenue\승인.md)
+- 승인 기다리는 것: A {n} · B {n} · C {n} (koreaplug-revenue\승인.md)
 - 사용자 할 일: {있으면 화면 경로까지, 없으면 "없음"}
 - 확인 필요: {오류·미확인·외부 수정 감지·마감 중단, 없으면 "없음"}
 ```
