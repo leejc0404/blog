@@ -536,3 +536,31 @@ GET /wp-json/wp/v2/posts?status={draft|future|publish|pending|trash}&per_page=30
 - 성과 지표를 보고 싶은 유혹이 들어도 보지 않는다. 이 루틴이 성과 리포트로 변질되면 존재 이유가 사라진다
 - **Chrome 확장이 연결되지 않으면 3·4·5(GSC 상태)·6번만 확인 불가다.** `⚠️ Chrome 미연결 — 3·4·6·14·15·16번 미확인`으로 보고하고, **1·2·5(XML)·7·8·10·12·13번은 fetch와 WordPress REST로 그대로 수행한다.** 0행의 자동 실행도 REST만으로 완결되므로 Chrome 미연결과 무관하게 수행한다
 - Notion MCP가 실패하면 잃는 것은 ① 항목 11의 리포트 값 ② `Blog #N` 번호 ③ 알람 기록이다. 각각 폴백이 있으므로(항목 11 실측, `Blog #미확인` 표기, 사용자에게 수동 기재 요청) **Notion 하나 때문에 실행 전체를 중단하지 않는다.** 단 0행·항목 10의 날짜를 바꿨는데 Notion 기록에 실패하면, 그 사실을 리포트 끝에 `⚠️ Notion 기록 실패 — 수동 기재 필요: {내용}` 으로 반드시 남긴다
+
+---
+
+## 🧾 마지막 STEP — 실행 기록 한 줄 (관제탑용 · 2026-10-12 추가)
+
+이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
+
+- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
+- `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
+- `count`: 이번 회차에 이상으로 판정한 점검 항목 수(코드의 `0`을 그 수로 바꾼다). 없으면 0
+- `summary`: 60자 이내 한 줄 / `warnings`: 사용자가 봐야 할 것만, 없으면 빈 목록
+- 자격증명 값·URL 쿼리스트링은 넣지 않는다.
+
+```bash
+python3 - <<'PY'
+import json, os, datetime
+now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+root = os.path.expanduser("~/mnt/Claude/control_tower/runs")
+os.makedirs(root, exist_ok=True)
+rec = {"routine": "5. GSC-Daily-Report-Routine", "file": "GSC-Daily-Report-Routine.md",
+       "date": now.strftime("%Y-%m-%d"), "start": "{시작 HH:MM}",
+       "end": now.strftime("%H:%M"), "result": "{성공|부분|건너뜀|실패}",
+       "count": 0, "summary": "{한 줄 요약}", "warnings": []}
+with open(os.path.join(root, now.strftime("%Y-%m") + ".jsonl"), "a", encoding="utf-8") as f:
+    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+PY
+```

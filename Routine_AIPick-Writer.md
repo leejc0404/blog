@@ -249,3 +249,31 @@ timeout 300 python3 $K/hf_render.py review_bars "$D/clip_vars.json" "$D/clip.mp4
   ⑤ `device_commit_files` → `NB\out\{폴더}\clip\clip.mp4` · `clip.txt` · `clip_vars.json`. **`upload_queue\` 에는 아무것도 넣지 않는다.** 현황표·`run_state.step` 은 건드리지 않는다.
 - **실패**(SKIP 출력·종료코드 2·시간 초과·③에서 걸림)는 그 제품군 클립만 건너뛴다. 같은 회차에 다시 시도하지 않는다.
 - **끝나면 SendUserMessage 한 번**(만든 게 없어도): `🎞 클립(선택): {n}편 → out\…\clip\ (네이버 클립에 올리고 clip.txt 의 종합 1위 상품으로 쇼핑커넥트 스티커 연결) · 건너뜀 {n}편(사유)` — 06:50 이 지나 하지 않았으면 `🎞 클립: 시간 부족으로 생략`.
+
+---
+
+## 🧾 마지막 STEP — 실행 기록 한 줄 (관제탑용 · 2026-10-12 추가)
+
+이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다. 이 루틴은 **STEP 9 리포트를 보낸 직후, STEP 10(클립) 전에** 남긴다 — STEP 10이 시간 초과로 끊겨도 기록이 남도록.
+
+- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
+- `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
+- `count`: 이번 회차에 업로드 큐에 넣은 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0
+- `summary`: 60자 이내 한 줄 / `warnings`: 사용자가 봐야 할 것만, 없으면 빈 목록
+- 자격증명 값·URL 쿼리스트링은 넣지 않는다.
+
+```bash
+python3 - <<'PY'
+import json, os, datetime
+now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+root = os.path.expanduser("~/mnt/Claude/control_tower/runs")
+os.makedirs(root, exist_ok=True)
+rec = {"routine": "9. aipick-weekly", "file": "Routine_AIPick-Writer.md",
+       "date": now.strftime("%Y-%m-%d"), "start": "{시작 HH:MM}",
+       "end": now.strftime("%H:%M"), "result": "{성공|부분|건너뜀|실패}",
+       "count": 0, "summary": "{한 줄 요약}", "warnings": []}
+with open(os.path.join(root, now.strftime("%Y-%m") + ".jsonl"), "a", encoding="utf-8") as f:
+    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+PY
+```

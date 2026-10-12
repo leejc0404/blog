@@ -798,3 +798,31 @@ koreaplug.com은 존재하지 않는 슬러그에도 **HTTP 200 + "Page Not Foun
 **⚠️ URL 조립**
 
 경로를 문자열로 조합할 때 이중 슬래시(`//`)를 만들지 않는다. `https://koreaplug.com//?nc=` 는 301을 반환하고, `-L` 없는 curl은 빈 본문을 받아 검증 결과를 오판하게 만든다.
+
+---
+
+## 🧾 마지막 STEP — 실행 기록 한 줄 (관제탑용 · 2026-10-12 추가)
+
+이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
+
+- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
+- `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
+- `count`: 이번 회차에 WP에 초안으로 올린 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0
+- `summary`: 60자 이내 한 줄 / `warnings`: 사용자가 봐야 할 것만, 없으면 빈 목록
+- 자격증명 값·URL 쿼리스트링은 넣지 않는다.
+
+```bash
+python3 - <<'PY'
+import json, os, datetime
+now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+root = os.path.expanduser("~/mnt/Claude/control_tower/runs")
+os.makedirs(root, exist_ok=True)
+rec = {"routine": "1. Wordpress_draft", "file": "Schd_KoreaPlug-Draft.md",
+       "date": now.strftime("%Y-%m-%d"), "start": "{시작 HH:MM}",
+       "end": now.strftime("%H:%M"), "result": "{성공|부분|건너뜀|실패}",
+       "count": 0, "summary": "{한 줄 요약}", "warnings": []}
+with open(os.path.join(root, now.strftime("%Y-%m") + ".jsonl"), "a", encoding="utf-8") as f:
+    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+PY
+```

@@ -265,3 +265,31 @@ PushNotification 1회. `<routine_summary>` 의 **첫 문장**(휴대폰 배너)�
 ## Cowork 원라이너
 
 날짜·폴더(1) → 자격증명(2) → CSV·글 목록(3) → **지난 확장 작업 회수 → 상품 1~3개 선택 → 링크 발급 작업(4)** → **준비된 글에 상품 블록 + 고지 한 줄, 백업·검사·원복 규칙(5)** → 새 글 2편 구매 연결 등급 판정 → `connect_search` 작업(6) → **최고점 14~45일 전 · 물건 연결 키워드 → 백로그 `💰수익 레이더`(7)** → 월요일 주간 수익 리포트(8) → 기록(9) → 알림(10). 제목·메타·기존 문단은 건드리지 않는다.
+
+---
+
+## 🧾 마지막 STEP — 실행 기록 한 줄 (관제탑용 · 2026-10-12 추가)
+
+이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
+
+- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
+- `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
+- `count`: 이번 회차에 상품 블록을 넣은 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0
+- `summary`: 60자 이내 한 줄 / `warnings`: 사용자가 봐야 할 것만, 없으면 빈 목록
+- 자격증명 값·URL 쿼리스트링은 넣지 않는다.
+
+```bash
+python3 - <<'PY'
+import json, os, datetime
+now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+root = os.path.expanduser("~/mnt/Claude/control_tower/runs")
+os.makedirs(root, exist_ok=True)
+rec = {"routine": "6. 0and1life 수익 루틴", "file": "Schd_0and1Life-Revenue.md",
+       "date": now.strftime("%Y-%m-%d"), "start": "{시작 HH:MM}",
+       "end": now.strftime("%H:%M"), "result": "{성공|부분|건너뜀|실패}",
+       "count": 0, "summary": "{한 줄 요약}", "warnings": []}
+with open(os.path.join(root, now.strftime("%Y-%m") + ".jsonl"), "a", encoding="utf-8") as f:
+    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+PY
+```

@@ -384,3 +384,31 @@ SEO 81점 미달 | [6j] 판정표로 조치 가능 여부 먼저 확인. 조치 
 캡처 대상이 행정규칙 별표 | HTML 렌더링 불가 — 법령 조문으로 대체하고 경로 변경 사실 기록
 슬러그 중복이지만 GP/RankMath 미설정 | STEP 6부터 재개 ([4c] 참고)
 관문 반려 ([4f] 불통과) | 반려 로그 행 추가 + Draft일 공란 유지 + 다음 포스트 진행
+
+---
+
+## 🧾 마지막 STEP — 실행 기록 한 줄 (관제탑용 · 2026-10-12 추가)
+
+이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
+
+- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
+- `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
+- `count`: 이번 회차에 WP에 초안으로 올린 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0
+- `summary`: 60자 이내 한 줄 / `warnings`: 사용자가 봐야 할 것만, 없으면 빈 목록
+- 자격증명 값·URL 쿼리스트링은 넣지 않는다.
+
+```bash
+python3 - <<'PY'
+import json, os, datetime
+now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+root = os.path.expanduser("~/mnt/Claude/control_tower/runs")
+os.makedirs(root, exist_ok=True)
+rec = {"routine": "2. 0and1life wordpress draft", "file": "Schd_0and1Life-Draft.md",
+       "date": now.strftime("%Y-%m-%d"), "start": "{시작 HH:MM}",
+       "end": now.strftime("%H:%M"), "result": "{성공|부분|건너뜀|실패}",
+       "count": 0, "summary": "{한 줄 요약}", "warnings": []}
+with open(os.path.join(root, now.strftime("%Y-%m") + ".jsonl"), "a", encoding="utf-8") as f:
+    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+PY
+```
