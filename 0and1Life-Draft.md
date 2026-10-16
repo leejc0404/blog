@@ -192,7 +192,7 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 | `keywordInSubheadings` | ✅ 조치 가능 | H2 1개 이상에 Focus Keyword 포함 |
 | `keywordInMetaDescription` | ✅ 조치 가능 | 메타 설명 150자 이내 + Focus Keyword |
 | `linksHasInternal` | ✅ 조치 가능 | `/slug/` 상대경로 내부링크 1개 이상 |
-| `lengthContent` | ✅ 조치 가능 | 본문 1,500자 이상 |
+| `lengthContent` | ⛔ **사양 — 조치 불가 (2026-10-16)** | Writer 2-5가 분량을 **900~1,300어절**로 정했다(독자 지적: "휴대폰으로 읽기 힘들다"·"너무 길다"). 이 항목이 실패해도 **본문을 늘리지 않는다** — 로그에 '사양(분량 상한)'으로 기록. 점수가 81점에 못 미쳐도 이 항목 때문이면 그대로 기록한다 |
 
 > ### ⛔ `contentHasShortParagraphs` — 문단을 쪼개도 해소되지 않는다 (2026-08-08 규명)
 >
@@ -405,4 +405,4 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 
 ## Cowork 원라이너 (SEO 보정 기준)
 
-81점 미달 시: **Phase 5-3-B로 조치 가능 여부를 먼저 판정** → 조치 가능 항목이 있을 때만 REST로 HTML 수정 → Phase 5-1-B 순서로 저장·검증 → 재시도 1회. 조치 가능 항목이 없으면 **보정하지 말고** 서버 점수를 그대로 Notion에 기록.
+81점 미달 시(⚠️ 2026-10-16부터 `lengthContent`는 사양 — 분량을 늘려 점수를 맞추지 않는다): **Phase 5-3-B로 조치 가능 여부를 먼저 판정** → 조치 가능 항목이 있을 때만 REST로 HTML 수정 → Phase 5-1-B 순서로 저장·검증 → 재시도 1회. 조치 가능 항목이 없으면 **보정하지 말고** 서버 점수를 그대로 Notion에 기록.
