@@ -117,13 +117,13 @@ curl -s -o /dev/null -w "WP %{http_code}\n" -u "$U:$P" "https://koreaplug.com/wp
 | 종류 | 루틴이 하는 일 (REST) | 사용자가 하는 일 |
 |---|---|---|
 | `noindex` | `meta.rank_math_robots` 를 `["noindex","follow"]` 로 쓴다. 재조회해서 값이 바뀌었는지, 공개 페이지 `<meta name="robots">` 에 `noindex` 가 보이는지 확인한다. 메타가 REST 로 써지지 않으면(키 없음·403) 바꾸지 않고 "사용자 작업"으로 넘긴다 | (REST 불가일 때) 글 편집 → Rank Math → 고급 → No Index |
-| `통합` | 대표 글에 흡수할 내용이 있으면 대표 글 본문에 섹션(H2)을 추가한다. 흡수되는 글의 클릭 있는 H2 제목을 그대로 쓴다. 그다음 흡수되는 글을 `noindex` 처리한다. **301 은 루틴이 등록하지 않는다** | Rank Math → 리디렉션 → `구 슬러그 → 대표 슬러그` 301 등록(루틴이 보고에 정확한 쌍을 적는다) |
-| `보강` | 진단 `content_audit.json` 의 `val_parts` 가 낮은 항목(수치·출처·한글 원문·1인칭 확인)을 1차 출처로 확인한 사실로만 채운다. 근거 없는 경험담·인용은 지운다. 분량 ±40% 안에서 고친다 | — |
+| `통합` | 대표 글에 흡수할 내용이 있으면 대표 글 본문에 섹션(H2)을 추가한다. 흡수되는 글의 클릭 있는 H2 제목을 그대로 쓴다. 그다음 흡수되는 글을 `noindex` 처리한다. **301 은 루틴이 등록하지 않는다**. ⚠️ 흡수 후에도 대표 글 본문은 **1,300단어 이하**(`KoreaPlug-Writer.md` 2-5, 2026-10-16) — 넘으면 흡수 섹션을 표·목록으로 압축하거나 대표 글의 중복 문단을 줄인다 | Rank Math → 리디렉션 → `구 슬러그 → 대표 슬러그` 301 등록(루틴이 보고에 정확한 쌍을 적는다) |
+| `보강` | 진단 `content_audit.json` 의 `val_parts` 가 낮은 항목(수치·출처·한글 원문·1인칭 확인)을 1차 출처로 확인한 사실로만 채운다. 근거 없는 경험담·인용은 지운다. 분량 ±40% 안에서 고치되 **1,300단어를 넘기지 않고** 📱 모바일 가독성(문단 40단어·문장 20단어 안팎·3열 표 — Writer 2-5)을 지킨다 | — |
 | `템플릿 정리` | 진단 배치 E 의 1~7을 그 글에 적용한다: "Last updated \| N min read" 줄, Core Fact 블록, "Where This Guide Breaks Down / Quick Answers / Key points" H2, 반박형 오프너, Focus Keyword 15회 이상 반복, 낚시형 부제, 60자 넘는 SEO 제목 | — |
 | `내부링크 제거` | 미발행 글을 가리키는 링크의 `<a>` 만 풀고 앵커 글자는 남긴다 | — |
 | `사이트 설정` | 하지 않는다(배치 A·B 의 플러그인·WPCode·리디렉션 설정) | 보고에 적힌 화면·버튼대로 사용자가 한다 |
 
-4. **검증** — 본문을 바꾼 항목은 `python3 gsc-ctr/rm_check.py` 로 수정 전·후를 비교해 통과 수가 줄면 백업으로 되돌린다. `python3 gsc-ctr/work/pubcheck.py` 로 공개 페이지를 구글봇 관점에서 확인한다(200·canonical·H1 1개·JSON-LD 파싱). 이상이 있으면 즉시 백업으로 되돌린다.
+4. **검증** — 본문을 바꾼 항목은 `python3 gsc-ctr/rm_check.py` 로 수정 전·후를 비교해 통과 수가 줄면 백업으로 되돌린다. 단 **분량 항목(`lengthContent`·단어 수) 하나만 줄어든 경우는 되돌리지 않는다** — 2026-10-16 분량 상한(Writer 2-5)에 따른 의도된 감소다. `python3 gsc-ctr/work/pubcheck.py` 로 공개 페이지를 구글봇 관점에서 확인한다(200·canonical·H1 1개·JSON-LD 파싱). 이상이 있으면 즉시 백업으로 되돌린다.
 5. **기록** — `state.json.approvals.{id} = {done: TODAY, result, before, after}`, `log.md` 맨 위에 한 줄. `승인.md` 의 그 줄 끝에 ` → 완료 {TODAY}` 를 붙인다(`[x]` 는 그대로 둔다).
 
 ### 1-2. 새 제안 (최대 `A_PROPOSE_PER_RUN`건)
