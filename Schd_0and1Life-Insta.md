@@ -1,4 +1,6 @@
-# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.10 2026-10-12)
+# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.11 2026-10-16)
+
+**v3.11에서 바뀐 것**(지침 v3.11 대응 — 10/16 사용자 검수 "영상만 봐서 무슨 내용인지 모르겠다" · 쇼핑커넥트 연동): ① STEP 5 — **요약어 금지(지침 I-3-11 ⑪)**: 본론 장면마다 글의 실제 숫자·조건·날짜를 화면에(비교는 양쪽 값 나란히, 결과는 금액·기간 그대로, 조건은 목록 그대로, 할 일은 날짜·순서 그대로), 표·카드·일정 장면은 2.6~3.4초·행 4개, 마지막은 가능하면 한 장 정리 카드(`E2`) ② STEP 7 ⑭·⑯ 기준 갱신(장면별 "영상만 본 사람이 말할 수 있는 것"을 `checks.info` 에) ③ **쇼핑커넥트(지침 I-0 v3.11)** — STEP 4에서 글 본문의 쇼핑커넥트 블록을 찾고, STEP 4.5-8에서 세 조건(본문에 블록 있음·글 주제와 직접 연결·영상을 보면 그 물건이 사고 싶어짐)이 **모두** 맞을 때만 허브 카드 `shop` + 캡션 ⑥-2 한 줄. 기본값은 달지 않음. 영상에는 넣지 않음 ④ STEP 8 `meta.json.shop` ⑤ STEP 11 알림 `🛒` 줄. **그 밖의 단계·문구는 v3.10 그대로다.**
 
 **v3.10에서 바뀐 것**(지침 v3.9·v3.10 대응 — 10/10·10/11 실제 회차 방식을 루틴에 맞춤): ① **렌더 기본 = HyperFrames 전체 렌더**(지침 I-3-10, `hf_render.py` + 포맷 템플릿 `instagram\formats\`) — 엔진 v12(`reel_engine.py`)는 HF가 실패했을 때의 **대체 경로**(STEP 6-E). 구 STEP 6-HF(장면 1개 끼우기)는 STEP 6-E 안의 선택 단계로 내려감 ② STEP 4.5 맨 앞에 **글 성격 판정 → 제작 모드 `M1`~`M6`**(지침 I-2-0-E) — 모드가 장면 수·길이·색·움직임·효과음·포맷 후보를 정한다. 틀은 매 회차 바뀌어도 된다 ③ STEP 4.5에 **엔딩 1개 `E1`~`E4`**(지침 I-2-10, `E4` 프로필 유도는 최근 4회차 중 1회 이하) ④ STEP 5에 **읽히는 화면 원칙**(지침 I-3-11) 적용 · **답은 영상 안에서 끝낸다**(지침 I-0 v3.10 — 블로그는 보너스, 영상 안 블로그 유도는 `E4` 일 때만) ⑤ STEP 7 자가검수 **16항목**(⑯ 가독성 `R-READ` · ⑥ 엔딩·유도) + `verify_hf_sync.py` ⑥ STEP 8 `meta.json.mode`·`ending`·`format`·`checks.read` ⑦ STEP 11 알림에 `🎛 모드`·`🔚 엔딩` 줄 ⑧ STEP M 알림 줄에 완주율 ⑨ BGM판 없음(지침 v3.8) 명시.
 
@@ -62,7 +64,7 @@
 6. 열었던 탭은 모두 닫는다.
 
 ## STEP 0. 지침 읽기·설정 확인
-1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. **v3.10 기준**: 개정 이력 첫 줄이 **v3.10 이상**이면 이 루틴 전체를 그대로 수행한다. v3.8~3.9면 엔딩(I-2-10)·완결 원칙이 없다 — 엔딩은 `E4` 로 고정하고 알림에 `📐 지침 v3.10 미배포` 한 줄. v3.8 미만이면 HF 전체 렌더 대신 STEP 6-E(엔진)로 간다(`📐 지침 v3.8 미배포`). 아래는 이전 판 기준(참고용): Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
+1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. **v3.11 기준**: 개정 이력 첫 줄이 **v3.11 이상**이면 이 루틴 전체를 그대로 수행한다. v3.10이면 쇼핑커넥트(STEP 4.5-8)는 건너뛰고(달지 않음) 요약어 금지(⑪)는 이 루틴 STEP 5대로 적용, 알림에 `📐 지침 v3.11 미배포` 한 줄. **v3.10 기준(이전 판)**: 개정 이력 첫 줄이 **v3.10 이상**이면 이 루틴 전체를 그대로 수행한다. v3.8~3.9면 엔딩(I-2-10)·완결 원칙이 없다 — 엔딩은 `E4` 로 고정하고 알림에 `📐 지침 v3.10 미배포` 한 줄. v3.8 미만이면 HF 전체 렌더 대신 STEP 6-E(엔진)로 간다(`📐 지침 v3.8 미배포`). 아래는 이전 판 기준(참고용): Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
 2. 설정값을 세션 변수로 둔다. `PUBLISH_MODE`는 이 프롬프트의 값이 기준이며 지침·ledger에서 바꾸지 않는다.
 
 ## STEP 1. 날짜·폴더·자격증명
@@ -110,7 +112,7 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts?status=publish&after=${D3}T00
 ```bash
 curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,date,modified,content,categories,featured_media" -o post.json
 ```
-- 추출: 제목, Core Fact / Primary Insight / Actionable Tip, 모든 `<table>`, H2 목록(⭐ GAP H2), "근데/다만/함정/실제 예" 문단, `📌`/`*핵심 :` 요약 줄, 출처 명칭, `modified`, 잠정·예정 표현.
+- 추출: 제목, Core Fact / Primary Insight / Actionable Tip, 모든 `<table>`, H2 목록(⭐ GAP H2), "근데/다만/함정/실제 예" 문단, `📌`/`*핵심 :` 요약 줄, 출처 명칭, `modified`, 잠정·예정 표현, **네이버 쇼핑커넥트 상품 블록**(v3.11 — 있으면 상품 종류·링크 URL만 메모, 없으면 `shop=없음`).
 - HTML을 벗긴 **본문 전체 텍스트**를 `post_text.txt`로 저장(STEP 7 숫자 대조용).
 - `<table>` 0개이고 Core Fact에 수치가 없으면 `X-THIN` — ledger 기록 후 다음 후보로(1회).
 
@@ -122,15 +124,18 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 5. **엔딩 1개**(지침 I-2-10): `E1` 루프 · `E2` 저장 · `E3` 댓글 질문 · `E4` 프로필 유도. `ledger` 최근 4회차에 `E4` 가 있으면 `E4` 금지. 같은 엔딩 연속 3회 금지. **훅이 연 질문의 답은 영상 안에서 끝낸다**(지침 I-0 v3.10 · I-2-9 ② — 블로그로 넘기는 고리 금지).
 6. 1개를 고르고 `meta.json.hook = {id, format, type, stage, concept, why}`, `structure`, `format = {verified, experiment, note}`, `mode`, `ending`, `marketing`, `fresh` 를 적는다. `concepts.md` 에 열린 고리 표(연 곳·닫는 곳 — 전부 영상 안)·정보 전달 4요소(I-2-0-D)·탈락한 2개와 이유.
 7. 고른 포맷에 필요한 요소가 템플릿에 없으면 **새 포맷 폴더**를 만든다(기존 템플릿 복사 + 요소 추가 — 지침 I-3-10). 기존 포맷 폴더·`reel_engine.py` 는 고치지 않는다.
+8. **쇼핑커넥트 판단 (v3.11 · 지침 I-0)**: STEP 4에서 블록을 찾았을 때만 본다. ① 본문에 블록이 있다 ② 그 물건이 글이 말하는 문제를 직접 푼다 ③ 고른 콘셉트의 영상을 끝까지 보면 그 물건이 사고 싶어질 장면이 이미 있다 — **셋 다 "예"일 때만** `shop.used=true`. 애매하면 `false`(기본값). 물건을 광고하는 장면을 새로 만들지 않는다. `concepts.md` 에 판단 한 줄.
 
 ## STEP 5. 원고 → `build_hf_vars.py`(→ `hf_vars.json` · `reel-final_timeline.json`) · `caption.txt` · `hub_card.json`
 - 지침 I-2(쉬운 3초·0프레임·숫자 복사·날짜·잠정 표시·화자·금지·마케팅 장치·지속성)·**I-3-11 읽히는 화면 원칙**·I-4(캡션 500자)를 그대로 적용한다. 장면 수·길이는 **모드 행**(I-2-0-E), 엔딩 장면은 **I-2-10 의 고른 코드**대로.
 - **읽히는 화면 (I-3-11) — 원고 단계에서 먼저 지킨다**: 장면마다 "이 장면의 한 문장"을 `concepts.md` 장면 매핑에 적는다 · 글 덩어리 2개(목록 장면만 행 3개) · 영상 숫자 3개(`M1` 4개)·장면당 1개 · 본론에 34px(lv 1) 글자 없음(출처·가정·기준일은 엔딩 한 줄·캡션으로) · 배경 2색·강조색 1개 · 고스트 숫자·티커·장식 스티커 없음(`ghost`·`series` 값을 비운다) · 장면 길이(배속 반영) ≥ 0.8 + 글자 수 × 0.09초 · 장면마다 그림 1개(도식·소품·배치)로 뜻이 보이게.
+- **요약어 금지 — 실제 내용을 화면에 (지침 I-3-11 ⑪ · v3.11)**: 사용자 검수(10/16) "영상만 봐서 무슨 내용인지 모르겠다". 본론 장면마다 글의 **실제 숫자·조건·날짜**가 화면에 있어야 한다 — 비교는 양쪽 값을 나란히(`card` 행 또는 `stack` + 값), 결과는 금액·기간 그대로, 조건은 목록 그대로(`seats`·`card` 행 4개까지), 할 일은 날짜·순서 그대로. 그림(저울·기울기·화살표)은 숫자를 돕는 것이지 대신하지 않는다. 표·카드·일정 장면은 2.6~3.4초, 행은 0.15~0.25초 간격으로 차례로 띄운다. 마지막은 가능하면 한 장 정리 카드(`E2`). 기준 회차: `instagram\2026-10-16\youth-leap-to-future-savings-switch\build_hf_vars.py`(v2, 19.9초).
 - **답은 영상 안에서 끝낸다**(I-0 v3.10): 영상 안 블로그 문구(`blog_note`·잠긴 표·`프로필 링크 → 맨 위 글` 버튼)는 **엔딩이 `E4` 일 때만**. 다른 엔딩에서도 캡션 2번째 줄(I-4-1 ②)의 블로그 안내는 넣는다.
 - `build_hf_vars.py` 구조(견본: `2026-10-11\samsung-bonus-tax-refund\build_hf_vars.py`): `scenes = [dict(dur, bg, amb, els=[dict(kind, lv, y, at, parts|text|rows…, sfx=[[시각, 효과음]])…])…]` · `V = dict(speed, series, foot, scenes)` · 장면 경계에 `whoosh`, 요소의 `sfx` 를 모아 `/speed` 한 큐를 `reel-final_timeline.json` 에 쓴다 — **효과음 큐는 반드시 이 값에서만 만든다**(싱크 구조 보장, I-3-4). `speed` 는 `M6` 이면 0.8, 다른 모드는 모드 행의 장면 길이가 나오게 정한다(보통 1.0, 길이는 `dur` 로 조정).
 - 요소 종류(템플릿 공통, `formats\F01·F04·F09·F02` 기준): `text`(lv 1~5 = 34·55·89·144·233, `parts`, `fx`, `split`, `glitch`, `pulse`, `shake`, `punch`) · `sticker` · `card`(`rows`) · `bar`(tease 띠) · `stamp` · `line`(밑줄·동그라미) · `burst` · `invert` · `arrow`(계정 행) · `lock` · `flap`(F09) · `seats`(F04) · `yesbut`(F02). `M2`·`M3` 은 `shake`·`glitch`·`burst`·`punch` 를 쓰지 않는다(I-2-0-E).
 - `caption.txt` 는 지침 I-4-1 순서 · `len(strip()) ≤ 480` · 첫 줄·첫 해시태그 = 핵심 검색어. 7번 줄에 보낼 사람과 꺼내 볼 순간.
-- `hub_card.json`: `slug, title, date, category, thumb(STEP 9에서 채움), ig_url(""), points[2~3]`.
+- `hub_card.json`: `slug, title, date, category, thumb(STEP 9에서 채움), ig_url(""), points[2~3]` · (v3.11, `shop.used=true` 일 때만) `shop: {label: "{물건 종류} 보기", url: "{본문 블록과 같은 URL}"}`.
+- (v3.11, `shop.used=true` 일 때만) `caption.txt` ⑥ 바로 아래 한 줄: `🛒 {물건 종류}는 프로필 링크 → 맨 위 글 아래에 같이 뒀어요` — 상품명·가격·할인·"추천" 강조·URL 금지. 480자를 넘으면 이 줄부터 뺀다.
 
 ## STEP 6. 렌더 — HyperFrames 전체 렌더 (클라우드 · 지침 I-3-10 · 기본 경로)
 Bash 도구 `timeout` 은 **600000ms** 로 지정한다.
@@ -180,12 +185,13 @@ for t in 0.0 0.3 0.6 1.0 1.6 2.2; do ffmpeg -y -v error -ss $t -i reel-final.mp4
 6. **⑧ 싱크** 🚨 · **⑨ 훅** 🚨: 검증 스크립트가 실패하면 **즉시 중단**(`R-SYNC`/`R-HOOK`). `hook_*.png` 를 보고 "넘기지 않을 이유" 한 문장(`meta.json.checks.hook`) · 첫 사건 ≤0.8초 · 쉬운 3초(제도 용어 없음·숫자 1개 이하·문장 2개 이하, 예/아니오 질문 단독 금지) — "초등학교 고학년이 이해하는가" 한 문장(`checks.easy`).
 7. **⑪ 속도·장치**: 장면 수·장면 길이·총 길이·엔딩 길이가 `meta.json.mode` 행 범위 안 · 장치 3~5개 · `fresh` 있음 · 글자 크기 34·55·89·144·233 만. 아니면 `R-PACE`.
 8. **⑫ 검색 의도·캡션**(`R-INTENT`/`R-CAP`) · **⑬ 지속성**(고리 전부 영상 안에서 닫힘·인터럽트 연속 없음·보상 55~75%·`L`) · **⑭ 정보 전달**(①·④는 영상 안) · **⑮ 포맷**(검증 1 + 실험 1 기록·직전 회차 실험 포맷과 다름·복제 없음·큐가 같은 값에서 생성).
-9. **⑯ 가독성** `R-READ`(지침 I-3-11): 스크립트로 장면별 글 덩어리 수(목록 행 제외 ≤2)·영상 숫자 개수(≤3, `M1` ≤4)·본론 lv 1 사용 여부·배경 색 수(≤2)·`ghost`/`series` 장식 여부·`dur/speed ≥ 0.8 + 글자 수 × 0.09` 를 계산하고, 장면마다 대표 프레임의 글자 영역을 가린 사본(흰 박스로 덮기)을 `Read` 로 보며 "그림만으로 무슨 장면인지" 한 줄씩 `meta.json.checks.read` 에 적는다. 글자만 있는 장면이 절반을 넘으면 반려.
-10. 반려가 있으면 STEP 4.5(콘셉트 2순위) 또는 STEP 5로 돌아가 **1회만** 수정·재렌더. 다시 실패하면 전달하지 않고 `ledger.reels.{slug} = {status:"held", held:"R-…"}` 기록 후 STEP 8 → 12 → 11.
+9. **⑭ 요약어 검사 (v3.11)**: 본론 장면마다 "영상만 본 사람이 이 장면에서 말할 수 있는 것(얼마·왜·누가·언제·어떻게)"을 한 줄씩 `meta.json.checks.info` 에 적는다. 그림·기울기만 있고 실제 숫자·조건·날짜가 없는 본론 장면이 있으면 `R-INFO`.
+10. **⑯ 가독성** `R-READ`(지침 I-3-11 v3.11): 스크립트로 장면별 글 덩어리 수(표·카드·목록·일정 장면은 제목 1 + 행 ≤4 + 결론 1, 그 밖은 ≤2)·장면당 주인공 숫자(④·⑤단) 1개·본론 lv 1 사용 여부·배경 색 수(≤2)·`ghost`/`series` 장식 여부·`dur/speed ≥ 0.8 + 글자 수 × 0.09` 를 계산하고, 장면마다 대표 프레임의 글자 영역을 가린 사본(흰 박스로 덮기)을 `Read` 로 보며 "그림만으로 무슨 장면인지" 한 줄씩 `meta.json.checks.read` 에 적는다. 글자만 있는 장면이 절반을 넘으면 반려.
+11. 반려가 있으면 STEP 4.5(콘셉트 2순위) 또는 STEP 5로 돌아가 **1회만** 수정·재렌더. 다시 실패하면 전달하지 않고 `ledger.reels.{slug} = {status:"held", held:"R-…"}` 기록 후 STEP 8 → 12 → 11.
 
 ## STEP 8. PC 저장
 - `device_commit_files` 로 `instagram\{TODAY}\{slug}\` 에 `concepts.md build_hf_vars.py hf_vars.json verify_hf_sync.py caption.txt reel-final.mp4 reel-final_cover.jpg reel-final_timeline.json stills.jpg hub_card.json post_text.txt meta.json` 을 저장한다(엔진 경로면 `reel_spec.json` 도).
-- `meta.json`: `{blog_post_id, blog_url, blog_modified_at_build, search_intent, persona, mode, ending, hook:{id,format,type,stage,concept,why}, structure, format:{verified,experiment,note}, marketing:[…], fresh, retention:{interrupts,reward_at,loopback}, scenes:[…], dur, speed, engine, render:{path:"hf"|"engine", reason}, hf?, status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,easy,typo,pace,intent,retain,info,format,read}}`.
+- `meta.json`: `{blog_post_id, blog_url, blog_modified_at_build, search_intent, persona, mode, ending, hook:{id,format,type,stage,concept,why}, structure, format:{verified,experiment,note}, marketing:[…], fresh, retention:{interrupts,reward_at,loopback}, scenes:[…], dur, speed, engine, render:{path:"hf"|"engine", reason}, hf?, shop:{used, why, label?, url?}, status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,easy,typo,pace,intent,retain,info,format,read}}`.
 - 새 포맷·새 요소를 만들었으면 `instagram\formats\{id}_{이름}\`(`index.html·template.json·example.json·preview.jpg`)에 저장하고 `formats.json` 의 그 카드(`hf`·`dir`·`uses`·`log`)와 바탕 포맷의 `uses`·`log` 를 갱신한다(`updated` = TODAY). 기존 포맷 폴더는 덮어쓰지 않는다. 사용자 폴더에 백업·이전 판 사본을 만들지 않는다.
 
 ## STEP 9. WP 업로드 (PC)
@@ -212,7 +218,7 @@ cd "$R" && python3 make_dl_page.py {회차폴더}/handoff.json
 ```
 1. 생성된 페이지 URL이 200인지, `download=` 속성과 복사 버튼이 각각 들어갔는지 `curl | grep -c`로 확인한다. 실패하면 `E-PAGE` — 알림에 영상 URL을 직접 실어 대체한다.
 2. `ledger.reels.{slug} = {date:TODAY, status:"handoff", video_media_id, cover_media_id, dur, scenes, hook_type, hook_id, structure_id, stage, concept, mode, ending, format, marketing, fresh, hub_card:false}`.
-3. **허브 카드 먼저 추가 (지침 I-6 v3.1.1)**: `hub_card.json` 의 `thumb`(STEP 9 커버 URL)을 확인하고 `ig_url` 은 빈 값으로 둔 채 `python3 hub.py add {회차폴더}/hub_card.json` → 8초 뒤 `curl -s https://0and1life.com/ig/?cb=$(date +%s) | grep -c "o1-ig-card:{slug}"` ≥ 1 이면 `ledger.reels.{slug}.hub_card="no_ig_url"`, 아니면 1회 재시도 후 `E-HUB`(전달은 유지). 알림에 `🗂 허브 카드 추가` 한 줄.
+3. **허브 카드 먼저 추가 (지침 I-6 v3.1.1 · v3.11 `shop` 은 used=true 일 때만 — `hub.py` 가 `shop` 을 모르면 카드에서 빼고 알림 `🛒 허브 shop 미지원`)**: `hub_card.json` 의 `thumb`(STEP 9 커버 URL)을 확인하고 `ig_url` 은 빈 값으로 둔 채 `python3 hub.py add {회차폴더}/hub_card.json` → 8초 뒤 `curl -s https://0and1life.com/ig/?cb=$(date +%s) | grep -c "o1-ig-card:{slug}"` ≥ 1 이면 `ledger.reels.{slug}.hub_card="no_ig_url"`, 아니면 1회 재시도 후 `E-HUB`(전달은 유지). 알림에 `🗂 허브 카드 추가` 한 줄.
 4. STEP 11 알림에 **전달 페이지 URL 하나만** 싣는다.
 5. **사용자가 게시했다고 알리면** (같은 세션 또는 다음 회차 STEP M에서 자동 확인):
    ```bash
@@ -234,7 +240,7 @@ PushNotification 1회. 첫 문장은 한 줄 요약, 그 뒤 줄들. 모두 한�
 - 전달함: `📱 인스타 릴스 {TODAY} — {slug} 준비 완료 · {길이}초 · 훅 {공식}/{무대} · 검증 통과 · 저장 https://0and1life.com/reel-dl-latest/`
 - 대상 없음: `📱 인스타 릴스 {TODAY} — 대상 글 없음`
 - 반려·오류: `📱 인스타 릴스 {TODAY} — {slug} 보류({코드}) · {한 줄 원인}`
-- 덧붙이는 줄(해당 시): `🎛 모드: {M?} {이유}` · `🔚 엔딩: {E?}` · `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧬 포맷: {검증 id} + {실험 id}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 렌더: {HF 전체|엔진 대체(사유)}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}`(엔진 경로일 때만) · `📐 지침-루틴 상충: {조항}`
+- 덧붙이는 줄(해당 시): `🛒 쇼핑커넥트: {달음 — 물건 종류|안 담 — 사유 한 줄}` · `🎛 모드: {M?} {이유}` · `🔚 엔딩: {E?}` · `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧬 포맷: {검증 id} + {실험 id}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 렌더: {HF 전체|엔진 대체(사유)}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}`(엔진 경로일 때만) · `📐 지침-루틴 상충: {조항}`
 
 ## STEP 12. 임시 자산 정리 (지침 I-9 — 대상 글 유무와 무관하게 매 회차)
 ```bash
@@ -280,7 +286,8 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 
 | 항목 | 상태 | 비고 |
 |---|---|---|
-| 지침 `0and1Life-Insta.md` **v3.10** GitHub 커밋 | ⬜ **커밋 필요**(blog 폴더에 전문 저장됨, 2026-10-12) | STEP 0이 v3.8~3.9면 엔딩 `E4` 고정 + `📐 지침 v3.10 미배포`, v3.8 미만이면 엔진 경로 |
+| 지침 `0and1Life-Insta.md` **v3.11** GitHub 커밋 | ⬜ **커밋 필요**(전문 전달 2026-10-16) | STEP 0이 v3.10이면 쇼핑커넥트 건너뜀 + `📐 지침 v3.11 미배포`, v3.8~3.9면 엔딩 `E4` 고정, v3.8 미만이면 엔진 경로 |
+| `hub.py` 의 `shop` 필드(허브 카드 아래 작은 링크 + 제휴 고지) | ⬜ 확인 필요(v3.11) | 지원하지 않으면 허브 카드에서 `shop` 을 빼고 캡션 ⑥-2 줄도 넣지 않는다(링크가 없는 안내가 되므로) |
 | 포맷 게놈 `instagram\formats\`(F01·F02·F04·F09 템플릿 · `formats.json`) | ✅ 2026-10-11 PC 저장(F02 Yes…but 추가) | 없으면 STEP 6 에서 키트 기본 템플릿 `reel_scene` 대신 STEP 6-E |
 | 엔진 v12 `relay\reel_engine.py` · 효과음 v2.1 `build_reel_sfx_v2.py` · `verify_reel_v9.py` · `regress_engine.py` · `examples\bank_spec.json` · `examples\story_spec.json` | ✅ 2026-10-06 PC 저장(v12 — 기존 장면 회귀 동일 확인) | 없으면 STEP 1에서 `MISSING` |
 | WPCode 스니펫 `ig-relay` v1.2 (`reel`·`insights`·`my_media`) | ✅ 동작 확인(2026-10-02 insights 응답) | |
