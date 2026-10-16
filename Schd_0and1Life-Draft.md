@@ -309,7 +309,42 @@ Rank Math가 보는 `getEditedPostContent()` 에서 `<p>`가 소실돼 본문을
 [6k] Notion SEO 점수 업데이트
 현황표 해당 행의 SEO 셀을 최종 점수로 교체한다. old_str은 실행 전 re-fetch로 현재 셀 원문을 확인해 구성하고, 같은 값이 여러 행에 있으면 작성일까지 포함해 범위를 확장한다.
 
-[6l] Draft일 기록 (STEP 6 전 과정 성공 시에만)
+[6k-M] 📱 모바일 화면 점검 (2026-10-16 신설 — 사용자 지시 · [6l] 전 필수)
+기준·절차는 지침서 `0and1Life-Draft.md` Phase 5-7. 올린 글을 **휴대폰 화면(390px)으로 띄워 처음부터 끝까지 직접 읽어 보고** 가독성을 느낀 뒤에만 [6l]로 간다.
+`resize_window` 는 뷰포트에 반영되지 않으므로 미리보기(`/?p={WP_POST_ID}&preview=true`) 탭 위에 **390px iframe 프레임**을 띄워 측정·스크린샷한다:
+```js
+// ① 390px 프레임 띄우기 — 미리보기(/?p={WP_POST_ID}&preview=true) 탭에서 실행
+const u = location.href.split('#')[0] + (location.search ? '&' : '?') + 'mf=' + Date.now();
+document.body.insertAdjacentHTML('beforeend', `<div id="mf-wrap" style="position:fixed;inset:0;z-index:2147483647;background:#e5e7eb;display:flex;justify-content:center;align-items:flex-start;padding-top:8px"><iframe id="mf" src="${u}" style="width:390px;height:844px;border:0;background:#fff;box-shadow:0 0 0 8px #111;border-radius:24px"></iframe></div>`);
+```
+```js
+// ② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능)
+const d = document.getElementById('mf').contentDocument, w = d.defaultView;
+const R = d.querySelector('[id$="-report"]'), P0 = R.querySelector(':scope > p');
+JSON.stringify({
+  vw: w.innerWidth,
+  overflowX: d.documentElement.scrollWidth > w.innerWidth,
+  keepAll: getComputedStyle(R).wordBreak,
+  longParas: [...R.querySelectorAll('p')].filter(p => !p.closest('figure,.trust-note') && !/^Q\./.test(p.innerText.trim()) && parseFloat(getComputedStyle(p).fontSize) >= 15)
+    .map(p => Math.round(p.getBoundingClientRect().height / (parseFloat(getComputedStyle(p).lineHeight) || 30)))
+    .filter(n => n > 4).length,
+  hiddenTables: [...R.querySelectorAll('table')].filter(t => t.scrollWidth > t.parentElement.clientWidth + 2).length,
+  heroCut: (() => { const f = R.querySelector('figure'); return !!f && f.querySelector('figcaption')?.getBoundingClientRect().height > f.getBoundingClientRect().height; })(),
+  firstAnswerTop: P0 ? Math.round(P0.getBoundingClientRect().top) : -1,
+  pFont: P0 ? getComputedStyle(P0).fontSize : null
+});
+```
+```js
+// ③ 한 화면씩 내리며 스크린샷 → 직접 읽기 (k = 0, 1, 2 … 끝까지)
+document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
+// ④ 끝나면 프레임 제거
+document.getElementById('mf-wrap').remove();
+```
+- 판정: `overflowX`·`heroCut` 이 true면 🔴(구조 수정 후 재측정, 남으면 [6l] 금지) / `keepAll≠keep-all`(한국어 글) · `longParas>0` · `hiddenTables>0` · `firstAnswerTop≥844` 는 🟡
+- Draft가 고치는 것은 구조뿐(래퍼 style · `<p>` 나누기 · 표 래퍼). 문장·숫자·표 구성은 Writer 소관 — 기록만. ⛔ FAQ 문단은 나누지 않는다(스키마). **내용 추가 금지.**
+- STEP 7 알림에 한 줄: `📱 390px: 가로넘침 0 · 4줄+ 문단 n · 숨은 표 n · 첫 화면 답 Y/N · 소감 한 줄`
+
+[6l] Draft일 기록 (STEP 6 전 과정 성공 시에만) · **[6k-M] 📱 모바일 점검 🔴 0건일 때만**
 ⚠️ 아래 중 하나라도 있었으면 공란으로 남긴다: Chrome 로그인 실패 / GP 레이아웃 미반영(재시도 후에도) / Rank Math 설정 throw 후 클릭 폴백까지 실패.
 성공 시: 서브페이지 Draft일자 = TODAY · 메인 테이블 "Draft일" 셀 → TODAY (실행 전 현재 셀 원문을 재확인해 old_str 구성 — "—"가 아니라 빈 칸일 수 있다)
 

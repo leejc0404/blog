@@ -394,7 +394,7 @@ R6. 수요 하한 — 7일 창에 0-3 D < 0.3인 글이 발행됐으면 위반(2
 모든 콘텐츠는 `<div id="z-[SLUG_FIRST_WORD]-report">` 안. `max-width:820px; padding:0 16px 40px; box-sizing:border-box` 유지. 본문 이미지는 plain `<figure>/<img>`(Gutenberg 마커 금지).
 
 ```html
-<div id="z-[SLUG_FIRST_WORD]-report" style="font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; max-width:820px; margin:0 auto; padding:0 16px 40px; color:#1a1a2e; line-height:1.8; box-sizing:border-box;">
+<div id="z-[SLUG_FIRST_WORD]-report" style="font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; max-width:820px; margin:0 auto; padding:0 16px 40px; color:#1a1a2e; line-height:1.8; box-sizing:border-box; word-break:keep-all; overflow-wrap:break-word;">
   <!-- 상단 배너 = 히어로 이미지 위에 H1을 얹는다. 아래 2-3b 템플릿을 그대로 쓴다 (색 박스 금지) -->
   <figure style="display:grid; margin:0 0 28px; border-radius:16px; overflow:hidden; background:#111;">
     <img fetchpriority="high" decoding="async" style="grid-area:1/1; width:100%; display:block; height:auto; align-self:start;" src="[FEATURED_IMAGE_URL]" alt="[ALT_TEXT]" />
@@ -469,7 +469,8 @@ R6. 수요 하한 — 7일 창에 0-3 D < 0.3인 글이 발행됐으면 위반(2
 - **완성 분량**: **900~1,300어절**(글자 아님). 2026-10-16 개정 — 독자 지적 2가지("휴대폰으로 읽기 힘들다", "글이 너무 길다"). 종전 1,500~2,500은 Rank Math 분량 점수용이었다. **점수보다 독자가 끝까지 읽는 길이가 우선**이다.
 - **📱 모바일 가독성 (2026-10-16 신설)** — 휴대폰 한 화면(약 375px)에서 읽히는지가 기준이다.
   - 문단은 **2~3줄(80자) 이하**. 한 H2 섹션은 **휴대폰 두 화면(약 250어절) 이내** — 넘으면 표·목록으로 바꾸거나 H2를 나눈다.
-  - 표는 **3열 이하**로 짠다. 4열 이상 표는 글당 1개까지(가로 스크롤 래핑 유지 — 2-3b).
+  - 표는 **3열 이하**로 짠다. **4열 이상 표는 쓰지 않는다** — 390px 실측(#144)에서 마지막 열(핵심 값 '차이')이 화면 밖으로 밀려 옆으로 밀어야 보였다. 비교 대상이 많으면 열을 합치거나(`에페 합계` · `위고비보다 덜 냄`) 표를 나눈다. 예외: 칸이 숫자 1~2자인 7열 달력(2-9).
+  - **래퍼에 `word-break:keep-all; overflow-wrap:break-word`**(2-3 템플릿). 없으면 휴대폰에서 한글이 단어 중간에서 끊긴다(`12/만9,800원`·`있/어요` — #144 실측).
   - **문장은 40자 안팎**(휴대폰 1~1.5줄). 40자 넘는 문장은 본문의 10% 이하.
   - **한 문장에 숫자는 2개까지.** 셋 이상 비교하면 표로 뺀다.
   - 쉼표로 두 내용을 잇지 않는다(`A이고, B예요` → `A예요. B예요.`). 괄호 설명은 글당 2~3회(시그니처 ⑥)까지.
