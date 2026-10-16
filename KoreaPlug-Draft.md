@@ -185,7 +185,7 @@ if (b.name === 'rank-math/toc-block' && !b.isValid) {
 4. `rank_math_description` ≤ 150자 + Focus Keyword 포함
 5. 내부 링크 1개 이상, 목적지 전부 `publish`
 6. `<img>` alt 에 Focus Keyword 또는 연관어 포함
-7. 본문 1,500단어 이상
+7. 본문 **900~1,300단어**(Writer `2-5`, 2026-10-16 개정). ⛔ 짧다는 이유로 본문을 늘리지 않는다 — 900단어 미만이면 보정하지 말고 Notion에 `분량 미달(Writer 소관)`로 기록
 8. `rank_math_focus_keyword` 에 쉼표 항목 5개
 
 - [ ] 임시저장(Draft) 상태 확인

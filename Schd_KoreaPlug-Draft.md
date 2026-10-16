@@ -502,7 +502,7 @@ Ctrl+S → 저장 확인 → 편집 URL로 다시 navigate → wait 5초 → `ge
 4. `rank_math_description` ≤ 150자 + Focus Keyword 포함
 5. 내부 링크 1개 이상, 목적지 전부 `publish`
 6. `<img>` alt 에 Focus Keyword 또는 연관어 포함
-7. 본문 1,500단어 이상
+7. 본문 **900~1,300단어**(Writer `2-5`, 2026-10-16 개정). ⛔ 짧다는 이유로 본문을 늘리지 않는다 — 900단어 미만이면 보정 대상에서 빼고 `분량 미달(Writer 소관)`로 기록
 8. `rank_math_focus_keyword` 쉼표 항목 5개
 
 - **8항목 전부 통과** → 점수 게이트 충족으로 본다. Notion SEO 셀에 `자가검사 통과 (점수 미측정)` 기록, `[6l]` draft 일자 기록 가능
@@ -697,10 +697,10 @@ GET /wp-json/wp/v2/posts?slug={신규슬러그}&status=any&_fields=id,slug,statu
 4. META_DESCRIPTION ≤ 150자 + FOCUS_KEYWORD 포함
 5. 내부 링크 1개 이상
 6. `<img>` alt에 FOCUS_KEYWORD 또는 연관어 포함
-7. 본문 1,500자 이상
+7. 본문 분량은 Writer `2-5` 범위(900~1,300단어) — ⛔ 보정으로 늘리지 않는다
 8. 목차 없으면 본문 상단에 `<div class="wp-block-rank-math-toc-block"></div>` 추가
 
-⛔ 절대 금지: core/heading 블록 추가 / `getEditedPostContent()` freeform 소스 사용 / 키워드 기계적 반복 삽입
+⛔ 절대 금지: core/heading 블록 추가 / `getEditedPostContent()` freeform 소스 사용 / 키워드 기계적 반복 삽입 / **점수를 위한 본문 분량 추가**(Writer `2-5` 📱 모바일 가독성과 충돌 — 2026-10-16)
 
 ---
 
