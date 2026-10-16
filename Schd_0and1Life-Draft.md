@@ -293,8 +293,8 @@ await new Promise(r=>setTimeout(r,1500));
 JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')].filter(n=>/test-fail/.test(n.className)).map(n=>(n.className.match(/seo-check-([A-Za-z]+)/)||[])[1]));
 
 2) 판정표
-⛔ 조치 불가: `keywordInPermalink` (슬러그 영문 정책 — 변경 금지, 로그에 '사양' 기록) · `hasContentAI` (PRO 전용) · `contentHasShortParagraphs` (구조적, 아래 참조)
-✅ 조치 가능: `keywordIn10Percent` (도입 첫 문단 100자 안에 Focus Keyword) · `keywordInSubheadings` (H2 1개 이상에 포함) · `keywordInMetaDescription` (메타 150자 이내 + 키워드) · `linksHasInternal` (`/slug/` 상대경로 1개 이상) · `lengthContent` (본문 1,500자 이상) · `contentHasAssets` (이미지 1개 이상)
+⛔ 조치 불가: `keywordInPermalink` (슬러그 영문 정책 — 변경 금지, 로그에 '사양' 기록) · `hasContentAI` (PRO 전용) · `contentHasShortParagraphs` (구조적, 아래 참조) · `lengthContent` (2026-10-16 사양 — Writer 2-5 분량 900~1,300어절·모바일 가독성. 본문을 늘리지 않고 로그에 '사양(분량 상한)' 기록)
+✅ 조치 가능: `keywordIn10Percent` (도입 첫 문단 100자 안에 Focus Keyword) · `keywordInSubheadings` (H2 1개 이상에 포함) · `keywordInMetaDescription` (메타 150자 이내 + 키워드) · `linksHasInternal` (`/slug/` 상대경로 1개 이상) · `contentHasAssets` (이미지 1개 이상)
 
 ⛔ **`contentHasShortParagraphs` 는 문단을 쪼개도 해소되지 않는다.**
 Rank Math가 보는 `getEditedPostContent()` 에서 `<p>`가 소실돼 본문을 통짜 덩어리로 계산하기 때문이다. 저장본 raw가 정상이어도 실패한다.
@@ -304,7 +304,7 @@ Rank Math가 보는 `getEditedPostContent()` 에서 `<p>`가 소실돼 본문을
 
 4) 조치 가능 항목이 있을 때만: [6m-0] 탭 정리 → REST로 HTML 수정 → 에디터 재오픈 → 재분석 트리거(GitHub 지침 Phase 5-2) → 저장 → 검증. **재시도는 1회.** 키워드 기계적 반복 삽입 금지.
 
-⛔ 절대 금지: core/heading 블록 추가 / 슬러그 한글화 / 키워드 반복 삽입
+⛔ 절대 금지: core/heading 블록 추가 / 슬러그 한글화 / 키워드 반복 삽입 / **점수를 위한 본문 분량 추가**(문단·FAQ·설명 문장 덧붙이기 — Writer 2-5 모바일 가독성 규칙과 충돌)
 
 [6k] Notion SEO 점수 업데이트
 현황표 해당 행의 SEO 셀을 최종 점수로 교체한다. old_str은 실행 전 re-fetch로 현재 셀 원문을 확인해 구성하고, 같은 값이 여러 행에 있으면 작성일까지 포함해 범위를 확장한다.
