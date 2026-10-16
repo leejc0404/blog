@@ -284,6 +284,69 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 
 ---
 
+
+## Phase 5-7. 📱 모바일 화면 점검 (2026-10-16 신설 — 사용자 지시)
+
+> 독자는 휴대폰으로 읽는다. Draft는 올린 글을 **휴대폰 화면(폭 390px)으로 띄워 처음부터 끝까지 직접 읽어 보고**, 가독성이 좋은지 느낀 뒤에만 Draft일을 기록한다. 데스크톱 화면이나 HTML 소스만 보고 통과시키지 않는다.
+> 기준은 Writer 지침 2-5 「📱 모바일 가독성」이다(분량 900~1,300 · 문단 휴대폰 3줄 · 표 3열 이하).
+
+**방법 — 390px 프레임**. 이 환경에서는 `resize_window` 가 뷰포트에 반영되지 않는다(`outerWidth`/`outerHeight` = 0). 창 크기를 바꾸지 말고, 미리보기 탭 위에 **폭 390px iframe**(아이폰 12~15 크기)을 띄운다. 같은 도메인이라 iframe 안이 모바일 레이아웃(미디어쿼리 포함)으로 그려지고 JS 측정도 된다.
+
+```js
+// ① 390px 프레임 띄우기 — 미리보기(/?p={WP_POST_ID}&preview=true) 탭에서 실행
+const u = location.href.split('#')[0] + (location.search ? '&' : '?') + 'mf=' + Date.now();
+document.body.insertAdjacentHTML('beforeend', `<div id="mf-wrap" style="position:fixed;inset:0;z-index:2147483647;background:#e5e7eb;display:flex;justify-content:center;align-items:flex-start;padding-top:8px"><iframe id="mf" src="${u}" style="width:390px;height:844px;border:0;background:#fff;box-shadow:0 0 0 8px #111;border-radius:24px"></iframe></div>`);
+```
+```js
+// ② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능)
+const d = document.getElementById('mf').contentDocument, w = d.defaultView;
+const R = d.querySelector('[id$="-report"]'), P0 = R.querySelector(':scope > p');
+JSON.stringify({
+  vw: w.innerWidth,
+  overflowX: d.documentElement.scrollWidth > w.innerWidth,
+  keepAll: getComputedStyle(R).wordBreak,
+  longParas: [...R.querySelectorAll('p')].filter(p => !p.closest('figure,.trust-note') && !/^Q\./.test(p.innerText.trim()) && parseFloat(getComputedStyle(p).fontSize) >= 15)
+    .map(p => Math.round(p.getBoundingClientRect().height / (parseFloat(getComputedStyle(p).lineHeight) || 30)))
+    .filter(n => n > 4).length,
+  hiddenTables: [...R.querySelectorAll('table')].filter(t => t.scrollWidth > t.parentElement.clientWidth + 2).length,
+  heroCut: (() => { const f = R.querySelector('figure'); return !!f && f.querySelector('figcaption')?.getBoundingClientRect().height > f.getBoundingClientRect().height; })(),
+  firstAnswerTop: P0 ? Math.round(P0.getBoundingClientRect().top) : -1,
+  pFont: P0 ? getComputedStyle(P0).fontSize : null
+});
+```
+```js
+// ③ 한 화면씩 내리며 스크린샷 → 직접 읽기 (k = 0, 1, 2 … 끝까지)
+document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
+// ④ 끝나면 프레임 제거
+document.getElementById('mf-wrap').remove();
+```
+
+**읽기 — 화면마다 스스로 묻는다** (스크린샷을 한 장씩 보며 끝까지)
+- 첫 화면에 검색어의 답(숫자·날짜)이 보이는가?
+- 글자 벽이 있는가 — 한 문단이 4줄을 넘는가?
+- 숫자·단어가 줄바꿈으로 쪼개지는가?
+- 표의 열이 잘려 옆으로 밀어야 보이는가? 특히 핵심 값 열이 숨는가?
+- 같은 말을 두 번 하는가? 다음 화면으로 넘기고 싶은가, 지루한가?
+
+**판정**
+
+| 항목 | 기준 | 실패 시 |
+|---|---|---|
+| 가로 넘침 `overflowX` | false | 🔴 원인 요소 수정(래퍼 padding · 고정폭 요소 · 긴 URL) |
+| 히어로 제목 잘림 `heroCut` | false | 🔴 히어로 규칙(그리드 스택·clamp)대로 수정 |
+| 한글 줄바꿈 `keepAll` | `keep-all` | 🟡 래퍼 style에 `word-break:keep-all; overflow-wrap:break-word` 추가 (없으면 `12/만9,800원`·`있/어요`처럼 단어 중간에서 끊긴다 — #144 실측) |
+| 숨은 표 `hiddenTables` | 0 | 🟡 래퍼 확인. 4열 이상 표면 `Writer 소관 — 3열 재구성 필요` 기록 |
+| 긴 문단 `longParas` (4줄 초과) | 0 | 🟡 문장 경계에서 `<p>` 를 둘로 나눈다(문장은 바꾸지 않는다). ⛔ FAQ 문단(`<p><strong>Q. …</strong><br>…</p>`)은 나누지 않는다 — FAQPage 스키마 정규식이 깨진다. FAQ·작은 글씨 주석은 측정에서도 뺀다 |
+| 첫 화면 답 `firstAnswerTop` | 844 미만 | 🟡 기록(`Writer 소관`) |
+| 본문 글자 `pFont` | 15px 이상 | 🟡 기록(테마 소관) |
+| 읽기 소감 | 막힘 없이 끝까지 읽힘 | 걸린 곳을 화면 번호와 함께 기록 |
+
+- Draft가 고치는 것은 **구조뿐**이다 — 문단 나누기 · 래퍼 style · 표 래퍼. 문장·숫자·표 구성은 Writer 소관이라 기록만 한다. **내용을 덧붙이지 않는다.**
+- 🔴 가 남으면 Draft일을 기록하지 않는다. 🟡 는 고치거나 기록하고 진행한다. 구조를 고쳤으면 ②를 다시 돌려 확인한다.
+- 기록(완료 알림 + Notion 기본 정보 표 `📱 모바일 점검` 행): `📱 390px: 가로넘침 0 · 4줄+ 문단 n · 숨은 표 n · 첫 화면 답 Y/N · 소감 한 줄`
+
+---
+
 ## Phase 6. 완료 후 처리
 
 **6-1. Notion 업데이트**

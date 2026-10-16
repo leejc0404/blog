@@ -516,7 +516,42 @@ POST `/wp-json/wp/v2/posts/{WP_POST_ID}` — `{"content": "<!-- wp:freeform -->\
 메인 테이블 해당 행의 SEO 셀 `—` → 실제 점수. 브라우저 불가 회차는 `[6h-L]` 결과에 따라 `자가검사 통과 (점수 미측정)` 로 적고, 다음 회차에 숫자로 교체한다.
 ⚠️ `<td>—</td>` + 카테고리 셀 같은 짧은 old_str은 다른 행과 중복된다. **제목 또는 한줄 요약 셀부터 포함해** 유일한 범위로 잡는다.
 
-### [6l] draft 일자 기록 — 전 과정 성공 시에만
+### [6k-M] 📱 모바일 화면 점검 (2026-10-16 신설 — 사용자 지시 · [6l] 전 필수)
+기준·절차는 지침서 `KoreaPlug-Draft.md` 5-7. 올린 글을 **휴대폰 화면(390px)으로 띄워 처음부터 끝까지 직접 읽어 보고** 가독성을 느낀 뒤에만 [6l]로 간다.
+`resize_window` 는 뷰포트에 반영되지 않으므로 미리보기(`/?p={WP_POST_ID}&preview=true`) 탭 위에 **390px iframe 프레임**을 띄워 측정·스크린샷한다:
+```js
+// ① 390px 프레임 띄우기 — 미리보기(/?p={WP_POST_ID}&preview=true) 탭에서 실행
+const u = location.href.split('#')[0] + (location.search ? '&' : '?') + 'mf=' + Date.now();
+document.body.insertAdjacentHTML('beforeend', `<div id="mf-wrap" style="position:fixed;inset:0;z-index:2147483647;background:#e5e7eb;display:flex;justify-content:center;align-items:flex-start;padding-top:8px"><iframe id="mf" src="${u}" style="width:390px;height:844px;border:0;background:#fff;box-shadow:0 0 0 8px #111;border-radius:24px"></iframe></div>`);
+```
+```js
+// ② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능)
+const d = document.getElementById('mf').contentDocument, w = d.defaultView;
+const R = d.querySelector('[id$="-report"]'), P0 = R.querySelector(':scope > p');
+JSON.stringify({
+  vw: w.innerWidth,
+  overflowX: d.documentElement.scrollWidth > w.innerWidth,
+  keepAll: getComputedStyle(R).wordBreak,
+  longParas: [...R.querySelectorAll('p')].filter(p => !p.closest('figure,.trust-note') && !/^Q\./.test(p.innerText.trim()) && parseFloat(getComputedStyle(p).fontSize) >= 15)
+    .map(p => Math.round(p.getBoundingClientRect().height / (parseFloat(getComputedStyle(p).lineHeight) || 30)))
+    .filter(n => n > 4).length,
+  hiddenTables: [...R.querySelectorAll('table')].filter(t => t.scrollWidth > t.parentElement.clientWidth + 2).length,
+  heroCut: (() => { const f = R.querySelector('figure'); return !!f && f.querySelector('figcaption')?.getBoundingClientRect().height > f.getBoundingClientRect().height; })(),
+  firstAnswerTop: P0 ? Math.round(P0.getBoundingClientRect().top) : -1,
+  pFont: P0 ? getComputedStyle(P0).fontSize : null
+});
+```
+```js
+// ③ 한 화면씩 내리며 스크린샷 → 직접 읽기 (k = 0, 1, 2 … 끝까지)
+document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
+// ④ 끝나면 프레임 제거
+document.getElementById('mf-wrap').remove();
+```
+- 판정: `overflowX`·`heroCut` 이 true면 🔴(구조 수정 후 재측정, 남으면 [6l] 금지) / `keepAll≠keep-all`(한국어 글) · `longParas>0` · `hiddenTables>0` · `firstAnswerTop≥844` 는 🟡
+- Draft가 고치는 것은 구조뿐(래퍼 style · `<p>` 나누기 · 표 래퍼). 문장·숫자·표 구성은 Writer 소관 — 기록만. ⛔ FAQ 문단은 나누지 않는다(스키마). **내용 추가 금지.**
+- STEP 7 알림에 한 줄: `📱 390px: 가로넘침 0 · 4줄+ 문단 n · 숨은 표 n · 첫 화면 답 Y/N · 소감 한 줄`
+
+### [6l] draft 일자 기록 — 전 과정 성공 시에만 · **[6k-M] 📱 모바일 점검 🔴 0건일 때만**
 
 아래 중 하나라도 있었으면 draft 일자를 **공란으로 남긴다** (다음 실행이 [4d] 복구 로직으로 이어받는다):
 - Astra 설정 미반영 (재시도 후에도)
