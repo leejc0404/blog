@@ -164,6 +164,7 @@ Q/A가 1쌍 이하면 null.
 
 캡처 품질·마크업:
 - 전체 화면·전체 페이지 캡처 금지. 결과·조문 영역만 잘라 찍는다.
+- 📱 **폰 판독 규격 (2026-10-18 신설)**: 독자 4명 중 3명이 390px 화면에서 본다. 오버레이 안쪽 래퍼 폭을 **780px로 고정**(`width:780px;margin:0 auto`)하고 결과 숫자 블록만 담은 뒤, `computer` 의 `zoom` 액션 `region`으로 **그 래퍼 영역만** 캡처한다. 전체 뷰포트(1568px) 캡처 ⛔ — 360px로 줄면 글자가 8px이 된다. 핵심 숫자는 래퍼 안에서 24px 이상이 되게 zoom을 올린다. figcaption에는 핵심 숫자를 글자로 반복한다("350kWh → 70,640원"). 기준: 업로드 후 `naturalWidth ÷ 폰 표시폭 ≤ 2.5`.
 - 스크롤바·커서·드래그 핸들·쿠키 배너·팝업 잔재·깨진 아이콘이 보이면 재캡처. 오버레이 구성 시 `ul, img, a.lsLink, button` 노드를 먼저 제거.
 - ⚠️ 표준 우회로: 대상 블록을 복제해 `position:fixed;inset:0;background:#fff` 오버레이로 뷰포트를 채운 뒤 전체 스크린샷.
   · law.go.kr처럼 iframe 안에 내용이 있으면 **iframe 자체를 `position:fixed;inset:0;width:100vw;height:100vh`로 만들고 오버레이는 iframe 문서 안에 삽입**한다 (사이트 CSS를 살리기 위함).
@@ -309,40 +310,53 @@ Rank Math가 보는 `getEditedPostContent()` 에서 `<p>`가 소실돼 본문을
 [6k] Notion SEO 점수 업데이트
 현황표 해당 행의 SEO 셀을 최종 점수로 교체한다. old_str은 실행 전 re-fetch로 현재 셀 원문을 확인해 구성하고, 같은 값이 여러 행에 있으면 작성일까지 포함해 범위를 확장한다.
 
-[6k-M] 📱 모바일 화면 점검 (2026-10-16 신설 — 사용자 지시 · [6l] 전 필수)
-기준·절차는 지침서 `0and1Life-Draft.md` Phase 5-7. 올린 글을 **휴대폰 화면(390px)으로 띄워 처음부터 끝까지 직접 읽어 보고** 가독성을 느낀 뒤에만 [6l]로 간다.
-`resize_window` 는 뷰포트에 반영되지 않으므로 미리보기(`/?p={WP_POST_ID}&preview=true`) 탭 위에 **390px iframe 프레임**을 띄워 측정·스크린샷한다:
+[6k-M] 📱 모바일 화면 점검·보정 (2026-10-16 신설 · 2026-10-18 개정 — 모바일 퍼스트 · [6l] 전 필수)
+근거: 네이버 서치어드바이저 최근 7일(10-11~17) 모바일 노출 1.3만·클릭 190 vs PC 노출 4.4천·클릭 78. 독자 4명 중 3명이 휴대폰이다.
+이 단계는 '기록'이 아니라 **'보정'**이다. 390px에서 읽기 불편한 **구조**는 Draft가 고치고 나서 [6l]로 간다. 문장·숫자·표 내용은 Writer 소관이라 기록만 한다.
+기준은 지침서 `0and1Life-Draft.md` Phase 5-7. `resize_window` 는 뷰포트에 반영되지 않으므로 미리보기(`/?p={WP_POST_ID}&preview=true`) 탭 위에 **390px iframe 프레임**을 띄워 측정·스크린샷한다.
+
+① 390px 프레임 띄우기 — 미리보기 탭에서 실행
 ```js
-// ① 390px 프레임 띄우기 — 미리보기(/?p={WP_POST_ID}&preview=true) 탭에서 실행
 const u = location.href.split('#')[0] + (location.search ? '&' : '?') + 'mf=' + Date.now();
 document.body.insertAdjacentHTML('beforeend', `<div id="mf-wrap" style="position:fixed;inset:0;z-index:2147483647;background:#e5e7eb;display:flex;justify-content:center;align-items:flex-start;padding-top:8px"><iframe id="mf" src="${u}" style="width:390px;height:844px;border:0;background:#fff;box-shadow:0 0 0 8px #111;border-radius:24px"></iframe></div>`);
 ```
+② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능) — 🟡 항목은 **위치까지** 뽑는다
 ```js
-// ② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능)
 const d = document.getElementById('mf').contentDocument, w = d.defaultView;
 const R = d.querySelector('[id$="-report"]'), P0 = R.querySelector(':scope > p');
+const ps = [...R.querySelectorAll('p')].filter(p => !p.closest('figure,.trust-note') && !/^Q\./.test(p.innerText.trim()) && parseFloat(getComputedStyle(p).fontSize) >= 15);
+const lines = p => Math.round(p.getBoundingClientRect().height / (parseFloat(getComputedStyle(p).lineHeight) || 30));
 JSON.stringify({
   vw: w.innerWidth,
   overflowX: d.documentElement.scrollWidth > w.innerWidth,
   keepAll: getComputedStyle(R).wordBreak,
-  longParas: [...R.querySelectorAll('p')].filter(p => !p.closest('figure,.trust-note') && !/^Q\./.test(p.innerText.trim()) && parseFloat(getComputedStyle(p).fontSize) >= 15)
-    .map(p => Math.round(p.getBoundingClientRect().height / (parseFloat(getComputedStyle(p).lineHeight) || 30)))
-    .filter(n => n > 4).length,
-  hiddenTables: [...R.querySelectorAll('table')].filter(t => t.scrollWidth > t.parentElement.clientWidth + 2).length,
+  longParas: ps.filter(p => lines(p) > 4).map(p => ({lines: lines(p), head: p.innerText.slice(0, 30)})),
+  hiddenTables: [...R.querySelectorAll('table')].map((t, i) => ({i, cols: t.rows[0]?.cells.length, hidden: t.scrollWidth > t.parentElement.clientWidth + 2})).filter(x => x.hidden),
   heroCut: (() => { const f = R.querySelector('figure'); return !!f && f.querySelector('figcaption')?.getBoundingClientRect().height > f.getBoundingClientRect().height; })(),
   firstAnswerTop: P0 ? Math.round(P0.getBoundingClientRect().top) : -1,
-  pFont: P0 ? getComputedStyle(P0).fontSize : null
+  pFont: P0 ? getComputedStyle(P0).fontSize : null,
+  evidence: [...R.querySelectorAll('figure.evidence-capture img')].map(i => ({shown: Math.round(i.getBoundingClientRect().width), natural: i.naturalWidth, shrink: +(i.naturalWidth / i.getBoundingClientRect().width).toFixed(1)}))
 });
 ```
+③ 한 화면씩 내리며 스크린샷 → **직접 읽는다** (k = 0, 1, 2 … 끝까지). 각 화면에서 "엄지로 넘기며 읽는 독자"가 걸리는 곳을 적는다.
 ```js
-// ③ 한 화면씩 내리며 스크린샷 → 직접 읽기 (k = 0, 1, 2 … 끝까지)
 document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
-// ④ 끝나면 프레임 제거
+```
+④ 판정
+- 🔴 `overflowX` · `heroCut` → 구조 수정 후 재측정. 남으면 [6l] 금지.
+- 🟡 **Draft가 고친다** (⑤): `keepAll ≠ keep-all`(한국어 글) · `longParas` 1건 이상 · `hiddenTables` 1건 이상 · `evidence.shrink > 2.5`(증빙 숫자가 폰에서 판독 불가)
+- 📝 기록만 (내용 소관 → Writer): `firstAnswerTop ≥ 844` · 한 문단에 숫자 3개 이상 · 4열 이상 표
+⑤ 보정 — **구조만**. 내용 추가 금지 · 문장 수정 금지 · FAQ `<p>` 분할 금지(스키마)
+- `longParas`: 해당 `<p>`를 문장 경계(`.` `?` `!` 뒤 공백)에서 2~3줄 단위로 나눈다. 나눌 경계가 없으면 기록만.
+- `keepAll`: 래퍼 `<div id="…-report">` style에 `word-break:keep-all; overflow-wrap:break-word;` 추가.
+- `hiddenTables`: 해당 `<table>`을 `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0;">…</div>`로 감싼다(table의 margin은 0). 열은 지우지 않는다.
+- `evidence.shrink > 2.5`: [4f] 📱 규격(780px 프레임·`zoom` 영역 캡처)으로 **재캡처 → 재업로드 → figure의 src·`wp-image-{ID}` 교체**. 재캡처가 불가하면 figcaption에 핵심 숫자를 글자로 덧붙인다("350kWh → 70,640원").
+- 순서: [6m-0] 탭 정리 → REST POST → **8초 대기** → `<p>` 수·ld+json·evidence·freeform 마커 검증 → ①부터 재측정. **최대 2회.** 2회 후 남는 🟡는 기록하고 넘어간다.
+⑥ 끝나면 프레임 제거
+```js
 document.getElementById('mf-wrap').remove();
 ```
-- 판정: `overflowX`·`heroCut` 이 true면 🔴(구조 수정 후 재측정, 남으면 [6l] 금지) / `keepAll≠keep-all`(한국어 글) · `longParas>0` · `hiddenTables>0` · `firstAnswerTop≥844` 는 🟡
-- Draft가 고치는 것은 구조뿐(래퍼 style · `<p>` 나누기 · 표 래퍼). 문장·숫자·표 구성은 Writer 소관 — 기록만. ⛔ FAQ 문단은 나누지 않는다(스키마). **내용 추가 금지.**
-- STEP 7 알림에 한 줄: `📱 390px: 가로넘침 0 · 4줄+ 문단 n · 숨은 표 n · 첫 화면 답 Y/N · 소감 한 줄`
+- STEP 7 알림에 한 줄: `📱 390px: 가로넘침 0 · 4줄+ 문단 n→m · 숨은 표 n→m · 증빙 판독 OK/NG · 첫 화면 답 Y/N · 보정 k건 · 소감 한 줄`
 
 [6l] Draft일 기록 (STEP 6 전 과정 성공 시에만) · **[6k-M] 📱 모바일 점검 🔴 0건일 때만**
 ⚠️ 아래 중 하나라도 있었으면 공란으로 남긴다: Chrome 로그인 실패 / GP 레이아웃 미반영(재시도 후에도) / Rank Math 설정 throw 후 클릭 폴백까지 실패.
