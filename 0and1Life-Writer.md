@@ -406,7 +406,7 @@ R6. 수요 하한 — 7일 창에 0-3 D < 0.3인 글이 발행됐으면 위반(2
       <p style="margin:0; font-size:clamp(11px,2.9vw,13px); opacity:.85;">[YYYY년 M월 D일] 작성 · 읽는 데 약 [N]분</p>
     </figcaption>
   </figure>
-  <!-- ① 공감 유도 첫 문단 (60단어 이내) -->
+  <!-- ① 첫 화면 3문단 — 각 80자 이하, 3문단 안에 결론 숫자 (2-5 📱 · 백과사전식 서론 금지) -->
   <!-- ② [GEO] 3줄 스니펫 박스 -->
   <div class="ai-knowledge-snippet" style="background:#f8fafc; border-radius:14px; padding:22px 26px; margin-bottom:28px; border-left:5px solid [THEME_COLOR];">
     <ul><li><strong>Core Fact:</strong> …</li><li><strong>Primary Insight:</strong> …</li><li><strong>Actionable Tip:</strong> …</li></ul>
@@ -450,7 +450,7 @@ R6. 수요 하한 — 7일 창에 0-3 D < 0.3인 글이 발행됐으면 위반(2
 - `grid-area:1/1` 이 3개, `clamp(` 가 4개
 - `position:absolute` 인 `<figcaption>` 이 0개, `font-size:26px` 같은 고정값이 0개
 
-⚠️ **열이 4개 이상인 표는 `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0;">`로 감싼다.** 감싸지 않으면 모바일에서 표가 화면 밖으로 넘쳐 본문 전체에 가로 스크롤이 생긴다 — 모바일 이탈률과 Core Web Vitals(CLS)에 직접 걸린다. (2026-09-05 전수검사: 발행 글 55개 표가 미래핑 상태였음)
+⚠️ **표는 3열 이하로 짠다(2-5 📱 하드 게이트 — 2026-10-18).** 4열 이상은 열을 합치거나 표를 나눈다. 유일한 예외인 월말 7열 달력(2-9)만 `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:18px 0;">`로 감싼다 — 감싸지 않으면 모바일에서 표가 화면 밖으로 넘쳐 본문 전체에 가로 스크롤이 생긴다(2026-09-05 전수검사: 발행 글 55개 표가 미래핑 상태였음). 래핑은 달력의 안전장치이지 4열 표를 허용하는 수단이 아니다 — 390px 실측(#144)에서 래핑된 4열 표도 마지막 열(핵심 값)이 화면 밖으로 밀렸다.
 
 ### 2-4. 테마 컬러
 
@@ -510,7 +510,7 @@ R6. 수요 하한 — 7일 창에 0-3 D < 0.3인 글이 발행됐으면 위반(2
 
 **① create-viral-content — 구조·훅 (초안 시)**
 - SEO Title 후보 10개 이상 → 호기심/구체성/감정 3축 스코어링(각 0~3, 합 7↑ 채택). 구체 수치 후보 우선. 2-2 중복 훅 검사 통과 후보만 스코어링.
-- 첫 문단(60단어): Before/After 압축 또는 문제 직격. 백과사전식 서론 금지.
+- 첫 화면 3문단(각 80자 이하 — 2-5 📱): Before/After 압축 또는 문제 직격, 3문단 안에 결론 숫자. 백과사전식 서론 금지. (종전 '첫 문단 60단어'는 휴대폰에서 한 문단이 5~6줄로 늘어져 폐지 — 2026-10-18)
 - 마무리: engagement bait 금지 — 오늘 바로 할 행동 1가지.
 - 정제 패스 3개: Skeptic → Scroller → Editor.
 
