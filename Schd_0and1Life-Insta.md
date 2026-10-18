@@ -1,4 +1,6 @@
-# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.11 2026-10-16)
+# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.12 2026-10-18)
+
+**v3.12에서 바뀐 것**(지침 v3.12 대응 — 10/18 사용자 지시 "레퍼런스(solostack11 '이 연출, 이름이 뭐지?')를 참고해서 방식이나 스토리라인을 잘 이끌어가줘" · 반영 범위 '모션 6종 활용'): ① STEP 4.5 — 콘셉트마다 **장면별 주 모션 계획**(지침 I-3-12 — 키네틱 타이포그래피·로어 서드·펀치 인·스태거·휩 팬 + 이징, 모드 허용 표대로) ② STEP 5 — `build_hf_vars.py` 장면마다 `motion` 주석, `M2`·`M3` 은 `cut: "calm"`·`calm: True`(F17 이상) 로 펀치·흔들림을 끈다 · 템플릿에 없는 로어 서드(`lower`)·휩 팬(`cut: "whip"`)은 새 포맷 폴더로 ③ STEP 7 ⑪ 에 모션 검사 ④ STEP 8 `meta.json.motion` · ledger·metrics `motion` ⑤ STEP 11 알림 `🎞 모션` 줄 ⑥ STEP W 주간 비교에 모션 조합별 표. **그 밖의 단계·문구는 v3.11 그대로다.**
 
 **v3.11에서 바뀐 것**(지침 v3.11 대응 — 10/16 사용자 검수 "영상만 봐서 무슨 내용인지 모르겠다" · 쇼핑커넥트 연동): ① STEP 5 — **요약어 금지(지침 I-3-11 ⑪)**: 본론 장면마다 글의 실제 숫자·조건·날짜를 화면에(비교는 양쪽 값 나란히, 결과는 금액·기간 그대로, 조건은 목록 그대로, 할 일은 날짜·순서 그대로), 표·카드·일정 장면은 2.6~3.4초·행 4개, 마지막은 가능하면 한 장 정리 카드(`E2`) ② STEP 7 ⑭·⑯ 기준 갱신(장면별 "영상만 본 사람이 말할 수 있는 것"을 `checks.info` 에) ③ **쇼핑커넥트(지침 I-0 v3.11)** — STEP 4에서 글 본문의 쇼핑커넥트 블록을 찾고, STEP 4.5-8에서 세 조건(본문에 블록 있음·글 주제와 직접 연결·영상을 보면 그 물건이 사고 싶어짐)이 **모두** 맞을 때만 허브 카드 `shop` + 캡션 ⑥-2 한 줄. 기본값은 달지 않음. 영상에는 넣지 않음 ④ STEP 8 `meta.json.shop` ⑤ STEP 11 알림 `🛒` 줄. **그 밖의 단계·문구는 v3.10 그대로다.**
 
@@ -43,8 +45,8 @@
 | **전달 페이지** | `instagram\relay\make_dl_page.py` | `handoff.json` → `reel-dl-latest` 덮어쓰기 |
 | **임시 자산 정리** | `instagram\relay\cleanup_reel_temp.py` | 3일 경과분 휴지통 |
 | 허브 카드 | `instagram\relay\hub.py` | `add <card.json>` · `seo <seo.json>` · `get` |
-| 원장 | `instagram\ledger.json` | `reels.{slug}: {date, status, ig_media_id, ig_url, hub_card, video_media_id, cover_media_id, dur, scenes, hook_type, hook_id, structure_id, stage, concept, mode, ending, format, marketing, fresh}` |
-| **성과 기록** | `instagram\metrics.json` | `{slug: {posted, dur, hook_type, stage, mode, ending, format, daily: {YYYY-MM-DD: {...}}}}` |
+| 원장 | `instagram\ledger.json` | `reels.{slug}: {date, status, ig_media_id, ig_url, hub_card, video_media_id, cover_media_id, dur, scenes, hook_type, hook_id, structure_id, stage, concept, mode, ending, format, marketing, fresh, motion}` |
+| **성과 기록** | `instagram\metrics.json` | `{slug: {posted, dur, hook_type, stage, mode, ending, format, motion, daily: {YYYY-MM-DD: {...}}}}` |
 | 레퍼런스 | `instagram\refs\inbox.md` · `refs\{YYYY-Www}.md` | |
 | 회차 폴더 | `instagram\{YYYY-MM-DD}\{slug}\` | `concepts.md` `build_hf_vars.py` `hf_vars.json` `verify_hf_sync.py` `caption.txt` `reel-final.mp4` `reel-final_cover.jpg` `reel-final_timeline.json` `stills.jpg` `meta.json` `hub_card.json` `post_text.txt` `wp_media.json` `handoff.json` (엔진 대체 경로면 `reel_spec.json` 도) |
 | (구) v8 자산 | `render_reel_v8.py` `build_reel_sfx.py` `verify_reel_sync.py` | **사용 중지.** 지우지 않고 남겨 둔다(과거 회차 재현용) |
@@ -59,12 +61,12 @@
 1. **수집 목록**(최대 `REF_MAX_POSTS`): ① `refs/inbox.md`의 `- [ ]` 줄 ② 벤치 계정 최근 **릴스** ③ 탐색·해시태그 상위의 **정보형 릴스**. 지침 I-3-7 "고를 기준"으로 거른다.
 2. **읽기 방법**: `…/reel/{code}/` 로 URL 이동 → 5초 대기 → 스크린샷. 30초 타임아웃이면 같은 URL로 1회 재시도, 그래도 실패하면 건너뛴다. 반응 수치는 `get_page_text`로 읽는다. **인스타 화면에서 클릭은 페이지 이동에만 쓴다.**
 3. **기록**: `refs/{YYYY-Www}.md`에 지침 I-3-7 "추출 8항목" + 반응 수치 + "차용할 것 / 복제하지 않을 것"을 쓴다. 처리한 인박스 줄은 `[x]`로 바꾼다.
-4. **주간 비교**(지침 I-8-3): `metrics.json` 에서 훅 공식별 최신 스킵률 평균을 내 같은 파일 끝에 표로 적는다. **v3.10**: 모드(`M1`~`M6`)·엔딩(`E1`~`E4`)·포맷별로 3초 스킵률·완주율(평균 시청 ÷ 길이)·저장·공유 표를 더한다(지침 I-8-3·I-2-10).
+4. **주간 비교**(지침 I-8-3): `metrics.json` 에서 훅 공식별 최신 스킵률 평균을 내 같은 파일 끝에 표로 적는다. **v3.10**: 모드(`M1`~`M6`)·엔딩(`E1`~`E4`)·포맷별로 3초 스킵률·완주율(평균 시청 ÷ 길이)·저장·공유 표를 더한다(지침 I-8-3·I-2-10). **v3.12**: 모션 조합별(`metrics.json.{slug}.motion` — 장면별 주 모션) 완주율·3초 스킵률 표를 더한다(지침 I-3-12·I-8-3).
 5. **반영**: 새 형식은 지침 I-2-2 표 **행 추가 제안**으로 STEP 11에 남긴다(`🧩 형식 제안`). ⛔ 지침 I-3-5 — 밈·영상의 **이미지·캐릭터·클립·음원 자체는 복제하지 않는다.** 차용은 편집 형식까지다.
 6. 열었던 탭은 모두 닫는다.
 
 ## STEP 0. 지침 읽기·설정 확인
-1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. **v3.11 기준**: 개정 이력 첫 줄이 **v3.11 이상**이면 이 루틴 전체를 그대로 수행한다. v3.10이면 쇼핑커넥트(STEP 4.5-8)는 건너뛰고(달지 않음) 요약어 금지(⑪)는 이 루틴 STEP 5대로 적용, 알림에 `📐 지침 v3.11 미배포` 한 줄. **v3.10 기준(이전 판)**: 개정 이력 첫 줄이 **v3.10 이상**이면 이 루틴 전체를 그대로 수행한다. v3.8~3.9면 엔딩(I-2-10)·완결 원칙이 없다 — 엔딩은 `E4` 로 고정하고 알림에 `📐 지침 v3.10 미배포` 한 줄. v3.8 미만이면 HF 전체 렌더 대신 STEP 6-E(엔진)로 간다(`📐 지침 v3.8 미배포`). 아래는 이전 판 기준(참고용): Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
+1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. **v3.12 기준**: 개정 이력 첫 줄이 **v3.12 이상**이면 이 루틴 전체를 그대로 수행한다. v3.11이면 모션 규칙(I-3-12)이 없다 — STEP 4.5-3·STEP 7 ⑪ 의 모션 항목은 이 루틴 문구대로 적용하되 반려(`R-PACE`) 사유로는 쓰지 않고, 알림에 `📐 지침 v3.12 미배포` 한 줄. **v3.11 기준(이전 판)**: 개정 이력 첫 줄이 **v3.11 이상**이면 이 루틴 전체를 그대로 수행한다. v3.10이면 쇼핑커넥트(STEP 4.5-8)는 건너뛰고(달지 않음) 요약어 금지(⑪)는 이 루틴 STEP 5대로 적용, 알림에 `📐 지침 v3.11 미배포` 한 줄. **v3.10 기준(이전 판)**: 개정 이력 첫 줄이 **v3.10 이상**이면 이 루틴 전체를 그대로 수행한다. v3.8~3.9면 엔딩(I-2-10)·완결 원칙이 없다 — 엔딩은 `E4` 로 고정하고 알림에 `📐 지침 v3.10 미배포` 한 줄. v3.8 미만이면 HF 전체 렌더 대신 STEP 6-E(엔진)로 간다(`📐 지침 v3.8 미배포`). 아래는 이전 판 기준(참고용): Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
 2. 설정값을 세션 변수로 둔다. `PUBLISH_MODE`는 이 프롬프트의 값이 기준이며 지침·ledger에서 바꾸지 않는다.
 
 ## STEP 1. 날짜·폴더·자격증명
@@ -119,7 +121,7 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 ## STEP 4.5. 기획 — 모드 → 검색 의도 → 콘셉트 3개 → 1개 + 엔딩 (지침 I-2-0-E · I-2-0-A · I-2-0-B · I-2-0-C · I-2-10 · I-3-6 · I-3-10)
 1. **글 성격 판정 → 제작 모드**(지침 I-2-0-E): 제목·H2·Core Fact·카테고리로 `M1`~`M6` 중 하나. 두 개에 걸치면 표 위쪽(`M2` 부정적 이슈가 먼저). 애매하면 `M3`. `concepts.md` 맨 위에 `모드: M? — {이유 한 줄}`. **이 회차의 장면 수·장면 길이·색·움직임·효과음·포맷 후보·구성 후보는 모드 행을 따른다.**
 2. **검색 의도**(지침 I-2-0-A): 핵심 검색어 → WebSearch 상위 제목 5~10개 → 궁금증 3~4개 순위 → 장면 매핑. `concepts.md` 에 적고 `meta.json.search_intent` 한 줄. 조회가 모두 막히면 제목·H2에서 추정(`🔎 검색 의도 추정`).
-3. **콘셉트 3개**(지침 I-2-0-B 서로 다른 그룹 × I-2-2 화면 형식): 콘셉트마다 훅 코드(`H`)·구성 코드(`S`, 모드 후보 우선)·포맷(모드 후보 우선, 검증 1 + 실험 1 — 지침 I-3-10-3)·0~3초 글자 전부(I-2-1-B 검사용)·0초 화면 그림 한 줄(I-3-11 ⑩ 관계가 보이게)·마케팅 장치 3~5개(I-2-8)·새 연출 1개(I-3-8)·넘기지 않을 이유.
+3. **콘셉트 3개**(지침 I-2-0-B 서로 다른 그룹 × I-2-2 화면 형식): 콘셉트마다 훅 코드(`H`)·구성 코드(`S`, 모드 후보 우선)·포맷(모드 후보 우선, 검증 1 + 실험 1 — 지침 I-3-10-3)·0~3초 글자 전부(I-2-1-B 검사용)·0초 화면 그림 한 줄(I-3-11 ⑩ 관계가 보이게)·마케팅 장치 3~5개(I-2-8)·새 연출 1개(I-3-8)·넘기지 않을 이유·**장면별 주 모션**(v3.12 — 지침 I-3-12: 키네틱 타이포그래피=핵심 한 줄 · 로어 서드=누가·어디서·언제 · 펀치 인=주인공 숫자 · 스태거=표·목록 읽는 순서 · 휩 팬=맥락 전환 · 이징은 늘. 모드 허용 표의 ✕ 금지(`M2`·`M3` 은 펀치 인·휩 팬·글자 흔들림 ✕), 장면마다 주 모션 1개, 영상에 3종 이상, 같은 주 모션 연속 금지). 고른 콘셉트는 `concepts.md` 장면 매핑의 '이 장면의 한 문장' 옆에 주 모션을 적는다.
 4. **순환**(지침 I-3-6): `ledger.reels` 최근 2회차의 `hook_id`·`structure_id`·`format`(실험)·`stage` 와 겹치지 않게. 최근 6회차에 같은 (H, S) 조합 금지. `refs/{YYYY-Www}.md` 주간 비교에서 나쁜 코드는 피한다.
 5. **엔딩 1개**(지침 I-2-10): `E1` 루프 · `E2` 저장 · `E3` 댓글 질문 · `E4` 프로필 유도. `ledger` 최근 4회차에 `E4` 가 있으면 `E4` 금지. 같은 엔딩 연속 3회 금지. **훅이 연 질문의 답은 영상 안에서 끝낸다**(지침 I-0 v3.10 · I-2-9 ② — 블로그로 넘기는 고리 금지).
 6. 1개를 고르고 `meta.json.hook = {id, format, type, stage, concept, why}`, `structure`, `format = {verified, experiment, note}`, `mode`, `ending`, `marketing`, `fresh` 를 적는다. `concepts.md` 에 열린 고리 표(연 곳·닫는 곳 — 전부 영상 안)·정보 전달 4요소(I-2-0-D)·탈락한 2개와 이유.
@@ -131,6 +133,7 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 - **읽히는 화면 (I-3-11) — 원고 단계에서 먼저 지킨다**: 장면마다 "이 장면의 한 문장"을 `concepts.md` 장면 매핑에 적는다 · 글 덩어리 2개(목록 장면만 행 3개) · 영상 숫자 3개(`M1` 4개)·장면당 1개 · 본론에 34px(lv 1) 글자 없음(출처·가정·기준일은 엔딩 한 줄·캡션으로) · 배경 2색·강조색 1개 · 고스트 숫자·티커·장식 스티커 없음(`ghost`·`series` 값을 비운다) · 장면 길이(배속 반영) ≥ 0.8 + 글자 수 × 0.09초 · 장면마다 그림 1개(도식·소품·배치)로 뜻이 보이게.
 - **요약어 금지 — 실제 내용을 화면에 (지침 I-3-11 ⑪ · v3.11)**: 사용자 검수(10/16) "영상만 봐서 무슨 내용인지 모르겠다". 본론 장면마다 글의 **실제 숫자·조건·날짜**가 화면에 있어야 한다 — 비교는 양쪽 값을 나란히(`card` 행 또는 `stack` + 값), 결과는 금액·기간 그대로, 조건은 목록 그대로(`seats`·`card` 행 4개까지), 할 일은 날짜·순서 그대로. 그림(저울·기울기·화살표)은 숫자를 돕는 것이지 대신하지 않는다. 표·카드·일정 장면은 2.6~3.4초, 행은 0.15~0.25초 간격으로 차례로 띄운다. 마지막은 가능하면 한 장 정리 카드(`E2`). 기준 회차: `instagram\2026-10-16\youth-leap-to-future-savings-switch\build_hf_vars.py`(v2, 19.9초).
 - **답은 영상 안에서 끝낸다**(I-0 v3.10): 영상 안 블로그 문구(`blog_note`·잠긴 표·`프로필 링크 → 맨 위 글` 버튼)는 **엔딩이 `E4` 일 때만**. 다른 엔딩에서도 캡션 2번째 줄(I-4-1 ②)의 블로그 안내는 넣는다.
+- **모션 (v3.12 · 지침 I-3-12)**: 장면 dict 마다 주석 한 줄 `# motion: {주 모션}(+{보조})` 를 단다. 키네틱 = `text` 의 `fx`(`slam`·`snapL`·`snapR`·`track`·`rise`), 펀치 인 = 요소 `punch` 또는 기본 컷, 스태거 = `card`·`seats` 의 `stagger`(0.15~0.25)·`ladder`·`fall`·`stack` 의 `step`, 이징 = 템플릿 `EASE`. `M2`·`M3` 은 F17 이상 템플릿에서 장면 `cut: "calm"` · 도장 `calm: True` 로 펀치·흔들림을 끈다(기준 회차: `instagram\2026-10-18\circuit-breaker-trigger-kospi-level\build_hf_vars.py`). **로어 서드(`lower`)·휩 팬(`cut: "whip"`)은 아직 템플릿에 없다** — 쓰기로 했으면 최신 포맷 폴더를 복사해 새 포맷(`F18_…` 등)으로 요소를 추가한다(STEP 4.5-7과 같은 규칙, 기존 폴더는 고치지 않는다). 로어 서드 글자는 ②단(55px) 한 줄·y 1300~1500, 휩 팬은 0.18~0.24초·효과음 `whoosh` 를 그 장면 경계 큐로.
 - `build_hf_vars.py` 구조(견본: `2026-10-11\samsung-bonus-tax-refund\build_hf_vars.py`): `scenes = [dict(dur, bg, amb, els=[dict(kind, lv, y, at, parts|text|rows…, sfx=[[시각, 효과음]])…])…]` · `V = dict(speed, series, foot, scenes)` · 장면 경계에 `whoosh`, 요소의 `sfx` 를 모아 `/speed` 한 큐를 `reel-final_timeline.json` 에 쓴다 — **효과음 큐는 반드시 이 값에서만 만든다**(싱크 구조 보장, I-3-4). `speed` 는 `M6` 이면 0.8, 다른 모드는 모드 행의 장면 길이가 나오게 정한다(보통 1.0, 길이는 `dur` 로 조정).
 - 요소 종류(템플릿 공통, `formats\F01·F04·F09·F02` 기준): `text`(lv 1~5 = 34·55·89·144·233, `parts`, `fx`, `split`, `glitch`, `pulse`, `shake`, `punch`) · `sticker` · `card`(`rows`) · `bar`(tease 띠) · `stamp` · `line`(밑줄·동그라미) · `burst` · `invert` · `arrow`(계정 행) · `lock` · `flap`(F09) · `seats`(F04) · `yesbut`(F02). `M2`·`M3` 은 `shake`·`glitch`·`burst`·`punch` 를 쓰지 않는다(I-2-0-E).
 - `caption.txt` 는 지침 I-4-1 순서 · `len(strip()) ≤ 480` · 첫 줄·첫 해시태그 = 핵심 검색어. 7번 줄에 보낼 사람과 꺼내 볼 순간.
@@ -183,7 +186,7 @@ for t in 0.0 0.3 0.6 1.0 1.6 2.2; do ffmpeg -y -v error -ss $t -i reel-final.mp4
 4. **④ 커버** `Read`. **⑤ 날짜·잠정**(I-2-4). **⑥ 엔딩·유도**(v3.10): `meta.json.ending` 이 I-2-10 대로 · `E4` 는 최근 4회차 중 1회 이하 · 캡션 2번째 줄 블로그 안내 · `E4` 가 아니면 영상 안에 '블로그에' 문구 없음.
 5. **⑦ 화자·금지어·저작권** — I-2-6·I-2-7·I-3-5.
 6. **⑧ 싱크** 🚨 · **⑨ 훅** 🚨: 검증 스크립트가 실패하면 **즉시 중단**(`R-SYNC`/`R-HOOK`). `hook_*.png` 를 보고 "넘기지 않을 이유" 한 문장(`meta.json.checks.hook`) · 첫 사건 ≤0.8초 · 쉬운 3초(제도 용어 없음·숫자 1개 이하·문장 2개 이하, 예/아니오 질문 단독 금지) — "초등학교 고학년이 이해하는가" 한 문장(`checks.easy`).
-7. **⑪ 속도·장치**: 장면 수·장면 길이·총 길이·엔딩 길이가 `meta.json.mode` 행 범위 안 · 장치 3~5개 · `fresh` 있음 · 글자 크기 34·55·89·144·233 만. 아니면 `R-PACE`.
+7. **⑪ 속도·장치**: 장면 수·장면 길이·총 길이·엔딩 길이가 `meta.json.mode` 행 범위 안 · 장치 3~5개 · `fresh` 있음 · 글자 크기 34·55·89·144·233 만 · **모션(v3.12)**: 장면마다 주 모션 1개가 `meta.json.motion` 에 있고 모드 허용 표의 ✕ 없음(스크립트로 `hf_vars.json` 에서 `M2`·`M3` 회차의 `shake`·`glitch`·`punch`·`burst`·`cut:"whip"`, `calm` 없는 `stamp`, `cut` 이 `calm` 이 아닌 장면을 찾는다) · 3종 이상(이징 제외) · 같은 주 모션 연속 없음 · 모션마다 '하는 일'(지침 I-3-12 표)이 그 장면에 있음. 아니면 `R-PACE`.
 8. **⑫ 검색 의도·캡션**(`R-INTENT`/`R-CAP`) · **⑬ 지속성**(고리 전부 영상 안에서 닫힘·인터럽트 연속 없음·보상 55~75%·`L`) · **⑭ 정보 전달**(①·④는 영상 안) · **⑮ 포맷**(검증 1 + 실험 1 기록·직전 회차 실험 포맷과 다름·복제 없음·큐가 같은 값에서 생성).
 9. **⑭ 요약어 검사 (v3.11)**: 본론 장면마다 "영상만 본 사람이 이 장면에서 말할 수 있는 것(얼마·왜·누가·언제·어떻게)"을 한 줄씩 `meta.json.checks.info` 에 적는다. 그림·기울기만 있고 실제 숫자·조건·날짜가 없는 본론 장면이 있으면 `R-INFO`.
 10. **⑯ 가독성** `R-READ`(지침 I-3-11 v3.11): 스크립트로 장면별 글 덩어리 수(표·카드·목록·일정 장면은 제목 1 + 행 ≤4 + 결론 1, 그 밖은 ≤2)·장면당 주인공 숫자(④·⑤단) 1개·본론 lv 1 사용 여부·배경 색 수(≤2)·`ghost`/`series` 장식 여부·`dur/speed ≥ 0.8 + 글자 수 × 0.09` 를 계산하고, 장면마다 대표 프레임의 글자 영역을 가린 사본(흰 박스로 덮기)을 `Read` 로 보며 "그림만으로 무슨 장면인지" 한 줄씩 `meta.json.checks.read` 에 적는다. 글자만 있는 장면이 절반을 넘으면 반려.
@@ -191,7 +194,7 @@ for t in 0.0 0.3 0.6 1.0 1.6 2.2; do ffmpeg -y -v error -ss $t -i reel-final.mp4
 
 ## STEP 8. PC 저장
 - `device_commit_files` 로 `instagram\{TODAY}\{slug}\` 에 `concepts.md build_hf_vars.py hf_vars.json verify_hf_sync.py caption.txt reel-final.mp4 reel-final_cover.jpg reel-final_timeline.json stills.jpg hub_card.json post_text.txt meta.json` 을 저장한다(엔진 경로면 `reel_spec.json` 도).
-- `meta.json`: `{blog_post_id, blog_url, blog_modified_at_build, search_intent, persona, mode, ending, hook:{id,format,type,stage,concept,why}, structure, format:{verified,experiment,note}, marketing:[…], fresh, retention:{interrupts,reward_at,loopback}, scenes:[…], dur, speed, engine, render:{path:"hf"|"engine", reason}, hf?, shop:{used, why, label?, url?}, status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,easy,typo,pace,intent,retain,info,format,read}}`.
+- `meta.json`: `{blog_post_id, blog_url, blog_modified_at_build, search_intent, persona, mode, ending, hook:{id,format,type,stage,concept,why}, structure, format:{verified,experiment,note}, marketing:[…], fresh, retention:{interrupts,reward_at,loopback}, motion:[{scene,main,sub}], scenes:[…], dur, speed, engine, render:{path:"hf"|"engine", reason}, hf?, shop:{used, why, label?, url?}, status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,easy,typo,pace,intent,retain,info,format,read}}`.
 - 새 포맷·새 요소를 만들었으면 `instagram\formats\{id}_{이름}\`(`index.html·template.json·example.json·preview.jpg`)에 저장하고 `formats.json` 의 그 카드(`hf`·`dir`·`uses`·`log`)와 바탕 포맷의 `uses`·`log` 를 갱신한다(`updated` = TODAY). 기존 포맷 폴더는 덮어쓰지 않는다. 사용자 폴더에 백업·이전 판 사본을 만들지 않는다.
 
 ## STEP 9. WP 업로드 (PC)
@@ -217,7 +220,7 @@ cd "$R" && python3 make_dl_page.py {회차폴더}/handoff.json
            "filename":"0and1life-reel-{slug}.mp4","caption_file":"{회차폴더}/caption.txt"}]}
 ```
 1. 생성된 페이지 URL이 200인지, `download=` 속성과 복사 버튼이 각각 들어갔는지 `curl | grep -c`로 확인한다. 실패하면 `E-PAGE` — 알림에 영상 URL을 직접 실어 대체한다.
-2. `ledger.reels.{slug} = {date:TODAY, status:"handoff", video_media_id, cover_media_id, dur, scenes, hook_type, hook_id, structure_id, stage, concept, mode, ending, format, marketing, fresh, hub_card:false}`.
+2. `ledger.reels.{slug} = {date:TODAY, status:"handoff", video_media_id, cover_media_id, dur, scenes, hook_type, hook_id, structure_id, stage, concept, mode, ending, format, marketing, fresh, motion, hub_card:false}`.
 3. **허브 카드 먼저 추가 (지침 I-6 v3.1.1 · v3.11 `shop` 은 used=true 일 때만 — `hub.py` 가 `shop` 을 모르면 카드에서 빼고 알림 `🛒 허브 shop 미지원`)**: `hub_card.json` 의 `thumb`(STEP 9 커버 URL)을 확인하고 `ig_url` 은 빈 값으로 둔 채 `python3 hub.py add {회차폴더}/hub_card.json` → 8초 뒤 `curl -s https://0and1life.com/ig/?cb=$(date +%s) | grep -c "o1-ig-card:{slug}"` ≥ 1 이면 `ledger.reels.{slug}.hub_card="no_ig_url"`, 아니면 1회 재시도 후 `E-HUB`(전달은 유지). 알림에 `🗂 허브 카드 추가` 한 줄.
 4. STEP 11 알림에 **전달 페이지 URL 하나만** 싣는다.
 5. **사용자가 게시했다고 알리면** (같은 세션 또는 다음 회차 STEP M에서 자동 확인):
@@ -240,7 +243,7 @@ PushNotification 1회. 첫 문장은 한 줄 요약, 그 뒤 줄들. 모두 한�
 - 전달함: `📱 인스타 릴스 {TODAY} — {slug} 준비 완료 · {길이}초 · 훅 {공식}/{무대} · 검증 통과 · 저장 https://0and1life.com/reel-dl-latest/`
 - 대상 없음: `📱 인스타 릴스 {TODAY} — 대상 글 없음`
 - 반려·오류: `📱 인스타 릴스 {TODAY} — {slug} 보류({코드}) · {한 줄 원인}`
-- 덧붙이는 줄(해당 시): `🛒 쇼핑커넥트: {달음 — 물건 종류|안 담 — 사유 한 줄}` · `🎛 모드: {M?} {이유}` · `🔚 엔딩: {E?}` · `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧬 포맷: {검증 id} + {실험 id}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 렌더: {HF 전체|엔진 대체(사유)}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}`(엔진 경로일 때만) · `📐 지침-루틴 상충: {조항}`
+- 덧붙이는 줄(해당 시): `🛒 쇼핑커넥트: {달음 — 물건 종류|안 담 — 사유 한 줄}` · `🎛 모드: {M?} {이유}` · `🔚 엔딩: {E?}` · `🎞 모션: {장면별 주 모션을 → 로 나열, 예: 키네틱 → 스태거 → 펀치 인}` · `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧬 포맷: {검증 id} + {실험 id}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 렌더: {HF 전체|엔진 대체(사유)}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}`(엔진 경로일 때만) · `📐 지침-루틴 상충: {조항}`
 
 ## STEP 12. 임시 자산 정리 (지침 I-9 — 대상 글 유무와 무관하게 매 회차)
 ```bash
@@ -286,7 +289,7 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 
 | 항목 | 상태 | 비고 |
 |---|---|---|
-| 지침 `0and1Life-Insta.md` **v3.11** GitHub 커밋 | ⬜ **커밋 필요**(전문 전달 2026-10-16) | STEP 0이 v3.10이면 쇼핑커넥트 건너뜀 + `📐 지침 v3.11 미배포`, v3.8~3.9면 엔딩 `E4` 고정, v3.8 미만이면 엔진 경로 |
+| 지침 `0and1Life-Insta.md` **v3.12** GitHub 커밋 | ⬜ **커밋 필요**(전문 전달 2026-10-18 · v3.11은 커밋 확인 2026-10-18) | STEP 0이 v3.11이면 모션 항목을 반려 사유로 쓰지 않고 `📐 지침 v3.12 미배포`, v3.10이면 쇼핑커넥트 건너뜀 + `📐 지침 v3.11 미배포`, v3.8~3.9면 엔딩 `E4` 고정, v3.8 미만이면 엔진 경로 |
 | `hub.py` 의 `shop` 필드(허브 카드 아래 작은 링크 + 제휴 고지) | ⬜ 확인 필요(v3.11) | 지원하지 않으면 허브 카드에서 `shop` 을 빼고 캡션 ⑥-2 줄도 넣지 않는다(링크가 없는 안내가 되므로) |
 | 포맷 게놈 `instagram\formats\`(F01·F02·F04·F09 템플릿 · `formats.json`) | ✅ 2026-10-11 PC 저장(F02 Yes…but 추가) | 없으면 STEP 6 에서 키트 기본 템플릿 `reel_scene` 대신 STEP 6-E |
 | 엔진 v12 `relay\reel_engine.py` · 효과음 v2.1 `build_reel_sfx_v2.py` · `verify_reel_v9.py` · `regress_engine.py` · `examples\bank_spec.json` · `examples\story_spec.json` | ✅ 2026-10-06 PC 저장(v12 — 기존 장면 회귀 동일 확인) | 없으면 STEP 1에서 `MISSING` |
@@ -301,7 +304,7 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 
 ## Cowork 원라이너
 
-토큰 확인(2) → **전 회차 스킵률·평균 시청·완주율 측정(M)** → 대상 글 1편(3) → 본문 최종본(4) → **글 성격 → 모드 M1~M6 → 검색 의도 → 콘셉트 3개(H·S·포맷 검증 1 + 실험 1·장치·새 연출) → 1개 + 엔딩 E1~E4(E4 는 4회 중 1회 이하)(4.5)** → 읽히는 화면 원칙(한 장면 한 메시지·글 덩어리 2·숫자 3·장식 없음·읽을 시간)·답은 영상 안에서 끝냄 → `build_hf_vars.py`·캡션(5) → **HyperFrames 전체 렌더 + 효과음 v2.1 + 커버 · `verify_hf_sync.py`(6)** — 실패면 엔진 v12 대체(6-E) → **자가검수 16항목, 싱크·훅 실패면 무조건 중단(7)** → PC 저장·포맷 게놈 갱신(8) → WP 업로드(9) → `reel-dl-latest` 덮어쓰기 + 허브 카드(10) → 알림에 URL 하나(11) → 3일 지난 임시 자산 정리(휴지통 미지원이면 보류)(12). 통과 못 하면 **전달하지 말고** held로 남긴다.
+토큰 확인(2) → **전 회차 스킵률·평균 시청·완주율 측정(M)** → 대상 글 1편(3) → 본문 최종본(4) → **글 성격 → 모드 M1~M6 → 검색 의도 → 콘셉트 3개(H·S·포맷 검증 1 + 실험 1·장치·새 연출) → 1개 + 엔딩 E1~E4(E4 는 4회 중 1회 이하)(4.5)** → 읽히는 화면 원칙(한 장면 한 메시지·글 덩어리 2·숫자 3·장식 없음·읽을 시간)·답은 영상 안에서 끝냄 → `build_hf_vars.py`·캡션(5) → **장면별 주 모션(지침 I-3-12 — 모드 허용 표·3종 이상·연속 금지)** → **HyperFrames 전체 렌더 + 효과음 v2.1 + 커버 · `verify_hf_sync.py`(6)** — 실패면 엔진 v12 대체(6-E) → **자가검수 16항목, 싱크·훅 실패면 무조건 중단(7)** → PC 저장·포맷 게놈 갱신(8) → WP 업로드(9) → `reel-dl-latest` 덮어쓰기 + 허브 카드(10) → 알림에 URL 하나(11) → 3일 지난 임시 자산 정리(휴지통 미지원이면 보류)(12). 통과 못 하면 **전달하지 말고** held로 남긴다.
 
 ---
 
