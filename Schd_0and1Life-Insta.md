@@ -1,4 +1,8 @@
-# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.12 2026-10-18)
+# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v3.14 2026-10-19)
+
+**v3.14에서 바뀐 것**(지침 v3.14 — 10/19 사용자 "내 블로그 유입이 1순위, 그 위 0순위는 계속·반복해서 보게"): ① **주제 띠**(지침 I-2-1-C ⓪ — 화면 맨 위에 검색어형 주제어 고정, 예 `AI 여행 스케줄러`, `hf_vars.topic`) · 대본 첫 장면 = **결과·충돌 장면**(지침 I-2-1-C — 0프레임에 가장 센 순간, 0.3초 움직임, 첫 문장 14자 이하 결과형, 큰 글자 1줄) ② 엔딩 기본 **`E4` + 루프 문장**(4회 중 1회 제한 폐지) — 블로그에만 있는 **실물**(복사할 원문·전체 표)을 1초 보여 주고 잠금 + `프로필 링크 → 맨 위 글` + 계정 행 화살표 ③ **외부 사이트로 보내는 문구 금지**(공식 도움말·기관 — 출처는 캡션 끝 이름만) ④ 재시청 장치 3개(루프·멈춰 보는 화면·15~22초) ⑤ ⑰ 시험에 "0~1.5초에 넘기지 않을 이유" 항목 추가.
+
+**v3.13에서 바뀐 것**(지침 v3.13 대응 — 10/19 사용자 검수 "영상만으로는 도통 이해할 수 없다" · "그래서 뭘 어떻게 하라는 건지" · "블로그가 주는 가장 큰 메리트부터"): ① STEP 4 — **독자 이득 한 문장**(지침 I-0-A)을 먼저 확정, 근거가 본문에 없으면 `X-BENEFIT` ② STEP 4.5 — 콘셉트 3개 대신 **대본 먼저**(지침 I-2-11: 5~6문장 · 이득 1 + 근거·방법 2 · 화살표 조각 금지) + **대본 시험** ③ STEP 5·6 — 기본 포맷 **F19 내레이션**(`script.json` → `tts.py` Edge 음성 +42% → `build_hf_vars.py` → HF 렌더 → `mix.py` 내레이션 + 효과음), 30초 이하 ④ STEP 7 — **⑰ 처음 보는 사람 시험 `R-BLIND`**(🚨 싱크와 같은 급, 실패면 전달하지 않는다) ⑤ STEP 8 `script.json`·`tts/`·`mix.py`·`meta.json.benefit`·`checks.blind` ⑥ STEP 11 `🎯 이득`·`🧪 처음 보는 사람` 줄. v3.12 의 모션·모드 규칙은 지침 I-2-11 ⑥대로 권장으로 내려간다. **그 밖의 단계·문구는 v3.12 그대로다.**
 
 **v3.12에서 바뀐 것**(지침 v3.12 대응 — 10/18 사용자 지시 "레퍼런스(solostack11 '이 연출, 이름이 뭐지?')를 참고해서 방식이나 스토리라인을 잘 이끌어가줘" · 반영 범위 '모션 6종 활용'): ① STEP 4.5 — 콘셉트마다 **장면별 주 모션 계획**(지침 I-3-12 — 키네틱 타이포그래피·로어 서드·펀치 인·스태거·휩 팬 + 이징, 모드 허용 표대로) ② STEP 5 — `build_hf_vars.py` 장면마다 `motion` 주석, `M2`·`M3` 은 `cut: "calm"`·`calm: True`(F17 이상) 로 펀치·흔들림을 끈다 · 템플릿에 없는 로어 서드(`lower`)·휩 팬(`cut: "whip"`)은 새 포맷 폴더로 ③ STEP 7 ⑪ 에 모션 검사 ④ STEP 8 `meta.json.motion` · ledger·metrics `motion` ⑤ STEP 11 알림 `🎞 모션` 줄 ⑥ STEP W 주간 비교에 모션 조합별 표. **그 밖의 단계·문구는 v3.11 그대로다.**
 
@@ -43,6 +47,10 @@
 | **포맷 게놈 (v3.10)** | `instagram\formats\formats.json` · `formats\{id}_{이름}\index.html·template.json·example.json·preview.jpg` | 지침 I-3-10. STEP 6 에서 고른 포맷 폴더를 클라우드 키트의 `templates\{id}_{이름}\` 로 복사해 렌더. 새 요소·새 포맷은 **새 폴더로** 저장(기존 폴더는 고치지 않는다) |
 | **HF 값·검증 (v3.10)** | 회차 폴더 `build_hf_vars.py`(장면 목록 → `hf_vars.json` + `reel-final_timeline.json` 큐) · `verify_hf_sync.py`(큐가 전부 같은 값에서 나왔는지·큐마다 화면이 변하는지·0프레임) | 견본: `instagram\2026-10-11\samsung-bonus-tax-refund\` (F02) · `2026-10-10\church-hacking-data-leak-check\` (F04) |
 | **전달 페이지** | `instagram\relay\make_dl_page.py` | `handoff.json` → `reel-dl-latest` 덮어쓰기 |
+| **내레이션 키트 (v3.13)** | 견본 회차 `instagram\2026-10-19\claude-cowork-travel-planner\` 의 `script.json`·`tts.py`·`build_hf_vars_v313.py`(회차 폴더에선 `build_hf_vars.py` 로 복사)·`mix.py`·`img\` | `tts.py` v2: `script.json`(`[{key, lines:[{text, say?}]}]`) → **문장마다 따로** 음성을 만들어 0.16초 간격으로 이은 `tts/{키}.mp3` + 문장별 시각 `tts/timing.json`(Edge `ko-KR-SunHiNeural`, `rate='+42%'`, `proxy=$HTTPS_PROXY` — 클라우드에서 `pip install edge-tts`) · `build_hf_vars.py`: 장면 길이 = 낭독 + 0.25초, 자막(`sub`) = 문장 단위, 요소 등장 시각은 `L(장면, 문장번호)` 로 그 문장 시작에 맞춘다 · `mix.py`: 내레이션 + 효과음(0.45배) → `reel-final.mp4` |
+| **포맷 F21 (v3.14 기본)** | `instagram\formats\F21_blog_lock\` | F20 + `frost`(블로그 실물 잠금) · 첫 장면 요소 0프레임 완성형 · 견본 `2026-10-19\claude-cowork-travel-planner\build_hf_vars_v313.py`(v3.14 판) |
+| **포맷 F20 (v3.13 — AI·앱 활용 글 기본)** | `instagram\formats\F20_ai_chat\` | F19 + `chat.type_at`(타이핑) · `reply`(입력 중 점 → AI 답) · `attach`(캡처 카드가 말풍선에 붙음) — 지침 I-2-11 ⑨ |
+| **포맷 F19 (v3.13 기본)** | `instagram\formats\F19_narrated\` | F18 + `shot`(실제 캡처를 폰 화면 틀에 확대·스크롤, 값 키 `img` 는 로컬 경로 — `hf_render.py` 가 복사) · `chat`(여러 줄 메시지) · `panel` · `sub`(내레이션 자막) |
 | **임시 자산 정리** | `instagram\relay\cleanup_reel_temp.py` | 3일 경과분 휴지통 |
 | 허브 카드 | `instagram\relay\hub.py` | `add <card.json>` · `seo <seo.json>` · `get` |
 | 원장 | `instagram\ledger.json` | `reels.{slug}: {date, status, ig_media_id, ig_url, hub_card, video_media_id, cover_media_id, dur, scenes, hook_type, hook_id, structure_id, stage, concept, mode, ending, format, marketing, fresh, motion}` |
@@ -52,7 +60,7 @@
 | (구) v8 자산 | `render_reel_v8.py` `build_reel_sfx.py` `verify_reel_sync.py` | **사용 중지.** 지우지 않고 남겨 둔다(과거 회차 재현용) |
 | 엔진 이전 판 | (만들지 않음 — v3.2) | 사용자 지시(10/6)로 사용자 폴더에 백업·이전 판 사본을 만들지 않는다. 회귀 검사용 이전 판은 클라우드 작업 공간에만 둔다 |
 
-설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 1` · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음** · `RENDER = HF 전체(기본) → 엔진 v12(대체)` · `HF_RENDER_TIMEOUT = 540초` · `HF_INSERT = 엔진 대체 경로에서만 선택(최대 1장면, CTA 제외)` · `HF_TIMEOUT = 420초` · `MODES = M1~M6`(지침 I-2-0-E) · `ENDINGS = E1~E4`, `E4_MAX = 최근 4회차 중 1회`(지침 I-2-10) · `BGM = 만들지 않음`(지침 I-3-1 v3.8)
+설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 1` · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음** · `RENDER = HF 전체(기본) → 엔진 v12(대체)` · `HF_RENDER_TIMEOUT = 540초` · `HF_INSERT = 엔진 대체 경로에서만 선택(최대 1장면, CTA 제외)` · `HF_TIMEOUT = 420초` · `MODES = M1~M6`(지침 I-2-0-E) · `ENDINGS = E1~E4`, `E4_MAX = 최근 4회차 중 1회`(지침 I-2-10) · `BGM = 만들지 않음`(지침 I-3-1 v3.8) · `NARRATION = Edge ko-KR-SunHiNeural +42%`(지침 I-2-11 v3.13) · `MAX_DUR = 30초` · `BLIND_PASS = 8/10 + 이득·첫 행동 일치 + 모름 0`(지침 I-5 ⑰)
 
 ---
 
@@ -66,7 +74,7 @@
 6. 열었던 탭은 모두 닫는다.
 
 ## STEP 0. 지침 읽기·설정 확인
-1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. **v3.12 기준**: 개정 이력 첫 줄이 **v3.12 이상**이면 이 루틴 전체를 그대로 수행한다. v3.11이면 모션 규칙(I-3-12)이 없다 — STEP 4.5-3·STEP 7 ⑪ 의 모션 항목은 이 루틴 문구대로 적용하되 반려(`R-PACE`) 사유로는 쓰지 않고, 알림에 `📐 지침 v3.12 미배포` 한 줄. **v3.11 기준(이전 판)**: 개정 이력 첫 줄이 **v3.11 이상**이면 이 루틴 전체를 그대로 수행한다. v3.10이면 쇼핑커넥트(STEP 4.5-8)는 건너뛰고(달지 않음) 요약어 금지(⑪)는 이 루틴 STEP 5대로 적용, 알림에 `📐 지침 v3.11 미배포` 한 줄. **v3.10 기준(이전 판)**: 개정 이력 첫 줄이 **v3.10 이상**이면 이 루틴 전체를 그대로 수행한다. v3.8~3.9면 엔딩(I-2-10)·완결 원칙이 없다 — 엔딩은 `E4` 로 고정하고 알림에 `📐 지침 v3.10 미배포` 한 줄. v3.8 미만이면 HF 전체 렌더 대신 STEP 6-E(엔진)로 간다(`📐 지침 v3.8 미배포`). 아래는 이전 판 기준(참고용): Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
+1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. **v3.14 기준**: 개정 이력 첫 줄이 **v3.14 이상**이면 이 루틴 전체를 그대로 수행한다. 그보다 낮으면(GitHub 미커밋) 이 루틴의 v3.13·v3.14 항목(이득·대본·내레이션·⑰·주제 띠·결과 장면 훅·블로그 실물 잠금·외부 사이트 금지)은 그대로 수행하고 알림에 `📐 지침 v3.14 미배포` 한 줄. **v3.13 기준(이전 판)**: 개정 이력 첫 줄이 **v3.13 이상**이면 v3.13 항목을 수행한다. **v3.12 기준(이전 판)**: 개정 이력 첫 줄이 **v3.12 이상**이면 이 루틴 전체를 그대로 수행한다. v3.11이면 모션 규칙(I-3-12)이 없다 — STEP 4.5-3·STEP 7 ⑪ 의 모션 항목은 이 루틴 문구대로 적용하되 반려(`R-PACE`) 사유로는 쓰지 않고, 알림에 `📐 지침 v3.12 미배포` 한 줄. **v3.11 기준(이전 판)**: 개정 이력 첫 줄이 **v3.11 이상**이면 이 루틴 전체를 그대로 수행한다. v3.10이면 쇼핑커넥트(STEP 4.5-8)는 건너뛰고(달지 않음) 요약어 금지(⑪)는 이 루틴 STEP 5대로 적용, 알림에 `📐 지침 v3.11 미배포` 한 줄. **v3.10 기준(이전 판)**: 개정 이력 첫 줄이 **v3.10 이상**이면 이 루틴 전체를 그대로 수행한다. v3.8~3.9면 엔딩(I-2-10)·완결 원칙이 없다 — 엔딩은 `E4` 로 고정하고 알림에 `📐 지침 v3.10 미배포` 한 줄. v3.8 미만이면 HF 전체 렌더 대신 STEP 6-E(엔진)로 간다(`📐 지침 v3.8 미배포`). 아래는 이전 판 기준(참고용): Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
 2. 설정값을 세션 변수로 둔다. `PUBLISH_MODE`는 이 프롬프트의 값이 기준이며 지침·ledger에서 바꾸지 않는다.
 
 ## STEP 1. 날짜·폴더·자격증명
@@ -117,18 +125,21 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 - 추출: 제목, Core Fact / Primary Insight / Actionable Tip, 모든 `<table>`, H2 목록(⭐ GAP H2), "근데/다만/함정/실제 예" 문단, `📌`/`*핵심 :` 요약 줄, 출처 명칭, `modified`, 잠정·예정 표현, **네이버 쇼핑커넥트 상품 블록**(v3.11 — 있으면 상품 종류·링크 URL만 메모, 없으면 `shop=없음`).
 - HTML을 벗긴 **본문 전체 텍스트**를 `post_text.txt`로 저장(STEP 7 숫자 대조용).
 - `<table>` 0개이고 Core Fact에 수치가 없으면 `X-THIN` — ledger 기록 후 다음 후보로(1회).
+- **독자 이득 한 문장 (v3.13 · 지침 I-0-A)**: Notion 도구가 있으면 그 글의 Notion 서브페이지 기본 정보 표 `독자 이득` 행(Writer 0-11 — 2026-10-19 이후 글)을 읽고, 없으면 `post_text.txt` 에서 `[누가] + [무엇이 좋아지나] + [글 속 근거 1개]` 로 만든다. 근거가 본문에 없으면 `X-BENEFIT` — 전달하지 않고 ledger·알림에 남긴다. 글이 수단(만드는 과정)을 주인공으로 세웠어도 영상은 이득을 주인공으로 다시 세운다. 본문 직접 캡처(`evidence-*`·`<img>`)의 URL을 모아 `img\` 에 받아 둔다(STEP 5 화면 1순위).
 
-## STEP 4.5. 기획 — 모드 → 검색 의도 → 콘셉트 3개 → 1개 + 엔딩 (지침 I-2-0-E · I-2-0-A · I-2-0-B · I-2-0-C · I-2-10 · I-3-6 · I-3-10)
+## STEP 4.5. 기획 — (v3.13) 이득 → 대본 → 대본 시험 · 모드 → 검색 의도 → 콘셉트 → 엔딩 (지침 I-2-0-E · I-2-0-A · I-2-0-B · I-2-0-C · I-2-10 · I-3-6 · I-3-10)
+0. **(v3.13 — 이 단계가 아래 1~8보다 앞선다 · 지침 I-2-11)** ① 이득 한 문장(STEP 4)을 `concepts.md` 맨 위에. ② **대본**을 `script.json` 에 쓴다 — `[{"key":"S1","lines":[{"text":"…","say":"(읽기용, 선택)"}]},…]`, 장면 5개 안팎 · 장면마다 **짧은 문장 2~3개**(지침 I-2-11 ⑦ — 한 문장 한 마디, 25자 안팎), 구조는 I-2-11 ②(상황·고생 → 이득 → 증거(원인→결과) → 얻는 법(어디서·무엇을) → 엔딩), **주제 띠 1개**(I-2-1-C ⓪ — 사람들이 아는 검색어형 4~10자, 캡션 첫 줄·첫 해시태그와 같은 말) · **첫 장면 = 결과·충돌 장면**(I-2-1-C — 첫 문장 14자 이하 결과형, 상황 설명 제목 금지) · **마지막 장면 = 블로그에만 있는 실물 한 줄 + 잠긴 미리보기 + 루프 문장**(I-2-11 ⑧ v3.14 — 공식 도움말·외부 사이트 언급 금지) · 총 15~22초, 화살표 조각·글에만 나오는 말 금지. AI·앱 활용 글이면 장면을 대화 흐름(I-2-11 ⑨)으로 짠다. ③ **대본 시험(⑰ 1차)**: Agent 도구로 서브에이전트를 띄워 대본 문장만 주고(이 글·지침·폴더를 보지 말라고 명시) 지침 I-5 ⑰ (a)~(d)를 받는다. (a)가 이득 문장과 다르거나 (c)에 '모름'이 있으면 대본을 고쳐 1회 재시험. ④ 아래 1~8(모드·검색 의도·콘셉트·엔딩)은 **대본이 정해진 뒤** 색·톤·훅 첫 줄·엔딩 코드를 고르는 데만 쓴다 — 콘셉트 3개는 대본 ①문장의 후보 3개로 줄여도 된다. 모션 계획(3번 끝)·마케팅 장치 3개는 권장.
 1. **글 성격 판정 → 제작 모드**(지침 I-2-0-E): 제목·H2·Core Fact·카테고리로 `M1`~`M6` 중 하나. 두 개에 걸치면 표 위쪽(`M2` 부정적 이슈가 먼저). 애매하면 `M3`. `concepts.md` 맨 위에 `모드: M? — {이유 한 줄}`. **이 회차의 장면 수·장면 길이·색·움직임·효과음·포맷 후보·구성 후보는 모드 행을 따른다.**
 2. **검색 의도**(지침 I-2-0-A): 핵심 검색어 → WebSearch 상위 제목 5~10개 → 궁금증 3~4개 순위 → 장면 매핑. `concepts.md` 에 적고 `meta.json.search_intent` 한 줄. 조회가 모두 막히면 제목·H2에서 추정(`🔎 검색 의도 추정`).
 3. **콘셉트 3개**(지침 I-2-0-B 서로 다른 그룹 × I-2-2 화면 형식): 콘셉트마다 훅 코드(`H`)·구성 코드(`S`, 모드 후보 우선)·포맷(모드 후보 우선, 검증 1 + 실험 1 — 지침 I-3-10-3)·0~3초 글자 전부(I-2-1-B 검사용)·0초 화면 그림 한 줄(I-3-11 ⑩ 관계가 보이게)·마케팅 장치 3~5개(I-2-8)·새 연출 1개(I-3-8)·넘기지 않을 이유·**장면별 주 모션**(v3.12 — 지침 I-3-12: 키네틱 타이포그래피=핵심 한 줄 · 로어 서드=누가·어디서·언제 · 펀치 인=주인공 숫자 · 스태거=표·목록 읽는 순서 · 휩 팬=맥락 전환 · 이징은 늘. 모드 허용 표의 ✕ 금지(`M2`·`M3` 은 펀치 인·휩 팬·글자 흔들림 ✕), 장면마다 주 모션 1개, 영상에 3종 이상, 같은 주 모션 연속 금지). 고른 콘셉트는 `concepts.md` 장면 매핑의 '이 장면의 한 문장' 옆에 주 모션을 적는다.
 4. **순환**(지침 I-3-6): `ledger.reels` 최근 2회차의 `hook_id`·`structure_id`·`format`(실험)·`stage` 와 겹치지 않게. 최근 6회차에 같은 (H, S) 조합 금지. `refs/{YYYY-Www}.md` 주간 비교에서 나쁜 코드는 피한다.
-5. **엔딩 1개**(지침 I-2-10): `E1` 루프 · `E2` 저장 · `E3` 댓글 질문 · `E4` 프로필 유도. `ledger` 최근 4회차에 `E4` 가 있으면 `E4` 금지. 같은 엔딩 연속 3회 금지. **훅이 연 질문의 답은 영상 안에서 끝낸다**(지침 I-0 v3.10 · I-2-9 ② — 블로그로 넘기는 고리 금지).
+5. **엔딩**(지침 I-2-10 · v3.14 I-0-0): 기본 `E4` 프로필 유도 + `E1` 루프 문장(4회 중 1회 제한 폐지). `E2`·`E3` 는 `E4` 화면 위 한 줄로만. **훅이 연 질문의 답은 영상 안에서 끝낸다**(지침 I-0 v3.10 · I-2-9 ② — 블로그로 넘기는 고리 금지).
 6. 1개를 고르고 `meta.json.hook = {id, format, type, stage, concept, why}`, `structure`, `format = {verified, experiment, note}`, `mode`, `ending`, `marketing`, `fresh` 를 적는다. `concepts.md` 에 열린 고리 표(연 곳·닫는 곳 — 전부 영상 안)·정보 전달 4요소(I-2-0-D)·탈락한 2개와 이유.
 7. 고른 포맷에 필요한 요소가 템플릿에 없으면 **새 포맷 폴더**를 만든다(기존 템플릿 복사 + 요소 추가 — 지침 I-3-10). 기존 포맷 폴더·`reel_engine.py` 는 고치지 않는다.
 8. **쇼핑커넥트 판단 (v3.11 · 지침 I-0)**: STEP 4에서 블록을 찾았을 때만 본다. ① 본문에 블록이 있다 ② 그 물건이 글이 말하는 문제를 직접 푼다 ③ 고른 콘셉트의 영상을 끝까지 보면 그 물건이 사고 싶어질 장면이 이미 있다 — **셋 다 "예"일 때만** `shop.used=true`. 애매하면 `false`(기본값). 물건을 광고하는 장면을 새로 만들지 않는다. `concepts.md` 에 판단 한 줄.
 
 ## STEP 5. 원고 → `build_hf_vars.py`(→ `hf_vars.json` · `reel-final_timeline.json`) · `caption.txt` · `hub_card.json`
+- **(v3.13 기본 경로 — F19 내레이션)**: 견본 회차의 `tts.py`·`build_hf_vars_v313.py`(→ `build_hf_vars.py`)·`mix.py` 를 회차 폴더로 복사 → `python3 tts.py`(Edge 음성, 문장마다 mp3 + `tts/timing.json`; 총 낭독이 30초를 넘으면 **문장 하나를 빼고** 다시) → `build_hf_vars.py` 의 `scenes` 를 이 회차 대본에 맞게 고친다(장면 키 = `script.json` 키, 제목 89px 한 줄, 가운데 = 그 문장의 실물: 본문 캡처 `shot`(읽힐 부분만 `zoom`·`left`) > `chat`·`card`·`panel`, 자막 `sub` 는 자동). 아래 v3.12 의 글 덩어리·행 20자·0.09초/자·모션 3종 규칙은 자막에 적용하지 않는다(지침 I-2-11 ⑥).
 - 지침 I-2(쉬운 3초·0프레임·숫자 복사·날짜·잠정 표시·화자·금지·마케팅 장치·지속성)·**I-3-11 읽히는 화면 원칙**·I-4(캡션 500자)를 그대로 적용한다. 장면 수·길이는 **모드 행**(I-2-0-E), 엔딩 장면은 **I-2-10 의 고른 코드**대로.
 - **읽히는 화면 (I-3-11) — 원고 단계에서 먼저 지킨다**: 장면마다 "이 장면의 한 문장"을 `concepts.md` 장면 매핑에 적는다 · 글 덩어리 2개(목록 장면만 행 3개) · 영상 숫자 3개(`M1` 4개)·장면당 1개 · 본론에 34px(lv 1) 글자 없음(출처·가정·기준일은 엔딩 한 줄·캡션으로) · 배경 2색·강조색 1개 · 고스트 숫자·티커·장식 스티커 없음(`ghost`·`series` 값을 비운다) · 장면 길이(배속 반영) ≥ 0.8 + 글자 수 × 0.09초 · 장면마다 그림 1개(도식·소품·배치)로 뜻이 보이게.
 - **요약어 금지 — 실제 내용을 화면에 (지침 I-3-11 ⑪ · v3.11)**: 사용자 검수(10/16) "영상만 봐서 무슨 내용인지 모르겠다". 본론 장면마다 글의 **실제 숫자·조건·날짜**가 화면에 있어야 한다 — 비교는 양쪽 값을 나란히(`card` 행 또는 `stack` + 값), 결과는 금액·기간 그대로, 조건은 목록 그대로(`seats`·`card` 행 4개까지), 할 일은 날짜·순서 그대로. 그림(저울·기울기·화살표)은 숫자를 돕는 것이지 대신하지 않는다. 표·카드·일정 장면은 2.6~3.4초, 행은 0.15~0.25초 간격으로 차례로 띄운다. 마지막은 가능하면 한 장 정리 카드(`E2`). 기준 회차: `instagram\2026-10-16\youth-leap-to-future-savings-switch\build_hf_vars.py`(v2, 19.9초).
@@ -152,6 +163,7 @@ python3 build_reel_sfx_v2.py reel-final_timeline.json sfx.wav
 ffmpeg -y -v error -i reel-hf.mp4 -i sfx.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 160k -ar 44100 -ac 2 -shortest -movflags +faststart reel-final.mp4
 python3 verify_hf_sync.py                                                         # 종료코드 0 이어야 통과
 ```
+- **(v3.13 F19)** 위 `hf_render.py` 의 포맷은 `F19_narrated`(PC `formats\F19_narrated\` → 키트 `templates\F19_narrated\`). 효과음 wav 를 만든 뒤 **`ffmpeg … reel-final.mp4` 대신 `python3 mix.py`**(내레이션 + 효과음 0.45배 + 리미터)로 `reel-final.mp4` 를 만든다. `tts.py` 가 실패하면(Edge 연결 — 허용 도메인 `speech.platform.bing.com`) 1회 재시도 후 `E-TTS` 로 held — 내레이션 없는 판은 전달하지 않는다.
 - **대표 프레임 먼저 본다**: 장면마다 0초·중간·끝 프레임을 360px 로 뽑아 한 장(`stills.jpg`)으로 이어 붙여 `Read` 로 본다. 요소가 안 보이면 템플릿 복사 누락·JS 오류부터 의심한다(2026-10-11 실측: 템플릿을 고치기 전에 키트로 복사해 새 요소가 안 나온 사례). 디버그가 필요하면 `hf_render.build_project` 로 작업 폴더를 만들고 Playwright로 열어 `pageerror` 를 본다(`page.evaluate` 는 타임라인 객체를 반환하지 않게 `; 0` 을 붙인다).
 - 커버: 훅의 사건·자막이 다 보이는 시각(보통 1.6초 안팎)을 `ffmpeg -ss {t} -frames:v 1 -q:v 2 reel-final_cover.jpg`.
 - 새 요소를 쓰는 포맷이면 `verify_hf_sync.py` 의 요소별 허용 규칙(예: `yesbut` 의 `but_at`)을 그 회차 사본에 추가한다 — 큐가 같은 값에서 나왔는지·큐마다 화면이 변하는지 검사는 빼지 않는다.
@@ -191,10 +203,11 @@ for t in 0.0 0.3 0.6 1.0 1.6 2.2; do ffmpeg -y -v error -ss $t -i reel-final.mp4
 9. **⑭ 요약어 검사 (v3.11)**: 본론 장면마다 "영상만 본 사람이 이 장면에서 말할 수 있는 것(얼마·왜·누가·언제·어떻게)"을 한 줄씩 `meta.json.checks.info` 에 적는다. 그림·기울기만 있고 실제 숫자·조건·날짜가 없는 본론 장면이 있으면 `R-INFO`.
 10. **⑯ 가독성** `R-READ`(지침 I-3-11 v3.11): 스크립트로 장면별 글 덩어리 수(표·카드·목록·일정 장면은 제목 1 + 행 ≤4 + 결론 1, 그 밖은 ≤2)·장면당 주인공 숫자(④·⑤단) 1개·본론 lv 1 사용 여부·배경 색 수(≤2)·`ghost`/`series` 장식 여부·`dur/speed ≥ 0.8 + 글자 수 × 0.09` 를 계산하고, 장면마다 대표 프레임의 글자 영역을 가린 사본(흰 박스로 덮기)을 `Read` 로 보며 "그림만으로 무슨 장면인지" 한 줄씩 `meta.json.checks.read` 에 적는다. 글자만 있는 장면이 절반을 넘으면 반려.
 11. 반려가 있으면 STEP 4.5(콘셉트 2순위) 또는 STEP 5로 돌아가 **1회만** 수정·재렌더. 다시 실패하면 전달하지 않고 `ledger.reels.{slug} = {status:"held", held:"R-…"}` 기록 후 STEP 8 → 12 → 11.
+12. **⑰ 처음 보는 사람 시험 (v3.13 · 🚨 — 지침 I-5 ⑰)**: 실제 재생 시각대로 장면 12~16장을 540px 로 뽑아 `blind\f_{초}.png` 로 두고(**자막 조각마다 그 조각이 떠 있는 가운데 시각을 최소 1장씩** — 조각을 건너뛰면 시험자가 연결부를 놓친다, 2026-10-19 실측), Agent 도구로 서브에이전트를 띄워 그 파일들만 시간 순서로 보게 한다("자막 = 내레이션" 안내, 이 글·지침·회차 폴더·웹 검색 금지 명시). (a) 누가·무엇으로·무엇이 좋아지나 (b) 따라 할 첫 행동 (c) 막힌 단어·장면 (d) 0~10 (e) (v3.14) 0.0·1.0·1.5초 장면만 보고 넘기겠는가·왜 (f) 블로그에 가 보고 싶은가·무엇을 받으러 를 받아 `meta.json.checks.blind` 에 원문을 붙인다. 통과 = (a)=이득 문장과 같은 뜻 · (b)=대본 ④ · (c) '모름' 0 · (d) ≥ 8 · (v3.14) (e) "안 넘긴다" · (f) 블로그의 실물을 이름으로 말함. 실패면 대본·화면 수정 1회 → 재렌더 → 재시험, 다시 실패면 `R-BLIND` 로 held(전달하지 않음). 제작자 자기 판정(⑭·⑯)으로 이 단계를 대신하지 않는다.
 
 ## STEP 8. PC 저장
-- `device_commit_files` 로 `instagram\{TODAY}\{slug}\` 에 `concepts.md build_hf_vars.py hf_vars.json verify_hf_sync.py caption.txt reel-final.mp4 reel-final_cover.jpg reel-final_timeline.json stills.jpg hub_card.json post_text.txt meta.json` 을 저장한다(엔진 경로면 `reel_spec.json` 도).
-- `meta.json`: `{blog_post_id, blog_url, blog_modified_at_build, search_intent, persona, mode, ending, hook:{id,format,type,stage,concept,why}, structure, format:{verified,experiment,note}, marketing:[…], fresh, retention:{interrupts,reward_at,loopback}, motion:[{scene,main,sub}], scenes:[…], dur, speed, engine, render:{path:"hf"|"engine", reason}, hf?, shop:{used, why, label?, url?}, status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,easy,typo,pace,intent,retain,info,format,read}}`.
+- `device_commit_files` 로 `instagram\{TODAY}\{slug}\` 에 `concepts.md build_hf_vars.py hf_vars.json verify_hf_sync.py caption.txt reel-final.mp4 reel-final_cover.jpg reel-final_timeline.json stills.jpg hub_card.json post_text.txt meta.json` + (v3.13) `script.json tts.py mix.py tts\timing.json` 을 저장한다(엔진 경로면 `reel_spec.json` 도).
+- `meta.json`: (v3.13 추가: `benefit`, `script`, `checks.blind`) `{blog_post_id, blog_url, blog_modified_at_build, search_intent, persona, mode, ending, hook:{id,format,type,stage,concept,why}, structure, format:{verified,experiment,note}, marketing:[…], fresh, retention:{interrupts,reward_at,loopback}, motion:[{scene,main,sub}], scenes:[…], dur, speed, engine, render:{path:"hf"|"engine", reason}, hf?, shop:{used, why, label?, url?}, status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,easy,typo,pace,intent,retain,info,format,read}}`.
 - 새 포맷·새 요소를 만들었으면 `instagram\formats\{id}_{이름}\`(`index.html·template.json·example.json·preview.jpg`)에 저장하고 `formats.json` 의 그 카드(`hf`·`dir`·`uses`·`log`)와 바탕 포맷의 `uses`·`log` 를 갱신한다(`updated` = TODAY). 기존 포맷 폴더는 덮어쓰지 않는다. 사용자 폴더에 백업·이전 판 사본을 만들지 않는다.
 
 ## STEP 9. WP 업로드 (PC)
@@ -243,7 +256,7 @@ PushNotification 1회. 첫 문장은 한 줄 요약, 그 뒤 줄들. 모두 한�
 - 전달함: `📱 인스타 릴스 {TODAY} — {slug} 준비 완료 · {길이}초 · 훅 {공식}/{무대} · 검증 통과 · 저장 https://0and1life.com/reel-dl-latest/`
 - 대상 없음: `📱 인스타 릴스 {TODAY} — 대상 글 없음`
 - 반려·오류: `📱 인스타 릴스 {TODAY} — {slug} 보류({코드}) · {한 줄 원인}`
-- 덧붙이는 줄(해당 시): `🛒 쇼핑커넥트: {달음 — 물건 종류|안 담 — 사유 한 줄}` · `🎛 모드: {M?} {이유}` · `🔚 엔딩: {E?}` · `🎞 모션: {장면별 주 모션을 → 로 나열, 예: 키네틱 → 스태거 → 펀치 인}` · `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧬 포맷: {검증 id} + {실험 id}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 렌더: {HF 전체|엔진 대체(사유)}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}`(엔진 경로일 때만) · `📐 지침-루틴 상충: {조항}`
+- 덧붙이는 줄(해당 시): `🎯 이득: {이득 한 문장}` · `🧪 처음 보는 사람: {d}/10 · 첫 행동 "{b 요약}"` · `🛒 쇼핑커넥트: {달음 — 물건 종류|안 담 — 사유 한 줄}` · `🎛 모드: {M?} {이유}` · `🔚 엔딩: {E?}` · `🎞 모션: {장면별 주 모션을 → 로 나열, 예: 키네틱 → 스태거 → 펀치 인}` · `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧬 포맷: {검증 id} + {실험 id}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 렌더: {HF 전체|엔진 대체(사유)}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}`(엔진 경로일 때만) · `📐 지침-루틴 상충: {조항}`
 
 ## STEP 12. 임시 자산 정리 (지침 I-9 — 대상 글 유무와 무관하게 매 회차)
 ```bash
@@ -271,6 +284,9 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 | `insights` `bad_action` | 측정만 건너뛰고 계속 진행 (`📊 측정 건너뜀`) |
 | `reel` `bad_action` (AUTO 시도 시) | `E-REEL` 기록 후 HANDOFF로 전환해 계속 |
 | **`verify_hf_sync.py` 실패 (HF 경로)** | 🚨 `R-SYNC`/`R-HOOK` — **전달 중단.** `build_hf_vars.py` 의 `at`·`sfx` 수정 → 재렌더 → 재검사 |
+| **⑰ 처음 보는 사람 시험 실패 (v3.13)** | 🚨 `R-BLIND` — 대본·화면 수정 1회 → 재렌더 → 재시험, 다시 실패면 held(전달 중단) |
+| 이득 근거가 본문에 없음 (v3.13) | `X-BENEFIT` — 전달하지 않음, 알림에 Writer 0-11·2-6 ① 위반 |
+| Edge 음성 실패 (v3.13) | 1회 재시도 → `E-TTS` held. 내레이션 없는 판은 전달하지 않는다 |
 | HF 렌더 실패·시간 초과(값 수정 후에도) | **반려 아님** — STEP 6-E 엔진 대체 경로 · 알림 `🎞 렌더: 엔진 대체(사유)` |
 | 대표 프레임에 새 요소가 안 보임 | 템플릿 복사 누락·JS 오류 — 키트 `templates\` 에 최신 파일을 다시 복사하고 Playwright `pageerror` 확인 |
 | 가독성 기준 불통과 | `R-READ` — 글자 줄이기·장면 나누기·그림 넣기 1회 → 재렌더. 다시 실패면 held |
@@ -301,6 +317,8 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 | Cowork 예약 `8. 0and1life 인스타 릴스`(매일 07:00 KST, PC 연결, `C:\Users\win\Documents\Claude`·`instagram` 연결) | ✅ 진입점 방식(2026-10-12 확인) — 예약 본문은 이 파일을 끝까지 읽고 수행하라는 짧은 안내뿐 | **이 파일만 고치면 다음 실행부터 반영**된다. 예약 본문은 바꾸지 않는다. 단 지침(`0and1Life-Insta.md`)은 STEP 0이 GitHub에서 읽으므로 **커밋해야** 반영된다 |
 | HF 키트 `blog\tools\hf\`(`hf_render.py`·`hf_reel_insert.py`·`templates/_common`) GitHub | ✅ 2026-10-10·10-11 회차에서 clone·렌더 확인 | 없으면 STEP 6-E 엔진 경로 |
 | `PUBLISH_MODE` | `HANDOFF` | 유행 음원 때문에 기본은 반자동. AUTO는 회차별 지시로만 |
+| 허용 도메인 `speech.platform.bing.com` (Edge 음성) | ✅ 2026-10-19 사용자 추가 | `edge-tts` 는 `--proxy $HTTPS_PROXY`(파이썬은 `proxy=`)로 호출해야 연결된다 |
+| 지침 `0and1Life-Insta.md` **v3.13** · Writer 0-11 GitHub 커밋 | ⬜ 커밋 필요(전문 저장 2026-10-19) | 미배포면 `📐 지침 v3.13 미배포` 한 줄, 루틴의 v3.13 항목은 그대로 수행 |
 
 ## Cowork 원라이너
 

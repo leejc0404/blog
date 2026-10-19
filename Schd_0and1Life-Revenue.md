@@ -260,7 +260,7 @@ PushNotification 1회. `<routine_summary>` 의 **첫 문장**(휴대폰 배너)�
 | AIPick 확장·큐 서버(`naver_blog\uploader\server.py`) | ✅ 10/8 `connect_search`·`connect_links` 실측 동작 | 새벽에 PC·크롬·서버가 켜져 있어야 한다 |
 | 서치어드바이저 CSV 확장(`naver-advisor-export`) 06:00 | ✅ | 유입 순위 근거 |
 | Cowork 예약 `6. 0and1life 수익 루틴` 06:40 KST · 폴더 `C:\Users\win\Documents\Claude`·`다운로드\네이버_수집` | ✅ 2026-10-10 교체(이전 이름 `6. 0and1life 네이버 CTR 개선` 06:00) | 다음 개정 때 이 파일 전문으로 다시 교체 |
-| (구) `Schd_0and1Life-NaverCTR.md` · `naver-ctr\` 엔진 | 폐지 — 파일은 남겨 둠 | `ctr_engine.py ingest`·`naver_volume.py`·`naver_trend.py` 만 계속 쓴다. 파일 정리는 사용자 판단 |
+| (구) `Schd_0and1Life-NaverCTR.md` · `naver-ctr\` 엔진 | md는 2026-10-18 삭제 · 엔진 폴더는 유지 | `ctr_engine.py ingest`·`naver_volume.py`·`naver_trend.py` 만 계속 쓴다 |
 
 ## Cowork 원라이너
 
