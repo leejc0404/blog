@@ -334,8 +334,11 @@ const lines = p => Math.round(p.getBoundingClientRect().height / (parseFloat(get
 JSON.stringify({
   vw: w.innerWidth,
   overflowX: d.documentElement.scrollWidth > w.innerWidth,
-  keepAll: getComputedStyle(R).wordBreak,
-  longParas: ps.filter(p => lines(p) > 4).map(p => ({lines: lines(p), head: p.innerText.slice(0, 30)})),
+  keepAll: ['p','h1','h2','td','strong'].map(s => { const e = R.querySelector(s); return s + ':' + (e ? w.getComputedStyle(e).wordBreak : 'none'); }).join(' '),
+  screens: Math.ceil(d.documentElement.scrollHeight / 760),
+  oneLiners: ps.filter(p => lines(p) <= 1).length, pCount: ps.length,
+  strongCount: R.querySelectorAll('p > strong, li > strong, td > strong').length,
+  longParas: ps.filter(p => lines(p) > 6).map(p => ({lines: lines(p), head: p.innerText.slice(0, 30)})),
   hiddenTables: [...R.querySelectorAll('table')].map((t, i) => ({i, cols: t.rows[0]?.cells.length, hidden: t.scrollWidth > t.parentElement.clientWidth + 2})).filter(x => x.hidden),
   heroCut: (() => { const f = R.querySelector('figure'); return !!f && f.querySelector('figcaption')?.getBoundingClientRect().height > f.getBoundingClientRect().height; })(),
   firstAnswerTop: P0 ? Math.round(P0.getBoundingClientRect().top) : -1,
@@ -349,8 +352,9 @@ document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
 ```
 ④ 판정
 - 🔴 `overflowX` · `heroCut` → 구조 수정 후 재측정. 남으면 [6l] 금지.
-- 🟡 **Draft가 고친다** (⑤): `keepAll ≠ keep-all`(한국어 글) · `longParas` 1건 이상 · `hiddenTables` 1건 이상 · `evidence.shrink > 2.5`(증빙 숫자가 폰에서 판독 불가)
-- 📝 기록만 (내용 소관 → Writer): `firstAnswerTop ≥ 844` · 한 문단에 숫자 3개 이상 · 4열 이상 표
+- 🔴 `keepAll`에 `break-all`이 하나라도 있는데 래퍼 style은 정상 → **사이트 CSS 사고**(2026-10-20 실측). 글을 고치지 말고 STEP 7에 `🚨 사이트 CSS break-all 재발` 기재, Draft일 기록 보류.
+- 🟡 **Draft가 고친다** (⑤): 래퍼에 `keep-all` 없음 · `longParas`(6줄 초과) 1건 이상 · 한 문장 문단이 20% 넘으면 연속된 것을 2~3개씩 합침(문장 불변) · `hiddenTables` 1건 이상 · `evidence.shrink > 2.5`(증빙 숫자가 폰에서 판독 불가)
+- 📝 기록만 (내용 소관 → Writer): `screens > 14` · `firstAnswerTop ≥ 844` · H2 7개 이상 · FAQ 5개 이상 · 한 문단에 숫자 3개 이상 · 4열 이상 표
 ⑤ 보정 — **구조만**. 내용 추가 금지 · 문장 수정 금지 · FAQ `<p>` 분할 금지(스키마)
 - `longParas`: 해당 `<p>`를 문장 경계(`.` `?` `!` 뒤 공백)에서 2~3줄 단위로 나눈다. 나눌 경계가 없으면 기록만.
 - `keepAll`: 래퍼 `<div id="…-report">` style에 `word-break:keep-all; overflow-wrap:break-word;` 추가.
@@ -361,7 +365,7 @@ document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
 ```js
 document.getElementById('mf-wrap').remove();
 ```
-- STEP 7 알림에 한 줄: `📱 390px: 가로넘침 0 · 4줄+ 문단 n→m · 숨은 표 n→m · 증빙 판독 OK/NG · 첫 화면 답 Y/N · 보정 k건 · 소감 한 줄`
+- STEP 7 알림에 한 줄: `📱 390px: 화면 n · 가로넘침 0 · keepAll OK/NG · 4줄+ 문단 n→m · 숨은 표 n→m · 증빙 판독 OK/NG · 첫 화면 답 Y/N · 보정 k건 · 소감 한 줄`
 
 [6l] Draft일 기록 (STEP 6 전 과정 성공 시에만) · **[6k-M] 📱 모바일 점검 🔴 0건일 때만**
 ⚠️ 아래 중 하나라도 있었으면 공란으로 남긴다: Chrome 로그인 실패 / GP 레이아웃 미반영(재시도 후에도) / Rank Math 설정 throw 후 클릭 폴백까지 실패.

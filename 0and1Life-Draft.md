@@ -9,6 +9,7 @@
 - **번호 안내**: 번호는 Writer 지침의 Phase 체계를 이어받은 것 — Phase 0~4는 Writer 담당이라 이 문서에 없음(의도된 결번, 오타 아님). ⚠️ Writer 지침의 'Phase 5-3(SEO 콘텐츠 품질 자가검수)'과 이 문서의 'Phase 5-3(블록 구조·820px 체크)'은 **서로 다른 문서의 별개 항목**임에 주의.
 
 ### 개정 이력
+- **v2.0 (2026-10-20)** — **Phase 5-7 개정 + 5-7-B 기존 글 소급 보정 신설.** 글 #1268·#148 휴대폰 실측 결과 ① 사이트 추가 CSS의 `word-break:break-all !important`가 글의 `keep-all`을 덮어쓰고 있어 전 글이 단어 중간에서 끊기고 있었다(사용자 승인으로 CSS 교체) ② 5-7 ② 측정이 래퍼만 보고 있어 2개월간 놓쳤다 → 본문 요소 실제값 측정으로 교체 ③ 한 문장 문단·굵은 글씨 0개·라벨 구조가 가독성을 떨어뜨려 측정 항목(oneLiners·strongCount·colorCount·screens) 추가 ④ Draft가 이미지 루틴의 삽입물을 덮어쓴 사고(#148) 기록. 상세는 Writer 2-5 📱 참조.
 - **v1.9 (2026-09-07)** — **균형 규칙 사본 폐지.** 7-1 표의 `주간 한도` 열과 7-3의 R1~R6 사본을 **삭제하고 `0and1Life-Writer.md` 1-3 R1~R6 직접 조회로 전환**했다. 근거: 2026-09-07 Draft 회차가 `📐 규정계산 3건 — 한도 2 초과`를 보고했는데, 사본에 Writer 1-3 R1의 **「Head Type=시즌 글은 R1 카운트에서 제외」 예외가 누락**돼 있어 오탐 가능성이 확인됐다(사본 생성 이후 Writer에 추가된 조항이 따라오지 않음). 같은 이유로 사본에 없던 **R4·R5·7-4 F등급 가드**도 스케줄 프롬프트 폴백에서 소실되고 있었다. **WP ID·slug 매핑은 이 문서의 고유 자산이므로 그대로 유지**한다. 조항 번호(7-1·7-3·7-4)는 보존했다.
 - **v1.8 (2026-08-22)** — **Phase 7 카테고리 한도 재조정 + SSOT 명시.** 2026-08-22 네이버 서치어드바이저 실측(클릭 8회 -91.6% · 노출 5.6천 -73.7% · 노출 상위 5문서 중 4개가 6/20~7/4 작성분)에 근거해 📐 규정·계산 3→2, 💍 웨딩 1→2, 🤖 AI **0(동결)→1(조건부 해제)** 로 조정. 7-1 한도 열이 **Writer 지침 1-3 R1의 사본**임을 명시하고 상충 시 Writer가 이긴다는 우선순위를 못 박았다(7-1 표와 7-3 R1이 규정계산 2 vs 3으로 서로 어긋나 있던 내부 모순도 함께 해소). 7-3에 **R6 네이버 수요 하한** 보고 항목 신설.
 - **v1.7 (2026-08-17)** — Phase 5-4 관문 ①에 **「⛔ 본문 삽입 금지 자료」(SEO 리서치 산출물)** 조항 신설. KoreaPlug-Draft v10.5와 동일 기준.
@@ -285,10 +286,12 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 ---
 
 
-## Phase 5-7. 📱 모바일 화면 점검 (2026-10-16 신설 — 사용자 지시)
+## Phase 5-7. 📱 모바일 화면 점검 (2026-10-16 신설 — 사용자 지시 · 2026-10-20 개정)
 
 > 독자는 휴대폰으로 읽는다. Draft는 올린 글을 **휴대폰 화면(폭 390px)으로 띄워 처음부터 끝까지 직접 읽어 보고**, 가독성이 좋은지 느낀 뒤에만 Draft일을 기록한다. 데스크톱 화면이나 HTML 소스만 보고 통과시키지 않는다.
-> 기준은 Writer 지침 2-5 「📱 모바일 가독성」이다(분량 900~1,300 · 문단 휴대폰 3줄 · 표 3열 이하).
+> 기준은 Writer 지침 2-5 「📱 모바일 가독성」이다(분량 900~1,300 · 14화면 이내 · 문단 휴대폰 3줄 · 표 2~3열 · H2 4~6).
+
+> ⚠️ **2026-10-20 사고 기록 — 사이트 CSS가 글의 `keep-all`을 덮어쓰고 있었다.** 글 #1268 실측에서, 래퍼의 `word-break:keep-all`은 정상인데 그 안의 `<p>`·`<h1>`·`<td>`·`<strong>`은 전부 `break-all`로 계산됐다. 원인은 WP **외모 > 사용자 정의하기 > 추가 CSS**의 `@media (max-width:768px) .entry-content p, li, h1, h2, span, a, strong { word-break: break-all !important }` 와 `.entry-content table td, th { word-break: break-all }`. 이 두 규칙을 사용자 승인으로 `word-break: keep-all` + `overflow-wrap: anywhere`로 교체해 발행했다(2026-10-20, 전 글 즉시 적용). **종전 ② 측정은 래퍼만 보고 있어서 이 사고를 2개월간 놓쳤다** — 그래서 ②의 `keepAll` 측정 대상을 아래처럼 **본문 `<p>`·`<td>`·`<strong>` 실제 계산값**으로 바꿨다. 사이트 CSS를 다시 `break-all`로 되돌리지 않는다.
 
 **방법 — 390px 프레임**. 이 환경에서는 `resize_window` 가 뷰포트에 반영되지 않는다(`outerWidth`/`outerHeight` = 0). 창 크기를 바꾸지 말고, 미리보기 탭 위에 **폭 390px iframe**(아이폰 12~15 크기)을 띄운다. 같은 도메인이라 iframe 안이 모바일 레이아웃(미디어쿼리 포함)으로 그려지고 JS 측정도 된다.
 
@@ -298,35 +301,44 @@ const u = location.href.split('#')[0] + (location.search ? '&' : '?') + 'mf=' + 
 document.body.insertAdjacentHTML('beforeend', `<div id="mf-wrap" style="position:fixed;inset:0;z-index:2147483647;background:#e5e7eb;display:flex;justify-content:center;align-items:flex-start;padding-top:8px"><iframe id="mf" src="${u}" style="width:390px;height:844px;border:0;background:#fff;box-shadow:0 0 0 8px #111;border-radius:24px"></iframe></div>`);
 ```
 ```js
-// ② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능)
+// ② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능) — keepAll은 래퍼가 아니라 본문 요소의 실제 계산값
 const d = document.getElementById('mf').contentDocument, w = d.defaultView;
-const R = d.querySelector('[id$="-report"]'), P0 = R.querySelector(':scope > p');
+const R = d.querySelector('[id$="-report"]'), P0 = R.querySelector(':scope > p:not(.o1-sc-note)');
+const wb = s => { const e = R.querySelector(s); return e ? w.getComputedStyle(e).wordBreak : 'none'; };
+const ps = [...R.querySelectorAll('p')].filter(p => !p.closest('figure,.trust-note,.o1-sc-box,.ai-knowledge-snippet') && !/^Q\./.test(p.innerText.trim()) && parseFloat(getComputedStyle(p).fontSize) >= 15);
+const lines = p => Math.round(p.getBoundingClientRect().height / (parseFloat(getComputedStyle(p).lineHeight) || 30));
 JSON.stringify({
   vw: w.innerWidth,
+  screens: Math.ceil(d.documentElement.scrollHeight / 760),
   overflowX: d.documentElement.scrollWidth > w.innerWidth,
-  keepAll: getComputedStyle(R).wordBreak,
-  longParas: [...R.querySelectorAll('p')].filter(p => !p.closest('figure,.trust-note') && !/^Q\./.test(p.innerText.trim()) && parseFloat(getComputedStyle(p).fontSize) >= 15)
-    .map(p => Math.round(p.getBoundingClientRect().height / (parseFloat(getComputedStyle(p).lineHeight) || 30)))
-    .filter(n => n > 4).length,
-  hiddenTables: [...R.querySelectorAll('table')].filter(t => t.scrollWidth > t.parentElement.clientWidth + 2).length,
+  keepAll: { p: wb('p'), h1: wb('h1'), h2: wb('h2'), td: wb('td'), strong: wb('strong') },
+  longParas: ps.filter(p => lines(p) > 6).map(p => ({lines: lines(p), head: p.innerText.slice(0, 25)})),
+  oneLiners: ps.filter(p => lines(p) <= 1).length, pCount: ps.length,
+  strongCount: R.querySelectorAll('p > strong, li > strong, td > strong').length,
+  colorCount: [...R.querySelectorAll('p strong')].filter(e => e.style.color).length,
+  tables: [...R.querySelectorAll('table')].map((t, i) => ({i, cols: t.rows[0]?.cells.length, hidden: t.scrollWidth > t.parentElement.clientWidth + 2})),
+  h2Count: R.querySelectorAll('h2').length,
+  faqCount: [...R.querySelectorAll('p > strong')].filter(s => /^Q\./.test(s.innerText)).length,
   heroCut: (() => { const f = R.querySelector('figure'); return !!f && f.querySelector('figcaption')?.getBoundingClientRect().height > f.getBoundingClientRect().height; })(),
   firstAnswerTop: P0 ? Math.round(P0.getBoundingClientRect().top) : -1,
-  pFont: P0 ? getComputedStyle(P0).fontSize : null
+  firstStrong: !!R.querySelector(':scope > p strong'),
+  pFont: P0 ? getComputedStyle(P0).fontSize : null,
+  evidence: [...R.querySelectorAll('figure.evidence-capture img')].map(i => ({shown: Math.round(i.getBoundingClientRect().width), natural: i.naturalWidth, shrink: +(i.naturalWidth / i.getBoundingClientRect().width).toFixed(1)}))
 });
 ```
 ```js
-// ③ 한 화면씩 내리며 스크린샷 → 직접 읽기 (k = 0, 1, 2 … 끝까지)
+// ③ 한 화면씩 내리며 스크린샷 → 직접 읽기 (k = 0, 1, 2 … 끝까지). 스크린샷은 프레임 영역만 zoom 으로 찍는다
 document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
 // ④ 끝나면 프레임 제거
 document.getElementById('mf-wrap').remove();
 ```
 
 **읽기 — 화면마다 스스로 묻는다** (스크린샷을 한 장씩 보며 끝까지)
-- 첫 화면에 검색어의 답(숫자·날짜)이 보이는가?
+- 첫 화면에 검색어의 답(숫자·날짜)이 보이는가? 핵심 숫자 하나가 굵게 보이는가?
 - 글자 벽이 있는가 — 한 문단이 4줄을 넘는가?
-- 숫자·단어가 줄바꿈으로 쪼개지는가?
+- 숫자·단어가 줄바꿈으로 쪼개지는가? (`79만 9,0/00원` 같은 것이 한 군데라도 있으면 keepAll 측정값부터 다시 본다)
 - 표의 열이 잘려 옆으로 밀어야 보이는가? 특히 핵심 값 열이 숨는가?
-- 같은 말을 두 번 하는가? 다음 화면으로 넘기고 싶은가, 지루한가?
+- 목차가 한 화면을 다 먹는가? 같은 말을 두 번 하는가? 다음 화면으로 넘기고 싶은가, 지루한가?
 
 **판정**
 
@@ -334,16 +346,33 @@ document.getElementById('mf-wrap').remove();
 |---|---|---|
 | 가로 넘침 `overflowX` | false | 🔴 원인 요소 수정(래퍼 padding · 고정폭 요소 · 긴 URL) |
 | 히어로 제목 잘림 `heroCut` | false | 🔴 히어로 규칙(그리드 스택·clamp)대로 수정 |
-| 한글 줄바꿈 `keepAll` | `keep-all` | 🟡 래퍼 style에 `word-break:keep-all; overflow-wrap:break-word` 추가 (없으면 `12/만9,800원`·`있/어요`처럼 단어 중간에서 끊긴다 — #144 실측) |
-| 숨은 표 `hiddenTables` | 0 | 🟡 래퍼 확인. 4열 이상 표면 `Writer 소관 — 3열 재구성 필요` 기록 |
-| 긴 문단 `longParas` (4줄 초과) | 0 | 🟡 문장 경계에서 `<p>` 를 둘로 나눈다(문장은 바꾸지 않는다). ⛔ FAQ 문단(`<p><strong>Q. …</strong><br>…</p>`)은 나누지 않는다 — FAQPage 스키마 정규식이 깨진다. FAQ·작은 글씨 주석은 측정에서도 뺀다 |
-| 첫 화면 답 `firstAnswerTop` | 844 미만 | 🟡 기록(`Writer 소관`) |
+| 한글 줄바꿈 `keepAll.*` | **p·h1·h2·td·strong 전부 `keep-all`** | 🔴 래퍼 style 확인. 래퍼가 정상인데 자식이 `break-all`이면 **사이트 CSS 사고**다 — 글을 고치지 말고 STEP 7에 `🚨 사이트 CSS break-all 재발` 로 알리고 Draft일 기록 보류 |
+| 숨은 표 `tables[].hidden` | 0 | 🟡 숫자 셀 `white-space:nowrap`·래퍼 확인. 4열 이상이면 `Writer 소관 — 2~3열 재구성 필요` 기록 |
+| 긴 문단 `longParas` (6줄 초과) | 0 | 🟡 문장 경계에서 `<p>` 를 둘로 나눈다(문장은 바꾸지 않는다). ⛔ FAQ 문단은 나누지 않는다 — FAQPage 스키마 정규식이 깨진다 |
+| 한 문장 문단 비율 `oneLiners/pCount` | 20% 이하 | 🟡 **연속된 한 문장 문단을 2~3개씩 `<p>` 하나로 합친다**(문장은 바꾸지 않는다). 50% 넘으면 `Writer 소관 — 문단 리듬 재작성` 기록 |
+| 굵은 글씨 `strongCount` | 6 이상 | 🟡 기록(`Writer 소관`) — 0개면 핵심이 안 보이는 글이다 |
+| 색 강조 `colorCount` | 2~3 | 🟡 기록(`Writer 소관`) — 4곳 이상이면 광고처럼 보인다 |
+| 화면 수 `screens` | 14 이하 | 🟡 기록(`Writer 소관 — 분량`) · 20 초과면 🔴 Draft일 기록 보류 |
+| H2 수 `h2Count` / FAQ 수 `faqCount` | 4~6 / 3~4 | 🟡 기록(`Writer 소관`) |
+| 첫 화면 답 `firstAnswerTop` · `firstStrong` | 844 미만 · true | 🟡 기록(`Writer 소관`) |
+| 증빙 판독 `evidence.shrink` | 2.5 이하 | 🟡 [4f] 📱 규격으로 재캡처, 불가하면 figcaption에 핵심 숫자 글자로 |
 | 본문 글자 `pFont` | 15px 이상 | 🟡 기록(테마 소관) |
 | 읽기 소감 | 막힘 없이 끝까지 읽힘 | 걸린 곳을 화면 번호와 함께 기록 |
 
-- Draft가 고치는 것은 **구조뿐**이다 — 문단 나누기 · 래퍼 style · 표 래퍼. 문장·숫자·표 구성은 Writer 소관이라 기록만 한다. **내용을 덧붙이지 않는다.**
+- Draft가 고치는 것은 **구조뿐**이다 — 문단 나누기·합치기(문장 불변) · 래퍼 style · 표 래퍼·nowrap · figcaption 숫자. 문장·숫자·표 구성·분량은 Writer 소관이라 기록만 한다. **내용을 덧붙이지 않는다.**
 - 🔴 가 남으면 Draft일을 기록하지 않는다. 🟡 는 고치거나 기록하고 진행한다. 구조를 고쳤으면 ②를 다시 돌려 확인한다.
-- 기록(완료 알림 + Notion 기본 정보 표 `📱 모바일 점검` 행): `📱 390px: 가로넘침 0 · 4줄+ 문단 n · 숨은 표 n · 첫 화면 답 Y/N · 소감 한 줄`
+- 기록(완료 알림 + Notion 기본 정보 표 `📱 모바일 점검` 행): `📱 390px: 화면 n · 가로넘침 0 · keepAll OK/NG · 4줄+ 문단 n · 숨은 표 n · H2 n · 첫 화면 답 Y/N · 소감 한 줄`
+
+### 5-7-B. 기존 발행 글 소급 보정 (2026-10-20 신설 — 5-4 소급 적용 원칙)
+
+모바일 규칙은 2026-10-16 이후 글에만 적용돼 왔다. 그 전 글 100여 편은 #1268처럼 21화면·9 H2·3열 표 상태다. Draft 루틴은 **매 회차 신규 draft를 끝낸 뒤 발행 글 1편**을 골라 아래를 한다(신규가 없는 날도 한다).
+
+1. 대상: `GET /wp-json/wp/v2/posts?status=publish&before=2026-10-16T00:00:00&orderby=date&order=desc&per_page=20` 에서 아직 `📱 소급 점검` 기록이 없는 글 중 **최근 발행순** 1편.
+2. 5-7 ①~④를 그대로 돌리고 읽는다.
+3. **구조 보정은 Draft가 바로 한다**(5-1 저장 순서 준수): 래퍼 `keep-all` 추가 · 히어로를 2-3b 그리드로 교체(기존 히어로 이미지 그대로) · 4줄 넘는 문단 분할 · 숫자 셀 nowrap · 스니펫 라벨 한국어화(`Core Fact→한 줄 답`, `Primary Insight→왜`, `Actionable Tip→오늘 할 일`) · 증빙 figcaption 숫자 · `wp-image-{ID}` 누락 보완.
+4. **내용 축약(분량·H2·FAQ 수·표 재구성)은 하지 않는다** — `Writer 소관` 으로 STEP 7과 Notion 반려/백로그에 `📱 소급: #{번호} {슬러그} — 화면 n · H2 n · 표 열 n · 요청: 축약` 한 줄을 남긴다. 사용자가 "다시 써"라고 지시한 글만 Writer가 재작성한다.
+5. 보정 후 Rank Math 점수를 재확인해 **떨어지면 되돌린다**(5-3-B). 슬러그·제목·메타·내부 링크·제휴 박스는 건드리지 않는다.
+6. STEP 7 알림에 `📱 소급 보정: #{번호} {슬러그} 화면 a→b · 보정 k건 · SEO x→y` 한 줄.
 
 ---
 
