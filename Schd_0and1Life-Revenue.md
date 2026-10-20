@@ -1,6 +1,6 @@
 # Schd_0and1Life-Revenue — 0and1Life 수익 루틴 (네이버 쇼핑커넥트 · 수익 레이더) — Cowork 예약 작업용 v1.0 (2026-10-10)
 
-*매일 06:40 KST 실행. 예약 시각이 되면 같은 날 이미 실행됐더라도 다시 진행한다(글별 상태는 `0and1life-revenue\state.json` 이 막아 주므로 같은 글에 블록을 두 번 넣지 않는다).
+*매일 06:30 KST 실행. 예약 시각이 되면 같은 날 이미 실행됐더라도 다시 진행한다(글별 상태는 `0and1life-revenue\state.json` 이 막아 주므로 같은 글에 블록을 두 번 넣지 않는다).
 
 날짜: 실행 시점의 실제 KST 날짜를 쓴다. 이 프롬프트에 적힌 고정 날짜는 무시한다.
 
@@ -44,7 +44,7 @@
 
 ⚠️ [에디터·REST 충돌 규약 — Schd_0and1Life-Draft.md [6m-0]과 같다] 이 루틴은 **에디터(post.php)를 열지 않고 REST로만** 본문을 고친다. 반영 직전에 글의 `modified` 를 다시 읽어 회수 시점과 다르면(다른 루틴·사용자가 방금 고침) 그 글은 반영하지 않고 다음 회차로 넘긴다.
 
-⚠️ 삭제 금지: 글·리비전·파일·Notion 행·큐 작업 파일을 삭제하지 않는다. 필요하면 STEP 10에 "삭제 필요 — 사용자 확인"으로만 남긴다.
+⚠️ 삭제 금지: 글·리비전·파일·Notion 행·큐 작업 파일을 삭제하지 않는다. 필요하면 STEP 10에 "삭제 필요 — 사용자 확인"으로만 남긴다. **단 하나의 예외: [5-5] 반영 후 검사를 모두 통과한 글의 `backups\{slug}-{TODAY}.json`(이 루틴이 이번 회차에 만든 반영 전 원본)은 지운다(2026-10-20 사용자 지시).** 검사 실패·원복·보류(`hold`) 글의 백업은 지우지 않는다.
 ⚠️ 변경 금지(항상): 글의 status·**슬러그**·카테고리·발행일·제목·SEO 제목·메타 설명·Focus Keyword·기존 문단·기존 이미지·FAQ·ld+json. **이 루틴이 본문에 하는 일은 "상품 블록 삽입"과 "고지 한 줄 삽입" 두 가지뿐이다.**
 ⚠️ 사실: 상품명·가격·리뷰 수·평점은 **이번 회차에 회수한 `connect.json` 값만** 쓴다. 써 보지 않은 체험·효능·순위 단정은 쓰지 않는다(지침 2-10).
 ⚠️ git commit·push 하지 않는다 — 사용자가 직접 한다.
@@ -140,7 +140,7 @@ curl -s -o /dev/null -w "WP %{http_code}\n" --max-time 20 -u "$U:$P" "https://0a
 | 공개 페이지 | `publish` 글만: `https://0and1life.com/{slug}/?nc={epoch}` 200 · 블록 문구 보임 · `<meta name="robots">` 에 noindex 없음. 캐시로 안 보이면 `캐시 반영 대기` 로만 기록 |
 | 링크 | 상품 링크마다 `curl -s -o /dev/null -w "%{http_code}" -I --max-time 15` → 200·301·302 면 정상 · 404·410 이면 그 상품 줄을 빼고 다시 반영(1회) · **000(연결 거부)은 네트워크 정책 탓이므로 `링크 확인 불가` 로만 기록하고 그대로 둔다**(2026-10-10 실측: naver.me 는 PC 셸·클라우드 모두 프록시가 막는다. 링크는 커넥트가 방금 발급한 원문이라 반영을 막지 않는다) |
 
-[5-5] 성공하면 상태 `applied` · `applied_at` · `products[]`(name·link·price_won·commission_pct·review_count·rating·checked) · `backup` 경로를 기록한다.
+[5-5] 성공하면 상태 `applied` · `applied_at` · `products[]`(name·link·price_won·commission_pct·review_count·rating·checked)를 기록하고, [5-1]에서 만든 `backups\{slug}-{TODAY}.json` 을 지운다(`backup` 경로는 기록하지 않는다). 공개 페이지가 `캐시 반영 대기`인 경우도 구조·스키마·블록 검사를 통과했으면 성공으로 보고 지운다. 원복한 글의 백업은 남긴다. PC 셸에서 삭제가 막혀 있으면(`Operation not permitted`) 삭제 권한 요청을 1회만 하고, 허락이 없으면 지우지 않은 채 STEP 10 알림에 `백업 n개 삭제 대기` 로만 남긴다.
 
 ## STEP 6 — 새 수익 슬롯 (하루 SLOT_NEW_PER_DAY 편 — CUTOFF_KST 전까지만)
 
