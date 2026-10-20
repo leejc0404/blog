@@ -328,7 +328,7 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 | 프로필 링크 = 허브 `/ig/?utm_...=ig_bio` | ✅ | 모바일 앱에서만 변경 가능 |
 | 허브 페이지 1922 공개·index | ✅ | 제목·메타 고정, 카드만 추가 |
 | 전달 페이지 `reel-dl-latest` | ✅ page 1980 | 구글 문서가 가리키는 고정 주소 — 삭제 금지 |
-| Cowork 예약 `8. 0and1life 인스타 릴스`(매일 07:00 KST, PC 연결, `C:\Users\win\Documents\Claude`·`instagram` 연결) | ✅ 진입점 방식(2026-10-12 확인) — 예약 본문은 이 파일을 끝까지 읽고 수행하라는 짧은 안내뿐 | **이 파일만 고치면 다음 실행부터 반영**된다. 예약 본문은 바꾸지 않는다. 단 지침(`0and1Life-Insta.md`)은 STEP 0이 GitHub에서 읽으므로 **커밋해야** 반영된다 |
+| Cowork 예약 `8. 0and1life 인스타 릴스`(매일 06:30 KST, PC 연결, `C:\Users\win\Documents\Claude`·`instagram` 연결) | ✅ 진입점 방식(2026-10-12 확인) — 예약 본문은 이 파일을 끝까지 읽고 수행하라는 짧은 안내뿐 | **이 파일만 고치면 다음 실행부터 반영**된다. 예약 본문은 바꾸지 않는다. 단 지침(`0and1Life-Insta.md`)은 STEP 0이 GitHub에서 읽으므로 **커밋해야** 반영된다 |
 | HF 키트 `blog\tools\hf\`(`hf_render.py`·`hf_reel_insert.py`·`templates/_common`) GitHub | ✅ 2026-10-10·10-11 회차에서 clone·렌더 확인 | 없으면 STEP 6-E 엔진 경로 |
 | `PUBLISH_MODE` | `HANDOFF` | 유행 음원 때문에 기본은 반자동. AUTO는 회차별 지시로만 |
 | 허용 도메인 `speech.platform.bing.com` (Edge 음성) | ✅ 2026-10-19 사용자 추가 | `edge-tts` 는 `--proxy $HTTPS_PROXY`(파이썬은 `proxy=`)로 호출해야 연결된다 |
