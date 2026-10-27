@@ -1,4 +1,4 @@
-# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v4.0 2026-10-27)
+# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v4.0.1 2026-10-28 — 하루 1편 제한 폐지)
 
 **v4.0에서 바뀐 것**(지침 v4.0 I-2-V4 · I-3-M 대응 — 10/27 사용자 "앞으로 모든 글은 지금 나와 한 이 방식으로" · "첫 화면에는 이 글이 뭔지 제목이 뚜렷하게 가장 크게"): ① STEP 4 — 글의 **대표 이미지**(`featured_media`)를 받아 `img\hero.jpg` 로 두고, 사진 속 사물의 좌표(접히는 선·모서리 등)를 격자 미리보기로 재서 `meta.json.photo` 에 적는다(지침 I-2-V4 E) ② STEP 4.5-0 — 대본은 **지침 I-2-V4 A(사전 4가지) → B(6박 문장 틀) → D(말투)** 로 쓴다. 이득 문장·대본 시험·통과할 때까지 규칙은 v3.16 그대로 ③ STEP 5·6 — 기본 템플릿 **F27_photo_story**(견본: `instagram\2026-10-28\iphone-duo-defect-screen-repair-cost\build_hf_vars.py`), 첫 화면 제목 144px 두 줄이 가장 큰 글자(I-2-V4 C), 글자 x 80~1000 · 카메라 숨 1.012 이하(I-2-V4 F) ④ 효과음 큐는 `build_hf_vars.py` 가 같은 사건 시각(`ev`)에서 만든다(F27 은 장면 목록 대신 사건 시각 표) — 싱크 검사는 큐마다 화면 변화(0.8 이상) 검사로 ⑤ ⑰ 시험 질문에 (0) 무슨 얘기인지 한 줄 · (g) 장면별 그림 도움·말투(지침 I-5 ⑰ · I-2-V4 H) ⑥ 길이 25~30초. **그 밖의 단계·문구는 v3.16 그대로다.**
 
@@ -66,7 +66,7 @@
 | (구) v8 자산 | `render_reel_v8.py` `build_reel_sfx.py` `verify_reel_sync.py` | **사용 중지.** 지우지 않고 남겨 둔다(과거 회차 재현용) |
 | 엔진 이전 판 | (만들지 않음 — v3.2) | 사용자 지시(10/6)로 사용자 폴더에 백업·이전 판 사본을 만들지 않는다. 회귀 검사용 이전 판은 클라우드 작업 공간에만 둔다 |
 
-설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 1` · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음** · `RENDER = HF 전체(기본) → 엔진 v12(대체)` · `HF_RENDER_TIMEOUT = 540초` · `HF_INSERT = 엔진 대체 경로에서만 선택(최대 1장면, CTA 제외)` · `HF_TIMEOUT = 420초` · `MODES = M1~M6`(지침 I-2-0-E) · `ENDINGS = E1~E4`, `E4_MAX = 최근 4회차 중 1회`(지침 I-2-10) · `BGM = 만들지 않음`(지침 I-3-1 v3.8) · `NARRATION = Edge ko-KR-SunHiNeural +42%`(지침 I-2-11 v3.13) · `MAX_DUR = 30초` · `BLIND_PASS = 8/10 + 이득·첫 행동 일치 + 모름 0`(지침 I-5 ⑰)
+설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 제한 없음`(v4.0.1 — 회차마다 retry 글 + 새 글 1편) · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음** · `RENDER = HF 전체(기본) → 엔진 v12(대체)` · `HF_RENDER_TIMEOUT = 540초` · `HF_INSERT = 엔진 대체 경로에서만 선택(최대 1장면, CTA 제외)` · `HF_TIMEOUT = 420초` · `MODES = M1~M6`(지침 I-2-0-E) · `ENDINGS = E1~E4`, `E4_MAX = 최근 4회차 중 1회`(지침 I-2-10) · `BGM = 만들지 않음`(지침 I-3-1 v3.8) · `NARRATION = Edge ko-KR-SunHiNeural +42%`(지침 I-2-11 v3.13) · `MAX_DUR = 30초` · `BLIND_PASS = 8/10 + 이득·첫 행동 일치 + 모름 0`(지침 I-5 ⑰)
 
 ---
 
@@ -122,8 +122,8 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts?status=publish&after=${D3}T00
 1. 지침 I-1-1·I-1-3 순서로 판정한다(`ledger.reels` 의 `pending` 은 후보에 포함, 그 밖의 상태는 `X-LEDGER`). `X-THIN`은 STEP 4에서 확정.
 2. 우선순위 I-1-4로 1편 선정. 나머지는 `ledger.reels.{slug}.status="pending"`으로만 기록.
 3. (v3.14) `pending` 글은 지침 I-1-5 ① 시기 검사를 통과할 때만 후보로 둔다(실패면 `ledger.reels.{slug}.status="expired"`).
-3-1. **(v3.16 이어서 고치기 — 하루 1편 가드보다 앞)** `ledger.reels` 에 `status == "retry"` 인 글이 있으면 새 글·3-E 를 돌리지 않고 **그 글을 대상**으로 정한다. 회차 폴더는 처음 만든 날짜 폴더 그대로 쓰고 `concepts.md` ⑰ 절의 마지막 판 번호·지적부터 이어서 STEP 7 ⑫ 를 계속한다(대본·화면 원고는 그 폴더의 `script.json`·`build_hf_vars.py`). `ledger.reels.{slug}.date` 는 그대로 두고 `resumed: [TODAY…]` 에 오늘을 더한다. 통과해서 전달하면 그날 회차로 센다.
-4. **(하루 1편 가드)** `ledger.reels` 에 `date == TODAY` 또는 `resumed` 에 TODAY 가 있는 회차(handoff·posted)가 이미 있으면 새 글·3-E 모두 돌리지 않고 "오늘 완료"로 STEP 12 → 11.
+3-1. **(v3.16 이어서 고치기 — 하루 1편 가드보다 앞)** `ledger.reels` 에 `status == "retry"` 인 글이 있으면 **그 글을 먼저** 이어서 고친다(STEP 4~10). (v4.0.1) 끝나면 새 글·3-E 도 그대로 돌린다 — 하루 편수 제한 없음. 회차 폴더는 처음 만든 날짜 폴더 그대로 쓰고 `concepts.md` ⑰ 절의 마지막 판 번호·지적부터 이어서 STEP 7 ⑫ 를 계속한다(대본·화면 원고는 그 폴더의 `script.json`·`build_hf_vars.py`). `ledger.reels.{slug}.date` 는 그대로 두고 `resumed: [TODAY…]` 에 오늘을 더한다. 통과해서 전달하면 그날 회차로 센다.
+4. **(v4.0.1 — 하루 1편 가드 폐지)** 하루 편수 제한 없음. 같은 slug 이 `ledger.reels` 에 `handoff`·`posted` 로 있으면 그 글만 `X-LEDGER` 로 건너뛴다.
 4-1. **새 글이 없으면 → STEP 3-E (1년 가는 인기 글, 지침 I-1-5)** — "대상 없음"으로 끝내지 않는다. STEP 3-E 에서도 0편이면 그때만 `log.md` 한 줄 → **STEP 12 → STEP 11**.
 
 ### STEP 3-E. 새 글이 없는 날 — 1년 가는 인기 글 (v3.14 · 지침 I-1-5)
