@@ -1,5 +1,15 @@
 # KoreaPlug 자동 이미지 삽입 태스크 (v7.3 — C 슬롯 요금 비교·절차는 HyperFrames 템플릿 경로(3-6 ③-HF) 우선, 실패하면 그 슬롯만 기존 canvas 경로 / v7.2 — Flow 모델 Nano Banana Pro 고정, 크레딧 차감 시 NB2 폴백 / v7.1 — 밝은 낮·즐거운 사람 무드 + Flow 글당 2장 상한 / v7.0 — 무료 실사 3원화(무료 라이선스 실사진 / Flow 기록 사진 문법 / Claude 모션 그래픽) + 전송 폴백 재정렬 + 장소 오인 배제 + 전송 실패 시 재타이핑 금지 + 업로드 대기 20초 + Flow 교차출처 캡처 + DOM 기반 제출 + 다중 글 연속 처리 + zoom 뷰포트 보호 + 세션 사전 점검 + 사건 설계 + 한국성 + 신체 결손 방지 + 반응형 전송 + Google Flow)
 
+> 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
+> - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+> - **실행 모드**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(문서의 bash 블록을 PC 셸에서 그대로). 없으면 **브리지 모드** — PC 미연결이 아니므로 종료하지 않고 아래로 바꿔 수행한다(새 PC 기본).
+>   - 목록·존재 확인 = `device_list_dir` · 읽기 = `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`
+>   - 쓰기·수정 = 클라우드에서 만들어 `/mnt/user-data/outputs/…`에 두고 `device_commit_files`(기존 파일은 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로)
+>   - 문서의 bash·python 블록 = 필요한 파일을 스테이징해 **클라우드 Bash**에서 `$HOME/mnt/Claude`를 스테이징 폴더(`/mnt/user-data/uploads/Claude`)로 바꿔 실행하고, 바뀐·새 파일만 커밋한다. 네트워크(WP REST·네이버 API 등)는 클라우드에서 된다. 자격증명은 스테이징한 `{CR}\pw.txt`에서 환경변수로만 읽고 값은 출력하지 않는다
+>   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
+>   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
+>   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
 ### 목적
 
 Notion 글 현황 테이블에서 오늘·어제 작성된 WordPress 글을 찾아, **데코 이미지가 3장 미만인 글**에 이미지를 WebP(설명용 모션은 MP4)로 삽입한다 — 단, **증빙+데코 합계가 5장을 넘지 않는 범위**에서만 (3→2→1장 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다.
@@ -1898,7 +1908,7 @@ const r = await fetch(u, {headers: {Range: 'bytes=0-1023'}}); const b = new Uint
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 이미지를 채운 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0

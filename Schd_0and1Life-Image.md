@@ -1,5 +1,15 @@
 # 0and1Life 자동 이미지 삽입 태스크 (v7.4 — 설명컷 중 막대 비교·단계 흐름은 HyperFrames 템플릿 경로(3-10 ⑨-HF) 우선, 실패하면 그 슬롯만 기존 SVG→MP4 경로 · v7.3 — Claude 제작컷은 인라인 SVG 금지, MP4(모션)·WebP(정적)로 렌더해 업로드 · v7.2 — Flow 모델은 Nano Banana Pro 우선(0크레딧일 때만) · v7.1 설명은 Claude 제작컷(모션·정적 SVG) 우선 · 촬영컷은 밝은 일상 톤 · 비용 0원)
 
+> 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
+> - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+> - **실행 모드**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(문서의 bash 블록을 PC 셸에서 그대로). 없으면 **브리지 모드** — PC 미연결이 아니므로 종료하지 않고 아래로 바꿔 수행한다(새 PC 기본).
+>   - 목록·존재 확인 = `device_list_dir` · 읽기 = `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`
+>   - 쓰기·수정 = 클라우드에서 만들어 `/mnt/user-data/outputs/…`에 두고 `device_commit_files`(기존 파일은 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로)
+>   - 문서의 bash·python 블록 = 필요한 파일을 스테이징해 **클라우드 Bash**에서 `$HOME/mnt/Claude`를 스테이징 폴더(`/mnt/user-data/uploads/Claude`)로 바꿔 실행하고, 바뀐·새 파일만 커밋한다. 네트워크(WP REST·네이버 API 등)는 클라우드에서 된다. 자격증명은 스테이징한 `{CR}\pw.txt`에서 환경변수로만 읽고 값은 출력하지 않는다
+>   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
+>   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
+>   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
 ### 목적
 
 Notion 글 현황 테이블에서 오늘 날짜에 draft된 WordPress 글을 찾아, **데코 이미지(촬영컷+설명컷)가 3장 미만인 글**에 이미지를 채운다. 이미지는 두 종류다 (v7.0).
@@ -1934,7 +1944,7 @@ out.join('\n') + '\nsvgInBody:' + document.querySelectorAll('.entry-content svg'
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 이미지를 채운 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0

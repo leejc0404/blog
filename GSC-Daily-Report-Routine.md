@@ -1,5 +1,15 @@
 # 🩺 GSC-Daily-Report-Routine (일간 고장 점검) — v4.2
 
+> 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
+> - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+> - **실행 모드**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(문서의 bash 블록을 PC 셸에서 그대로). 없으면 **브리지 모드** — PC 미연결이 아니므로 종료하지 않고 아래로 바꿔 수행한다(새 PC 기본).
+>   - 목록·존재 확인 = `device_list_dir` · 읽기 = `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`
+>   - 쓰기·수정 = 클라우드에서 만들어 `/mnt/user-data/outputs/…`에 두고 `device_commit_files`(기존 파일은 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로)
+>   - 문서의 bash·python 블록 = 필요한 파일을 스테이징해 **클라우드 Bash**에서 `$HOME/mnt/Claude`를 스테이징 폴더(`/mnt/user-data/uploads/Claude`)로 바꿔 실행하고, 바뀐·새 파일만 커밋한다. 네트워크(WP REST·네이버 API 등)는 클라우드에서 된다. 자격증명은 스테이징한 `{CR}\pw.txt`에서 환경변수로만 읽고 값은 출력하지 않는다
+>   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
+>   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
+>   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
 > **이 문서는 Cowork 예약 작업 `daily-blog-health-check`의 본문이다.**
 > 이 루틴은 **성과 리포트가 아니라 고장 점검**이다. 짝이던 주간 성과 루틴(`GSC-Weekly-Report-Routine.md`)은 2026-10-10 폐지·10/18 삭제됐고, 지금 성과 지표를 정기적으로 보는 루틴은 없다(필요하면 사용자가 요청).
 > ✅ 이 문서가 예약 작업 `5. GSC-Daily-Report-Routine` 의 **본문**이다. 예약에는 이 문서를 읽으라는 진입점만 있으므로, 이 문서만 고치면 다음 실행부터 반영된다.
@@ -223,9 +233,9 @@ GET /wp-json/wp/v2/posts?status={draft|future|publish|pending|trash}&per_page=30
   ```
   ls /sessions/*/mnt/Claude/pw.txt
   ```
-  ✅ **2026-08-17 재확인: `pw.txt`는 `C:\Users\win\Documents\Claude\pw.txt` 에 정상 존재하며 마운트된다.** 키 4종(`KOREAPLUG_WP_USER`/`KOREAPLUG_WP_APP_PASSWORD`/`ONEANDZERO_WP_USER`/`ONEANDZERO_WP_APP_PASSWORD`)과 `PEXELS_API_KEY`가 들어 있다.
+  ✅ **2026-08-17 재확인: `pw.txt`는 `{CR}\pw.txt` 에 정상 존재하며 마운트된다.** 키 4종(`KOREAPLUG_WP_USER`/`KOREAPLUG_WP_APP_PASSWORD`/`ONEANDZERO_WP_USER`/`ONEANDZERO_WP_APP_PASSWORD`)과 `PEXELS_API_KEY`가 들어 있다.
   ⚠️ **舊 진단 "pw.txt를 마운트 가능한 경로로 복사"는 이미 완료된 조치이며, 다시 권고하지 말 것.** 舊 경로 `C:\Users\win\.claude\` 는 더 이상 관련 없다.
-  → 위 `ls`가 실패하면 원인은 파일이 아니라 **그 실행 세션에 폴더가 마운트되지 않은 것**이다. 무인 예약 실행에서는 `request_cowork_directory` 승인 창을 띄울 사람이 없어 여기서 멈춘다. 이때는 `request_cowork_directory`(path=`C:\Users\win\Documents\Claude`)를 1회만 시도하고, 실패하면 ②로 넘어간다.
+  → 위 `ls`가 실패하면 원인은 파일이 아니라 **그 실행 세션에 폴더가 마운트되지 않은 것**이다. 무인 예약 실행에서는 `request_cowork_directory` 승인 창을 띄울 사람이 없어 여기서 멈춘다. 이때는 `request_cowork_directory`(path=`{CR}`)를 1회만 시도하고, 실패하면 ②로 넘어간다.
 
 ② **자격증명 유효성** — REST가 `rest_invalid_param: status` 를 반환하면 **파라미터 문제가 아니라 인증 실패**다. 먼저 위 「데이터 취득 우선순위」의 파싱 코드로 공백 포함 값이 온전히 읽혔는지 확인한다. 파싱이 정상인데도 실패하면 앱 비밀번호가 폐기·재발급된 것이므로, wp-admin > 사용자 > 프로필 > 응용 프로그램 비밀번호에서 새로 발급해 `pw.txt`를 갱신한다.
 
@@ -233,7 +243,7 @@ GET /wp-json/wp/v2/posts?status={draft|future|publish|pending|trash}&per_page=30
 
 셋 다 정상인데 글이 없으면 해당 writer 루틴의 마지막 실행 로그를 확인해 보고한다. → `사용자필요`
 
-**보조 확인 (알람 조건 아님 — 발견 시에만 🔴로 보고)**: 예약 작업 본문이나 `C:\Users\win\Documents\Claude\Scheduled\*/SKILL.md` 에 **평문 앱 비밀번호가 적혀 있으면 즉시 보고**한다. 자격증명은 `pw.txt` 한 곳에만 있어야 한다. (2026-08-08에 구버전 사본 2개에서 발견되어 제거함. 노출됐던 비밀번호는 재발급 전까지 유효하다.)
+**보조 확인 (알람 조건 아님 — 발견 시에만 🔴로 보고)**: 예약 작업 본문이나 `{CR}\Scheduled\*/SKILL.md` 에 **평문 앱 비밀번호가 적혀 있으면 즉시 보고**한다. 자격증명은 `pw.txt` 한 곳에만 있어야 한다. (2026-08-08에 구버전 사본 2개에서 발견되어 제거함. 노출됐던 비밀번호는 재발급 전까지 유효하다.)
 
 ### 8. 신규 사용자 / 스팸 흔적 🔴(신규 관리자) / 🟡(신규 일반 사용자)
 
@@ -544,7 +554,7 @@ GET /wp-json/wp/v2/posts?status={draft|future|publish|pending|trash}&per_page=30
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 이상으로 판정한 점검 항목 수(코드의 `0`을 그 수로 바꾼다). 없으면 0

@@ -1,5 +1,15 @@
 # Schd_0and1Life-Revenue — 0and1Life 수익 루틴 (네이버 쇼핑커넥트 · 수익 레이더) — Cowork 예약 작업용 v1.0 (2026-10-10)
 
+> 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
+> - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+> - **실행 모드**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(문서의 bash 블록을 PC 셸에서 그대로). 없으면 **브리지 모드** — PC 미연결이 아니므로 종료하지 않고 아래로 바꿔 수행한다(새 PC 기본).
+>   - 목록·존재 확인 = `device_list_dir` · 읽기 = `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`
+>   - 쓰기·수정 = 클라우드에서 만들어 `/mnt/user-data/outputs/…`에 두고 `device_commit_files`(기존 파일은 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로)
+>   - 문서의 bash·python 블록 = 필요한 파일을 스테이징해 **클라우드 Bash**에서 `$HOME/mnt/Claude`를 스테이징 폴더(`/mnt/user-data/uploads/Claude`)로 바꿔 실행하고, 바뀐·새 파일만 커밋한다. 네트워크(WP REST·네이버 API 등)는 클라우드에서 된다. 자격증명은 스테이징한 `{CR}\pw.txt`에서 환경변수로만 읽고 값은 출력하지 않는다
+>   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
+>   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
+>   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
 *매일 06:30 KST 실행. 예약 시각이 되면 같은 날 이미 실행됐더라도 다시 진행한다(글별 상태는 `0and1life-revenue\state.json` 이 막아 주므로 같은 글에 블록을 두 번 넣지 않는다).
 
 날짜: 실행 시점의 실제 KST 날짜를 쓴다. 이 프롬프트에 적힌 고정 날짜는 무시한다.
@@ -14,7 +24,7 @@
 3. **주간 수익 리포트**(월요일) — 글별 유입과 상품 블록 현황, 쇼핑커넥트 실적(사용자가 넣어 준 파일이 있으면)을 한 표로 보고한다.
 
 ⚠️ **역할 경계 — 이 루틴은 도구다.** 어떤 글이 물건과 연결되는지(구매 연결 등급), 상품을 고르는 기준, 상품 블록의 위치·문구·고지 문구의 **기준(SSOT)은 작성 지침 `0and1Life-Writer.md` 0-10·2-10** 이다. 이 루틴은 운영 절차와 실행 자산만 정의하고 조항 번호로 참조한다. 상충이 보이면 지침을 따르고 STEP 10에 기록한다.
-- 지침 출처: `C:\Users\win\Documents\Claude\blog\0and1Life-Writer.md`(PC 셸로 읽는다 — 사용자가 커밋하기 전의 최신본이 여기 있다). 읽지 못하면 STEP 4(회수)와 STEP 9·10만 하고 반영·새 슬롯은 하지 않는다.
+- 지침 출처: `{CR}\blog\0and1Life-Writer.md`(PC 셸로 읽는다 — 사용자가 커밋하기 전의 최신본이 여기 있다). 읽지 못하면 STEP 4(회수)와 STEP 9·10만 하고 반영·새 슬롯은 하지 않는다.
 
 ---
 
@@ -22,16 +32,16 @@
 
 | 무엇 | 어디 | 비고 |
 |---|---|---|
-| 작업 폴더 | `C:\Users\win\Documents\Claude\0and1life-revenue\` (PC 셸 `$HOME/mnt/Claude/0and1life-revenue`) | blog 저장소 밖 — 커밋되지 않는다. ⛔ `revenue\`·`koreaplug-revenue\`(KoreaPlug 수익 루틴 폴더)는 쓰지 않는다 — 2026-10-10 두 루틴이 같은 폴더를 써서 상태 파일이 덮인 사고 |
+| 작업 폴더 | `{CR}\0and1life-revenue\` (PC 셸 `$HOME/mnt/Claude/0and1life-revenue`) | blog 저장소 밖 — 커밋되지 않는다. ⛔ `revenue\`·`koreaplug-revenue\`(KoreaPlug 수익 루틴 폴더)는 쓰지 않는다 — 2026-10-10 두 루틴이 같은 폴더를 써서 상태 파일이 덮인 사고 |
 | 글별 상태 | `0and1life-revenue\state.json` | `{"posts": {slug: {...}}, "radar": {키워드: {...}}, "weekly_last": "YYYY-MM-DD"}` — **같은 글에 두 번 넣지 않는 유일한 근거** |
 | 기록 | `0and1life-revenue\log.md`(사람이 읽는 기록, 맨 위에 추가) · `0and1life-revenue\backups\{slug}-{날짜}.json`(반영 전 원본) · `0and1life-revenue\weekly\{날짜}.md` · `0and1life-revenue\inbox\`(사용자가 넣는 쇼핑커넥트 실적 파일) | |
 | 유입 데이터 | `naver-ctr\ctr_engine.py ingest` → `naver-ctr\snapshots\{날짜}.json` | 서치어드바이저 TOP30 CSV(확장 `naver-advisor-export`가 06:00 수집). CTR 판정·plan 기능은 쓰지 않는다 |
 | 수요 조회 | `naver-ctr\naver_volume.py`(월간 검색수·연관어) · `naver-ctr\naver_trend.py`(검색어트렌드) | 사이트 릴레이 경유 |
 | 상위 글 조사 | 사이트 릴레이 `o1/v1/naver-check`(스니펫 1692) | `q`·`type=webkr|blog`·`display` |
-| **쇼핑커넥트 수집·링크 발급** | AIPick 확장 큐 `C:\Users\win\Documents\Claude\naver_blog\tasks\pending\` | 확장이 1분마다 읽어 실행하고 결과를 `naver_blog\inbox\{inbox}\connect.json`·`links.json` 에 쓴 뒤 작업 파일을 `tasks\done\` 으로 옮긴다(AIPick 루틴과 같은 큐 — 한 번에 하나씩 순서대로 처리) |
+| **쇼핑커넥트 수집·링크 발급** | AIPick 확장 큐 `{CR}\naver_blog\tasks\pending\` | 확장이 1분마다 읽어 실행하고 결과를 `naver_blog\inbox\{inbox}\connect.json`·`links.json` 에 쓴 뒤 작업 파일을 `tasks\done\` 으로 옮긴다(AIPick 루틴과 같은 큐 — 한 번에 하나씩 순서대로 처리) |
 | 쇼핑 인기검색어 | `naver_blog\radar\{RUN}_rank.json`·`_rank.md`(AIPick 월·목 회차가 만든 것 — 있으면 읽기만) | 레이더 보조 신호 |
 | 키워드 백로그 | Notion `3a9bfe4a2ae181e08fc9dc8e035388af` | 레이더 결과를 행으로 추가(맨 위 = 최신) |
-| 자격증명 | `C:\Users\win\Documents\Claude\pw.txt` | 값 출력 금지 |
+| 자격증명 | `{CR}\pw.txt` | 값 출력 금지 |
 
 **이 루틴의 작업 이름 접두어는 `REV_`** 다. 큐 작업 파일 `tasks\pending\REV_{RUN}_{n}_{connect|links}.json`, 결과 폴더 `naver_blog\inbox\REV_{RUN}_{n}_{slug 앞 20자}\`. AIPick 작업(`{RUN}_{n}_…`)과 섞이지 않게 한다. `RUN = YYYYMMDD`.
 
@@ -80,7 +90,7 @@ mkdir -p "$R/backups" "$R/weekly" "$R/inbox" "$R/proposals"
 ls "$NB/tasks/pending" "$NB/tasks/done" >/dev/null 2>&1 && echo "queue=있음" || echo "queue=없음"
 echo "$TODAY $NOW naver_in=${NAVER_IN:-없음}"
 ```
-- PC 셸(`device_bash`)로 실행한다. 셸이 없거나 `MISSING` 이면 STEP 10에 사유를 적고 종료한다(이 루틴은 PC 파일·확장 큐가 핵심이라 클라우드 폴백을 하지 않는다).
+- 셸 모드면 PC 셸(`device_bash`)로 실행한다. **셸이 없으면 맨 위 '실행 환경 공통'의 브리지 모드로 진행한다**(2026-11-18 — 파일은 스테이징·커밋, 확장 큐는 `tasks\pending` JSON 커밋, 네트워크 일은 클라우드). `MISSING`(폴더 없음)일 때만 STEP 10에 사유를 적고 종료한다.
 - `queue=없음` 이면 STEP 4~6의 확장 관련 부분을 건너뛰고 STEP 7(레이더)·STEP 9·10만 한다.
 - ⚠️ bash는 매 호출이 새 셸이다. 위 변수 줄을 bash 호출마다 맨 앞에 다시 넣는다.
 - 작성 지침 `0and1Life-Writer.md` 의 **0-10·2-10** 을 읽는다(`sed -n '/^### 0-10/,/^### 0-11\|^---/p'`, `sed -n '/^### 2-10/,/^## Phase 3/p'`). 두 조항이 없으면 STEP 5·6을 건너뛰고 STEP 10에 `📐 지침 0-10·2-10 없음` 을 적는다.
@@ -236,7 +246,8 @@ PushNotification 1회. `<routine_summary>` 의 **첫 문장**(휴대폰 배너)�
 
 | 상황 | 처리 |
 |---|---|
-| PC 셸 없음·`MISSING` | STEP 10에 사유만 적고 종료(클라우드 폴백 없음) |
+| PC 셸 없음 | 브리지 모드로 진행(맨 위 '실행 환경 공통') |
+| `MISSING`(폴더 없음) | STEP 10에 사유만 적고 종료 |
 | 확장 큐 폴더 없음 | STEP 4~6 확장 부분 건너뜀 → 레이더·기록·알림만 |
 | 작업이 `TASK_STALE_DAYS` 넘게 done 안 됨 | `큐 멈춤 의심` 보고. 작업 파일 유지(지우지 않음). 큐 서버·확장은 사용자 확인 |
 | `connect_search` 결과 0건·조건 맞는 상품 0개 | 그 글 `skip` · `상품 없음({검색어})` → REVISIT_DAYS 뒤 다른 검색어로 재시도 |
@@ -259,7 +270,7 @@ PushNotification 1회. `<routine_summary>` 의 **첫 문장**(휴대폰 배너)�
 | 브랜드커넥트 가입·로그인(확장이 쓰는 크롬 프로필) | ✅ 사용자 확인(10/10) | 로그인이 풀리면 확장 작업이 `err` 로 돌아온다 |
 | AIPick 확장·큐 서버(`naver_blog\uploader\server.py`) | ✅ 10/8 `connect_search`·`connect_links` 실측 동작 | 새벽에 PC·크롬·서버가 켜져 있어야 한다 |
 | 서치어드바이저 CSV 확장(`naver-advisor-export`) 06:00 | ✅ | 유입 순위 근거 |
-| Cowork 예약 `6. 0and1life 수익 루틴` 06:30 KST · 폴더 `C:\Users\win\Documents\Claude`·`다운로드\네이버_수집` | ✅ 2026-10-10 교체(이전 이름 `6. 0and1life 네이버 CTR 개선` 06:00) | 다음 개정 때 이 파일 전문으로 다시 교체 |
+| Cowork 예약 `6. 0and1life 수익 루틴` 06:30 KST · 폴더 `{CR}`·`다운로드\네이버_수집` | ✅ 2026-10-10 교체(이전 이름 `6. 0and1life 네이버 CTR 개선` 06:00) | 다음 개정 때 이 파일 전문으로 다시 교체 |
 | (구) `Schd_0and1Life-NaverCTR.md` · `naver-ctr\` 엔진 | md는 2026-10-18 삭제 · 엔진 폴더는 유지 | `ctr_engine.py ingest`·`naver_volume.py`·`naver_trend.py` 만 계속 쓴다 |
 
 ## Cowork 원라이너
@@ -272,7 +283,7 @@ PushNotification 1회. `<routine_summary>` 의 **첫 문장**(휴대폰 배너)�
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 상품 블록을 넣은 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0

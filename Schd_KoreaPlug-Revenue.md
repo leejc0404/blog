@@ -1,8 +1,18 @@
 # Schd_KoreaPlug-Revenue — KoreaPlug 수익·유입 루틴 (Cowork 예약 작업 `7. KoreaPlug 수익·유입`)
 
+> 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
+> - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+> - **실행 모드**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(문서의 bash 블록을 PC 셸에서 그대로). 없으면 **브리지 모드** — PC 미연결이 아니므로 종료하지 않고 아래로 바꿔 수행한다(새 PC 기본).
+>   - 목록·존재 확인 = `device_list_dir` · 읽기 = `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`
+>   - 쓰기·수정 = 클라우드에서 만들어 `/mnt/user-data/outputs/…`에 두고 `device_commit_files`(기존 파일은 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로)
+>   - 문서의 bash·python 블록 = 필요한 파일을 스테이징해 **클라우드 Bash**에서 `$HOME/mnt/Claude`를 스테이징 폴더(`/mnt/user-data/uploads/Claude`)로 바꿔 실행하고, 바뀐·새 파일만 커밋한다. 네트워크(WP REST·네이버 API 등)는 클라우드에서 된다. 자격증명은 스테이징한 `{CR}\pw.txt`에서 환경변수로만 읽고 값은 출력하지 않는다
+>   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
+>   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
+>   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
 *v1.0 · 2026-10-10 신설 — `Schd_KoreaPlug-GSCCTR`(7. KoreaPlug 구글 CTR 개선)을 대체하고, `쇼츠) KoreaPlug 대본 2편 만들기 (주간)` 작업을 흡수한다.*
 *매일 07:00 KST 실행(2026-10-20 06:30 → 07:00, 그날 KoreaPlug 글이 06:00에 공개된 뒤 돌기 위해) · **07:50 마감**(사용자 PC가 08:00 전후 꺼진다) · 요일마다 한 가지 일만 깊게 한다.*
-*원본 문서: `C:\Users\win\Documents\Claude\blog\Schd_KoreaPlug-Revenue.md` — 예약 작업은 이 문서를 읽는 진입점만 갖는다. 고칠 때는 이 문서만 바꾼다.*
+*원본 문서: `{CR}\blog\Schd_KoreaPlug-Revenue.md` — 예약 작업은 이 문서를 읽는 진입점만 갖는다. 고칠 때는 이 문서만 바꾼다.*
 
 날짜: 실행 시점의 실제 KST 날짜와 요일을 쓴다. 이 프롬프트에 적힌 고정 날짜는 무시한다.
 
@@ -49,7 +59,7 @@
 
 | 무엇 | 위치 | 비고 |
 |---|---|---|
-| 작업 폴더 | `C:\Users\win\Documents\Claude\koreaplug-revenue\` | 이 루틴이 쓰는 모든 기록. ⛔ `revenue_0and1life\`(0and1Life 수익 루틴 전용)는 읽지도 쓰지도 않는다 |
+| 작업 폴더 | `{CR}\koreaplug-revenue\` | 이 루틴이 쓰는 모든 기록. ⛔ `revenue_0and1life\`(0and1Life 수익 루틴 전용)는 읽지도 쓰지도 않는다 |
 | 진행 상태 | `koreaplug-revenue\state.json` | 회차·모듈별 진행, 승인 항목 처리 이력, 체크리스트 |
 | 승인함 | `koreaplug-revenue\승인.md` | 루틴이 제안을 적고, 사용자가 `[x]` 로 승인한다 |
 | 작업 기록 | `koreaplug-revenue\log.md` | 최신이 위. 무엇을 바꿨는지, 전후 값 |
@@ -58,10 +68,10 @@
 | 아마존 | `koreaplug-revenue\amazon\placements.csv` · `koreaplug-revenue\amazon\config.json` | 상품 자리 목록 · 제휴 태그(가입 후 사용자가 기입) |
 | 유튜브 | `koreaplug-revenue\youtube\health-{날짜}.md` · `koreaplug-revenue\youtube\채널제안.md` | 공정 점검 결과 · 채널 기본기 제안 |
 | 주간 보고 | `koreaplug-revenue\report-{날짜}.md` | 일요일 산출물. 대화에도 첨부한다 |
-| 진단 원본 | `C:\Users\win\Documents\Claude\koreaplug_audit_2026-10-05\` | `koreaplug_진단_개선안_2026-10-05.md`(배치 A~G) · `content_audit.json`(글 173편별 `action`·`dup_cluster`·`value_score`) |
-| 쇼츠 공정 | `C:\Users\win\Documents\Claude\shorts\` | `대본만들기.md`(SSOT) · `제작표준.md` · `자동화-구조.md` · `job.template.json` · `episodes.csv` · `queue\` · `queue\_done\` · `queue\_failed\` · `broll\` · `bgm\` · `pipeline.log` · `pipeline-마지막실행.txt` · `audit_history.csv` |
-| 글 점검 도구 | `C:\Users\win\Documents\Claude\gsc-ctr\rm_check.py` · `gsc-ctr\work\pubcheck.py` | Rank Math 근사 점검 · 공개 페이지(구글봇) 점검 — 옛 CTR 루틴 자산을 그대로 쓴다 |
-| 자격증명 | `C:\Users\win\Documents\Claude\pw.txt` | `KOREAPLUG_WP_USER` · `KOREAPLUG_WP_APP_PASSWORD` — 값 출력 금지 |
+| 진단 원본 | `{CR}\koreaplug_audit_2026-10-05\` | `koreaplug_진단_개선안_2026-10-05.md`(배치 A~G) · `content_audit.json`(글 173편별 `action`·`dup_cluster`·`value_score`) |
+| 쇼츠 공정 | `{CR}\shorts\` | `대본만들기.md`(SSOT) · `제작표준.md` · `자동화-구조.md` · `job.template.json` · `episodes.csv` · `queue\` · `queue\_done\` · `queue\_failed\` · `broll\` · `bgm\` · `pipeline.log` · `pipeline-마지막실행.txt` · `audit_history.csv` |
+| 글 점검 도구 | `{CR}\gsc-ctr\rm_check.py` · `gsc-ctr\work\pubcheck.py` | Rank Math 근사 점검 · 공개 페이지(구글봇) 점검 — 옛 CTR 루틴 자산을 그대로 쓴다 |
+| 자격증명 | `{CR}\pw.txt` | `KOREAPLUG_WP_USER` · `KOREAPLUG_WP_APP_PASSWORD` — 값 출력 금지 |
 
 설정값(사용자만 수정):
 ```
@@ -325,7 +335,7 @@ KoreaPlug 수익·유입 {TODAY}({요일}) — {모듈}: {가장 중요한 결�
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 그날 모듈에서 처리한 항목(승인 실행 + 새 제안 + 대본) 수(코드의 `0`을 그 수로 바꾼다). 없으면 0

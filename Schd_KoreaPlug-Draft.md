@@ -1,3 +1,13 @@
+> 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
+> - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+> - **실행 모드**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(문서의 bash 블록을 PC 셸에서 그대로). 없으면 **브리지 모드** — PC 미연결이 아니므로 종료하지 않고 아래로 바꿔 수행한다(새 PC 기본).
+>   - 목록·존재 확인 = `device_list_dir` · 읽기 = `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`
+>   - 쓰기·수정 = 클라우드에서 만들어 `/mnt/user-data/outputs/…`에 두고 `device_commit_files`(기존 파일은 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로)
+>   - 문서의 bash·python 블록 = 필요한 파일을 스테이징해 **클라우드 Bash**에서 `$HOME/mnt/Claude`를 스테이징 폴더(`/mnt/user-data/uploads/Claude`)로 바꿔 실행하고, 바뀐·새 파일만 커밋한다. 네트워크(WP REST·네이버 API 등)는 클라우드에서 된다. 자격증명은 스테이징한 `{CR}\pw.txt`에서 환경변수로만 읽고 값은 출력하지 않는다
+>   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
+>   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
+>   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
 *예약된 트리거 시간이 되면 해당 일자에 먼저 루틴이 실행되었더라도 무조건 다시 진행한다.
 
 > **2026-10-02 개정**: STEP 2 에 `[2-v13]` 옛 방식(v12) 초안 거르기 추가 — 2026-09-21 이전 작성분·v12 태그·정의형 제목은 업로드하지 않고 `보류(v12)` 로 표시한다.
@@ -84,7 +94,7 @@ WebFetch → `https://raw.githubusercontent.com/leejc0404/blog/main/KoreaPlug-Dr
 **STOP하지 않는다.** 아래를 수행하고 draft 를 계속한다:
 
 1. **작성** — 결번 조항의 초안을 쓴다. 근거는 ⓐ 이 문서 **[부록 A]** → ⓑ `0and1Life-Draft.md` 의 대응 조항 → ⓒ 최근 7일 반려 로그·실행 로그의 실측 사실 **순서로만** 삼는다. 근거 없는 창작 금지
-2. **반영** — `C:\Users\win\Documents\Claude\blog\KoreaPlug-Draft.md` 에 **직접 써 넣는다.** 조항 제목에 `(자동 신설 {TODAY}, 루틴 작성)` 표기
+2. **반영** — `{CR}\blog\KoreaPlug-Draft.md` 에 **직접 써 넣는다.** 조항 제목에 `(자동 신설 {TODAY}, 루틴 작성)` 표기
    - ⛔ **추가만 한다.** 기존 조항 삭제·번호 변경 금지
 3. **커밋 금지** — git commit·push 는 **하지 않는다.** 사용자가 직접 한다
 4. **즉시 적용** — 신설 조항을 그 회차 판정 기준으로 바로 적용한다
@@ -151,13 +161,13 @@ CANDIDATE_POSTS가 비어 있으면 → **STEP 6m-Q(예약 큐 처리)를 먼저
    ls /sessions/*/mnt/Claude/pw.txt 2>/dev/null
    ```
    경로가 나오면 → **①로 바로 진행하고 `request_cowork_directory` 를 호출하지 않는다.** 세션명은 실행마다 달라지므로 와일드카드로 찾고, 확인된 실제 경로를 이후 단계에서 그대로 쓴다.
-2) 1)이 **빈 결과일 때만** `mcp__cowork__request_cowork_directory { path: "C:\Users\win\Documents\Claude" }` 를 **1회** 호출한다. 승인 창이 응답 없이 닫히면 **재시도하지 말고 즉시 ②로 이동한다.**
+2) 1)이 **빈 결과일 때만** `mcp__cowork__request_cowork_directory { path: "{CR}" }` 를 **1회** 호출한다. 승인 창이 응답 없이 닫히면 **재시도하지 말고 즉시 ②로 이동한다.**
 3) 이 단계에서는 **승인이 필요한 호출을 다른 도구 호출과 같은 블록에 묶지 않는다.** 묶으면 함께 실패한다.
 
 > ⓪을 조건부로 생략하는 것은 정상 동작이며 오류가 아니다. 폴더가 이미 연결된 세션에서 호출하는 쪽이 사고다.
 
 **① pw.txt (Basic Auth)**
-`C:\Users\win\Documents\Claude\pw.txt` 의 `KOREAPLUG_WP_APP_PASSWORD` 값으로 Basic Auth.
+`{CR}\pw.txt` 의 `KOREAPLUG_WP_APP_PASSWORD` 값으로 Basic Auth.
 ⚠️ 비밀번호 값을 응답·로그·Notion에 출력하지 않는다. bash 안에서 변수로만 다룬다:
 ```bash
 cd {⓪에서 확인한 실제 경로}
@@ -842,7 +852,7 @@ koreaplug.com은 존재하지 않는 슬러그에도 **HTTP 200 + "Page Not Foun
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 WP에 초안으로 올린 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0

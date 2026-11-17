@@ -1,5 +1,15 @@
 # Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v4.0.1 2026-10-28 — 하루 1편 제한 폐지)
 
+> 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
+> - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+> - **실행 모드**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(문서의 bash 블록을 PC 셸에서 그대로). 없으면 **브리지 모드** — PC 미연결이 아니므로 종료하지 않고 아래로 바꿔 수행한다(새 PC 기본).
+>   - 목록·존재 확인 = `device_list_dir` · 읽기 = `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`
+>   - 쓰기·수정 = 클라우드에서 만들어 `/mnt/user-data/outputs/…`에 두고 `device_commit_files`(기존 파일은 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로)
+>   - 문서의 bash·python 블록 = 필요한 파일을 스테이징해 **클라우드 Bash**에서 `$HOME/mnt/Claude`를 스테이징 폴더(`/mnt/user-data/uploads/Claude`)로 바꿔 실행하고, 바뀐·새 파일만 커밋한다. 네트워크(WP REST·네이버 API 등)는 클라우드에서 된다. 자격증명은 스테이징한 `{CR}\pw.txt`에서 환경변수로만 읽고 값은 출력하지 않는다
+>   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
+>   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
+>   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
 **v4.0에서 바뀐 것**(지침 v4.0 I-2-V4 · I-3-M 대응 — 10/27 사용자 "앞으로 모든 글은 지금 나와 한 이 방식으로" · "첫 화면에는 이 글이 뭔지 제목이 뚜렷하게 가장 크게"): ① STEP 4 — 글의 **대표 이미지**(`featured_media`)를 받아 `img\hero.jpg` 로 두고, 사진 속 사물의 좌표(접히는 선·모서리 등)를 격자 미리보기로 재서 `meta.json.photo` 에 적는다(지침 I-2-V4 E) ② STEP 4.5-0 — 대본은 **지침 I-2-V4 A(사전 4가지) → B(6박 문장 틀) → D(말투)** 로 쓴다. 이득 문장·대본 시험·통과할 때까지 규칙은 v3.16 그대로 ③ STEP 5·6 — 기본 템플릿 **F27_photo_story**(견본: `instagram\2026-10-28\iphone-duo-defect-screen-repair-cost\build_hf_vars.py`), 첫 화면 제목 144px 두 줄이 가장 큰 글자(I-2-V4 C), 글자 x 80~1000 · 카메라 숨 1.012 이하(I-2-V4 F) ④ 효과음 큐는 `build_hf_vars.py` 가 같은 사건 시각(`ev`)에서 만든다(F27 은 장면 목록 대신 사건 시각 표) — 싱크 검사는 큐마다 화면 변화(0.8 이상) 검사로 ⑤ ⑰ 시험 질문에 (0) 무슨 얘기인지 한 줄 · (g) 장면별 그림 도움·말투(지침 I-5 ⑰ · I-2-V4 H) ⑥ 길이 25~30초. **그 밖의 단계·문구는 v3.16 그대로다.**
 
 **v3.16에서 바뀐 것**(지침 v3.16 대응 — 10/27 사용자 "떨어지면 대상이 승인될 때까지 진행하도록 수정해라 · 잘못된 기준이거나 작성 자체에 문제가 있으면 지침을 수정해라"): ① **보류(held) 폐지 — 통과할 때까지 고친다.** STEP 7 ⑪·⑫ 의 '1회만'·'최대 3회 → held' 를 지침 I-5-A 단계표(판 1~3 지적 수정 → 4~6 대본 다시 → 7~ 콘셉트 교체)로 바꾼다 ② 실행이 끊기면 `ledger.reels.{slug}.status = "retry"` — 다음 회차 STEP 3 이 **새 글보다 먼저** 그 글을 이어서 고친다 ③ 시험자 안내는 지침 I-5-A 고정 문구(엔딩 빈칸·루프 문장은 (d) 에서 뺌 · (d) 기준표) · '모름' 중 범위 질문은 (f) 로 · 통과 = (d) 8 이상 또는 (d) 7 + 나머지 전부 통과 ④ STEP 4.5-0 ③ 대본 시험 (f) 의 질문을 엔딩 질문으로 고정(지침 I-2-12 ①) · 작성 규칙 지침 I-2-11 ⑪~⑬(화면 글자 = 내레이션 말 · 본문 조건 보존 · 한 예시) ⑤ 알림 `🔁 수정 {n}판` 줄 · `retry` 알림 형식 ⑥ 오류 처리 표·원라이너 갱신. 환경 오류(`E-*`)는 그대로다. **그 밖의 단계·문구는 v3.15 그대로다.**
@@ -43,7 +53,7 @@
 
 | 무엇 | 어디 | 비고 |
 |---|---|---|
-| 자격증명 | `C:\Users\win\Documents\Claude\pw.txt` | `ONEANDZERO_WP_USER` `ONEANDZERO_WP_APP_PASSWORD` `IG_USER_ID` `IG_ACCESS_TOKEN` — **값 출력 금지** |
+| 자격증명 | `{CR}\pw.txt` | `ONEANDZERO_WP_USER` `ONEANDZERO_WP_APP_PASSWORD` `IG_USER_ID` `IG_ACCESS_TOKEN` — **값 출력 금지** |
 | 릴레이 호출 | `instagram\relay\ig.py` | `me / limit / refresh / container / carousel / reel / status / media / publish / insights / my_media` |
 | **장면 엔진 v12** | `instagram\relay\reel_engine.py` | `reel_spec.json` → mp4(무음) + `_timeline.json` + `_cover.jpg` · `--stills <dir>` 로 장면별 대표 프레임 · **캐릭터 없음 레이아웃이 기본**(`REEL_MASCOT=gongil` 은 과거 회차 재현에만) |
 | **효과음 v2.1** | `instagram\relay\build_reel_sfx_v2.py` | `_timeline.json` → wav (16종, 전부 합성음 · 노이즈·사각파 없음 · 피크 -12dBFS) |
@@ -342,7 +352,7 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 | 프로필 링크 = 허브 `/ig/?utm_...=ig_bio` | ✅ | 모바일 앱에서만 변경 가능 |
 | 허브 페이지 1922 공개·index | ✅ | 제목·메타 고정, 카드만 추가 |
 | 전달 페이지 `reel-dl-latest` | ✅ page 1980 | 구글 문서가 가리키는 고정 주소 — 삭제 금지 |
-| Cowork 예약 `8. 0and1life 인스타 릴스`(매일 06:00 KST, PC 연결, `C:\Users\win\Documents\Claude`·`instagram` 연결) | ✅ 진입점 방식(2026-10-12 확인) — 예약 본문은 이 파일을 끝까지 읽고 수행하라는 짧은 안내뿐 | **이 파일만 고치면 다음 실행부터 반영**된다. 예약 본문은 바꾸지 않는다. 단 지침(`0and1Life-Insta.md`)은 STEP 0이 GitHub에서 읽으므로 **커밋해야** 반영된다 |
+| Cowork 예약 `8. 0and1life 인스타 릴스`(매일 06:00 KST, PC 연결, `{CR}`·`instagram` 연결) | ✅ 진입점 방식(2026-10-12 확인) — 예약 본문은 이 파일을 끝까지 읽고 수행하라는 짧은 안내뿐 | **이 파일만 고치면 다음 실행부터 반영**된다. 예약 본문은 바꾸지 않는다. 단 지침(`0and1Life-Insta.md`)은 STEP 0이 GitHub에서 읽으므로 **커밋해야** 반영된다 |
 | HF 키트 `blog\tools\hf\`(`hf_render.py`·`hf_reel_insert.py`·`templates/_common`) GitHub | ✅ 2026-10-10·10-11 회차에서 clone·렌더 확인 | 없으면 STEP 6-E 엔진 경로 |
 | `PUBLISH_MODE` | `HANDOFF` | 유행 음원 때문에 기본은 반자동. AUTO는 회차별 지시로만 |
 | 허용 도메인 `speech.platform.bing.com` (Edge 음성) | ✅ 2026-10-19 사용자 추가 | `edge-tts` 는 `--proxy $HTTPS_PROXY`(파이썬은 `proxy=`)로 호출해야 연결된다 |
@@ -360,7 +370,7 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 만들어 전달한 릴스 수(코드의 `0`을 그 수로 바꾼다). 없으면 0

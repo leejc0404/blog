@@ -1,26 +1,41 @@
-[루틴 : aipick-weekly — 네이버 블로그 ironeye 「먹어보고 따져본 리스트」 AI 리뷰분석 · **월·목 03:00** 실행 · 제품군 N개(월 4 · 목 3) → 수집 → 분석 → 글 N편 → 임시저장 업로드 → 사용자가 매일 1편 발행]
+[루틴 : aipick-weekly — 네이버 블로그 ironeye 「먹어보고 따져본 리스트」 AI 리뷰분석 · **월·목 02:00** 실행 · 제품군 N개(월 4 · 목 3) → 수집 → 분석 → 글 N편 → 임시저장 업로드 → 사용자가 매일 1편 발행]
 
-v3.2 · 2026-10-28 (정보글 구성 — 가이드 3-2c: STEP 4 `naver_collect`가 갤러리 이미지도 수집(`collect.js images`) · STEP 5-C 질문 집계 `{주제}_counts.json`(인용문 포함) · STEP 6 `cards_info.py`(썸네일 TOP3·다른 걸 고른 사람들) + `fetch_gallery.py`(제품 갤러리 컷) · STEP 7 `meta.layout:"v3.2"`·`<hk>`·`<sm>`·⭐ · 사진 제목 줄은 captions.label(사진 위)·썸네일 mark_before(표식 줄 없음) · `주제.txt` → 발행 레이어 주제 선택 · 7-D 결과에서 본문 앞부분·`주제 확인:` 확인) · v3.1 · 2026-10-27 (휴대폰 읽기 개편 — 가이드 v3.1 3-2b: STEP 6 본문 이미지 = 카드 ⓪·① + 제품 사진 3장(`[사진n 삽입]`, V1~V3 카드는 본문 제외) · 사진 설명 `_photo_caps.py`(captions.py 뒤) · STEP 7 `meta.layout:"v3.1"`·제품명 `<pn>`·`%` 금지·단점은 꿀팁 블록에서만 · check.py v3.1) · v3.0 · 2026-10-17 (정보성 전환 — STEP 2-0/3 블루오션 관문(`kw_combo.py` 조합 키워드, A·B 없으면 탈락) · STEP 4 모델 = 커넥트 리뷰 수 상위 3개(수수료·가격대 분산 폐지, 2N 작업) · STEP 5-C 주제 걱정 전수 집계 `*_counts.json` → `meta.pick_order`·`slot_titles`·`benefit[].plus`·`cons_mode` · STEP 7 제목 = 핵심 걱정 훅(가이드 3-1-⑨) · 7-D 업로드 결과 자동 재확인(링크 카드 3/3·카테고리·태그 → 실패 시 즉시 재큐) · STEP 0 ⑥ 수동 실행 공개 예정일 규칙 — 가이드 v3.0 0-5·0-5c·2-6·2-7c·3-1-⑨·3-3·3-7) · v2.9c · 2026-10-17 (광고 티 빼기 — STEP 6-1 썸네일 = 조사 결과 톤(키워드·큰 숫자·`meta.thumb_line` 발견 한 줄·작은 사진 1장) · V 카드 카피 → 실제 리뷰 인용 `meta.benefit[key].quote`(`quotes.py count` 확인) — 가이드 v2.9c Phase 4) · v2.9b · 2026-10-17 (클릭 이유·사는 이유·의외의 발견 — STEP 5-F `findings.py` · 세 번째 슬롯 = 사는 이유 1위(`analyze.py final` reason · `meta.slot3_title`) · STEP 6-1 썸네일 = 추천 3선 몽타주 + 질문 훅(1위 모델명 없음) · STEP 7 꿀팁 ① 수치 반전 1줄·블록 ③ 끝 "💡 리뷰에서 발견"·▶ 링크 3줄·`<br>` 18자/소제목 14자 · 7-B check.py v2.9b — 가이드 v2.9b 2-6·2-7b·3-2a·3-3·Phase 4) · v2.9 · 2026-10-17 (사진 카드 개편 — STEP 6 `fetch_images.py`(큐 서버) → `cards_photo.py` 5장(썸네일·요약·비교 3) · Q·② 카드 폐지 · 소제목 ①~④ 번호 · 벽돌색 1개 — 가이드 v2.9 3-2a·3-3·Phase 4) · v2.8 · 2026-10-16 (모바일 개편 — STEP 6 카드에 1위 모델명·가격·사지 마세요 줄 · STEP 7 본문 900~1,200자·소주제 4블록·FAQ 1·모바일 레이아웃(가운데 정렬·`<br>` 줄바꿈·굵게 1종) · 7-B check.py v2.8 — 가이드 v2.8 3-2·3-2a·3-3·3-5 ⓪·Phase 4) · v2.7.1 · 2026-10-15 (임시저장 때 카테고리 선택·반영 확인 필수 — STEP 7-C · STEP 0 ③ · STEP 9, 가이드 3-7) · v2.7 · 2026-10-12 (노출·선택 개편: STEP 3-D 키워드 블루오션 점수 `keyword_score.py` · STEP 5-T 구매자 꿀팁 `tips.py` · STEP 7 제목 = 블루오션 롱테일 + "(네이버 구매 리뷰 N개)" · 신뢰 훅 · 본문 1,800~2,300자·이미지 7장·링크 4+카드 3 — 가이드 v2.7 0-5b·2-7·3-1-⑧·3-2·3-3) · v2.6 · 2026-10-10 (업로드를 **임시저장 전용**으로 전환 · 발행된 글 재업로드·삭제 금지 · STEP 0 ⑤ 색인 점검 `idx_check.py` — 가이드 v2.6 3-7·5-3) · v2.5 · 2026-10-08 (STEP 10 네이버 클립용 세로 영상 — HyperFrames `review_bars` · 선택 · **STEP 9 리포트까지 끝난 뒤에만** · 업로드 큐와 무관 · 실패·시간 부족이면 건너뜀 · 가이드 v2.5 4-C) · v2.4.3 · 2026-10-08 ("추천" 금지 → 필수 아님으로 완화) · v2.4.2 · 2026-10-08 (2-C BT 조회어에서 "추천" 제거 — 가이드 3-1-⑦) · v2.4.1 · 2026-10-08 (STEP 2-S 검색광고 `naver_sa.py` 월간 검색량·연관키워드 → ④축 수치 · 가이드 v2.4.1) · v2.4 · 2026-10-08 (STEP 2-R 데이터랩 인기검색어 40·50·60대 `naver_rank.py` 1순위 · STEP 2-T 시기 트리거 WebSearch · 후보 절반 이상 ①에서 · 가이드 v2.4 Phase 0) · v2.3 · 2026-10-06 (월·목 03:00 2회 실행(PC가 08:00 전후 꺼짐 → 07:30 마감) · 월 4편/목 3편 · 공개 예정일 큐 이름 · SR40·TR40 관문 — 가이드 v2.3) · v2.2 · 2026-10-06 (석PD 카피 법칙 01 반영: 독자 우선 제목 검사 · 도입 3단 · 카드 Q+V1~V3 `cards_v22.py` · check.py 7항목 · 가이드 v2.2) · v2.1 · 2026-10-05 (1회전 실측 반영: SR 실측을 STEP 2 맨 앞으로 · 서버 실행기 `tasks\run` · 확장 자동 리로드 · 카드 7장·captions.json · 링크 카드 · 형식 A/B/C · 쿠팡 보류) · v2.0 2026-10-02 (단일 스케줄·순차 실행·3편/회) · v1.4 네이버 리뷰 · v1.3 확장 자동 수집 · v1.1 ironeye 통합 · 위치: `C:\Users\win\Documents\Claude\naver_blog\` (GitHub 미사용)
+v3.3 · 2026-11-18 (새 PC 이전 — 사용자 폴더 `C:\Users\win` → 연결 폴더 루트 `CR`로 일반화 · **PC 셸(`device_bash`) 없는 PC 대체 실행 모드** 추가(파일 읽기 = `device_stage_files`, 쓰기 = 클라우드에서 만들어 `device_commit_files`, 대기 = 클라우드 Bash `sleep` + `device_list_dir`, 스크립트 = 큐 서버 `tasks\run`) · 큐 서버 미응답 시 처리 · 실행 기록 한 줄 대체 경로 · 실행 시각을 실제 예약(월·목 02:00)에 맞춤) · v3.2 · 2026-10-28 (정보글 구성 — 가이드 3-2c: STEP 4 `naver_collect`가 갤러리 이미지도 수집(`collect.js images`) · STEP 5-C 질문 집계 `{주제}_counts.json`(인용문 포함) · STEP 6 `cards_info.py`(썸네일 TOP3·다른 걸 고른 사람들) + `fetch_gallery.py`(제품 갤러리 컷) · STEP 7 `meta.layout:"v3.2"`·`<hk>`·`<sm>`·⭐ · 사진 제목 줄은 captions.label(사진 위)·썸네일 mark_before(표식 줄 없음) · `주제.txt` → 발행 레이어 주제 선택 · 7-D 결과에서 본문 앞부분·`주제 확인:` 확인) · v3.1 · 2026-10-27 (휴대폰 읽기 개편 — 가이드 v3.1 3-2b: STEP 6 본문 이미지 = 카드 ⓪·① + 제품 사진 3장(`[사진n 삽입]`, V1~V3 카드는 본문 제외) · 사진 설명 `_photo_caps.py`(captions.py 뒤) · STEP 7 `meta.layout:"v3.1"`·제품명 `<pn>`·`%` 금지·단점은 꿀팁 블록에서만 · check.py v3.1) · v3.0 · 2026-10-17 (정보성 전환 — STEP 2-0/3 블루오션 관문(`kw_combo.py` 조합 키워드, A·B 없으면 탈락) · STEP 4 모델 = 커넥트 리뷰 수 상위 3개(수수료·가격대 분산 폐지, 2N 작업) · STEP 5-C 주제 걱정 전수 집계 `*_counts.json` → `meta.pick_order`·`slot_titles`·`benefit[].plus`·`cons_mode` · STEP 7 제목 = 핵심 걱정 훅(가이드 3-1-⑨) · 7-D 업로드 결과 자동 재확인(링크 카드 3/3·카테고리·태그 → 실패 시 즉시 재큐) · STEP 0 ⑥ 수동 실행 공개 예정일 규칙 — 가이드 v3.0 0-5·0-5c·2-6·2-7c·3-1-⑨·3-3·3-7) · v2.9c · 2026-10-17 (광고 티 빼기 — STEP 6-1 썸네일 = 조사 결과 톤(키워드·큰 숫자·`meta.thumb_line` 발견 한 줄·작은 사진 1장) · V 카드 카피 → 실제 리뷰 인용 `meta.benefit[key].quote`(`quotes.py count` 확인) — 가이드 v2.9c Phase 4) · v2.9b · 2026-10-17 (클릭 이유·사는 이유·의외의 발견 — STEP 5-F `findings.py` · 세 번째 슬롯 = 사는 이유 1위(`analyze.py final` reason · `meta.slot3_title`) · STEP 6-1 썸네일 = 추천 3선 몽타주 + 질문 훅(1위 모델명 없음) · STEP 7 꿀팁 ① 수치 반전 1줄·블록 ③ 끝 "💡 리뷰에서 발견"·▶ 링크 3줄·`<br>` 18자/소제목 14자 · 7-B check.py v2.9b — 가이드 v2.9b 2-6·2-7b·3-2a·3-3·Phase 4) · v2.9 · 2026-10-17 (사진 카드 개편 — STEP 6 `fetch_images.py`(큐 서버) → `cards_photo.py` 5장(썸네일·요약·비교 3) · Q·② 카드 폐지 · 소제목 ①~④ 번호 · 벽돌색 1개 — 가이드 v2.9 3-2a·3-3·Phase 4) · v2.8 · 2026-10-16 (모바일 개편 — STEP 6 카드에 1위 모델명·가격·사지 마세요 줄 · STEP 7 본문 900~1,200자·소주제 4블록·FAQ 1·모바일 레이아웃(가운데 정렬·`<br>` 줄바꿈·굵게 1종) · 7-B check.py v2.8 — 가이드 v2.8 3-2·3-2a·3-3·3-5 ⓪·Phase 4) · v2.7.1 · 2026-10-15 (임시저장 때 카테고리 선택·반영 확인 필수 — STEP 7-C · STEP 0 ③ · STEP 9, 가이드 3-7) · v2.7 · 2026-10-12 (노출·선택 개편: STEP 3-D 키워드 블루오션 점수 `keyword_score.py` · STEP 5-T 구매자 꿀팁 `tips.py` · STEP 7 제목 = 블루오션 롱테일 + "(네이버 구매 리뷰 N개)" · 신뢰 훅 · 본문 1,800~2,300자·이미지 7장·링크 4+카드 3 — 가이드 v2.7 0-5b·2-7·3-1-⑧·3-2·3-3) · v2.6 · 2026-10-10 (업로드를 **임시저장 전용**으로 전환 · 발행된 글 재업로드·삭제 금지 · STEP 0 ⑤ 색인 점검 `idx_check.py` — 가이드 v2.6 3-7·5-3) · v2.5 · 2026-10-08 (STEP 10 네이버 클립용 세로 영상 — HyperFrames `review_bars` · 선택 · **STEP 9 리포트까지 끝난 뒤에만** · 업로드 큐와 무관 · 실패·시간 부족이면 건너뜀 · 가이드 v2.5 4-C) · v2.4.3 · 2026-10-08 ("추천" 금지 → 필수 아님으로 완화) · v2.4.2 · 2026-10-08 (2-C BT 조회어에서 "추천" 제거 — 가이드 3-1-⑦) · v2.4.1 · 2026-10-08 (STEP 2-S 검색광고 `naver_sa.py` 월간 검색량·연관키워드 → ④축 수치 · 가이드 v2.4.1) · v2.4 · 2026-10-08 (STEP 2-R 데이터랩 인기검색어 40·50·60대 `naver_rank.py` 1순위 · STEP 2-T 시기 트리거 WebSearch · 후보 절반 이상 ①에서 · 가이드 v2.4 Phase 0) · v2.3 · 2026-10-06 (월·목 03:00 2회 실행(PC가 08:00 전후 꺼짐 → 07:30 마감) · 월 4편/목 3편 · 공개 예정일 큐 이름 · SR40·TR40 관문 — 가이드 v2.3) · v2.2 · 2026-10-06 (석PD 카피 법칙 01 반영: 독자 우선 제목 검사 · 도입 3단 · 카드 Q+V1~V3 `cards_v22.py` · check.py 7항목 · 가이드 v2.2) · v2.1 · 2026-10-05 (1회전 실측 반영: SR 실측을 STEP 2 맨 앞으로 · 서버 실행기 `tasks\run` · 확장 자동 리로드 · 카드 7장·captions.json · 링크 카드 · 형식 A/B/C · 쿠팡 보류) · v2.0 2026-10-02 (단일 스케줄·순차 실행·3편/회) · v1.4 네이버 리뷰 · v1.3 확장 자동 수집 · v1.1 ironeye 통합 · 위치: `{CR}\naver_blog\` (GitHub 미사용)
 
-*월·목 03:00 트리거 1개(같은 프롬프트)가 아래 STEP 0~9를 **한 세션에서 순서대로** 끝낸다. ⏰ **마감 07:30 KST** — 사용자 PC가 08:00 전후 꺼지므로 07:30까지 못 끝낸 STEP은 `run_state.json`에 남기고 STEP 8·9(현황표·리포트)만 하고 종료한다(다음 회차 STEP 0이 이어서 처리). 대기 루프마다 현재 시각을 확인한다. **편수 N**: 실행 요일이 월요일이면 4, 목요일이면 3(그 밖의 요일에 수동 실행하면 3). **공개 예정일**: 월 회차 = 화·수·목·금, 목 회차 = 토·일·월 — 확정 순서(1→N)대로 배정하고 큐 폴더명·현황표에 적는다. 발행은 사용자가 매일 1편 수기로 한다(루틴은 임시저장까지만, 발행된 글 재업로드·삭제 금지). 중간에 끊기면 `run_state.json`을 보고 끊긴 STEP부터 이어서 한다(수동 재실행 또는 다음 주 회차가 먼저 처리).
+*월·목 02:00 트리거 1개(같은 프롬프트)가 아래 STEP 0~9를 **한 세션에서 순서대로** 끝낸다. ⏰ **마감 07:30 KST** — 사용자 PC가 08:00 전후 꺼지므로 07:30까지 못 끝낸 STEP은 `run_state.json`에 남기고 STEP 8·9(현황표·리포트)만 하고 종료한다(다음 회차 STEP 0이 이어서 처리). 대기 루프마다 현재 시각을 확인한다. **편수 N**: 실행 요일이 월요일이면 4, 목요일이면 3(그 밖의 요일에 수동 실행하면 3). **공개 예정일**: 월 회차 = 화·수·목·금, 목 회차 = 토·일·월 — 확정 순서(1→N)대로 배정하고 큐 폴더명·현황표에 적는다. 발행은 사용자가 매일 1편 수기로 한다(루틴은 임시저장까지만, 발행된 글 재업로드·삭제 금지). 중간에 끊기면 `run_state.json`을 보고 끊긴 STEP부터 이어서 한다(수동 재실행 또는 다음 주 회차가 먼저 처리).
 날짜: 실행 시점의 실제 KST 날짜. `RUN = YYYYMMDD`(이번 회차 키).
 
 ⚠️ **역할 경계 — 이 루틴은 도구다.** 판정 기준·수치·품질 기준의 SSOT는 `AIPick-Writer.md`(이하 가이드)다. 이 루틴은 운영 절차와 실행 자산만 정의한다.
 - ⛔ 가이드의 수치를 이 루틴에 복사하지 않는다. 조항 번호로만 참조한다.
 - 상충이 발견되면 가이드를 따르고 STEP 9 리포트에 기록한다.
 
-⚠️ **실행 환경**: Cowork 예약 작업 · **사용자 PC(C:\Users\win) 필요**. PC 셸: `mcp__remote-devices__device_bash`. 파이썬 `py -3.12`.
-- 작업 폴더 `NB = C:\Users\win\Documents\Claude\naver_blog`
-  - `tasks\run\` — 루틴이 쓰는 **스크립트 실행 요청**(JSON `{"script":"naver_sr.py","args":["{RUN}"]}`). PC 셸(VM)은 외부망·localhost가 없으므로 **큐 서버(server.py)가 10초마다 읽어 Windows에서 `py -3.12 scripts\{script}`로 실행**하고 결과를 `tasks\run_done\{같은 이름}.json`(status·stdout_tail)에 쓴다. 허용 스크립트: `scripts\*.py` 전부(`_`로 시작하는 파일 제외 — 서버가 파일 존재로 동적 판정) + `ping` + `restart`(서버 자기 재시작, 코드 변경 반영)
+⚠️ **실행 환경**: Cowork 예약 작업 · **사용자 PC 필요**. 파이썬 `py -3.12`(Windows, 큐 서버가 실행).
+- **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders`의 첫 항목(2026-11-18 현재 새 PC `C:\Users\USER\Documents\Claude`, 이전 PC `C:\Users\win\Documents\Claude`). 이 문서의 모든 경로는 `CR` 기준이다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+- 작업 폴더 `NB = {CR}\naver_blog`
+- **실행 모드 판정(STEP 0 맨 앞)**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(PC 셸 `$HOME/mnt/Claude/…`), 없으면 **브리지 모드**(아래 표). 어느 모드든 절차·판정·산출물은 같다.
+
+| 할 일 | 셸 모드 | 브리지 모드(PC 셸 없음 — 새 PC 기본) |
+|---|---|---|
+| 파일 목록·존재·완료 확인 | `ls` | `device_list_dir` |
+| 파일 읽기(JSON·md·로그) | `cat`·`sed` | `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`에서 Read/Bash (오래된 사본이면 다시 스테이징) |
+| 파일 쓰기(작업 JSON·meta.json·labels·원고·run_state·현황표) | 셸에서 직접 | 클라우드 `/mnt/user-data/outputs/…`에 만들고 `device_commit_files`(stagedPath → `{CR}\…` 절대경로). 기존 파일 수정은 **스테이징 때의 `mtimeMs`를 `expectedMtimeMs`로** 넘긴다 |
+| 대기(60초 간격) | `py -3.12 -c "import time; time.sleep(60)"` | 클라우드 Bash `sleep 60` → `device_list_dir`로 `run_done`·`tasks\done`·`result.json` 확인 |
+| `scripts\*.py` 실행(분석·카드·점검·make_post 포함) | `python3 scripts\…` 직접 | **전부 큐 서버** `tasks\run\{RUN}_{이름}.json` ← `{"script":"analyze.py","args":["load","out\\{폴더}"],"timeout_sec":900}` → `tasks\run_done\` 확인(stdout_tail). 인자의 경로는 `NB` 기준 상대경로·백슬래시 |
+| Claude가 직접 읽고 판단하는 단계(라벨링·제목·원고·카드 눈 확인) | 셸 | 필요한 파일만 스테이징해 클라우드에서 하고 결과 파일만 커밋 |
+| 삭제 | 금지(문서 규칙) | 금지 — `device_commit_files`는 삭제를 못 한다. 큐 서버가 처리한 `tasks\run\*.json`은 서버가 지운다 |
+
+- 브리지 모드에서 **큐 서버가 꺼져 있으면 아무 스크립트도 못 돌린다** → 아래 서버 확인 규칙대로 처리한다.
+- 브리지 모드에서 스테이징은 한 번에 50개·파일당 400MB 이하. inbox 리뷰 원본(`naver_*.json`)은 Claude가 읽을 때만 스테이징하고, 집계는 스크립트(큐 서버)에 맡긴다.
+  - `tasks\run\` — 루틴이 쓰는 **스크립트 실행 요청**(JSON `{"script":"naver_sr.py","args":["{RUN}"]}`). PC 셸(VM)은 외부망·localhost가 없고 브리지 모드에는 PC 셸 자체가 없으므로 **큐 서버(server.py)가 10초마다 읽어 Windows에서 `py -3.12 scripts\{script}`로 실행**하고 결과를 `tasks\run_done\{같은 이름}.json`(status·stdout_tail)에 쓴다. 허용 스크립트: `scripts\*.py` 전부(`_`로 시작하는 파일 제외 — 서버가 파일 존재로 동적 판정) + `ping` + `restart`(서버 자기 재시작, 코드 변경 반영)
   - `tasks\pending\` — 루틴이 쓰는 수집 작업(JSON). **업로더 확장이 1분마다** 읽어 커넥트·네이버 스토어·쿠팡 페이지에서 실행하고 결과를 `inbox\`에 넣은 뒤 `tasks\done\`로 옮긴다
   - `inbox\{RUN}_{n}_{제품군}\` — 수집 결과(`connect.json` · `naver_*.json` · `coupang_*.json` · `links.json`) + 사용자 수기 `links.txt`
   - `out\{RUN}_{n}_{제품군}\` — 원고 패키지 (`clip\` — STEP 10 클립 영상, 선택 · 업로드 큐와 무관)
   - `upload_queue\{RUN}_{n}_{제품군}\` — 업로드 대기(확장이 이름순으로 5분 간격 **임시저장** — 발행은 사용자)
   - `radar\{RUN}.md` — 채점표 · `run_state.json` — 이번 회차 진행 상태 · `현황표.md` — 글·실행 로그 · `scripts\` — 분석·카드 스크립트
-- 확장·서버 상태 확인: PC 셸에서는 localhost에 닿지 않으므로 **`upload_logs\{오늘}.log`의 최근 10분 내 기록**(서버 시작·/peek·/run 등)으로 살아 있는지 판단한다. 기록이 없으면 `tasks\run\{RUN}_ping.json`(`{"script":"ping"}`)을 써서 60초 안에 `run_done`이 생기는지로 확인. 서버가 꺼져 있으면 **STEP 2까지만 하고**(채점·작업 투입) 리포트에 `⛔ 큐 서버 꺼짐 — 수집 대기`를 적고 종료한다. 다음 회차가 `tasks\done`을 보고 이어간다.
-- PC 미연결 → 아무것도 쓰지 않고 한 줄로 종료: `⏸️ PC 미연결 — 다음 실행에서 처리`.
+- 확장·서버 상태 확인: 루틴은 localhost에 닿지 않으므로 **`upload_logs\{오늘}.log`의 최근 10분 내 기록**(서버 시작·/peek·/run 등)으로 살아 있는지 판단한다. 기록이 없으면 `tasks\run\{RUN}_ping.json`(`{"script":"ping"}`)을 써서 60초 안에 `run_done`이 생기는지로 확인. 서버가 꺼져 있으면 **STEP 2까지만 하고**(채점·작업 투입) 리포트에 `⛔ 큐 서버 꺼짐 — 수집 대기`를 적고 종료한다. 다음 회차가 `tasks\done`을 보고 이어간다. **브리지 모드에서 서버가 꺼져 있으면** STEP 2 스크립트도 못 돌리므로 `run_state`만 그대로 두고 STEP 9 리포트 + PushNotification `⛔ 큐 서버 꺼짐 — {NB}\uploader\start_server.bat 실행·시작프로그램 등록 확인`을 보내고 끝낸다(ping 요청 파일은 남겨 둔다 — 서버가 켜지면 스스로 처리·삭제).
+- PC 미연결(`get_device_info` 실패) → 아무것도 쓰지 않고 한 줄로 종료: `⏸️ PC 미연결 — 다음 실행에서 처리`. PC 셸만 없는 것은 미연결이 아니다 — 브리지 모드로 진행한다.
 
-⚠️ **자격증명**: `C:\Users\win\Documents\Claude\pw.txt`는 스크립트가 Windows에서 읽는다(루틴은 값을 보지 않는다). 값은 로그·리포트·파일에 출력 금지. SR: `NAVER_APIGW_KEY_ID/KEY`(API HUB) · 검색량: `NAVER_SA_CUSTOMER_ID/ACCESS_LICENSE/SECRET`(검색광고) · BT: 사이트 릴레이(`ONEANDZERO_WP_USER/APP_PASSWORD`, `X-O1-NKID/NKEY`). 없으면 해당 지표 `미관측`.
+⚠️ **자격증명**: `{CR}\pw.txt`는 스크립트가 Windows에서 읽는다(루틴은 값을 보지 않는다). 값은 로그·리포트·파일에 출력 금지. SR: `NAVER_APIGW_KEY_ID/KEY`(API HUB) · 검색량: `NAVER_SA_CUSTOMER_ID/ACCESS_LICENSE/SECRET`(검색광고) · BT: 사이트 릴레이(`ONEANDZERO_WP_USER/APP_PASSWORD`, `X-O1-NKID/NKEY`). 없으면 해당 지표 `미관측`.
 
 ⛔ **금지**: 루틴이 직접 네이버·쿠팡에 접속하거나 글쓰기 화면을 조작하는 것(전부 확장이 한다). 기존 맛집 글·맛집 파이프라인 파일(`naver_blog\guides`, 맛집 `inbox`) 수정(가이드 A-5). inbox 원본 수정·삭제(복사본으로 작업). 사용자 폴더에 백업·이전 판 사본(`.bak`·`_backup` 등)을 만들지 않는다(2026-10-06 사용자 지시).
 
@@ -32,9 +47,9 @@ v3.2 · 2026-10-28 (정보글 구성 — 가이드 3-2c: STEP 4 `naver_collect`�
 
 | 이름 | 시각 (KST) | 반복 | 비고 |
 |---|---|---|---|
-| aipick-weekly | 월·목 03:00 (`CRON_TZ=Asia/Seoul 0 3 * * 1,4`) | 매주 2회 | 이 루틴 전체. 소요 2~3시간(월 4편은 ~3.5시간, 수집 대기 포함) · 07:30 마감 |
+| aipick-weekly | 월·목 02:00 (`CRON_TZ=Asia/Seoul 0 2 * * 1,4` — 2026-11-18 실제 예약에 맞춤) | 매주 2회 | 이 루틴 전체. 소요 2~3시간(월 4편은 ~3.5시간, 수집 대기 포함) · 07:30 마감 |
 
-- 확장은 스케줄이 없다. 1분마다 `tasks\pending`·`upload_queue`를 보고 있을 때 실행한다. 월·목 03:00~07:30에 **PC·크롬·큐 서버가 켜져 있어야** 한다(사용자 PC는 새벽에만 켜져 있고 08:00 전후 꺼진다).
+- 확장은 스케줄이 없다. 1분마다 `tasks\pending`·`upload_queue`를 보고 있을 때 실행한다. 월·목 02:00~07:30에 **PC·크롬·큐 서버가 켜져 있어야** 한다(사용자 PC는 새벽에만 켜져 있고 08:00 전후 꺼진다).
 - 재실행: 끊긴 회차는 Cowork에서 작업을 **지금 실행**하면 `run_state.json` 기준으로 이어간다.
 
 ---
@@ -50,7 +65,7 @@ STEP 0 — 준비 · 재개 판정
 
 STEP 1 — 가이드 읽기
 
-- PC 셸로 `NB\AIPick-Writer.md`(반드시 준수) · `C:\Users\win\Documents\Claude\blog\0and1Life-Writer.md`의 **5-6 문체 지문**(가이드 3-5) · `현황표.md`(최근 8주 제품군 — 가이드 0-6 재탕 금지, 직전 10개 제목 — 가이드 3-1 훅 중복, 공개 글 목록 — 내부 링크 후보). 가이드를 못 읽으면 아무것도 쓰지 않고 종료.
+- (셸 모드: PC 셸 / 브리지 모드: 스테이징 후 Read로 끝까지) `NB\AIPick-Writer.md`(반드시 준수) · `{CR}\blog\0and1Life-Writer.md`의 **5-6 문체 지문**(가이드 3-5) · `현황표.md`(최근 8주 제품군 — 가이드 0-6 재탕 금지, 직전 10개 제목 — 가이드 3-1 훅 중복, 공개 글 목록 — 내부 링크 후보). 가이드를 못 읽으면 아무것도 쓰지 않고 종료.
 
 STEP 2 — 주제 레이더: **지금 검색되는 것 먼저**(가이드 Phase 0 머리말 — 전체 공정에서 가장 중요한 단계, 시간을 아끼지 않는다)
 
@@ -103,7 +118,7 @@ STEP 3 — 채점 · 제품군 N개 확정(월 4 · 목 3) · 1차 수집 작업
   {"type":"connect_search","keyword":"{커넥트 검색어}","inbox":"{RUN}_{n}_{제품군}"}
   ```
   파일명 `tasks\pending\{RUN}_{n}_connect.json`. `run_state.groups`에 N+2개를 `status: connect_wait`로 기록.
-- 3-B. **대기** — `tasks\done\{RUN}_{n}_connect.json`이 N+2개 생길 때까지 60초 간격으로 확인, 최대 20분. (PC 셸에서 `py -3.12 -c "import time; time.sleep(60)"` 반복.) 20분 안에 안 끝난 후보는 `미관측`으로 둔다.
+- 3-B. **대기** — `tasks\done\{RUN}_{n}_connect.json`이 N+2개 생길 때까지 60초 간격으로 확인, 최대 20분. (셸 모드: `py -3.12 -c "import time; time.sleep(60)"` 반복 / 브리지 모드: 클라우드 Bash `sleep 60` + `device_list_dir`.) 20분 안에 안 끝난 후보는 `미관측`으로 둔다.
 - 3-C. `inbox\…\connect.json`으로 ③②⑤ 확정 → **블루오션 관문(가이드 0-5 v3.0)**: 3-D·3-D'를 먼저 돌려 A·B 키워드가 없는 후보는 `블루오션 없음`으로 탈락(2-R 신규·상승 1급 후보만 `훅 우선`으로 1회 허용) → 남은 후보 중 가이드 0-5 합계 9점 이상 **상위 N개 확정**(동점: ④ → 블루오션 지수 → TR40). N개 미만이면 있는 만큼만(최소 1개). 0개면 리포트 후 종료. 확정 순서 1→N에 **공개 예정일**을 붙인다(월: 화·수·목·금 / 목: 토·일·월).
 - 3-D. **제목 키워드 블루오션 점수**(가이드 0-5b) — 확정 제품군마다 시드 = 제품군 단어 + 인기검색어·자동완성 표기 변형(예: 욕실온풍기·화장실온풍기):
   ```
@@ -147,9 +162,9 @@ STEP 5 — 분석 (가이드 Phase 2) — 제품군마다
 - `scripts\analyze.py`가 없으면 가이드 2-1~2-6 규격대로 만든다. 입력: 모델별 파일. 출력: `analysis.json`(제품별 N·평점·저평점 비율·재구매 비율·시니어 신호 수·제외 수, 추천 3선, 표본 라벨 비율).
 - 주제 라벨링(가이드 2-5): 스크립트가 층화 표본을 `sample_{모델}.jsonl`로 뽑으면, Claude가 제품군 라벨 목록을 먼저 정하고 그 목록으로만 분류해 `labels_{모델}.json`으로 저장 → 스크립트가 비율을 집계해 `analysis.json`에 합친다.
 - 표본 하한(가이드 2-4)에 걸리면 해당 섹션 생략 플래그를 `analysis.json`에 남긴다.
-- 실행 순서(PC 셸에서 python3로 직접 실행 가능 — 외부망 불필요): `analyze.py load/stats/sample out\{폴더}` → Claude 라벨링(`labels_{key}.json`·`labels_{key}_neg.json`, 글자 코드 매핑은 `_lab.py`) → `analyze.py final` → `analysis.json`. Windows에서 돌릴 때는 `tasks\run`으로.
+- 실행 순서(셸 모드: PC 셸 python3로 직접 / **브리지 모드: 아래 `python3 scripts\…` 명령은 전부 큐 서버 `tasks\run` 요청으로 바꿔 실행** — 이하 STEP 5~7 모든 `python3` 줄에 같이 적용): `analyze.py load/stats/sample out\{폴더}` → Claude 라벨링(`labels_{key}.json`·`labels_{key}_neg.json`, 글자 코드 매핑은 `_lab.py`) → `analyze.py final` → `analysis.json`. Windows에서 돌릴 때는 `tasks\run`으로.
 - **세 번째 슬롯 = 사는 이유 1위**(가이드 2-6, 2026-10-17~): `analyze.py final`이 `recommend.gift`를 라벨 격차(≥ 8pp · 비율 ≥ 10%)로 고르고 `gift_basis:"reason"`·`gift_label`을 남긴다. Claude는 `gift_label`을 독자 말 슬롯 이름(≤ 12자, "… 1위")으로 바꿔 `meta.json`의 `"slot3_title"`에 적는다(예: 패브릭·관리 쉬움 → "물티슈로 닦는 소파 1위"). 라벨 격차가 없으면 5-F `findings.py`가 내는 `reason_mentions`(제품별 언급률 격차 ≥ 8pp)에서 고른다(예: 목마사지기 "두드려 주는 1위"); 그것도 없을 때만 "부모님 댁"(`gift_basis:"senior"`).
-- 5-C. **주제 걱정 전수 집계**(가이드 2-7c, v3.0): 제품군 걱정어·상황어 정규식 20개 안팎을 정해 제품 3개 리뷰 전체에서 n·평균·5점 수·1~3점 수를 세어 `out\{폴더}\{주제}_counts.json`(예 `noise_counts.json` · 공통 장점은 `plus_counts.json`)에 쓴다(PC 셸 python3 — 스크립트가 없으면 가이드 2-7c 규격대로 짧게 짠다). 결과로 ① **핵심 걱정 1개**(n 최대 + 대부분 별 5) ② **제품별 1위 집단 1~2개**를 정하고 `meta.json`에 `"pick_order"`(리뷰 수 순 키 3개) · `"slot_titles"`(overall/value/gift → 제품별 장점 이름 ≤12자) · `"benefit"[key].plus`(집단 n·평균·5점 수 한 줄) · `"cons_mode":"product_only"` · `"summary_label"` · `"thumb_foot"`을 적는다. `analyze.py final`을 다시 돌려 `recommend.basis:"sales_rank"`를 확인한다. 그 뒤 3-D'를 리뷰 걱정어로 한 번 더 돌려 제목 키워드를 확정한다.
+- 5-C. **주제 걱정 전수 집계**(가이드 2-7c, v3.0): 제품군 걱정어·상황어 정규식 20개 안팎을 정해 제품 3개 리뷰 전체에서 n·평균·5점 수·1~3점 수를 세어 `out\{폴더}\{주제}_counts.json`(예 `noise_counts.json` · 공통 장점은 `plus_counts.json`)에 쓴다(셸 모드 python3 / 브리지 모드: 기존 `scripts\topic_counts.py`를 큐 서버로 — 스크립트가 맞지 않으면 가이드 2-7c 규격대로 짧게 짜서 `scripts\`에 커밋한 뒤 큐 서버로). 결과로 ① **핵심 걱정 1개**(n 최대 + 대부분 별 5) ② **제품별 1위 집단 1~2개**를 정하고 `meta.json`에 `"pick_order"`(리뷰 수 순 키 3개) · `"slot_titles"`(overall/value/gift → 제품별 장점 이름 ≤12자) · `"benefit"[key].plus`(집단 n·평균·5점 수 한 줄) · `"cons_mode":"product_only"` · `"summary_label"` · `"thumb_foot"`을 적는다. `analyze.py final`을 다시 돌려 `recommend.basis:"sales_rank"`를 확인한다. 그 뒤 3-D'를 리뷰 걱정어로 한 번 더 돌려 제목 키워드를 확정한다.
 - 5-T. **구매자 꿀팁**(가이드 2-7): `python3 scripts\tips.py out\{폴더} scan` → `tips_scan.txt`를 읽고 반복된 사용·설치·관리 팁 3개를 골라 `meta.json`에 `"tips":[{"title":"…","regex":"…"}]` → `python3 scripts\tips.py out\{폴더} count` → `tips.json`. **n < 10인 팁은 교체**(3개 모두 n ≥ 10이 될 때까지, 후보가 없으면 리포트에 `꿀팁 부족`).
 - 5-F. **의외의 발견**(가이드 2-7b): `python3 scripts\findings.py out\{폴더}` → `findings.json` + `analysis.json["findings"]`(하위 집단별 n·평균·5점 수, 의외 점수 순). 꿀팁 ①의 수치 반전 1줄과 블록 ③ 끝 "💡 리뷰에서 발견" 문단의 재료 — **n ≥ 20** 집단만, 숫자는 그대로. 5-T 뒤에 실행한다(꿀팁 정규식도 집단에 포함되어 `tips.json` n과 맞는다).
 
@@ -217,7 +232,7 @@ STEP 8 — 현황표 갱신
 STEP 9 — 리포트 (SendUserMessage로 전송 — 사용자가 없을 수 있다)
 
 ```
-📝 AIPick 실행 — {TODAY_KST} ({월|목} 03:00 회차 · N={n}) · 소요 {n}분 · 재개 {여부}
+📝 AIPick 실행 — {TODAY_KST} ({월|목} 02:00 회차 · N={n}) · 소요 {n}분 · 재개 {여부}
 🎯 채택 제품군(공개 예정일 순): ① {제품군} {점수}/15 · 출처 {①신규/①상승/①TOP/②트리거} · SR40 {n}% TR40 {n} → {MM/DD 요일} · ② … · ③ … (· ④ …)   (탈락: {제품군 — 사유} …)
 🔎 주제 레이더: 인기검색어 {6분야 TOP100 · 신규 n · 상승 n} · 시기 트리거 {내용/없음} · 후보 {n}개(①에서 n) · 월간 검색량 {채택 제품군별 n}
 📡 SR 실측: {후보 n개 중 통과 n · 탈락 n(SR-C n / SR40<60% n / 하락 n)} · 수집: connect {성공/실패} · 네이버 리뷰 {모델 n개·리뷰 합 n} · 쿠팡 {보류/수기 n} · 링크 발급 {n/n} — 대기 {m}분
@@ -239,10 +254,10 @@ STEP 9 — 리포트 (SendUserMessage로 전송 — 사용자가 없을 수 있�
 
 | 항목 | 조건 |
 |---|---|
-| 실행 위치 | 사용자 PC(C:\Users\win) 브리지 연결. 월·목 03:00~07:30에 PC·크롬·큐 서버가 켜져 있어야 한다(08:00 전후 PC 꺼짐) |
+| 실행 위치 | 사용자 PC(`{CR}`) 브리지 연결(셸 모드 또는 브리지 모드). 월·목 02:00~07:30에 PC·크롬·큐 서버가 켜져 있어야 한다(08:00 전후 PC 꺼짐) |
 | 가이드 | 로컬 `naver_blog\AIPick-Writer.md` — GitHub 커밋 없음 |
 | 네이버 API | SR: API HUB 키(`NAVER_APIGW_KEY_ID/KEY`) · BT: 사이트 릴레이 · 인기검색어: 데이터랩 공개 웹 엔드포인트(키 불필요) · 검색량: 검색광고 API(`NAVER_SA_CUSTOMER_ID/ACCESS_LICENSE/SECRET`). pw.txt는 Windows 스크립트만 읽는다. 없으면 `미관측` 기록 후 진행 |
-| 서버 실행기 | `server.py`가 `tasks\run\`을 읽어 스크립트를 대신 실행(루틴 PC 셸은 외부망·localhost 없음). 확장은 코드 변경 시 `/version`으로 자동 리로드 · 서버 코드 변경은 `{"script":"restart"}` |
+| 서버 실행기 | `server.py`가 `tasks\run\`을 읽어 스크립트를 대신 실행(루틴 PC 셸은 외부망·localhost 없음, 브리지 모드는 셸 자체가 없음 — 서버가 유일한 실행 수단). 새 PC는 Python 3.12(`py -3.12`)·`pillow` 등 스크립트 의존 패키지·`start_server.bat` 시작프로그램 등록·크롬에 `uploader\aipick-extension` 압축해제 로드·네이버 로그인이 되어 있어야 한다. 확장은 코드 변경 시 `/version`으로 자동 리로드 · 서버 코드 변경은 `{"script":"restart"}` |
 | 수집·업로드 | 전부 확장(1분 폴링). 루틴은 작업 파일을 쓰고 기다릴 뿐, 네이버·쿠팡에 접속하지 않는다 |
 | 발행 | 확장은 임시저장까지. 매일 1편 발행은 사용자(공개 예정일 기준). 발행된 글의 재업로드·삭제 금지 |
 
@@ -289,7 +304,7 @@ timeout 300 python3 $K/hf_render.py review_bars "$D/clip_vars.json" "$D/clip.mp4
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다. 이 루틴은 **STEP 9 리포트를 보낸 직후, STEP 10(클립) 전에** 남긴다 — STEP 10이 시간 초과로 끊겨도 기록이 남도록.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (셸 모드: PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다 / **브리지 모드**: 그 파일을 `device_stage_files`로 가져와 클라우드에서 아래 코드의 `root`를 스테이징 폴더로 바꿔 한 줄 덧붙이고, `device_commit_files`에 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로 넘겨 같은 경로에 쓴다(파일이 없으면 새로 만든다). 같은 날 같은 결과 줄이 이미 있으면 덧붙이지 않는다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 업로드 큐에 넣은 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0

@@ -1,5 +1,15 @@
 # Schd_0and1Life-Draft — WordPress Draft 업로드 루틴 (Cowork 예약 작업용)
 
+> 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
+> - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
+> - **실행 모드**: 도구 목록에 `mcp__remote-devices__device_bash`가 있으면 **셸 모드**(문서의 bash 블록을 PC 셸에서 그대로). 없으면 **브리지 모드** — PC 미연결이 아니므로 종료하지 않고 아래로 바꿔 수행한다(새 PC 기본).
+>   - 목록·존재 확인 = `device_list_dir` · 읽기 = `device_stage_files` → 클라우드 `/mnt/user-data/uploads/…`
+>   - 쓰기·수정 = 클라우드에서 만들어 `/mnt/user-data/outputs/…`에 두고 `device_commit_files`(기존 파일은 스테이징 때 `mtimeMs`를 `expectedMtimeMs`로)
+>   - 문서의 bash·python 블록 = 필요한 파일을 스테이징해 **클라우드 Bash**에서 `$HOME/mnt/Claude`를 스테이징 폴더(`/mnt/user-data/uploads/Claude`)로 바꿔 실행하고, 바뀐·새 파일만 커밋한다. 네트워크(WP REST·네이버 API 등)는 클라우드에서 된다. 자격증명은 스테이징한 `{CR}\pw.txt`에서 환경변수로만 읽고 값은 출력하지 않는다
+>   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
+>   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
+>   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
 *예약된 트리거 시간이 되면 해당 일자에 먼저 루틴이 실행되었더라도 무조건 다시 진행한다.
 
 날짜: 실행 시점의 실제 KST 날짜를 사용한다 (이 프롬프트에 적힌 고정 날짜가 있어도 무시한다).
@@ -22,7 +32,7 @@ fetch 실패면 이 프롬프트의 규칙만으로 진행하고 오류 로그�
 
 ⚠️ [조항 자기보완 규약 — 지침서 Phase 5-0]
 조항이 안 보여도 **바로 "없다"고 판정하지 않는다.** ①새 `?cb=` 로 재조회 → ②Claude in Chrome 에서 `fetch(rawURL+'?cb='+Date.now())` → ③그래도 없으면 결번 확정. 어느 단계에서든 찾으면 그것이 진짜 지침서이고, 이 경우는 **상충이 아니라 캐시 사고**로 기록한다.
-결번이 확정되면 **STOP하지 않고** 조항을 직접 작성해 `C:\Users\win\Documents\Claude\blog\0and1Life-Draft.md` 에 써 넣고(제목에 `(자동 신설 {TODAY}, 루틴 작성)` 표기, **추가만**, 삭제·번호변경 금지) 그 회차 판정 기준으로 즉시 적용해 draft 를 계속한다. 근거는 ⓐ이 프롬프트의 인라인 폴백([4f]·[6j]) → ⓑ`KoreaPlug-Draft.md` 대응 조항 → ⓒ최근 7일 반려·실행 로그 실측 **순서로만** 삼는다. **git commit·push 는 하지 않는다 — 사용자가 직접 한다.** 신설 사실과 **전문**을 STEP 7 알림과 Notion 로그에 남긴다.
+결번이 확정되면 **STOP하지 않고** 조항을 직접 작성해 `{CR}\blog\0and1Life-Draft.md` 에 써 넣고(제목에 `(자동 신설 {TODAY}, 루틴 작성)` 표기, **추가만**, 삭제·번호변경 금지) 그 회차 판정 기준으로 즉시 적용해 draft 를 계속한다. 근거는 ⓐ이 프롬프트의 인라인 폴백([4f]·[6j]) → ⓑ`KoreaPlug-Draft.md` 대응 조항 → ⓒ최근 7일 반려·실행 로그 실측 **순서로만** 삼는다. **git commit·push 는 하지 않는다 — 사용자가 직접 한다.** 신설 사실과 **전문**을 STEP 7 알림과 Notion 로그에 남긴다.
 
 ⚠️ 이 프롬프트가 실행되는 유일한 원본이다. 다른 위치의 사본을 참조하지 않는다.
 
@@ -51,7 +61,7 @@ fetch → https://raw.githubusercontent.com/leejc0404/blog/main/0and1Life-Draft.
 [0-4] 결번 확정 시 — 조항 자기보완 후 계속 진행 (지침서 5-0-B)
 STOP하지 않는다.
 1) 조항 초안 작성. 근거는 ⓐ이 프롬프트 인라인 폴백([4f]·[6j]) → ⓑ`KoreaPlug-Draft.md` 대응 조항 → ⓒ최근 7일 반려·실행 로그 실측 순서로만. 근거 없는 창작 금지
-2) `C:\Users\win\Documents\Claude\blog\0and1Life-Draft.md` 에 직접 써 넣는다. 제목에 `(자동 신설 {TODAY}, 루틴 작성)` 표기. 추가만 — 삭제·번호변경 금지
+2) `{CR}\blog\0and1Life-Draft.md` 에 직접 써 넣는다. 제목에 `(자동 신설 {TODAY}, 루틴 작성)` 표기. 추가만 — 삭제·번호변경 금지
    · 폴더 미연결이면 [3-0] 절차대로 먼저 연결한다 (무인 승인 창 주의 — bash 탐색 먼저)
 3) git commit·push 는 하지 않는다 (사용자가 직접)
 4) 신설 조항을 그 회차 판정 기준으로 즉시 적용
@@ -88,7 +98,7 @@ STEP 3 — WordPress 인증 및 카테고리 ID
 ⛔ `request_cowork_directory` 를 무조건 호출하지 않는다. 무인 시간대에 승인 창이 뜨면 세션이 정지한다.
 1) 먼저 bash로 읽기를 시도한다: `ls /sessions/*/mnt/Claude/pw.txt 2>/dev/null`
    경로가 나오면 → [3-1]로 바로 진행, `request_cowork_directory` 호출 금지. 세션명은 실행마다 다르므로 와일드카드로 찾고 실제 경로를 이후 단계에서 쓴다.
-2) 1)이 실패했을 때만 `mcp__cowork__request_cowork_directory { path: "C:\Users\win\Documents\Claude" }` 1회. 승인 창이 응답 없이 닫히면(AbortError) 재시도하지 말고 [3-2]로 즉시 이동.
+2) 1)이 실패했을 때만 `mcp__cowork__request_cowork_directory { path: "{CR}" }` 1회. 승인 창이 응답 없이 닫히면(AbortError) 재시도하지 말고 [3-2]로 즉시 이동.
 3) 이 단계에서는 승인이 필요한 호출을 다른 도구 호출과 같은 블록에 묶지 않는다.
 
 [3-1] Basic Auth (우선 경로)
@@ -449,7 +459,7 @@ SEO 81점 미달 | [6j] 판정표로 조치 가능 여부 먼저 확인. 조치 
 
 이 루틴이 **어떤 경로로 끝나든**(정상 완료 · 대상 없음 · 조기 종료 · 오류 · 마감 중단) 끝내기 직전에 반드시 아래 한 줄을 남긴다. 관제탑이 이 기록으로 실제 성공·실패를 보여 준다. 실행을 시작할 때 KST 시각(HH:MM)을 기억해 둔다.
 
-- 위치: `C:\Users\win\Documents\Claude\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
+- 위치: `{CR}\control_tower\runs\YYYY-MM.jsonl` (PC 셸 `$HOME/mnt/Claude/control_tower/runs/`, 없으면 만든다)
 - 한 회차에 한 줄만 덧붙인다. 기존 줄은 고치거나 지우지 않는다.
 - `result`: `성공`(할 일을 다 함) · `부분`(일부만) · `건너뜀`(대상 없음) · `실패`(오류·마감)
 - `count`: 이번 회차에 WP에 초안으로 올린 글 수(코드의 `0`을 그 수로 바꾼다). 없으면 0
