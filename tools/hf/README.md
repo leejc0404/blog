@@ -43,6 +43,12 @@ python3 $K/hf_reel_insert.py --spec reel_spec.json --scene 0 --vars hf_vars.json
 - 클라우드에서는 HyperFrames가 크롬을 내려받지 못해(403) `/opt/pw-browsers` 의 헤드리스 셸을 자동으로 쓴다
 - PC(윈도우)에서도 같은 명령이 돈다(`py -3.12 hf_render.py …`). Node 22 이상·ffmpeg가 PATH에 있어야 한다
 
+## 인스타 릴스 v4.1 (2026-11-22) — OpenMontage 경로와의 관계
+
+- 8번 릴스 루틴(`Schd_0and1Life-Insta` v4.1)의 기본 렌더는 이 키트가 아니라 **OpenMontage `hyperframes_compose`**(HyperFrames `0.9.80` 고정)다. 이 키트는 두 가지로만 쓴다: ① `hf_render.build_project` — 회차마다 새로 지은 `om_index.html` 에 GSAP·Pretendard·사진·값(`window.HFV`)을 넣어 작업 공간을 만든다(템플릿 폴더 `templates/F{nn}_om_*` 는 클라우드에서만 잠깐 생긴다 — 커밋하지 않는다) ② OpenMontage 가 실패했을 때 F27c 포맷으로 `hf_render.py` 대체 렌더.
+- OpenMontage 검사(`hyperframes lint`)는 `@font-face` 선언이 없는 글꼴 이름을 오류로 본다. `_common/common.css` 의 `"Noto Sans CJK KR"` 대체 글꼴은 다른 루틴(3·4·9번)을 위해 그대로 두고, 릴스 루틴이 작업 공간 사본에서만 뺀다.
+- 이 키트의 `HF_VERSION`(0.8.140)과 OpenMontage 경로의 판(0.9.80)은 따로 관리한다. 2026-11-22 F27c 회차를 0.9.80 으로 다시 렌더해 화면이 같음을 확인했다.
+
 ## 바꿀 때
 
 - HyperFrames 버전은 `hf_render.py` 의 `HF_VERSION` 한 줄로 고정한다(현재 `0.8.140`). 올리면 `examples/*.json` 6개를 전부 다시 렌더해 눈으로 확인한 뒤 커밋한다

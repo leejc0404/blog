@@ -1,4 +1,4 @@
-# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v4.0.1 2026-10-28 — 하루 1편 제한 폐지)
+# Schd_0and1Life-Insta — 발행 글 → 인스타그램 릴스 제작·전달 루틴 (Cowork 예약 작업용, v4.2 2026-11-23 — 엔딩 답 완결 · 자막 아래로)
 
 > 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
 > - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
@@ -9,6 +9,10 @@
 >   - Windows에서만 되는 일(네이버 확장 큐·`py -3.12` 스크립트) = `{CR}\naver_blog\tasks\run\` · `tasks\pending\`에 JSON을 커밋하고 `device_list_dir`로 `run_done`·`done`을 기다린다(클라우드 `sleep 60`). 큐 서버가 60초 안에 ping에 답하지 않으면 그 부분만 건너뛰고 보고에 `⛔ 큐 서버 꺼짐`을 적는다
 >   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
 >   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
+
+**v4.2에서 바뀐 것**(2026-11-23 사용자 지시 "2·3번을 물음표로 놓으면 끌고 오는 것 같아 오기 싫어진다 — 정보를 다 주고, 번호 없이 더 궁금한 부분을 블로그로" · "자막을 인스타에서 가능한 만큼 조금 더 내리자" · 지침 v4.2 I-2-12·I-3-1 대응): ① STEP 4.5-0 ② 엔딩 = 질문 + **답 전부** + 더 궁금한 것 한 문장(첫 칸 맛보기·물음표 칸·번호 빈칸 폐지) ② STEP 5-OM ③ 자막 상자 **아래 끝 y 1610 고정**(`.sub` 를 `top` 대신 `bottom: 310px`) — 장면 요소는 y 1420 아래로 내려오지 않는다 · STEP 6 대체 경로(F27c 등 옛 템플릿)는 키트로 복사한 사본의 `.sub` 만 같은 값으로 바꿔 렌더(PC 포맷 폴더는 고치지 않는다) ③ STEP 7 ② 안전영역 · ⑫ ⑰ (f) 통과 기준 · 시험자 안내 ③ 문구(지침 I-5-A) ④ 캡션 2번째 줄(지침 I-4-1 ②). **그 밖의 단계·문구는 v4.1 그대로다.**
+
+**v4.1에서 바뀐 것**(2026-11-22 사용자 지시 "8번 인스타 릴스 영상을 OpenMontage 소스를 사용해서 제작하는 걸로" · 적용 범위 선택 "화면·렌더만 교체" · 지침 v4.1 I-2-V4 G·E-2·I-3-10 ① 대응): ① **STEP 5-OM 신설 — 화면은 회차마다 새로 짓는다.** F27 계열 템플릿에 값만 바꿔 넣지 않고, OpenMontage(커밋 고정)의 HyperFrames 지식(청사진·모션 규칙)을 읽고 그 회차의 `om_index.html` 을 짓는다. 값 계약(`hf_vars.json = {dur, ev, txt, subs, scenes, photo}`, F27c 키 유지)과 효과음 큐 원칙은 그대로라 `build_hf_vars.py`·`verify_hf_sync.py`·`mix.py` 는 바뀌지 않는다. **직전 3회차와 무대·주 사물·주 모션이 겹치지 않아야 한다**(10/30~11/22 회차가 F27c 한 무대로 반복됨) ② **STEP 6-OM 신설 — 렌더 기본 = OpenMontage `hyperframes_compose`**(HyperFrames 0.9.80 고정, 렌더 전 `hyperframes check` 오류 0) — 실패하면 STEP 6(F27c, HF 키트) → STEP 6-E(엔진) 순으로 내려간다(반려 아님) ③ STEP 7 ⓪ OM 검사 기록 · ① 에 `om_index.html` 글자 리터럴 금지 ④ STEP 8 새 화면은 포맷 게놈에 새 폴더(`F{nn}_om_{이름}`)로 · `meta.json.om` ⑤ STEP 11 `🎞 렌더` 줄 ⑥ 실행 자산·설정값·오류 처리·전제조건·원라이너 갱신. OpenMontage 의 제작 파이프라인(승인 대기 단계)·Backlot·유료 도구·API 키·TTS·음악은 쓰지 않는다. **대상 선정·이득·대본·Edge 음성·대본 시험·⑰ 시험·저장·업로드·전달·허브·원장·알림 등 그 밖의 단계·문구는 v4.0.1 그대로다.**
 
 **v4.0에서 바뀐 것**(지침 v4.0 I-2-V4 · I-3-M 대응 — 10/27 사용자 "앞으로 모든 글은 지금 나와 한 이 방식으로" · "첫 화면에는 이 글이 뭔지 제목이 뚜렷하게 가장 크게"): ① STEP 4 — 글의 **대표 이미지**(`featured_media`)를 받아 `img\hero.jpg` 로 두고, 사진 속 사물의 좌표(접히는 선·모서리 등)를 격자 미리보기로 재서 `meta.json.photo` 에 적는다(지침 I-2-V4 E) ② STEP 4.5-0 — 대본은 **지침 I-2-V4 A(사전 4가지) → B(6박 문장 틀) → D(말투)** 로 쓴다. 이득 문장·대본 시험·통과할 때까지 규칙은 v3.16 그대로 ③ STEP 5·6 — 기본 템플릿 **F27_photo_story**(견본: `instagram\2026-10-28\iphone-duo-defect-screen-repair-cost\build_hf_vars.py`), 첫 화면 제목 144px 두 줄이 가장 큰 글자(I-2-V4 C), 글자 x 80~1000 · 카메라 숨 1.012 이하(I-2-V4 F) ④ 효과음 큐는 `build_hf_vars.py` 가 같은 사건 시각(`ev`)에서 만든다(F27 은 장면 목록 대신 사건 시각 표) — 싱크 검사는 큐마다 화면 변화(0.8 이상) 검사로 ⑤ ⑰ 시험 질문에 (0) 무슨 얘기인지 한 줄 · (g) 장면별 그림 도움·말투(지침 I-5 ⑰ · I-2-V4 H) ⑥ 길이 25~30초. **그 밖의 단계·문구는 v3.16 그대로다.**
 
@@ -59,7 +63,10 @@
 | **효과음 v2.1** | `instagram\relay\build_reel_sfx_v2.py` | `_timeline.json` → wav (16종, 전부 합성음 · 노이즈·사각파 없음 · 피크 -12dBFS) |
 | **검증 v9** | `instagram\relay\verify_reel_v9.py` | `reel_spec.json` 검사 · 종료코드 0만 통과 (싱크·0프레임·훅 사건 시각·CTA·총 길이) |
 | 견본 spec | `instagram\relay\examples\bank_spec.json` | v9 첫 시안(은행 영업시간 편) — 장면 유형별 필드 예시 |
-| **HF 키트 (기본 렌더 · v3.10)** | GitHub `leejc0404/blog` 의 `tools/hf/` — STEP 6 에서 클라우드로 `git clone` | `hf_render.py`(템플릿 + 값 → mp4, 실패 시 종료코드 2) · `hf_reel_insert.py`(STEP 6-E 선택 — 엔진판 장면 1개 교체) · `templates/_common` |
+| **HF 키트 (v3.10 · v4.1부터 대체 경로 1 + OM 경로의 작업 공간 만들기)** | GitHub `leejc0404/blog` 의 `tools/hf/` — STEP 6-OM ① (대체 경로면 STEP 6)에서 클라우드로 `git clone` | `hf_render.py`(템플릿 + 값 → mp4, 실패 시 종료코드 2 · `build_project` = GSAP·Pretendard·사진·값 주입 — STEP 5-OM ④ 가 씀) · `hf_reel_insert.py`(STEP 6-E 선택 — 엔진판 장면 1개 교체) · `templates/_common` |
+| **OpenMontage (v4.1 기본 렌더)** | GitHub `OpenMontageInc/OpenMontage` 커밋 `2e003e65fa99a0f329478a2c1cdcf26bc481933a` — STEP 6-OM ① 에서 클라우드 `~/ig_work/om` 으로 받는다(약 20초) · PC 참고본 `{CR}\OpenMontage\`(같은 커밋 — 루틴은 읽지 않는다) | 쓰는 것: `tools/video/hyperframes_compose.py`(`check`·`render_existing`) · 읽는 지식(STEP 5-OM ①): `skills/core/hyperframes.md` · `.agents/skills/hyperframes-core/SKILL.md` · `.agents/skills/hyperframes-animation/`(`blueprints-index.md`·`blueprints/`·`rules-index.md`·`rules/`) · `skills/creative/short-form.md`. HyperFrames 는 `~/ig_work` 에 `hyperframes@0.9.80` 고정 설치 |
+| **OM 렌더 도우미 (v4.1)** | `~/ig_work/om_render.py` — STEP 6-OM ① 에서 이 문서의 코드 그대로 만든다 | `<작업공간> <출력.mp4> [check]` → 검사(+렌더). 결과 `om_check.json`(경고 집계·오류 목록), 오류가 있으면 종료코드 3 |
+| **화면 견본 (v4.1)** | `instagram\formats\F28_om_day_grid\` | 2026-11-22 시험 회차(수습 해고 실업급여 — 날짜 칸 무대 · 청사진 grid-card-assemble + kinetic-beat-slam). F27c 값 계약 그대로 · OM 검사 오류 0 · `verify_hf_sync.py` 통과. **구조만 참고하고 그대로 다시 쓰지 않는다**(무대 반복 금지) |
 | **포맷 게놈 (v3.10)** | `instagram\formats\formats.json` · `formats\{id}_{이름}\index.html·template.json·example.json·preview.jpg` | 지침 I-3-10. STEP 6 에서 고른 포맷 폴더를 클라우드 키트의 `templates\{id}_{이름}\` 로 복사해 렌더. 새 요소·새 포맷은 **새 폴더로** 저장(기존 폴더는 고치지 않는다) |
 | **HF 값·검증 (v3.10)** | 회차 폴더 `build_hf_vars.py`(장면 목록 → `hf_vars.json` + `reel-final_timeline.json` 큐) · `verify_hf_sync.py`(큐가 전부 같은 값에서 나왔는지·큐마다 화면이 변하는지·0프레임) | 견본: `instagram\2026-10-11\samsung-bonus-tax-refund\` (F02) · `2026-10-10\church-hacking-data-leak-check\` (F04) |
 | **전달 페이지** | `instagram\relay\make_dl_page.py` | `handoff.json` → `reel-dl-latest` 덮어쓰기 |
@@ -76,7 +83,7 @@
 | (구) v8 자산 | `render_reel_v8.py` `build_reel_sfx.py` `verify_reel_sync.py` | **사용 중지.** 지우지 않고 남겨 둔다(과거 회차 재현용) |
 | 엔진 이전 판 | (만들지 않음 — v3.2) | 사용자 지시(10/6)로 사용자 폴더에 백업·이전 판 사본을 만들지 않는다. 회귀 검사용 이전 판은 클라우드 작업 공간에만 둔다 |
 
-설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 제한 없음`(v4.0.1 — 회차마다 retry 글 + 새 글 1편) · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음** · `RENDER = HF 전체(기본) → 엔진 v12(대체)` · `HF_RENDER_TIMEOUT = 540초` · `HF_INSERT = 엔진 대체 경로에서만 선택(최대 1장면, CTA 제외)` · `HF_TIMEOUT = 420초` · `MODES = M1~M6`(지침 I-2-0-E) · `ENDINGS = E1~E4`, `E4_MAX = 최근 4회차 중 1회`(지침 I-2-10) · `BGM = 만들지 않음`(지침 I-3-1 v3.8) · `NARRATION = Edge ko-KR-SunHiNeural +42%`(지침 I-2-11 v3.13) · `MAX_DUR = 30초` · `BLIND_PASS = 8/10 + 이득·첫 행동 일치 + 모름 0`(지침 I-5 ⑰)
+설정값: `PUBLISH_MODE = HANDOFF`(기본) · `DAILY_TARGET = 제한 없음`(v4.0.1 — 회차마다 retry 글 + 새 글 1편) · `LOOKBACK_DAYS = 3` · `TOKEN_REFRESH_DAYS = 30` · `IG_API = v23.0` · `REF_SCAN_DAY = 월요일`(KST) · `REF_MAX_POSTS = 6` · `TEMP_KEEP_DAYS = 3` · `CONCEPTS = 3` · `MARKETING_MIN = 3`(지침 I-2-8) · `REEL_MASCOT` **설정하지 않음** · `RENDER = OpenMontage 회차 컴포지션(기본, v4.1) → HF 키트 F27c(대체 1) → 엔진 v12(대체 2)` · `OM_COMMIT = 2e003e65fa99a0f329478a2c1cdcf26bc481933a` · `OM_HF = 0.9.80` · `OM_RENDER_TIMEOUT = 540초` · `FRESH_LOOKBACK = 직전 3회차` · `HF_RENDER_TIMEOUT = 540초` · `HF_INSERT = 엔진 대체 경로에서만 선택(최대 1장면, CTA 제외)` · `HF_TIMEOUT = 420초` · `MODES = M1~M6`(지침 I-2-0-E) · `ENDINGS = E1~E4`, `E4_MAX = 최근 4회차 중 1회`(지침 I-2-10) · `BGM = 만들지 않음`(지침 I-3-1 v3.8) · `NARRATION = Edge ko-KR-SunHiNeural +42%`(지침 I-2-11 v3.13) · `MAX_DUR = 30초` · `BLIND_PASS = 8/10 + 이득·첫 행동 일치 + 모름 0`(지침 I-5 ⑰)
 
 ---
 
@@ -90,7 +97,7 @@
 6. 열었던 탭은 모두 닫는다.
 
 ## STEP 0. 지침 읽기·설정 확인
-1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. **v3.16 기준**: 개정 이력 첫 줄이 **v3.16 이상**이면 이 루틴 전체를 그대로 수행한다. v3.15면 I-5-A 단계표·모름 분류·안내 고정 문구·I-2-11 ⑪~⑬ 이 지침에 없다 — 이 루틴 STEP 7 ⑫ 문구대로 수행하고(보류 없이 통과할 때까지) 알림에 `📐 지침 v3.16 미배포` 한 줄. **v3.15 기준**: 개정 이력 첫 줄이 **v3.15 이상**이면 이 루틴 전체를 그대로 수행한다. v3.14면 I-5-A 표가 없다 — STEP 7 ⑫ 의 3회 수정은 이 루틴 문구대로 수행하고 알림에 `📐 지침 v3.15 미배포` 한 줄. **v3.14 기준(이전 판)**: 개정 이력 첫 줄이 **v3.14 이상**이면 이 루틴 전체를 그대로 수행한다. 그보다 낮으면(GitHub 미커밋) 이 루틴의 v3.13·v3.14 항목(이득·대본·내레이션·⑰·주제 띠·결과 장면 훅·블로그 실물 잠금·외부 사이트 금지)은 그대로 수행하고 알림에 `📐 지침 v3.14 미배포` 한 줄. **v3.13 기준(이전 판)**: 개정 이력 첫 줄이 **v3.13 이상**이면 v3.13 항목을 수행한다. **v3.12 기준(이전 판)**: 개정 이력 첫 줄이 **v3.12 이상**이면 이 루틴 전체를 그대로 수행한다. v3.11이면 모션 규칙(I-3-12)이 없다 — STEP 4.5-3·STEP 7 ⑪ 의 모션 항목은 이 루틴 문구대로 적용하되 반려(`R-PACE`) 사유로는 쓰지 않고, 알림에 `📐 지침 v3.12 미배포` 한 줄. **v3.11 기준(이전 판)**: 개정 이력 첫 줄이 **v3.11 이상**이면 이 루틴 전체를 그대로 수행한다. v3.10이면 쇼핑커넥트(STEP 4.5-8)는 건너뛰고(달지 않음) 요약어 금지(⑪)는 이 루틴 STEP 5대로 적용, 알림에 `📐 지침 v3.11 미배포` 한 줄. **v3.10 기준(이전 판)**: 개정 이력 첫 줄이 **v3.10 이상**이면 이 루틴 전체를 그대로 수행한다. v3.8~3.9면 엔딩(I-2-10)·완결 원칙이 없다 — 엔딩은 `E4` 로 고정하고 알림에 `📐 지침 v3.10 미배포` 한 줄. v3.8 미만이면 HF 전체 렌더 대신 STEP 6-E(엔진)로 간다(`📐 지침 v3.8 미배포`). 아래는 이전 판 기준(참고용): Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
+1. 지침을 `curl -s "...0and1Life-Insta.md?cb=$(date +%s%3N)"` 로 받아 **전체를** 읽는다. **v4.1 기준**: 개정 이력 첫 줄이 **v4.1 이상**이면 이 루틴 전체를 그대로 수행한다. v4.0.1 이하면(GitHub 미커밋) 지침 I-2-V4 G 의 '기본 템플릿 F27'·E-2 의 '사진 세 번' 대신 이 루틴의 STEP 5-OM·6-OM 을 그대로 수행하고 알림에 `📐 지침 v4.1 미배포` 한 줄. **v3.16 기준**: 개정 이력 첫 줄이 **v3.16 이상**이면 이 루틴 전체를 그대로 수행한다. v3.15면 I-5-A 단계표·모름 분류·안내 고정 문구·I-2-11 ⑪~⑬ 이 지침에 없다 — 이 루틴 STEP 7 ⑫ 문구대로 수행하고(보류 없이 통과할 때까지) 알림에 `📐 지침 v3.16 미배포` 한 줄. **v3.15 기준**: 개정 이력 첫 줄이 **v3.15 이상**이면 이 루틴 전체를 그대로 수행한다. v3.14면 I-5-A 표가 없다 — STEP 7 ⑫ 의 3회 수정은 이 루틴 문구대로 수행하고 알림에 `📐 지침 v3.15 미배포` 한 줄. **v3.14 기준(이전 판)**: 개정 이력 첫 줄이 **v3.14 이상**이면 이 루틴 전체를 그대로 수행한다. 그보다 낮으면(GitHub 미커밋) 이 루틴의 v3.13·v3.14 항목(이득·대본·내레이션·⑰·주제 띠·결과 장면 훅·블로그 실물 잠금·외부 사이트 금지)은 그대로 수행하고 알림에 `📐 지침 v3.14 미배포` 한 줄. **v3.13 기준(이전 판)**: 개정 이력 첫 줄이 **v3.13 이상**이면 v3.13 항목을 수행한다. **v3.12 기준(이전 판)**: 개정 이력 첫 줄이 **v3.12 이상**이면 이 루틴 전체를 그대로 수행한다. v3.11이면 모션 규칙(I-3-12)이 없다 — STEP 4.5-3·STEP 7 ⑪ 의 모션 항목은 이 루틴 문구대로 적용하되 반려(`R-PACE`) 사유로는 쓰지 않고, 알림에 `📐 지침 v3.12 미배포` 한 줄. **v3.11 기준(이전 판)**: 개정 이력 첫 줄이 **v3.11 이상**이면 이 루틴 전체를 그대로 수행한다. v3.10이면 쇼핑커넥트(STEP 4.5-8)는 건너뛰고(달지 않음) 요약어 금지(⑪)는 이 루틴 STEP 5대로 적용, 알림에 `📐 지침 v3.11 미배포` 한 줄. **v3.10 기준(이전 판)**: 개정 이력 첫 줄이 **v3.10 이상**이면 이 루틴 전체를 그대로 수행한다. v3.8~3.9면 엔딩(I-2-10)·완결 원칙이 없다 — 엔딩은 `E4` 로 고정하고 알림에 `📐 지침 v3.10 미배포` 한 줄. v3.8 미만이면 HF 전체 렌더 대신 STEP 6-E(엔진)로 간다(`📐 지침 v3.8 미배포`). 아래는 이전 판 기준(참고용): Phase I-0~I-9와 반려 코드표가 모두 보이는지, 개정 이력 첫 줄이 **v3.2 이상**인지 확인한다. v3.0~3.1이면 I-2-1-B(쉬운 3초)·5막 구조가 없다 — 이 루틴의 v3.2 항목은 그대로 수행하고 알림에 `📐 지침 v3.2 미배포` 한 줄만 남긴다. v2.x면 **전달하지 않고** 알림(`📐 지침 v3 미배포`). 개정 이력 첫 줄이 **v3.4 미만**이면 STEP 6-HF 만 건너뛴다(지침 I-3-9 미배포 — 알림에 `🎞 HF 건너뜀(지침 v3.4 미배포)` 한 줄).
 2. 설정값을 세션 변수로 둔다. `PUBLISH_MODE`는 이 프롬프트의 값이 기준이며 지침·ledger에서 바꾸지 않는다.
 
 ## STEP 1. 날짜·폴더·자격증명
@@ -160,11 +167,11 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 ## STEP 4.5-V4. (v4.0 — 아래 STEP 4.5·5 의 대본·장면 규칙보다 앞선다)
 1. 지침 I-2-V4 A 의 네 가지(핵심 질문 · 이어지는 궁금증 2 · 팁+이유 · 다음 질문)를 `concepts.md` 맨 위(이득 문장 아래)에 적는다.
 2. 대본 = I-2-V4 B 6박 문장 틀 · D 말투. `script.json` 키는 `S1`~`S6`(박 번호). 25~30초.
-3. 화면 = F27_photo_story: `hf_vars.json = {dur, ev(사건 시각), txt(화면 글자 — 내레이션의 말만), subs, scenes, photo}` · 제목 `txt.title1/2`(첫 화면 가장 큰 글자) · 사진 `photo.heroImg` + 좌표.
+3. 화면 = (v4.1) **STEP 5-OM 회차 컴포지션**. 값은 F27c 와 같은 계약: `hf_vars.json = {dur, ev(사건 시각), txt(화면 글자 — 내레이션의 말만), subs, scenes, photo}` · 제목 `txt.title1/2`(첫 화면 가장 큰 글자) · 사진 `photo.heroImg` + 좌표. F27 계열 템플릿은 STEP 6 대체 경로에서만 쓴다.
 4. 대본 시험 → 렌더 → ⑰ 시험(질문 (0)~(g)) → 통과할 때까지(v3.16 단계표).
 
 ## STEP 4.5. 기획 — (v3.13) 이득 → 대본 → 대본 시험 · 모드 → 검색 의도 → 콘셉트 → 엔딩 (지침 I-2-0-E · I-2-0-A · I-2-0-B · I-2-0-C · I-2-10 · I-3-6 · I-3-10)
-0. **(v3.13 — 이 단계가 아래 1~8보다 앞선다 · 지침 I-2-11)** ① 이득 한 문장(STEP 4)을 `concepts.md` 맨 위에. ② **대본**을 `script.json` 에 쓴다 — `[{"key":"S1","lines":[{"text":"…","say":"(읽기용, 선택)"}]},…]`, 장면 5개 안팎 · 장면마다 **짧은 문장 2~3개**(지침 I-2-11 ⑦ — 한 문장 한 마디, 25자 안팎), 구조는 I-2-11 ②(상황·고생 → 이득 → 증거(원인→결과) → 얻는 법(어디서·무엇을) → 엔딩), **주제 띠 1개**(I-2-1-C ⓪ — 사람들이 아는 검색어형 4~10자, 캡션 첫 줄·첫 해시태그와 같은 말) · **첫 장면 = 결과·충돌 장면**(I-2-1-C — 첫 문장 14자 이하 결과형, 상황 설명 제목 금지) · **마지막 장면 = 다음 질문 엔딩**(I-2-12 v3.15 — 끝까지 본 사람의 다음 질문을 그대로 묻고 + 답의 모양 + 첫 칸 맛보기 + 루프 문장 · 실물 이름·개수만 부르기 금지 · 보여 준 답 가리기 금지 · 공식 도움말·외부 사이트 언급 금지) · 총 15~22초, 화살표 조각·글에만 나오는 말 금지. AI·앱 활용 글이면 장면을 대화 흐름(I-2-11 ⑨)으로 짠다. ③ **대본 시험(⑰ 1차)**: Agent 도구로 서브에이전트를 띄워 대본 문장만 주고(이 글·지침·폴더를 보지 말라고 명시) 지침 I-5 ⑰ (a)~(d)와 (f)(끝까지 들은 뒤 더 알고 싶은 것을 질문 문장으로)를 받는다(안내 문구는 지침 I-5-A 고정 문구). (a)가 이득 문장과 다르거나 (c)에 이해 실패 '모름'이 있으면 **지침 I-5-A 표**대로 대본을 고쳐 재시험 — **통과할 때까지**(v3.16), 두 번 고쳐도 (a)·(b)가 다르면 대본 구조(I-2-11 ②)부터 다시 쓴다. **(v3.16) 시험자가 (f) 에 쓴 질문 중 본문에 답이 있는 것을 엔딩 질문으로 고정한다**(지침 I-2-12 ①) — 이후 판에서 엔딩 질문을 바꾸지 않는다. 화면 글자는 내레이션에 나온 말만, 본문 조건은 한 마디로 보존, 예시는 하나(지침 I-2-11 ⑪~⑬). ④ 아래 1~8(모드·검색 의도·콘셉트·엔딩)은 **대본이 정해진 뒤** 색·톤·훅 첫 줄·엔딩 코드를 고르는 데만 쓴다 — 콘셉트 3개는 대본 ①문장의 후보 3개로 줄여도 된다. 모션 계획(3번 끝)·마케팅 장치 3개는 권장.
+0. **(v3.13 — 이 단계가 아래 1~8보다 앞선다 · 지침 I-2-11)** ① 이득 한 문장(STEP 4)을 `concepts.md` 맨 위에. ② **대본**을 `script.json` 에 쓴다 — `[{"key":"S1","lines":[{"text":"…","say":"(읽기용, 선택)"}]},…]`, 장면 5개 안팎 · 장면마다 **짧은 문장 2~3개**(지침 I-2-11 ⑦ — 한 문장 한 마디, 25자 안팎), 구조는 I-2-11 ②(상황·고생 → 이득 → 증거(원인→결과) → 얻는 법(어디서·무엇을) → 엔딩), **주제 띠 1개**(I-2-1-C ⓪ — 사람들이 아는 검색어형 4~10자, 캡션 첫 줄·첫 해시태그와 같은 말) · **첫 장면 = 결과·충돌 장면**(I-2-1-C — 첫 문장 14자 이하 결과형, 상황 설명 제목 금지) · **마지막 장면 = 다음 질문 엔딩**(I-2-12 v4.2 — 끝까지 본 사람의 다음 질문을 그대로 묻고 + **그 답을 끝까지**(번호·물음표 칸 없이) + 답을 들은 사람이 더 궁금해질 한 가지(내 경우 금액·구간표·예외)는 프로필 링크 맨 위 글에 있다는 담담한 한 문장 · '나머지는'·번호 빈칸·실물 이름·개수만 부르기 금지 · 보여 준 답 가리기 금지 · 공식 도움말·외부 사이트 언급 금지) · 총 15~22초, 화살표 조각·글에만 나오는 말 금지. AI·앱 활용 글이면 장면을 대화 흐름(I-2-11 ⑨)으로 짠다. ③ **대본 시험(⑰ 1차)**: Agent 도구로 서브에이전트를 띄워 대본 문장만 주고(이 글·지침·폴더를 보지 말라고 명시) 지침 I-5 ⑰ (a)~(d)와 (f)(끝까지 들은 뒤 더 알고 싶은 것을 질문 문장으로)를 받는다(안내 문구는 지침 I-5-A 고정 문구). (a)가 이득 문장과 다르거나 (c)에 이해 실패 '모름'이 있으면 **지침 I-5-A 표**대로 대본을 고쳐 재시험 — **통과할 때까지**(v3.16), 두 번 고쳐도 (a)·(b)가 다르면 대본 구조(I-2-11 ②)부터 다시 쓴다. **(v3.16) 시험자가 (f) 에 쓴 질문 중 본문에 답이 있는 것을 엔딩 질문으로 고정한다**(지침 I-2-12 ①) — 이후 판에서 엔딩 질문을 바꾸지 않는다. (v4.2) 그 질문의 답은 엔딩에서 다 주고, (f) 의 나머지 질문 가운데 본문에 있는 '내 경우' 하나를 블로그 유도 한 문장으로 쓴다. 화면 글자는 내레이션에 나온 말만, 본문 조건은 한 마디로 보존, 예시는 하나(지침 I-2-11 ⑪~⑬). ④ 아래 1~8(모드·검색 의도·콘셉트·엔딩)은 **대본이 정해진 뒤** 색·톤·훅 첫 줄·엔딩 코드를 고르는 데만 쓴다 — 콘셉트 3개는 대본 ①문장의 후보 3개로 줄여도 된다. 모션 계획(3번 끝)·마케팅 장치 3개는 권장.
 1. **글 성격 판정 → 제작 모드**(지침 I-2-0-E): 제목·H2·Core Fact·카테고리로 `M1`~`M6` 중 하나. 두 개에 걸치면 표 위쪽(`M2` 부정적 이슈가 먼저). 애매하면 `M3`. `concepts.md` 맨 위에 `모드: M? — {이유 한 줄}`. **이 회차의 장면 수·장면 길이·색·움직임·효과음·포맷 후보·구성 후보는 모드 행을 따른다.**
 2. **검색 의도**(지침 I-2-0-A): 핵심 검색어 → WebSearch 상위 제목 5~10개 → 궁금증 3~4개 순위 → 장면 매핑. `concepts.md` 에 적고 `meta.json.search_intent` 한 줄. 조회가 모두 막히면 제목·H2에서 추정(`🔎 검색 의도 추정`).
 3. **콘셉트 3개**(지침 I-2-0-B 서로 다른 그룹 × I-2-2 화면 형식): 콘셉트마다 훅 코드(`H`)·구성 코드(`S`, 모드 후보 우선)·포맷(모드 후보 우선, 검증 1 + 실험 1 — 지침 I-3-10-3)·0~3초 글자 전부(I-2-1-B 검사용)·0초 화면 그림 한 줄(I-3-11 ⑩ 관계가 보이게)·마케팅 장치 3~5개(I-2-8)·새 연출 1개(I-3-8)·넘기지 않을 이유·**장면별 주 모션**(v3.12 — 지침 I-3-12: 키네틱 타이포그래피=핵심 한 줄 · 로어 서드=누가·어디서·언제 · 펀치 인=주인공 숫자 · 스태거=표·목록 읽는 순서 · 휩 팬=맥락 전환 · 이징은 늘. 모드 허용 표의 ✕ 금지(`M2`·`M3` 은 펀치 인·휩 팬·글자 흔들림 ✕), 장면마다 주 모션 1개, 영상에 3종 이상, 같은 주 모션 연속 금지). 고른 콘셉트는 `concepts.md` 장면 매핑의 '이 장면의 한 문장' 옆에 주 모션을 적는다.
@@ -187,7 +194,101 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 - `hub_card.json`: `slug, title, date, category, thumb(STEP 9에서 채움), ig_url(""), points[2~3]` · (v3.11, `shop.used=true` 일 때만) `shop: {label: "{물건 종류} 보기", url: "{본문 블록과 같은 URL}"}`.
 - (v3.11, `shop.used=true` 일 때만) `caption.txt` ⑥ 바로 아래 한 줄: `🛒 {물건 종류}는 프로필 링크 → 맨 위 글 아래에 같이 뒀어요` — 상품명·가격·할인·"추천" 강조·URL 금지. 480자를 넘으면 이 줄부터 뺀다.
 
-## STEP 6. 렌더 — (v4.0 기본 포맷 `F27_photo_story` — PC `formats\F27_photo_story\` → 키트 `templates\F27_photo_story\`, 사진 경로는 `photo.heroImg` 로 넘기면 `hf_render.py` 가 복사) HyperFrames 전체 렌더 (클라우드 · 지침 I-3-10 · 기본 경로)
+## STEP 5-OM. 화면 짓기 — OpenMontage 회차 컴포지션 (v4.1 기본 · 지침 I-2-V4 · I-3-10 ① · I-3-11 · I-3-12)
+STEP 5 의 `build_hf_vars.py`·`caption.txt`·`hub_card.json` 은 그대로 만든 뒤 이 단계로 온다. 클라우드 작업 폴더 `~/ig_work/{slug}/` 에서 하며, **STEP 6-OM ① 준비를 먼저 해 둔다**(지식 파일을 읽어야 하므로).
+1. **먼저 읽는다 — OpenMontage 지식(매 회차, 요약하지 말고 파일 그대로)**: `~/ig_work/om/skills/core/hyperframes.md`(Gotchas·Anti-patterns 절) · `~/ig_work/om/.agents/skills/hyperframes-core/SKILL.md`(결정적 렌더 규칙) · `~/ig_work/om/.agents/skills/hyperframes-animation/blueprints-index.md` → 이 글에 맞는 청사진 1~2개의 `blueprints/{id}.md` · `rules-index.md` → 장면에 쓸 규칙 2~4개의 `rules/{name}.md` · `~/ig_work/om/skills/creative/short-form.md`(9:16). OpenMontage 의 제작 파이프라인(`pipeline_defs`·디렉터 스킬·승인 대기)·Backlot 은 쓰지 않는다 — 이 루틴의 단계가 그 자리를 대신한다.
+2. **무대 정하기 — 직전 3회차와 다르게**: `ledger.reels` 최근 3회차의 `format` 과 그 포맷 폴더의 `preview.jpg`(없으면 그 회차 폴더의 `stills.jpg`)를 스테이징해 `Read` 로 보고, 이번 회차의 ① 배경·색 무대 ② 주 사물(원리를 보여 주는 도식) ③ 주 모션(청사진의 대표 움직임) **세 가지가 모두** 그 3회차와 겹치지 않게 정한다. 주 사물은 글의 원리에서 나온다(지침 I-3-M — 예: 일수 = 날짜 칸 판, 비율 = 쪼개지는 막대, 절차 = 이어지는 정거장, 비교 = 나란한 저울). `concepts.md` 에 `무대: {한 줄} · 청사진: {id} · 규칙: {이름들} · 직전 3회차와 다른 점: {한 줄}` 을 적는다.
+3. **`om_index.html` 을 쓴다** — 지침 I-2-V4 C·E·F · I-3-11 · I-3-12 를 그대로 지키고, 아래 계약을 지킨다.
+   - 뼈대는 F27c `index.html` 과 같다: `<!--HFV-->` 자리 · `vendor/gsap.min.js` · `common.css`·`common.js`(키트 `_common`) · `#root[data-composition-id="main"]` · `#stage` · `__W__ __H__ __DUR__` 자리표시 · 끝에 `window.__timelines["main"] = tl; tl.seek(0);`
+   - **모든 시각은 `V.ev` 에서만**, 화면 글자는 **`V.txt` 에서만**(내레이션의 말만 — 지침 I-2-11 ⑪. `om_index.html` 따옴표 안에 한글·숫자 문구를 직접 쓰지 않는다. 기호 `✔`·`↓`·`?` 는 된다), 자막은 `V.subs`((v4.2) 상자 **아래 끝 y 1610 고정** — `.sub` 에 `top` 대신 `bottom: 310px`, 줄 수와 관계없이 아래에 붙는다 · 상자 모양은 F27c 와 같다), 카메라 숨은 `V.scenes` 로 장면마다 1.012배 이하.
+   - **값 계약 유지**: `build_hf_vars.py` 는 F27c 의 `txt`·`ev` 키를 **그대로 다 채운다**. 새 무대에 필요한 값만 `txt.x_*`·`ev.x_*` 로 더한다(`ev.x_*` 로 효과음 큐를 만들면 그 값도 `verify_hf_sync.py` 의 출처 검사에 들어간다). 그래야 STEP 6-OM 이 실패해도 같은 `hf_vars.json` 으로 STEP 6(F27c)이 바로 돈다.
+   - **시킹 안전**: 속성 트윈과 `tl.set` 만 쓴다. `onUpdate`·`call` 콜백·`Math.random`·실시간 시계 금지(난수는 `HF.rng`). 숫자 올라가기는 `HF.countUp`(단계 4 이하 — 중간 숫자가 오래 보이지 않게).
+   - **글꼴은 Pretendard 만**(키트가 `fonts/` 에 넣는다). 외부 글꼴·웹폰트 로드 금지.
+   - **큐마다 눈에 보이는 사건**: `reel-final_timeline.json` 의 큐 시각마다 0.13~0.3초 안에 화면이 크게 바뀌어야 한다(`verify_hf_sync.py` 기준 0.8 이상 — 2026-11-22 시험에서 0.6초 큐의 가는 펜선 0.64 로 불통과 → 선을 굵게 + 사진 펀치 인으로 통과). 큐 시각에 등장·도장·전환을 둔다.
+   - **화면을 채운다**: 장면마다 주 사물이 y 600~1420 을 쓴다(가운데에 작은 요소 하나만 떠 있는 장면 금지). 글자 x 80~1000 · 우측 버튼 구간 x ≤ 880(지침 I-2-V4 F) · 자막 상자(v4.2 — 아래 끝 y 1610, 두 줄이면 위 끝 약 y 1450)와 요소가 겹치지 않는다(장면 요소는 y 1420 까지).
+   - 엔딩 계정 행 화살표는 F27c 와 같은 자리(x 68~192 · y 1620~1720).
+   - 견본: `instagram\formats\F28_om_day_grid\index.html`(스테이징해 읽는다) — 구조만 참고하고 무대는 새로 짓는다.
+4. **작업 공간 만들기**:
+```bash
+cd ~/ig_work/{slug}
+NEWF="F{nn}_om_{이름}"    # formats.json 의 마지막 번호 + 1 (예: F29_om_split_scale) · 이름은 영어 소문자_밑줄
+T=~/ig_work/hfkit/tools/hf/templates/$NEWF; mkdir -p "$T" && cp om_index.html "$T/index.html" && echo '{"w":1080,"h":1920,"dur":30,"fps":30}' > "$T/template.json"
+rm -rf om_ws && mkdir om_ws && NEWF=$NEWF python3 - <<'PY'
+import json, os, sys; from pathlib import Path
+sys.path.insert(0, os.path.expanduser("~/ig_work/hfkit/tools/hf")); import hf_render
+V = json.load(open("hf_vars.json"))
+hf_render.build_project(os.environ["NEWF"], V, 1080, 1920, V["dur"], 30, Path("om_ws"))
+p = Path("om_ws/common.css"); p.write_text(p.read_text().replace(', "Noto Sans CJK KR"', ""))  # OM 검사: 선언 없는 글꼴 금지
+PY
+```
+
+## STEP 6-OM. 렌더 — OpenMontage (v4.1 기본 경로 · 클라우드 · Bash `timeout` 600000ms)
+① **준비**(회차 처음 1회 — STEP 5-OM 보다 먼저):
+```bash
+mkdir -p ~/ig_work && cd ~/ig_work
+[ -f package.json ] || echo '{"name":"ig-work","private":true}' > package.json
+npm i -s hyperframes@0.9.80 >/dev/null 2>&1      # ~/ig_work 아래 작업 공간은 이 판으로 렌더된다(npx 가 가까운 node_modules 를 먼저 쓴다)
+rm -rf om && mkdir om && cd om && git init -q && git remote add origin https://github.com/OpenMontageInc/OpenMontage.git \
+  && git fetch -q --depth 1 origin 2e003e65fa99a0f329478a2c1cdcf26bc481933a && git checkout -q FETCH_HEAD \
+  && python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
+cd ~/ig_work && rm -rf hfkit && git clone -q --depth 1 https://github.com/leejc0404/blog hfkit
+cat > ~/ig_work/om_render.py <<'PY'
+#!/usr/bin/env python3
+# OpenMontage 로 HyperFrames 작업 공간을 검사·렌더한다 (8번 루틴 STEP 6-OM)
+# 사용: ~/ig_work/om/.venv/bin/python ~/ig_work/om_render.py <작업공간> <출력 mp4> [check]
+import collections, json, os, sys, time
+ws, out = os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2])
+OM = os.path.expanduser("~/ig_work/om")
+sys.path.insert(0, OM); os.chdir(OM)
+from tools.tool_registry import registry
+registry.discover()
+t = registry.get("hyperframes_compose")
+only_check = len(sys.argv) > 3 and sys.argv[3] == "check"
+
+def summary(rep):
+    s = {}
+    for sec in ("lint", "runtime", "layout", "motion", "contrast", "craft"):
+        v = rep.get(sec)
+        if isinstance(v, dict):
+            s[sec] = dict(collections.Counter(f"{f.get('code')}:{f.get('severity')}" for f in v.get("findings", [])))
+    errs = [(sec, f.get("code"), f.get("time"), (f.get("text") or "")[:30], (f.get("message") or "")[:120])
+            for sec in ("lint", "runtime", "layout", "motion", "contrast")
+            for f in (rep.get(sec) or {}).get("findings", []) if f.get("severity") == "error"]
+    return s, errs
+
+t0 = time.time()
+if only_check:
+    r = t.execute({"operation": "check", "workspace_path": ws})
+    rep = (r.data or {}).get("report", {})
+else:
+    r = t.execute({"operation": "render_existing", "workspace_path": ws, "output_path": out,
+                   "fps": 30, "quality": "standard", "strict_check": False})
+    rep = ((r.data or {}).get("steps", {}).get("check", {}) or {}).get("report", {})
+s, errs = summary(rep) if rep else ({}, [])
+res = {"ok": bool(r.success) and not errs, "sec": round(time.time() - t0, 1), "summary": s, "errors": errs,
+       "error": (r.error or "")[:400]}
+json.dump(res, open(os.path.join(os.path.dirname(out), "om_check.json"), "w"), ensure_ascii=False, indent=1)
+print(json.dumps(res, ensure_ascii=False)[:2000])
+sys.exit(0 if res["ok"] else 3)
+PY
+```
+② **검사 → 렌더 → 효과음·믹스 → 싱크**:
+```bash
+cd ~/ig_work/{slug}
+~/ig_work/om/.venv/bin/python ~/ig_work/om_render.py om_ws reel-hf.mp4 check            # 오류 0 이어야 한다(아래 읽는 법)
+timeout 560 ~/ig_work/om/.venv/bin/python ~/ig_work/om_render.py om_ws reel-hf.mp4       # 같은 검사 후 렌더(30초 영상 약 2분)
+python3 build_reel_sfx_v2.py reel-final_timeline.json sfx.wav
+python3 mix.py                                                                          # 내레이션 + 효과음 → reel-final.mp4
+python3 verify_hf_sync.py                                                               # 종료코드 0 이어야 통과
+```
+- **검사 결과 읽는 법**(`om_check.json`): `errors` 가 있으면 고친다 — `content_overlap`(글자 겹침)·`text_occluded`(자막 상자 등에 가림)·`font_family_without_font_face`·`runtime` 오류·`contrast` 오류. 경고 중 `outside_safe_zone` 은 틱톡 기준이라 참고만 한다(안전영역 판정은 STEP 7 ② 우리 기준). `line_unread` 는 `HF.countUp` 중간 숫자면 무시하고, 그 밖의 글자면 머무는 시간을 늘린다(마지막 줄은 2초 이상). `film_silent` 은 무음 작업 공간이라 무시.
+- 고칠 때는 `om_index.html` 만 고치고 STEP 5-OM ④ 부터 다시 한다(작업 공간을 새로 만든다).
+- **대표 프레임 먼저 본다**: STEP 6 과 같은 방법(`stills.jpg`)으로 `Read` — 요소가 안 보이면 `om_index.html` JS 오류부터 의심한다(`om_check.json` 의 `runtime`).
+- 커버·BGM 없음은 STEP 6 과 같다.
+- **대체로 내려가는 조건(반려 아님)**: ① 준비 실패(GitHub·npm·pip — 1회 재시도 후) ② 검사 오류를 두 번 고쳐도 남음 ③ 렌더 실패·시간 초과 2회 → `meta.json.render = {path:"hf", reason}` 을 남기고 **같은 `hf_vars.json` 으로 STEP 6**(F27c). STEP 6 도 실패하면 STEP 6-E.
+- `verify_hf_sync.py` 실패는 대체 사유가 아니다 — 🚨 `R-SYNC`/`R-HOOK`: `om_index.html` 의 그 큐 시각 사건을 키우거나 `build_hf_vars.py` 의 `ev` 를 고쳐 재렌더한다(STEP 7 ⑧ 과 같다).
+
+## STEP 6. 대체 경로 1 — HF 키트 템플릿 렌더 (v4.1: STEP 6-OM 이 실패했을 때만 · 최근 검증 포맷 `F27c_photo_story_fold` — PC `formats\F27c_photo_story_fold\` → 키트 `templates\F27c_photo_story_fold\`, 사진 경로는 `photo.heroImg` 로 넘기면 `hf_render.py` 가 복사) HyperFrames 전체 렌더 (클라우드 · 지침 I-3-10)
 Bash 도구 `timeout` 은 **600000ms** 로 지정한다.
 ```bash
 mkdir -p ~/ig_work && cd ~/ig_work && rm -rf hfkit && git clone -q --depth 1 https://github.com/leejc0404/blog hfkit && K=hfkit/tools/hf
@@ -204,6 +305,7 @@ python3 verify_hf_sync.py                                                       
 - 커버: 훅의 사건·자막이 다 보이는 시각(보통 1.6초 안팎)을 `ffmpeg -ss {t} -frames:v 1 -q:v 2 reel-final_cover.jpg`.
 - 새 요소를 쓰는 포맷이면 `verify_hf_sync.py` 의 요소별 허용 규칙(예: `yesbut` 의 `but_at`)을 그 회차 사본에 추가한다 — 큐가 같은 값에서 나왔는지·큐마다 화면이 변하는지 검사는 빼지 않는다.
 - **BGM판은 만들지 않는다**(지침 I-3-1 v3.8).
+- **(v4.2) 자막 위치**: 키트 `templates\{id}_{이름}\index.html`(클라우드 사본)의 `.sub` 위치를 `top: "1440px"` 대신 `bottom: "310px"` 로 바꿔 렌더한다 — PC `formats\` 폴더는 고치지 않는다.
 - HF 렌더가 2회(값 수정 1회 포함) 실패하거나 시간 초과면 `meta.json.render = {path:"engine", reason}` 을 남기고 **STEP 6-E** 로 간다(반려 아님).
 
 ## STEP 6-E. 대체 경로 — 엔진 v12 렌더 (HF 실패 시에만)
@@ -228,8 +330,9 @@ ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,pix_f
 ffmpeg -i reel-final.mp4 -af volumedetect -f null - 2>&1 | grep max_volume
 for t in 0.0 0.3 0.6 1.0 1.6 2.2; do ffmpeg -y -v error -ss $t -i reel-final.mp4 -frames:v 1 -vf scale=270:-1 hook_$t.png; done
 ```
+0. **⓪ OM 검사 (v4.1)**: STEP 6-OM 경로면 `om_check.json` 의 `errors` 가 0 이고, 경고 집계를 `meta.json.om.check` 에 붙인다(대체 경로면 `om.check = "skipped"`). `om_index.html` 에서 주석을 뺀 코드의 따옴표 안에 한글·숫자 문구가 있으면 `R-NUM`(화면 글자는 `V.txt` 로만 — STEP 5-OM ③).
 1. **① 숫자 전수 대조**: `hf_vars.json`(엔진이면 `reel_spec.json`)의 모든 `text`·`parts`·`rows`·`tag` 글자와 `caption.txt` 에서 숫자 토큰(`\d[\d,\.]*(억|만원|만|%|년|월|원|가지|개|줄)?`)을 뽑아 `post_text.txt`(공백 제거)에 있는지 본다. 기준일 표기·장면 길이·효과음 시각은 제외. 하나라도 없으면 `R-NUM` → 본문 표현으로 고쳐 재렌더(2026-10-11 실측: '1개'·'2줄' → '1가지'·'따로 적어 두기').
-2. **② 안전영역 · ⑩ 겹침·빈 곳**: `stills.jpg` 를 `Read` 로 본다(글자 x 60~1020·y 410~1560, 우측 버튼 구간 x 900~1010·y 700~1500 글자 없음).
+2. **② 안전영역 · ⑩ 겹침·빈 곳**: `stills.jpg` 를 `Read` 로 본다(글자 x 60~1020·y 410~1560 — (v4.2) 자막 상자만 아래 끝 y 1610, 우측 버튼 구간 x 900~1010·y 700~1500 글자 없음).
 3. **③ 규격**: 1080×1920 · 30fps · yuv420p · 모드 행의 총 길이(12~20초 안) · AAC 스테레오 · 피크 ≤ -12dBFS.
 4. **④ 커버** `Read`. **⑤ 날짜·잠정**(I-2-4). **⑥ 엔딩·유도**(v3.10): `meta.json.ending` 이 I-2-10 대로 · `E4` 는 최근 4회차 중 1회 이하 · 캡션 2번째 줄 블로그 안내 · `E4` 가 아니면 영상 안에 '블로그에' 문구 없음.
 5. **⑦ 화자·금지어·저작권** — I-2-6·I-2-7·I-3-5.
@@ -239,11 +342,12 @@ for t in 0.0 0.3 0.6 1.0 1.6 2.2; do ffmpeg -y -v error -ss $t -i reel-final.mp4
 9. **⑭ 요약어 검사 (v3.11)**: 본론 장면마다 "영상만 본 사람이 이 장면에서 말할 수 있는 것(얼마·왜·누가·언제·어떻게)"을 한 줄씩 `meta.json.checks.info` 에 적는다. 그림·기울기만 있고 실제 숫자·조건·날짜가 없는 본론 장면이 있으면 `R-INFO`.
 10. **⑯ 가독성** `R-READ`(지침 I-3-11 v3.11): 스크립트로 장면별 글 덩어리 수(표·카드·목록·일정 장면은 제목 1 + 행 ≤4 + 결론 1, 그 밖은 ≤2)·장면당 주인공 숫자(④·⑤단) 1개·본론 lv 1 사용 여부·배경 색 수(≤2)·`ghost`/`series` 장식 여부·`dur/speed ≥ 0.8 + 글자 수 × 0.09` 를 계산하고, 장면마다 대표 프레임의 글자 영역을 가린 사본(흰 박스로 덮기)을 `Read` 로 보며 "그림만으로 무슨 장면인지" 한 줄씩 `meta.json.checks.read` 에 적는다. 글자만 있는 장면이 절반을 넘으면 반려.
 11. 반려가 있으면 STEP 5(원고) 또는 STEP 4.5(콘셉트 2순위)로 돌아가 수정·재렌더한다 — **(v3.16) 통과할 때까지 반복하고 보류(held)는 쓰지 않는다**(지침 I-5). 같은 지적이 두 판 이어지면 한 단계 위(원고 → 콘셉트)에서 다시 만든다. 통과하지 않은 판은 전달하지 않는다.
-12. **⑰ 처음 보는 사람 시험 (v3.13 · 🚨 — 지침 I-5 ⑰)**: 실제 재생 시각대로 장면 12~16장을 540px 로 뽑아 `blind\f_{초}.png` 로 두고(**자막 조각마다 그 조각이 떠 있는 가운데 시각을 최소 1장씩** — 조각을 건너뛰면 시험자가 연결부를 놓친다, 2026-10-19 실측), Agent 도구로 서브에이전트를 띄워 그 파일들만 시간 순서로 보게 한다("자막 = 내레이션" 안내, 이 글·지침·회차 폴더·웹 검색 금지 명시). (a) 누가·무엇으로·무엇이 좋아지나 (b) 따라 할 첫 행동 (c) 막힌 단어·장면 (d) 0~10 (e) (v3.14) 0.0·1.0·1.5초 장면만 보고 넘기겠는가·왜 (f) 블로그에 가 보고 싶은가·무엇을 받으러 를 받아 `meta.json.checks.blind` 에 원문을 붙인다. 통과 = (a)=이득 문장과 같은 뜻 · (b)=대본 ④ · (c) '모름' 0 · (d) ≥ 8 · (v3.14) (e) "안 넘긴다" · (f) 궁금한 것을 질문 문장으로 적고 그것이 엔딩의 질문과 같음(I-2-12). 실패면 **지침 I-5-A 표**에서 (c)·(e)·(f)의 지적을 전부 찾아 한 번에 고치고 → `tts.py`·`build_hf_vars.py` 재실행 → 재렌더 → ① 숫자 대조 · ⑧ `verify_hf_sync.py` 다시 → 재시험. **(v3.16) 통과할 때까지** — 지침 I-5-A 단계표: 판 1~3 지적 수정 · 판 4~6 대본 다시 쓰기(대본 시험부터, 엔딩 질문은 대본 시험 (f) 로 다시 고정) · 판 7~ 콘셉트 교체(훅 첫 장면·구성·예시). 판마다 `blind{n}\f_{초}.png`, `concepts.md` ⑰ 절에 "v{n}: 점수 · 지적 → 분류(이해 실패/범위 → (f)) → 고친 것" 한 줄. **시험자는 판마다 새로 띄우고 안내는 지침 I-5-A 고정 문구 그대로**(엔딩 빈칸·루프 문장은 (d) 에서 뺌 · (d) 기준표). '모름'은 시험자가 "모름·무슨 뜻인지 모르겠다"로 적은 것만 세고("짐작은 된다"는 통과), 그중 **범위 질문**(영상이 다루지 않은 더 알고 싶은 것)은 (f) 로 옮겨 실패로 세지 않는다 — 단 영상의 단정 때문에 생긴 것이면 고친다(지침 I-2-11 ⑫). 통과 = (d) 8 이상, 또는 (d) 7 이면서 모름 0 · (a)(b) 일치 · (e) 안 넘긴다 · (f) 엔딩 질문과 같음. 지적받지 않은 장면·엔딩 질문은 판이 바뀌어도 건드리지 않는다. **실행이 끊기면**(PC 연결 끊김·세션 마감) 그때까지의 파일을 STEP 8 대로 PC 에 저장하고 `ledger.reels.{slug} = {status:"retry", round:n, last:"(c) 원문"}` 로 남긴 뒤 STEP 11 알림(`🔁 이어서 고침`) — 다음 회차 STEP 3-1 이 이어받는다. 길이는 판마다 22초 안인지 다시 잰다. 제작자 자기 판정(⑭·⑯)으로 이 단계를 대신하지 않는다.
+12. **⑰ 처음 보는 사람 시험 (v3.13 · 🚨 — 지침 I-5 ⑰)**: 실제 재생 시각대로 장면 12~16장을 540px 로 뽑아 `blind\f_{초}.png` 로 두고(**자막 조각마다 그 조각이 떠 있는 가운데 시각을 최소 1장씩** — 조각을 건너뛰면 시험자가 연결부를 놓친다, 2026-10-19 실측), Agent 도구로 서브에이전트를 띄워 그 파일들만 시간 순서로 보게 한다("자막 = 내레이션" 안내, 이 글·지침·회차 폴더·웹 검색 금지 명시). (a) 누가·무엇으로·무엇이 좋아지나 (b) 따라 할 첫 행동 (c) 막힌 단어·장면 (d) 0~10 (e) (v3.14) 0.0·1.0·1.5초 장면만 보고 넘기겠는가·왜 (f) 블로그에 가 보고 싶은가·무엇을 받으러 를 받아 `meta.json.checks.blind` 에 원문을 붙인다. 통과 = (a)=이득 문장과 같은 뜻 · (b)=대본 ④ · (c) '모름' 0 · (d) ≥ 8 · (v3.14) (e) "안 넘긴다" · (f) (v4.2) 엔딩 질문의 답은 영상에서 받았다고 하고, 블로그에 가 보고 싶은 이유·더 궁금한 질문이 엔딩의 블로그 유도 한 줄과 같은 방향(I-2-12 ⑦) — "끌고 가는 느낌"·"답을 안 줬다"면 실패. 실패면 **지침 I-5-A 표**에서 (c)·(e)·(f)의 지적을 전부 찾아 한 번에 고치고 → `tts.py`·`build_hf_vars.py` 재실행 → 재렌더 → ① 숫자 대조 · ⑧ `verify_hf_sync.py` 다시 → 재시험. **(v3.16) 통과할 때까지** — 지침 I-5-A 단계표: 판 1~3 지적 수정 · 판 4~6 대본 다시 쓰기(대본 시험부터, 엔딩 질문은 대본 시험 (f) 로 다시 고정) · 판 7~ 콘셉트 교체(훅 첫 장면·구성·예시). 판마다 `blind{n}\f_{초}.png`, `concepts.md` ⑰ 절에 "v{n}: 점수 · 지적 → 분류(이해 실패/범위 → (f)) → 고친 것" 한 줄. **시험자는 판마다 새로 띄우고 안내는 지침 I-5-A 고정 문구 그대로**(엔딩 빈칸·루프 문장은 (d) 에서 뺌 · (d) 기준표). '모름'은 시험자가 "모름·무슨 뜻인지 모르겠다"로 적은 것만 세고("짐작은 된다"는 통과), 그중 **범위 질문**(영상이 다루지 않은 더 알고 싶은 것)은 (f) 로 옮겨 실패로 세지 않는다 — 단 영상의 단정 때문에 생긴 것이면 고친다(지침 I-2-11 ⑫). 통과 = (d) 8 이상, 또는 (d) 7 이면서 모름 0 · (a)(b) 일치 · (e) 안 넘긴다 · (f) I-2-12 ⑦ 통과(v4.2). 지적받지 않은 장면·엔딩 질문은 판이 바뀌어도 건드리지 않는다. **실행이 끊기면**(PC 연결 끊김·세션 마감) 그때까지의 파일을 STEP 8 대로 PC 에 저장하고 `ledger.reels.{slug} = {status:"retry", round:n, last:"(c) 원문"}` 로 남긴 뒤 STEP 11 알림(`🔁 이어서 고침`) — 다음 회차 STEP 3-1 이 이어받는다. 길이는 판마다 22초 안인지 다시 잰다. 제작자 자기 판정(⑭·⑯)으로 이 단계를 대신하지 않는다.
 
 ## STEP 8. PC 저장
 - `device_commit_files` 로 `instagram\{TODAY}\{slug}\` 에 `concepts.md build_hf_vars.py hf_vars.json verify_hf_sync.py caption.txt reel-final.mp4 reel-final_cover.jpg reel-final_timeline.json stills.jpg hub_card.json post_text.txt meta.json` + (v3.13) `script.json tts.py mix.py tts\timing.json` 을 저장한다(엔진 경로면 `reel_spec.json` 도).
 - `meta.json`: (v3.13 추가: `benefit`, `script`, `checks.blind`) `{blog_post_id, blog_url, blog_modified_at_build, search_intent, persona, mode, ending, hook:{id,format,type,stage,concept,why}, structure, format:{verified,experiment,note}, marketing:[…], fresh, retention:{interrupts,reward_at,loopback}, motion:[{scene,main,sub}], scenes:[…], dur, speed, engine, render:{path:"hf"|"engine", reason}, hf?, shop:{used, why, label?, url?}, status:"ready"|"held", checks:{num,safe,spec,cover,date,link,voice,sync,hook,easy,typo,pace,intent,retain,info,format,read}}`.
+- **(v4.1 OM 경로)** 회차 폴더에 `om_index.html` · `om_check.json` 을 더 저장한다. 새 포맷 폴더 `instagram\formats\{NEWF}\` 에 `index.html`(= `om_index.html`) · `template.json` · `example.json`(이 회차 `hf_vars.json`, `photo.heroImg` 는 `img/hero.jpg` 상대경로로) · `preview.jpg`(이 회차 `stills.jpg`)를 저장하고 `formats.json` 에 카드를 더한다: `{id: "F{nn}", name: "{무대 한 줄}", origin: "OpenMontage {청사진 id} · {TODAY} {slug}", structure: "{장면별 주 사물·주 모션}", hf: "{NEWF}", dir: "{NEWF}", fits: "{어떤 글에 맞나}", status: "실험", uses: 1, log: ["{TODAY} {slug} — 처음 보는 사람 {d}/10({n}판)"]}` (`updated` = TODAY). `ledger.reels.{slug}.format` = `F{nn}`. `meta.json` 에 `render: {path: "om"|"hf"|"engine", reason}` · `om: {commit: "2e003e6", hf_version: "0.9.80", blueprints: […], rules: […], stage: "{무대}", fresh_vs: ["{직전 3회차 format}"], check: {errors: 0, warnings: {…}}, render_sec}`.
 - 새 포맷·새 요소를 만들었으면 `instagram\formats\{id}_{이름}\`(`index.html·template.json·example.json·preview.jpg`)에 저장하고 `formats.json` 의 그 카드(`hf`·`dir`·`uses`·`log`)와 바탕 포맷의 `uses`·`log` 를 갱신한다(`updated` = TODAY). 기존 포맷 폴더는 덮어쓰지 않는다. 사용자 폴더에 백업·이전 판 사본을 만들지 않는다.
 
 ## STEP 9. WP 업로드 (PC)
@@ -293,7 +397,7 @@ PushNotification 1회. 첫 문장은 한 줄 요약, 그 뒤 줄들. 모두 한�
 - 대상 없음: `📱 인스타 릴스 {TODAY} — 대상 글 없음`
 - 오류(`E-*`): `📱 인스타 릴스 {TODAY} — {slug} 보류({코드}) · {한 줄 원인}`
 - (v3.16) 이어서 고침: `📱 인스타 릴스 {TODAY} — {slug} 아직 통과 전 · {n}판까지 {d}/10 · 다음 회차가 이어서 고침` + 마지막 (c) 원문 한 줄 (`R-*` 반려는 보류로 알리지 않는다)
-- 덧붙이는 줄(해당 시): `🎯 이득: {이득 한 문장}` · `🔁 수정 {n}판({판별 점수 →})` · `🧪 처음 보는 사람: {d}/10 · 첫 행동 "{b 요약}"` · `🛒 쇼핑커넥트: {달음 — 물건 종류|안 담 — 사유 한 줄}` · `🎛 모드: {M?} {이유}` · `🔚 엔딩: {E?}` · `🎞 모션: {장면별 주 모션을 → 로 나열, 예: 키네틱 → 스태거 → 펀치 인}` · `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧬 포맷: {검증 id} + {실험 id}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 렌더: {HF 전체|엔진 대체(사유)}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}`(엔진 경로일 때만) · `📐 지침-루틴 상충: {조항}`
+- 덧붙이는 줄(해당 시): `🎯 이득: {이득 한 문장}` · `🔁 수정 {n}판({판별 점수 →})` · `🧪 처음 보는 사람: {d}/10 · 첫 행동 "{b 요약}"` · `🛒 쇼핑커넥트: {달음 — 물건 종류|안 담 — 사유 한 줄}` · `🎛 모드: {M?} {이유}` · `🔚 엔딩: {E?}` · `🎞 모션: {장면별 주 모션을 → 로 나열, 예: 키네틱 → 스태거 → 펀치 인}` · `🎬 콘셉트: {고른 콘셉트 한 줄}` · `🧬 포맷: {검증 id} + {실험 id}` · `🧲 장치: {장치 이름 나열}` · `✨ 새 연출: {meta.fresh}` · `📊 {slug} 스킵 {n}% · 평균 {n.n}초 {🎯}` · `🔑 토큰 갱신 {성공|실패}` · `🗑 임시 자산 {n}건 정리` · `⏳ pending {n}편` · `🔍 레퍼런스 스캔 {n}편` · `🧩 엔진 확장: {무엇}` · `🧩 형식 제안: {한 줄}` · `🎞 렌더: {OpenMontage {NEWF}({청사진}) · 검사 경고 {n}|HF 대체 F27c(사유)|엔진 대체(사유)}` · `🎞 HF 장면: s{N} {type} {적용|건너뜀(사유)|되돌림(사유)}`(엔진 경로일 때만) · `📐 지침-루틴 상충: {조항}`
 
 ## STEP 12. 임시 자산 정리 (지침 I-9 — 대상 글 유무와 무관하게 매 회차)
 ```bash
@@ -324,6 +428,10 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 | **⑰ 처음 보는 사람 시험 실패 (v3.13 → v3.16)** | 🚨 `R-BLIND` — 지침 I-5-A 단계표대로 **통과할 때까지** 수정 → 재렌더 → 재시험(보류 없음). 통과 전에는 전달하지 않는다 · 실행이 끊기면 `retry` 로 다음 회차가 이어받음 |
 | 이득 근거가 본문에 없음 (v3.13) | `X-BENEFIT` — 전달하지 않음, 알림에 Writer 0-11·2-6 ① 위반 |
 | Edge 음성 실패 (v3.13) | 1회 재시도 → `E-TTS` held. 내레이션 없는 판은 전달하지 않는다 |
+| OpenMontage 준비 실패(GitHub·npm·pip) (v4.1) | 1회 재시도 → **반려 아님** — STEP 6(F27c) 대체 · 알림 `🎞 렌더: HF 대체 F27c(OM 준비 실패)` |
+| OM 검사 오류(`om_check.json.errors`) (v4.1) | `om_index.html` 을 고쳐 재검사 — 두 번 고쳐도 남으면 STEP 6 대체(반려 아님) |
+| OM 렌더 실패·시간 초과 (v4.1) | 1회 재시도 → STEP 6 대체(반려 아님) |
+| 직전 3회차와 무대가 겹침 (v4.1) | `R-PACE` — STEP 5-OM ② 부터 무대를 다시 정한다 |
 | HF 렌더 실패·시간 초과(값 수정 후에도) | **반려 아님** — STEP 6-E 엔진 대체 경로 · 알림 `🎞 렌더: 엔진 대체(사유)` |
 | 대표 프레임에 새 요소가 안 보임 | 템플릿 복사 누락·JS 오류 — 키트 `templates\` 에 최신 파일을 다시 복사하고 Playwright `pageerror` 확인 |
 | 가독성 기준 불통과 | `R-READ` — 글자 줄이기·장면 나누기·그림 넣기 → 재렌더, 통과할 때까지(v3.16) |
@@ -354,6 +462,9 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 | 전달 페이지 `reel-dl-latest` | ✅ page 1980 | 구글 문서가 가리키는 고정 주소 — 삭제 금지 |
 | Cowork 예약 `8. 0and1life 인스타 릴스`(매일 06:00 KST, PC 연결, `{CR}`·`instagram` 연결) | ✅ 진입점 방식(2026-10-12 확인) — 예약 본문은 이 파일을 끝까지 읽고 수행하라는 짧은 안내뿐 | **이 파일만 고치면 다음 실행부터 반영**된다. 예약 본문은 바꾸지 않는다. 단 지침(`0and1Life-Insta.md`)은 STEP 0이 GitHub에서 읽으므로 **커밋해야** 반영된다 |
 | HF 키트 `blog\tools\hf\`(`hf_render.py`·`hf_reel_insert.py`·`templates/_common`) GitHub | ✅ 2026-10-10·10-11 회차에서 clone·렌더 확인 | 없으면 STEP 6-E 엔진 경로 |
+| OpenMontage 커밋 `2e003e6`(GitHub 공개 저장소) · HyperFrames `0.9.80` (v4.1) | ✅ 2026-11-22 클라우드 확인 — 11-22 회차(F27c)를 OM 으로 다시 렌더해 화면 동일(2분 46초) · 시험 화면 `F28_om_day_grid` 검사 오류 0 · `verify_hf_sync.py` 통과(렌더 약 2분) | 커밋·판을 올릴 때는 이 문서의 설정값 `OM_COMMIT`·`OM_HF` 와 STEP 6-OM ① 을 같이 바꾼다 |
+| PC 참고본 `{CR}\OpenMontage\` (v4.1) | ✅ 2026-11-22 설치(소스만 — Windows 가상환경·npm 설치는 하지 않음) | 루틴은 읽지 않는다. 직접 Claude Code 로 열어 쓸 때만 |
+| 지침 `0and1Life-Insta.md` **v4.1**(I-2-V4 G·E-2 · I-3-10 ①) GitHub 커밋 | ⬜ 커밋 필요(전문 저장 2026-11-22) | 미배포면 `📐 지침 v4.1 미배포` 한 줄, STEP 5-OM·6-OM 은 이 루틴 문구대로 수행 |
 | `PUBLISH_MODE` | `HANDOFF` | 유행 음원 때문에 기본은 반자동. AUTO는 회차별 지시로만 |
 | 허용 도메인 `speech.platform.bing.com` (Edge 음성) | ✅ 2026-10-19 사용자 추가 | `edge-tts` 는 `--proxy $HTTPS_PROXY`(파이썬은 `proxy=`)로 호출해야 연결된다 |
 | 지침 `0and1Life-Insta.md` **v3.13** · Writer 0-11 GitHub 커밋 | ⬜ 커밋 필요(전문 저장 2026-10-19) | 미배포면 `📐 지침 v3.13 미배포` 한 줄, 루틴의 v3.13 항목은 그대로 수행 |
@@ -362,7 +473,7 @@ python3 cleanup_reel_temp.py --days 3                      # dry 목록에 대�
 
 ## Cowork 원라이너
 
-토큰 확인(2) → **전 회차 스킵률·평균 시청·완주율 측정(M)** → 대상 글 1편(3) → 본문 최종본(4) → **글 성격 → 모드 M1~M6 → 검색 의도 → 콘셉트 3개(H·S·포맷 검증 1 + 실험 1·장치·새 연출) → 1개 + 엔딩 E1~E4(E4 는 4회 중 1회 이하)(4.5)** → 읽히는 화면 원칙(한 장면 한 메시지·글 덩어리 2·숫자 3·장식 없음·읽을 시간)·답은 영상 안에서 끝냄 → `build_hf_vars.py`·캡션(5) → **장면별 주 모션(지침 I-3-12 — 모드 허용 표·3종 이상·연속 금지)** → **HyperFrames 전체 렌더 + 효과음 v2.1 + 커버 · `verify_hf_sync.py`(6)** — 실패면 엔진 v12 대체(6-E) → **자가검수 16항목, 싱크·훅 실패면 무조건 중단(7)** → PC 저장·포맷 게놈 갱신(8) → WP 업로드(9) → `reel-dl-latest` 덮어쓰기 + 허브 카드(10) → 알림에 URL 하나(11) → 3일 지난 임시 자산 정리(휴지통 미지원이면 보류)(12). 통과 못 하면 **전달하지 않고 통과할 때까지 고친다**(v3.16 — 보류 없음, 끊기면 `retry` 로 다음 회차가 이어받음).
+토큰 확인(2) → **전 회차 스킵률·평균 시청·완주율 측정(M)** → 대상 글 1편(3) → 본문 최종본(4) → **글 성격 → 모드 M1~M6 → 검색 의도 → 콘셉트 3개(H·S·포맷 검증 1 + 실험 1·장치·새 연출) → 1개 + 엔딩 E1~E4(E4 는 4회 중 1회 이하)(4.5)** → 읽히는 화면 원칙(한 장면 한 메시지·글 덩어리 2·숫자 3·장식 없음·읽을 시간)·답은 영상 안에서 끝냄 → `build_hf_vars.py`·캡션(5) → **장면별 주 모션(지침 I-3-12 — 모드 허용 표·3종 이상·연속 금지)** → **(v4.1) OpenMontage 지식으로 회차 화면 짓기 — 직전 3회차와 다른 무대(5-OM) → OpenMontage 검사·렌더 + 효과음 v2.1 + 커버 · `verify_hf_sync.py`(6-OM)** — 실패면 F27c(6) → 엔진 v12(6-E) → **자가검수 16항목, 싱크·훅 실패면 무조건 중단(7)** → PC 저장·포맷 게놈 갱신(8) → WP 업로드(9) → `reel-dl-latest` 덮어쓰기 + 허브 카드(10) → 알림에 URL 하나(11) → 3일 지난 임시 자산 정리(휴지통 미지원이면 보류)(12). 통과 못 하면 **전달하지 않고 통과할 때까지 고친다**(v3.16 — 보류 없음, 끊기면 `retry` 로 다음 회차가 이어받음).
 
 ---
 
