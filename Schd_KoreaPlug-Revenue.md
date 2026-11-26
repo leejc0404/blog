@@ -41,7 +41,7 @@
 
 1. **삭제 0건.** 글·미디어·리비전·파일·예약 작업·유튜브 영상을 지우지 않는다. 진단에 "삭제"로 적힌 항목도 이 루틴에서는 noindex 까지만 하고, 삭제는 사용자에게 넘긴다.
 2. **게시·공개는 사용자가 한다.** 글의 발행 상태(`status`)를 공개로 바꾸지 않는다. 유튜브는 PC 공정이 **비공개**로만 올리고, 공개 전환·고정 댓글·썸네일 업로드는 사용자가 한다.
-3. **승인함(`koreaplug-revenue\승인.md`)에서 `[x]` 로 표시된 항목만 실행한다.** 표시가 없으면 제안만 하고 끝낸다.
+3. **사용자 확정(2026-11-26): 모든 제안은 자동 승인이다.** 루틴은 제안을 `koreaplug-revenue\승인.md`(루틴 전용 작업 목록 — 사용자는 관리하지 않는다)에 처음부터 `[x]` 로 적고, 해당 요일 회차에 실행한다. 사용자 승인을 기다리지 않는다.
 4. **애드센스 광고 코드를 건드리지 않는다.** WPCode 스니펫 `999`, ads.txt, 헤더 영역은 읽기만 한다. 상세 규칙은 `Schd_KoreaPlug-Draft.md` STEP -1 을 따른다.
 5. **변경 금지:** 슬러그(URL), Focus Keyword 첫 항목, 카테고리, 발행일, 대표 이미지. 기존 1급 자료·캡처·표·이미지·내부 링크는 지우지 않는다(위치 이동은 가능).
 6. **다른 루틴과 겹치지 않는다.** REST 응답의 `modified` 가 최근 14일 안인데 이 루틴의 기록(`koreaplug-revenue\log.md`)에 없으면 Writer·사용자가 고친 글이다. 그 회차에는 손대지 않고 보고에 적는다. **제목 동결(Writer v13.12 `0-5` 제목 교체 공통 규칙, 2026-11-26 추가)**: 발행 목록의 `[U/…]` 행이나 이 루틴의 `log.md`에 제목·본문 구조를 바꾼 기록이 있는 글은 바꾼 날부터 **14일(그 글의 28일 노출이 500 미만이면 28일)** 동안 제목·H2 구성을 바꾸는 항목(`통합`의 대표 글 · `보강` · `템플릿 정리`)을 실행하지 않고 다음 회차로 미룬다 — 효과를 섞으면 무엇이 통했는지 판정할 수 없다. `revenue_0and1life\`(0and1Life 수익 루틴 전용 폴더)는 읽지도 쓰지도 않는다.
@@ -63,7 +63,7 @@
 |---|---|---|
 | 작업 폴더 | `{CR}\koreaplug-revenue\` | 이 루틴이 쓰는 모든 기록. ⛔ `revenue_0and1life\`(0and1Life 수익 루틴 전용)는 읽지도 쓰지도 않는다 |
 | 진행 상태 | `koreaplug-revenue\state.json` | 회차·모듈별 진행, 승인 항목 처리 이력, 체크리스트 |
-| 승인함 | `koreaplug-revenue\승인.md` | 루틴이 제안을 적고, 사용자가 `[x]` 로 승인한다 |
+| 작업 목록 | `koreaplug-revenue\승인.md` | 루틴 전용. 제안을 `[x]`(자동 승인)로 적고 실행 후 "→ 완료"를 붙인다. 사용자는 건드리지 않는다 |
 | 작업 기록 | `koreaplug-revenue\log.md` | 최신이 위. 무엇을 바꿨는지, 전후 값 |
 | 백업 | `koreaplug-revenue\backups\` | 글을 바꾸기 전 REST `context=edit` 응답 원본 |
 | 애드센스 | `koreaplug-revenue\adsense\checklist.md` | 재신청 체크리스트와 진행률 |
@@ -147,7 +147,7 @@ curl -s -o /dev/null -w "WP %{http_code}\n" -u "$U:$P" "https://koreaplug.com/wp
    - 근거: 2026-11-19 `korean-ondol-floor-heating-explained` 를 `korean-apartment-entryway-floor` 로 통합하면서 "ondol floor"(1.6위)·"ondol room"(1.2위)·"korean heated floor"(1.5위)를 잃을 뻔했다. 2026-11-25 재발행·리디렉션 비활성화·noindex 해제·사이트맵 제외 해제로 복구했다.
 3. `승인.md` 의 `## A. 애드센스` 아래에 한 줄씩 추가한다:
 ```
-- [ ] A-{YYYYMMDD}-{nn} | {종류} | {slug}{ → 대표 slug} | 근거: {28일 노출·클릭, value_score, 중복 유사도, 진단 배치} | 사용자 작업: {있으면 한 줄}
+- [x] A-{YYYYMMDD}-{nn} | {종류} | {slug}{ → 대표 slug} | 근거: {28일 노출·클릭, value_score, 중복 유사도, 진단 배치} | 사용자 작업: {있으면 한 줄}
 ```
 4. 배치 A·B·G 의 사이트 설정 항목은 `승인.md` 가 아니라 `adsense\checklist.md` 의 "사용자 작업" 표에 정확한 화면 경로와 함께 적는다.
 
@@ -187,7 +187,7 @@ curl -s -o /dev/null -w "WP %{http_code}\n" -u "$U:$P" "https://koreaplug.com/wp
 1. 클릭이 나는 글부터 본다: 최근 서치콘솔 28일 표(없으면 `koreaplug-revenue\state.json` 의 마지막 값)에서 클릭 상위 글 중 `placements.csv` 에 아직 없는 글.
 2. 글 본문(REST)을 읽고 **독자가 그 순간 실제로 물건이 필요한 문장**을 찾는다. 예: 전압·플러그(→ Type C/F 어댑터), 하루 종일 지도·번역 사용(→ 보조배터리), 겨울 산행(→ 아이젠·핫팩), 찜질방·여행 세면(→ 여행용 파우치), K-뷰티 쇼핑 글(→ 그 제품군). **억지로 끼우지 않는다** — 글이 상품을 필요로 하지 않으면 그 글은 "자리 없음"으로 기록한다.
 3. `amazon\placements.csv` 에 행을 추가한다(헤더: `id,slug,h2,moment,product_type,amazon_query,shorts_slug,status,added`). `status` 는 `후보`. 같은 상품을 다룰 쇼츠가 있거나 만들 예정이면 `shorts_slug` 에 적는다.
-4. `승인.md` 의 `## B. 아마존` 아래에 `- [ ] B-{YYYYMMDD}-{nn} | {slug} | {h2} | {product_type} | 검색어 "{amazon_query}"` 로 추가한다.
+4. `승인.md` 의 `## B. 아마존` 아래에 `- [x] B-{YYYYMMDD}-{nn} | {slug} | {h2} | {product_type} | 검색어 "{amazon_query}"` 로 추가한다.
 5. 아마존 사이트를 긁지 않는다. 상품 종류와 검색어만 정한다.
 
 ### 3-3. 가입 시점 판정
@@ -197,6 +197,17 @@ curl -s -o /dev/null -w "WP %{http_code}\n" -u "$U:$P" "https://koreaplug.com/wp
 - 조건 ② 블로그 28일 클릭 ≥ `AMAZON_READY_CLICKS` **또는** 공개된 쇼츠 ≥ `AMAZON_READY_SHORTS`
 
 둘 다 참이 되는 첫 회차에 보고 맨 위에 **"아마존 제휴 가입할 때"** 를 적는다. 가입 순서(사용자 몫)도 함께 적는다: 아마존 어소시에이트(미국) 가입 → 사이트 `koreaplug.com` 과 유튜브 채널 등록 → 발급된 태그를 `koreaplug-revenue\amazon\config.json` 의 `amazon_tag` 에 입력. 가입 후 정해진 기간 안에 첫 판매가 있어야 계정이 유지되므로 **가입은 자리와 유입이 준비된 뒤에** 한다. 가입 조건·기간은 그때 공식 안내에서 다시 확인해 보고에 적는다.
+
+### 3-4. 판매 확인 (화요일만)
+
+아마존 어소시에이트(`koreaplug-20`) 판매 현황을 확인한다. 첫 판매 3건 기한은 **2027-04-18**이다.
+
+1. 앱 안 브라우저로 `https://affiliate-program.amazon.com/home` 을 열어 Summary(Total Ordered Items · Total Items Shipped · Clicks · Total Earnings)를 읽는다. 필요하면 View Full Report로 최근 30일 보고서를 본다.
+2. 로그인 화면이 나오면 아무것도 누르지 않고 이 단계를 건너뛴다. STEP 9 보고 맨 위에 **"아마존 어소시에이트 로그인 필요"**를 적는다.
+3. 결과를 `state.json.amazon.sales` 에 `{checked: TODAY, ordered, shipped, clicks, earnings}` 로 덮어쓰고, `log.md` 해당 회차 줄에 `판매 {ordered}건·클릭 {clicks}` 를 덧붙인다.
+4. 직전 값보다 ordered 가 늘었으면 STEP 9 알림 맨 앞에 **"🎉 아마존 판매 발생"**을 적는다. 첫 판매라면 지급 방식을 Payoneer/Wise 미국 계좌로 바꾸라고 함께 적는다.
+5. 누적 판매가 3건 이상이 되면 이 절의 확인 주기를 월 1회(첫째 주 화요일)로 줄여도 된다고 보고에 적는다.
+6. 아마존 화면에서 설정 변경·삭제를 하지 않는다. 자격증명 값을 출력하지 않는다.
 
 ---
 
@@ -281,7 +292,7 @@ ls -la $S/queue $S/queue/_done $S/queue/_failed; tail -5 $S/episodes.csv; tail -
 ```
 KoreaPlug 수익·유입 {TODAY}({요일}) — {모듈}: {가장 중요한 결과 한 문장}
 - 실행: {승인 항목 n건 처리 · 새 제안 n건 · 대본 n편 등}
-- 승인 기다리는 것: A {n} · B {n} · C {n} (koreaplug-revenue\승인.md)
+- 실행 대기(자동 승인): A {n} · B {n} · C {n}
 - 사용자 할 일: {있으면 화면 경로까지, 없으면 "없음"}
 - 확인 필요: {오류·미확인·외부 수정 감지·마감 중단, 없으면 "없음"}
 ```
@@ -295,8 +306,8 @@ KoreaPlug 수익·유입 {TODAY}({요일}) — {모듈}: {가장 중요한 결�
 
 ```
 # KoreaPlug 수익·유입 승인함
-사용 법: 실행해도 되는 줄의 [ ] 를 [x] 로 바꾸세요. 해당 요일 회차에 실행하고 줄 끝에 "→ 완료 날짜"를 붙입니다.
-거절하려면 줄 맨 앞에 ~~ 를 붙이세요(루틴이 다시 제안하지 않습니다).
+루틴 전용 작업 목록입니다. 모든 줄은 자동 승인([x])으로 적히고 해당 요일 회차에 실행된 뒤 줄 끝에 "→ 완료 날짜"가 붙습니다.
+실행을 막고 싶은 줄만 맨 앞에 ~~ 를 붙이면 됩니다(선택).
 
 ## A. 애드센스 (월·목 실행)
 ## B. 아마존 (화·금 실행)
