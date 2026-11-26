@@ -9,7 +9,9 @@
 산출물: out/gsc/{도메인}/{오늘}/
   daily.csv · pages_28d.csv · queries_28d.csv · query_page_28d.csv
   country_28d.csv · device_28d.csv · query_page_90d.csv
-  engine_g_candidates.csv (노출 ≥ 50 · 순위 5~30 · 비정의형) · summary.md
+  engine_g_candidates.csv (노출 ≥ 50 · 순위 5~30 · 비정의형 · near me 제외) · summary.md
+  한국발(country=kor, 지침서 0-1 G v13.13): query_page_90d_kor.csv · engine_g_candidates_kor.csv
+  near_me_90d.csv (near me 쿼리 전체·한국발 — 지침서 1-0: 업종형은 버리고 물건형만 서브 키워드로)
 기준일 = 오늘 − 3일 (GSC 확정 데이터 지연, dataState=final)
 """
 import argparse, base64, csv, datetime as dt, json, os, re, sys, time, urllib.parse
@@ -20,6 +22,8 @@ import requests
 SCOPE = "https://www.googleapis.com/auth/webmasters.readonly"
 DEFINITION_Q = re.compile(r"\b(meaning|means|definition|what is|what does|explained|why do koreans)\b", re.I)
 DEFINITION_URL = re.compile(r"-meaning|why-do-koreans-|-explained")
+NEAR_ME = re.compile(r"\bnear me\b", re.I)
+KOR = [{"filters": [{"dimension": "country", "operator": "equals", "expression": "kor"}]}]
 
 
 def load_key():
@@ -54,13 +58,15 @@ class GSC:
         self.h = {"Authorization": "Bearer " + tok}
         self.end = end
 
-    def query(self, days, dims, end=None):
+    def query(self, days, dims, end=None, groups=None):
         end = end or self.end
         rows, start_row = [], 0
         while True:
-            r = requests.post(self.url, headers=self.h, timeout=60, json={
-                "startDate": str(end - dt.timedelta(days=days - 1)), "endDate": str(end),
-                "dimensions": dims, "rowLimit": 25000, "startRow": start_row, "dataState": "final"})
+            body = {"startDate": str(end - dt.timedelta(days=days - 1)), "endDate": str(end),
+                    "dimensions": dims, "rowLimit": 25000, "startRow": start_row, "dataState": "final"}
+            if groups:
+                body["dimensionFilterGroups"] = groups
+            r = requests.post(self.url, headers=self.h, timeout=60, json=body)
             if r.status_code != 200:
                 sys.exit(f"GSC API {r.status_code}: {r.text[:300]}")
             batch = r.json().get("rows", [])
@@ -103,9 +109,24 @@ def main():
     qp = g.query(a.days, ["query", "page"])
     write(f"{out}/query_page_{a.days}d.csv", ["query", "page"], qp)
 
-    cand = [r for r in qp if r["impressions"] >= 50 and 5 <= r["position"] <= 30
-            and not DEFINITION_Q.search(r["keys"][0]) and not DEFINITION_URL.search(r["keys"][1])]
+    def candidates(rows):
+        return [r for r in rows if r["impressions"] >= 50 and 5 <= r["position"] <= 30
+                and not DEFINITION_Q.search(r["keys"][0]) and not DEFINITION_URL.search(r["keys"][1])
+                and not NEAR_ME.search(r["keys"][0])]
+
+    cand = candidates(qp)
     write(f"{out}/engine_g_candidates.csv", ["query", "page"], cand)
+
+    # 한국발 — 핵심 독자(지금 한국에 있는 외국인)의 검색. 엔진 G는 이 목록을 먼저 본다
+    qp_kor = g.query(a.days, ["query", "page"], groups=KOR)
+    write(f"{out}/query_page_{a.days}d_kor.csv", ["query", "page"], qp_kor)
+    cand_kor = candidates(qp_kor)
+    write(f"{out}/engine_g_candidates_kor.csv", ["query", "page"], cand_kor)
+
+    # near me — 후보에서 뺀 것을 따로 남긴다. 업종형(cafe·pc bang)은 지도 묶음이 답하고, 물건형(yakgwa)은 글이 답한다
+    near = [dict(r, keys=["all"] + r["keys"]) for r in qp if NEAR_ME.search(r["keys"][0])]
+    near += [dict(r, keys=["kor"] + r["keys"]) for r in qp_kor if NEAR_ME.search(r["keys"][0])]
+    write(f"{out}/near_me_{a.days}d.csv", ["scope", "query", "page"], near)
 
     # summary.md — 7일·28일 클릭 변화, 페이지 클릭 상승·하락 상위
     clicks = [r["clicks"] for r in sorted(daily, key=lambda r: r["keys"][0])]
@@ -117,7 +138,10 @@ def main():
     lines = [f"# GSC 요약 — {host} (기준일 {end})", "",
              f"- 7일 클릭 {s7} (직전 7일 {p7}, {pct(s7, p7)})",
              f"- 28일 클릭 {s28} (직전 28일 {p28}, {pct(s28, p28)})",
-             f"- 엔진 G 후보 {len(cand)}건 (노출 100+ {sum(r['impressions'] >= 100 for r in cand)}건)", "",
+             f"- 엔진 G 후보 {len(cand)}건 (노출 100+ {sum(r['impressions'] >= 100 for r in cand)}건)",
+             f"- 한국발 엔진 G 후보 {len(cand_kor)}건 (노출 100+ {sum(r['impressions'] >= 100 for r in cand_kor)}건)"
+             f" · 한국발 90일 클릭 {sum(r['clicks'] for r in qp_kor)} / 노출 {sum(r['impressions'] for r in qp_kor)}",
+             f"- near me 쿼리 {len(near)}건 (후보에서 제외, near_me_{a.days}d.csv)", "",
              "## 28일 클릭 상승 상위"]
     lines += [f"- {d:+d} {p}" for d, p in reversed(delta[-5:]) if d > 0]
     lines += ["", "## 28일 클릭 하락 상위"]

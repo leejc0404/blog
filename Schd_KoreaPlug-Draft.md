@@ -451,7 +451,7 @@ curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/posts/{WP_POST_ID}?conte
 **[6c-1] 값 준비**
 
 - `rank_math_focus_keyword` = `{FOCUS_KEYWORD},{SUB1},{SUB2},{SUB3},{SUB4}` — 구분자 `,`, 공백 없음, Focus 가 첫 번째
-- `rank_math_title` = SEO_TITLE. **60자 초과면 지침서 5-3 에 따라 관사·수식어 1개를 빼서 57자 내외로 축약**한다. 글 제목(H1·post title)은 Notion 원문 유지
+- `rank_math_title` = SEO_TITLE. **60자 초과면 지침서 5-3 에 따라 관사·수식어 1개를 빼서 57자 내외로 축약**하고, 축약했으면 **글 제목(post title)과 본문 `<h1>`도 같은 축약 문자열로 바꾼다**(Writer v13.12 — `H1 = SEO Title` 동일 규칙을 공개 글에도 적용. 2026-11-26 이전에는 H1·post title을 Notion 원문으로 두어 제목과 H1이 달라졌다). 축약한 사실은 실행 로그에 남긴다
 - `rank_math_description` = META_DESCRIPTION. 150자 초과면 축약. Focus Keyword 포함 필수
 - ⚠️ Notion 값에 `(144자)` 같은 **길이 표기가 붙어 있으면 제거**한 뒤 넣는다
 
@@ -475,6 +475,7 @@ curl -s -u "$U:$P" "https://koreaplug.com/wp-json/wp/v2/posts/{WP_POST_ID}?conte
 
 - `rank_math_focus_keyword` 를 `,` 로 쪼갠 길이가 **5**
 - `rank_math_title` ≤ 60자, `rank_math_description` ≤ 150자, 둘 다 Focus Keyword 포함
+- `rank_math_title` = WP `title.raw` = 본문 `<h1>` 텍스트 — **세 값이 같은 문자열**(HTML 엔티티 `&amp;`·`&#8217;`는 풀어서 비교, Writer v13.12). 다르면 `rank_math_title` 값으로 나머지 둘을 맞춰 다시 저장한다. `rank_math_title`에 `%` 변수가 있으면 실제 제목 문자열로 바꾼다
 
 어긋나면 1회 재시도. 그래도 어긋나면 `[6d]` UI 폴백으로 내려간다.
 
@@ -510,7 +511,7 @@ Ctrl+S → 저장 확인 → 편집 URL로 다시 navigate → wait 5초 → `ge
 
 1. Focus Keyword 가 첫 `<p>` 도입부 100자 이내에 포함
 2. Focus Keyword 가 `<h2>` 1개 이상에 포함
-3. `rank_math_title` ≤ 60자 + Focus Keyword 포함
+3. `rank_math_title` ≤ 60자 + Focus Keyword 포함 + WP 제목·`<h1>`과 같은 문자열 + `%변수%` 0 (지침서 5-3 v10.7)
 4. `rank_math_description` ≤ 150자 + Focus Keyword 포함
 5. 내부 링크 1개 이상, 목적지 전부 `publish`
 6. `<img>` alt 에 Focus Keyword 또는 연관어 포함
@@ -740,7 +741,7 @@ GET /wp-json/wp/v2/posts?slug={신규슬러그}&status=any&_fields=id,slug,statu
 **SEO 보정(지침서 5-3 대체)**
 1. FOCUS_KEYWORD가 첫 `<p>`(도입부 100자 이내)에 포함
 2. FOCUS_KEYWORD가 `<h2>` 1개 이상에 포함
-3. SEO_TITLE ≤ 60자 + FOCUS_KEYWORD 포함
+3. SEO_TITLE ≤ 60자 + FOCUS_KEYWORD 포함 + WP 제목·`<h1>`과 같은 문자열
 4. META_DESCRIPTION ≤ 150자 + FOCUS_KEYWORD 포함
 5. 내부 링크 1개 이상
 6. `<img>` alt에 FOCUS_KEYWORD 또는 연관어 포함

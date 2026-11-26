@@ -1469,7 +1469,7 @@ if (hero) {
   <div style="grid-area:1/1; background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.72) 100%);"></div>
   <figcaption style="grid-area:1/1; align-self:end; padding:clamp(14px,3.6vw,26px) clamp(14px,3.2vw,24px); color:#fff;">
     <h1 style="font-size:clamp(16px,4.4vw,26px); line-height:1.35; font-weight:800; margin:0 0 8px; color:#fff;">{제목}</h1>
-    <p style="margin:0; font-size:clamp(11px,2.9vw,13px); opacity:.85;">{날짜} · 읽는 시간 {N}분</p>
+    <p style="margin:0; font-size:clamp(11px,2.9vw,13px); opacity:.85;">{날짜}</p>
   </figcaption>
 </figure>
 
@@ -1478,6 +1478,8 @@ if (hero) {
 <!-- C. 舊 결함형(v5.5~v5.9) — 구조는 A인데 캡션이 position:absolute + 고정 26px.
      모바일에서 캡션이 이미지보다 커져 윗부분이 잘린다. 발견 즉시 A로 정규화한다 -->
 ```
+
+⛔ **(2026-11-26) 메타 줄에는 날짜만 쓴다 — "읽는 시간 N분"을 넣지 않는다.** 글을 고치면 분량 표시가 실제와 어긋나고, 같은 모양의 줄이 모든 글에 반복되면 템플릿 흔적이 된다(자매 블로그 KoreaPlug는 애드센스 진단에서 같은 줄이 지적돼 금지 중). 날짜는 YMYL 글의 신뢰 신호이므로 유지하되, **실제로 내용을 고친 경우에만** 바꾼다. 기존 글은 일부러 찾아 고치지 않고, 아래 병합 절차로 그 글의 헤더를 A로 정규화할 때만 "· 읽는 시간 N분"을 함께 뺀다.
 
 ⛔ **(v6.0) `position:absolute` 캡션은 금지한다.** 절대 위치 캡션은 **자기 높이가 figure 높이에 반영되지 않으므로**, 좁은 화면에서 반드시 넘친다. 위 A의 그리드 스택은 행 높이가 `max(이미지, 캡션)` 이라 **figure가 캡션을 따라 커지고 넘침이 구조적으로 불가능**하다. 넘쳐서 생긴 여백은 그라디언트 `<div>`(기본 `stretch`)와 `figure{background:#111}` 이 덮으므로 흰 글자가 그대로 읽힌다.
 
