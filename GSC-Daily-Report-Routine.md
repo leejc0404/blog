@@ -1,4 +1,6 @@
-# 🩺 GSC-Daily-Report-Routine (일간 고장 점검) — v4.4
+# 🩺 GSC-Daily-Report-Routine (일간 고장 점검) — v4.5
+
+> **v4.5 (2026-11-27)**: 항목 15 다음 수집요청 JS를 개편된 화면에 맞춤 — 입력칸 `input[name=url]` 첫 칸 · 버튼 `button.btn_result` 첫 버튼 · 결과는 화면 레이어 문구로 판정 · URL마다 1회씩 실행.
 
 > **v4.4 (2026-11-26)**: KoreaPlug 기준을 현재 Writer(v13.13)에 맞춤 — 항목 9(트랙 S)를 0and1Life 전용으로 · 항목 0·10의 KoreaPlug 선점 창 마감 D-21 → D-3(Writer `0-4`) · 항목 0의 긴급 표시 조건을 두 블로그의 실제 표기(`배포 우선=당일` / `급한 쪽 먼저`)로.
 
@@ -481,22 +483,22 @@ GET /wp-json/wp/v2/posts?status={draft|future|publish|pending|trash}&per_page=30
 1. WP REST로 대상 글의 `link`를 뽑는다. 0건이면 이 항목은 통과 처리하고 아무것도 적지 않는다
 2. Chrome으로 `https://webmaster.daum.net/tool/collect` 접속 → `get_page_text`로 상태 확인
    - **주소가 `/login`으로 바뀌었거나 「PIN코드 입력」이 보이면 → 로그인 만료.** ⛔ **PIN은 절대 입력하지 않는다**(자격증명). `⚠️ 다음 로그인 만료 — 사용자필요: webmaster.daum.net에서 사이트 URL + PIN으로 재로그인` 으로 보고하고, 대상 URL 목록을 그대로 적어 둔다
-3. 로그인 상태면 **페이지 알림창(alert)을 먼저 가로챈다** — 브라우저 기본 알림창이 뜨면 Chrome 확장 제어가 멈추기 때문이다. `javascript_tool`로 아래를 실행해 입력·클릭·결과 수집을 한 번에 처리한다 (URL마다 1회, 사이에 3초 대기):
+3. 로그인 상태면 `javascript_tool`로 아래를 **URL마다 1회씩 따로** 실행한다(한 번에 여러 URL을 돌리면 45초 제한에 걸려 결과를 못 받는다). 2026-11-27 화면 개편 기준 — 입력칸 placeholder가 없어졌고, 결과는 alert가 아니라 화면 레이어로 뜬다:
    ```js
    (async (url) => {
      const msgs = []; window.alert = m => msgs.push(String(m)); window.confirm = m => { msgs.push(String(m)); return true; };
-     const inp = [...document.querySelectorAll('input[type=text]')].find(i => (i.placeholder||'').includes('사이트의 URL'));
-     if (!inp) return {ok:false, msg:'입력칸 없음'};
+     [...document.querySelectorAll('button,a')].filter(b => b.offsetParent && b.innerText.trim() === '확인').forEach(b => b.click());
+     const inp = document.querySelectorAll('input[name=url]')[0];          // 첫 칸 = 문서등록
+     const btn = document.querySelectorAll('button.btn_result')[0];        // 첫 버튼 = 문서등록 수집요청
+     if (!inp || !btn) return {ok:false, msg:'입력칸/버튼 없음 — 화면 재개편 확인'};
      inp.focus(); inp.value = url; inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true}));
-     let box = inp, btn = null;
-     for (let i = 0; i < 5 && !btn; i++) { box = box.parentElement; btn = [...box.querySelectorAll('button')].find(b => b.innerText.trim() === '수집요청'); }
-     if (!btn) return {ok:false, msg:'버튼 없음'};
-     btn.click(); await new Promise(r => setTimeout(r, 3000));
-     return {ok:true, msgs, after: document.body.innerText.slice(0, 300)};
+     btn.click(); await new Promise(r => setTimeout(r, 3500));
+     const lay = [...new Set([...document.querySelectorAll('[class*=layer],[class*=popup],[role=dialog]')].filter(e => e.offsetParent).map(e => e.innerText.trim().split('\n')[0]))].filter(t => t && t !== '확인');
+     return {ok:true, msgs, lay};
    })('{URL}')
    ```
-   - 입력칸은 **첫 번째 칸 「수집을 원하는 사이트의 URL을 입력해주세요.」** 만 쓴다. 두 번째 칸(RSS 피드·ATOM·리스트 페이지)은 쓰지 않는다
-4. 반환된 `msgs`(알림창 문구)로 판정한다 — 완료·접수 문구면 성공, 형식·오류·초과 문구면 실패. 문구가 비어 있으면 `응답 없음`으로 적는다
+   - 쓰는 칸은 **첫 번째 `input[name=url]`(문서등록)** 하나뿐이다. 두 번째(RSS·ATOM·리스트)와 세 번째(사이트맵)는 쓰지 않는다
+4. 반환된 `lay`(화면 레이어 문구)와 `msgs`(알림창 문구)로 판정한다 — `수집요청이 완료되었습니다`면 성공, 형식·오류·초과 문구면 실패, 둘 다 비어 있으면 `응답 없음`으로 적는다
 5. 결과를 한 줄로 보고한다: `{슬러그} — 다음 수집요청 완료` / `{슬러그} — 다음 수집요청 실패: {메시지}`
 
 **실행 주체**: `루틴가능` — 콘텐츠를 바꾸지 않는 외부 요청이므로 사용자 승인 없이 실행한다. 로그인 만료만 `사용자필요`. Chrome 미연결이면 `⚠️ 미확인`으로 보고하고 건너뛴다.
