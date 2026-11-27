@@ -9,6 +9,7 @@
 - **번호 안내**: 번호는 Writer 지침의 Phase 체계를 이어받은 것 — Phase 0~4는 Writer 담당이라 이 문서에 없음(의도된 결번, 오타 아님). ⚠️ Writer 지침의 'Phase 5-3(SEO 콘텐츠 품질 자가검수)'과 이 문서의 'Phase 5-3(블록 구조·820px 체크)'은 **서로 다른 문서의 별개 항목**임에 주의.
 
 ### 개정 이력
+- **v2.1 (2026-11-27)** — **네이버 모바일 포맷 전환 (Writer 2026-11-27 전면 개정과 짝).** 사용자 판정: #2846 기준금리 글이 "요즘 사람들이 들어와도 절대 안 읽을 길이·가독성". ① **Rank Math 점수 목표(81점) 폐지** — 점수는 기록만, 실패 항목은 기술 SEO만 조치(5-2·5-3·5-3-B·5-3-C·원라이너) ② `keywordDensity`·`keywordInSubheadings`·`keywordInImageAlt`·`lengthContent` 를 '사양 — 조치 안 함'으로 ③ 증빙 캡처 1장·필요한 줄만·한국어 캡션(`Captured` 금지)(5-4) ④ 5-7 모바일 측정에 반복·키워드·숫자·이미지 수·3줄 요약·오늘 할 일 측정 추가, 화면 상한 14→9 ⑤ 5-7-B 소급 보정 기준을 새 뼈대로 ⑥ 같은 날 추가 — 글자 규칙(Writer 2-4b: 17px·#333d4b·형광펜 2곳)과 궁금증 장치(진행 표시) · 예고 질문 줄 0개 · 막대 차트 · 소제목 테마색 측정 ⑦ 같은 날 추가 — 목차 위치 `tocPos` 측정·보정(5-3 체크리스트 `[ez-toc]`, 5-7 ②-b).
 - **v2.0 (2026-10-20)** — **Phase 5-7 개정 + 5-7-B 기존 글 소급 보정 신설.** 글 #1268·#148 휴대폰 실측 결과 ① 사이트 추가 CSS의 `word-break:break-all !important`가 글의 `keep-all`을 덮어쓰고 있어 전 글이 단어 중간에서 끊기고 있었다(사용자 승인으로 CSS 교체) ② 5-7 ② 측정이 래퍼만 보고 있어 2개월간 놓쳤다 → 본문 요소 실제값 측정으로 교체 ③ 한 문장 문단·굵은 글씨 0개·라벨 구조가 가독성을 떨어뜨려 측정 항목(oneLiners·strongCount·colorCount·screens) 추가 ④ Draft가 이미지 루틴의 삽입물을 덮어쓴 사고(#148) 기록. 상세는 Writer 2-5 📱 참조.
 - **v1.9 (2026-09-07)** — **균형 규칙 사본 폐지.** 7-1 표의 `주간 한도` 열과 7-3의 R1~R6 사본을 **삭제하고 `0and1Life-Writer.md` 1-3 R1~R6 직접 조회로 전환**했다. 근거: 2026-09-07 Draft 회차가 `📐 규정계산 3건 — 한도 2 초과`를 보고했는데, 사본에 Writer 1-3 R1의 **「Head Type=시즌 글은 R1 카운트에서 제외」 예외가 누락**돼 있어 오탐 가능성이 확인됐다(사본 생성 이후 Writer에 추가된 조항이 따라오지 않음). 같은 이유로 사본에 없던 **R4·R5·7-4 F등급 가드**도 스케줄 프롬프트 폴백에서 소실되고 있었다. **WP ID·slug 매핑은 이 문서의 고유 자산이므로 그대로 유지**한다. 조항 번호(7-1·7-3·7-4)는 보존했다.
 - **v1.8 (2026-08-22)** — **Phase 7 카테고리 한도 재조정 + SSOT 명시.** 2026-08-22 네이버 서치어드바이저 실측(클릭 8회 -91.6% · 노출 5.6천 -73.7% · 노출 상위 5문서 중 4개가 6/20~7/4 작성분)에 근거해 📐 규정·계산 3→2, 💍 웨딩 1→2, 🤖 AI **0(동결)→1(조건부 해제)** 로 조정. 7-1 한도 열이 **Writer 지침 1-3 R1의 사본**임을 명시하고 상충 시 Writer가 이긴다는 우선순위를 못 박았다(7-1 표와 7-3 R1이 규정계산 2 vs 3으로 서로 어긋나 있던 내부 모순도 함께 해소). 7-3에 **R6 네이버 수요 하한** 보고 항목 신설.
@@ -110,11 +111,8 @@ print('len',len(c),'| p',len(re.findall(r'<p[ >]',c)),'| ld','application/ld+jso
 **규칙:**
 
 - `hasTOCPlugin = true` 강제는 **Rank Math 설정 단계에서 미리** 넣는다(STEP 6d). 이것만으로 TOC 인식은 해결된다 — 2026-08-06·08-08 연속 확인.
-- **재분석 트리거는 다음 조건을 모두 만족할 때만 실행한다:**
-  1. 저장 후 점수가 81점 미만이고
-  2. 실패 항목 중 **본문 수정으로 해소 가능한 것**이 있으며
-  3. 그 수정을 실제로 REST에 반영한 뒤일 것
-- 위 조건에 해당하지 않으면 **트리거를 돌리지 말고 서버 점수를 그대로 최종값으로 기록한다.** 돌리면 점수만 내려간다.
+- **(v2.1 — 2026-11-27) 재분석 트리거는 기본적으로 실행하지 않는다.** 점수 목표가 없어졌으므로(Writer 5-1) 서버 점수를 그대로 기록한다. 예외: 5-3-B의 ✅ 기술 항목(메타 설명·내부 링크 등)을 REST로 고친 뒤 그 반영을 확인할 때만 1회 돌린다.
+- 트리거를 돌려도 점수만 내려가는 경우가 많다(아래 배경). 점수를 올리려고 돌리지 않는다.
 
 ### 트리거 스크립트 (조건 충족 시에만)
 
@@ -145,7 +143,7 @@ if (fb) {
 
 - [ ] `core/freeform` 블록 **단일**로 HTML 삽입 (`getBlocks()` 결과가 `['core/freeform']` 하나여야 함)
 - [ ] `hasTOCPlugin = true` 강제 설정 완료 (STEP 6d에서 선반영)
-- [ ] `<!-- TABLE OF CONTENTS -->` 마커가 본문에 존재
+- [ ] `[ez-toc]` 숏코드가 3줄 요약 바로 아래·첫 `p.o1-step` 위에 **한 번** 있다 (없으면 Easy TOC가 진행 표시와 첫 H2 사이에 목차를 끼운다 — 2026-11-27). 옛 `<!-- TABLE OF CONTENTS -->` 마커는 Easy TOC가 읽지 않으므로 `[ez-toc]`로 바꾼다
 
 **🟢 820px 컨테이너 무결성**
 
@@ -156,21 +154,22 @@ if (fb) {
 
 **🟢 키워드 입력 (누락 금지)**
 
-- [ ] Rank Math 포커스 키워드 필드에 Notion 기본 정보 표의 **Focus Keyword + Sub Keywords 전부**를 쉼표로 연결해 입력했는가? (Focus가 첫 번째, 총 5개 권장)
-- [ ] 저장 후 검증: `wp.data.select('rank-math').getKeywords()` 결과에 쉼표 항목이 2개 이상인가?
+- [ ] Rank Math 포커스 키워드 필드에 Notion 기본 정보 표의 **Focus Keyword(메인) + Sub Keywords(블루오션 → 레드오션) 전부**를 쉼표로 연결해 입력했는가? **총 4~5개, 메인이 첫 번째** (Writer 1-1 — 2026-11-27 개정)
+- [ ] Sub Keywords를 나눌 때 **쉼표와 ` / ` 둘 다** 구분자로 본다 — 2026-11-27 이전 초안은 ` / `로 적혀 있어 쉼표로만 나누면 한 덩어리로 들어갔다.
+- [ ] 저장 후 검증: `wp.data.select('rank-math').getKeywords()` 결과의 쉼표 항목이 **4개 이상**인가? 3개 이하면 Notion `Sub Keywords`가 모자란 것 — STEP 7에 `⚠️ 키워드 세트 {n}개 — Writer 1-1 미달` 한 줄 보고(루틴이 키워드를 지어내지 않는다).
 
 > 배경: 2026-07-09 점검에서 Draft 루틴이 Focus만 입력하고 Writer가 기록한 Sub Keywords를 버리는 문제 확인(Blog #52).
 
 **🟢 최종 확인**
 
-- [ ] Rank Math 점수 확인 — 목표 81/100, 미달 시 아래 5-3-B 판정
+- [ ] Rank Math 점수 **기록만** — 목표 점수 없음(Writer 5-1, v2.1). 실패 항목 중 5-3-B의 ✅ 기술 항목만 조치
 - [ ] 임시저장(Draft) 상태 확인
 - [ ] 본문 무결성 재검증 (Phase 5-1-C)
 - [ ] Notion 페이지 점수 업데이트
 
 ### 5-3-B. 점수 미달 시 — 조치 가능 여부 선판정 (v1.4 신설)
 
-**보정을 시작하기 전에 실패 항목이 조치 가능한지부터 가른다.** 무의미한 보정에 시간을 쓰지 않기 위해서다.
+**(v2.1) 점수 미달이라는 개념은 없어졌다. 실패 항목 중 아래 ✅ 기술 항목만 조치하고, 나머지는 사양으로 기록한다.** 보정을 시작하기 전에 실패 항목이 조치 대상인지부터 가른다.
 
 실패 항목은 에디터 콘솔에서 이렇게 뽑는다 (Rank Math 패널을 연 뒤 실행):
 
@@ -189,11 +188,13 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 | `keywordInPermalink` | ⛔ **구조적 — 조치 불가** | 슬러그 영문 정책. **변경 금지.** 로그에 '사양'으로 기록 |
 | `hasContentAI` | ⛔ **PRO 전용 — 조치 불가** | 로그에만 기록 |
 | `contentHasShortParagraphs` | ⛔ **구조적 — 조치 불가 (v1.4 규명)** | 아래 참조 |
-| `keywordIn10Percent` | ✅ 조치 가능 | 도입 첫 문단 100자 안에 Focus Keyword 배치 |
-| `keywordInSubheadings` | ✅ 조치 가능 | H2 1개 이상에 Focus Keyword 포함 |
+| `keywordIn10Percent` | ✅ 조치 가능 | 공감 한마디(Writer 2-3 ②)에 Focus Keyword가 자연스럽게 1회 있는지 확인. 없을 때만 그 문장을 다듬는다(문장 앞에 키워드를 붙이지 않는다) |
+| `keywordInSubheadings` | ⛔ **사양 — 조치 안 함 (v2.1)** | Writer 2-5: 키워드는 H2 중 많아야 1곳. H2에 키워드를 끼워 넣지 않는다 |
+| `keywordInImageAlt` | ⛔ **사양 — 조치 안 함 (v2.1)** | alt는 장면 설명(Writer 2-5). 키워드를 위해 alt를 고치지 않는다 |
 | `keywordInMetaDescription` | ✅ 조치 가능 | 메타 설명 150자 이내 + Focus Keyword |
 | `linksHasInternal` | ✅ 조치 가능 | `/slug/` 상대경로 내부링크 1개 이상 |
-| `lengthContent` | ⛔ **사양 — 조치 불가 (2026-10-16)** | Writer 2-5가 분량을 **900~1,300어절**로 정했다(독자 지적: "휴대폰으로 읽기 힘들다"·"너무 길다"). 이 항목이 실패해도 **본문을 늘리지 않는다** — 로그에 '사양(분량 상한)'으로 기록. 점수가 81점에 못 미쳐도 이 항목 때문이면 그대로 기록한다 |
+| `lengthContent` | ⛔ **사양 — 조치 불가 (2026-10-16 · v2.1 재확인)** | Writer 2-5가 분량을 **공백 제외 1,200~2,500자**로 정했다(사용자 판정 2026-11-27: "요즘 사람들은 절대 안 읽을 길이"). 이 항목이 실패해도 **본문을 늘리지 않는다** — 로그에 '사양(분량 상한)'으로 기록 |
+| `keywordDensity` | ⛔ **사양 — 조치 불가 (v2.1)** | 5-3-C 참조 |
 
 > ### ⛔ `contentHasShortParagraphs` — 문단을 쪼개도 해소되지 않는다 (2026-08-08 규명)
 >
@@ -205,25 +206,16 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 
 **조치 가능 항목이 하나도 없으면 보정을 생략하고 서버 점수를 그대로 기록한다.**
 
-### 5-3-C. `keywordDensity` 하한 미달 — Draft 루틴은 조치하지 않는다 (자동 신설 2026-09-08, 루틴 작성)
+### 5-3-C. `keywordDensity` — 사양, 조치 안 함 (v2.1 개정 2026-11-27 · 최초 자동 신설 2026-09-08)
 
-> **신설 사유**: 2026-09-08 회차(#104 `jeonse-guarantee-landlord-rejection`)에서 Rank Math 실패 항목으로 `keywordDensity`가 떴는데, 5-3-B 판정표와 스케줄 프롬프트 [6j] 어디에도 이 항목의 행이 없었다. Phase 5-0-A 3단 검증(`?cb=` 재조회 → Claude in Chrome `fetch` 재조회, 둘 다 v1.9 최신본 확인)을 모두 밟은 뒤 **결번으로 확정**했고, 5-0-B에 따라 루틴이 직접 작성한다.
+Writer 2-5가 포커스 키워드를 **본문 2~4회, 밀도 목표 없음**으로 정했다(네이버는 과도한 키워드 반복을 어뷰징 신호로 본다). 그래서 Rank Math의 밀도 하한 실패는 **정상**이다.
 
 | 실패 항목 | 판정 | 조치 |
 |---|---|---|
-| `keywordDensity` (하한 미달) | ⛔ **소관 밖 — Draft 루틴 조치 불가** | 보정하지 않고 로그에 실측 밀도를 기록하고 넘어간다 |
+| `keywordDensity` 하한 미달 | ⛔ 사양 | 기록만. 키워드를 더 넣지 않는다 |
+| `keywordDensity` 상한 초과(2.5%↑) 또는 5-7 `kwCount` 5회↑ | 🟡 Writer 소관 | 보정하지 않고 STEP 7에 `⚠️ 키워드 과다 {n}회 — Writer 2-5` 한 줄 보고 |
 
-**판정 근거**
-
-1. **유일한 해소 수단이 이미 금지돼 있다.** 밀도 하한을 올리는 방법은 본문에 Focus Keyword를 더 넣는 것뿐인데, 스케줄 프롬프트 [6j]는 `⛔ 절대 금지: … 키워드 반복 삽입` 과 `키워드 기계적 반복 삽입 금지` 를 명시한다. 금지된 조치만 남은 항목은 조치 가능 항목이 아니다.
-2. **자매 지침서에도 하한 조치 규정이 없다.** `KoreaPlug-Draft.md` 오류표는 `Keyword 밀도 경고 | 2.2% 초과 | 본문에서 Focus Keyword 2~3회 삭제` 로 **상한 초과만** 다룬다. 하한 미달은 양쪽 지침서 모두 미규정 상태였다.
-3. **하한 미달은 작성 단계의 문제다.** `0and1Life-Writer.md` 2-5가 Focus Keyword 밀도 **1.0~1.5%** 를 작성 기준으로 두고 있다. 이 기준에 못 미친 원고가 넘어온 것이므로 책임 소재는 Writer이고, Draft 루틴은 **보고만** 한다(Phase 7 [6o] 카테고리 균형과 같은 취급).
-
-**실측 (2026-09-08 #104)**: Rank Math 패널 `키워드 밀도가 0.37로 낮으며 포커스 키워드와 조합이 6번 나타납니다` · 루틴 자체 계산 0.39%(본문 1,777어절 중 Focus Keyword 7회). Writer 2-5 하한 1.0%의 절반 이하.
-
-**보고 형식**: STEP 7 완료 알림에 `⚠️ keywordDensity {n}% — Writer 2-5 하한(1.0%) 미달, 작성 단계 소관` 을 한 줄 덧붙인다. 조용히 넘어가지 않는다.
-
-⚠️ **상한 초과(2.2% 초과)는 이 조항의 대상이 아니다.** 그쪽은 기존 오류표대로 본문에서 Focus Keyword를 2~3회 삭제해 조치한다 — 삭제는 금지 대상이 아니기 때문이다.
+> 舊 판정(2026-09-08, #104 밀도 0.37%를 'Writer 하한 1.0% 미달'로 보고)은 폐지됐다 — 그 하한이 #2846의 키워드 7회 반복을 만든 원인 중 하나였다.
 
 ---
 
@@ -276,9 +268,12 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 - **업로드**: 샌드박스에 스크린샷 파일이 없으므로 `upload_image` 로 `/wp-admin/media-new.php?browser-uploader=1` 의 `#async-upload` 에 넣고 **'업로드' submit 버튼을 좌표로 클릭**한다(ref 클릭만으로는 전송되지 않는 사례 확인). 이후 `GET /wp-json/wp/v2/media?per_page=2` 로 id·source_url 확인.
 - 파일명 `evidence-{SLUG}-{n}` 과 `class="evidence-capture"` 를 반드시 지킨다 — Image 루틴이 증빙과 생성 이미지를 구분하는 근거다. webp 변환이 불가능한 경로에서는 .jpg 도 허용하되 그 사실을 로그에 남긴다.
 
-**삽입 마크업 표준**
+**삽입 마크업 표준 (v2.1 — 2026-11-27)**
+- 글당 **1장**. 결과·조문 영역 중 **판단에 필요한 줄만** 잘라 찍는다 — 390px 화면에서 표시 높이 약 380px(화면 절반) 이하. 공시표처럼 줄이 많은 화면은 해당 행 2~3줄만.
+- figcaption은 **한국어 한 줄**: `{기관} {자료명} · {YYYY-MM-DD} 확인`. 영어 `Captured` 금지(#2846 사용자 지적 — 2곳). 캡처의 핵심 숫자는 본문 문장에 글자로 한 번 있어야 한다.
+- alt는 **캡처에 보이는 내용을 설명하는 문장**(키워드 강제 없음).
 ```html
-<figure class="evidence-capture" style="margin:26px 0; border:1px solid #e2e8f0; border-radius:12px; padding:10px; background:#fafafa;"><img style="width:100%;display:block;height:auto;border-radius:8px;" src="{URL}" alt="{Focus Keyword 포함 설명}" /><figcaption style="font-size:13px; color:#64748b; margin-top:8px;">{출처 기관 — 화면명 · Captured YYYY-MM-DD}</figcaption></figure>
+<figure class="evidence-capture" style="margin:22px 0; border:1px solid #e2e8f0; border-radius:12px; padding:8px; background:#fafafa;"><img style="width:100%;display:block;height:auto;border-radius:8px;" src="{URL}" alt="{캡처 내용 설명}" /><figcaption style="font-size:13px; color:#64748b; margin-top:6px;">{기관} {자료명} · {YYYY-MM-DD} 확인</figcaption></figure>
 ```
 
 > ⚠️ **소급 적용 원칙 (2026-08-05 사건의 교훈)**: 새 관문을 만들면 **기존 글에도 반드시 소급 적용**한다. `Fabricated Experience Gate`를 신규 글에만 걸어둔 탓에 기존 58편이 방치됐고, 이것이 구글 색인 거부 13편의 유력한 원인으로 지목됐다.
@@ -286,10 +281,10 @@ JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')]
 ---
 
 
-## Phase 5-7. 📱 모바일 화면 점검 (2026-10-16 신설 — 사용자 지시 · 2026-10-20 개정)
+## Phase 5-7. 📱 모바일 화면 점검 (2026-10-16 신설 — 사용자 지시 · 2026-10-20 개정 · v2.1 2026-11-27 네이버 모바일 포맷)
 
 > 독자는 휴대폰으로 읽는다. Draft는 올린 글을 **휴대폰 화면(폭 390px)으로 띄워 처음부터 끝까지 직접 읽어 보고**, 가독성이 좋은지 느낀 뒤에만 Draft일을 기록한다. 데스크톱 화면이나 HTML 소스만 보고 통과시키지 않는다.
-> 기준은 Writer 지침 2-5 「📱 모바일 가독성」이다(분량 900~1,300 · 14화면 이내 · 문단 휴대폰 3줄 · 표 2~3열 · H2 4~6).
+> 기준은 Writer 지침 2-3 뼈대와 2-5다(공백 제외 1,200~2,500자 · **9화면 이내** · 결론 한 번 · 키워드 2~4회 · 표 2개·이미지 2장 이하 · H2 4~5 · FAQ 3). 읽을 때 가장 먼저 보는 것은 **같은 말을 두 번 하는가**다.
 
 > ⚠️ **2026-10-20 사고 기록 — 사이트 CSS가 글의 `keep-all`을 덮어쓰고 있었다.** 글 #1268 실측에서, 래퍼의 `word-break:keep-all`은 정상인데 그 안의 `<p>`·`<h1>`·`<td>`·`<strong>`은 전부 `break-all`로 계산됐다. 원인은 WP **외모 > 사용자 정의하기 > 추가 CSS**의 `@media (max-width:768px) .entry-content p, li, h1, h2, span, a, strong { word-break: break-all !important }` 와 `.entry-content table td, th { word-break: break-all }`. 이 두 규칙을 사용자 승인으로 `word-break: keep-all` + `overflow-wrap: anywhere`로 교체해 발행했다(2026-10-20, 전 글 즉시 적용). **종전 ② 측정은 래퍼만 보고 있어서 이 사고를 2개월간 놓쳤다** — 그래서 ②의 `keepAll` 측정 대상을 아래처럼 **본문 `<p>`·`<td>`·`<strong>` 실제 계산값**으로 바꿨다. 사이트 CSS를 다시 `break-all`로 되돌리지 않는다.
 
@@ -327,6 +322,35 @@ JSON.stringify({
 });
 ```
 ```js
+// ②-b (v2.1) 네이버 모바일 포맷 측정 — ②와 같은 프레임에서. KW = Notion 기본 정보 표의 Focus Keyword
+const KW = '{FOCUS_KEYWORD}';
+const body = [...R.querySelectorAll(':scope > *')].filter(e => !e.matches('figure:first-of-type, .trust-note, script')).map(e => e.innerText).join('\n');
+const caps = [...R.querySelectorAll('figcaption')].map(c => c.innerText.trim()).filter(Boolean);
+const ps2 = [...R.querySelectorAll(':scope > p')].filter(p => !/^Q\./.test(p.innerText.trim()));
+let run = 0, maxRun = 0; ps2.forEach(p => { const one = (p.innerText.match(/[.?!요죠다]\s/g) || []).length <= 1 && p.innerText.length < 60; run = one ? run + 1 : 0; maxRun = Math.max(maxRun, run); });
+JSON.stringify({
+  chars: body.replace(/\s/g, '').length,
+  hasSummary: !!R.querySelector('.o1-summary li, .ai-knowledge-snippet li'),
+  hasTodo: R.querySelectorAll('.o1-todo li').length,
+  kwCount: (body.match(new RegExp(KW.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length,
+  numCount: (body.match(/\d[\d,.]*\s?(만원|억원|원|%p|%|개월|주|일|개|펜|병|mg)/g) || []).length,
+  tables: R.querySelectorAll('table').length,
+  bodyImgs: R.querySelectorAll('figure img').length - 1,
+  videos: R.querySelectorAll('video').length,
+  evidence: R.querySelectorAll('figure.evidence-capture').length,
+  captured: (R.innerText.match(/Captured/gi) || []).length,
+  dupCaptions: caps.length - new Set(caps).size,
+  oneLinerRun: maxRun,
+  pFont2: (() => { const c = w.getComputedStyle(R.querySelector(':scope > p')); return c.fontSize + '/' + c.color; })(),
+  tocPos: (() => { const t = R.querySelector('#ez-toc-container'); return !t ? 'none' : (t.previousElementSibling?.classList.contains('o1-summary') && t.nextElementSibling?.classList.contains('o1-step')) ? 'ok' : 'wrong'; })(),
+  steps: R.querySelectorAll('.o1-step').length, nexts: R.querySelectorAll('.o1-next').length, charts: R.querySelectorAll('.o1-chart').length, h2Color: w.getComputedStyle(R.querySelector('h2')).color,
+  marks: [...R.querySelectorAll('strong')].filter(e => /gradient/.test(e.getAttribute('style') || '')).length,
+  h2TwoLine: [...R.querySelectorAll('h2')].filter(h => h.getBoundingClientRect().height > 40).length,
+  h2Border: w.getComputedStyle(R.querySelector('h2')).borderLeftColor,
+  h2: [...R.querySelectorAll('h2')].map(h => h.innerText.trim())
+});
+```
+```js
 // ③ 한 화면씩 내리며 스크린샷 → 직접 읽기 (k = 0, 1, 2 … 끝까지). 스크린샷은 프레임 영역만 zoom 으로 찍는다
 document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
 // ④ 끝나면 프레임 제거
@@ -338,7 +362,7 @@ document.getElementById('mf-wrap').remove();
 - 글자 벽이 있는가 — 한 문단이 4줄을 넘는가?
 - 숫자·단어가 줄바꿈으로 쪼개지는가? (`79만 9,0/00원` 같은 것이 한 군데라도 있으면 keepAll 측정값부터 다시 본다)
 - 표의 열이 잘려 옆으로 밀어야 보이는가? 특히 핵심 값 열이 숨는가?
-- 목차가 한 화면을 다 먹는가? 같은 말을 두 번 하는가? 다음 화면으로 넘기고 싶은가, 지루한가?
+- 목차가 한 화면을 다 먹는가? **같은 말을 두 번 하는가?**(3줄 요약의 숫자가 본문·그림·FAQ에서 다시 나오는가) 다음 화면으로 넘기고 싶은가, 지루한가?
 
 **판정**
 
@@ -349,19 +373,32 @@ document.getElementById('mf-wrap').remove();
 | 한글 줄바꿈 `keepAll.*` | **p·h1·h2·td·strong 전부 `keep-all`** | 🔴 래퍼 style 확인. 래퍼가 정상인데 자식이 `break-all`이면 **사이트 CSS 사고**다 — 글을 고치지 말고 STEP 7에 `🚨 사이트 CSS break-all 재발` 로 알리고 Draft일 기록 보류 |
 | 숨은 표 `tables[].hidden` | 0 | 🟡 숫자 셀 `white-space:nowrap`·래퍼 확인. 4열 이상이면 `Writer 소관 — 2~3열 재구성 필요` 기록 |
 | 긴 문단 `longParas` (6줄 초과) | 0 | 🟡 문장 경계에서 `<p>` 를 둘로 나눈다(문장은 바꾸지 않는다). ⛔ FAQ 문단은 나누지 않는다 — FAQPage 스키마 정규식이 깨진다 |
-| 한 문장 문단 비율 `oneLiners/pCount` | 20% 이하 | 🟡 **연속된 한 문장 문단을 2~3개씩 `<p>` 하나로 합친다**(문장은 바꾸지 않는다). 50% 넘으면 `Writer 소관 — 문단 리듬 재작성` 기록 |
-| 굵은 글씨 `strongCount` | 6 이상 | 🟡 기록(`Writer 소관`) — 0개면 핵심이 안 보이는 글이다 |
-| 색 강조 `colorCount` | 2~3 | 🟡 기록(`Writer 소관`) — 4곳 이상이면 광고처럼 보인다 |
-| 화면 수 `screens` | 14 이하 | 🟡 기록(`Writer 소관 — 분량`) · 20 초과면 🔴 Draft일 기록 보류 |
-| H2 수 `h2Count` / FAQ 수 `faqCount` | 4~6 / 3~4 | 🟡 기록(`Writer 소관`) |
+| 한 문장 문단 연속 `oneLinerRun` (v2.1) | 2 이하 | 🟡 3개 이상 이어지면 2~3개씩 `<p>` 하나로 합친다(문장은 바꾸지 않는다) |
+| 굵은 글씨 `strongCount` | 4~10 | 🟡 기록(`Writer 소관`) — 0개면 핵심이 안 보이고, 10개를 넘으면 전부 같은 무게다 |
+| 색 강조 `colorCount` | (v2.1) 판정하지 않는다 — 강조 글자에 진한 색(#191f28)이 기본으로 들어가 이 값은 의미가 없다. 형광펜 `marks`로 본다 | — |
+| 화면 수 `screens` (v2.1) | **9 이하** | 🟡 10~12 기록(`Writer 소관 — 분량`) · **12 초과면 🔴 Draft일 기록 보류** |
+| 본문 글자 `chars` (v2.1) | 1,200~2,500 | 🟡 기록(`Writer 소관`) · 3,000 초과면 🔴 |
+| 3줄 요약 `hasSummary` · 오늘 할 일 `hasTodo` (v2.1) | true · 3 | 🔴 없으면 `Writer 소관 — 뼈대(2-3) 누락`으로 보류 |
+| 글자 `pFont2` (v2.1) | `17px` · `rgb(51, 61, 75)` | 🟡 래퍼 style이 Writer 2-3 템플릿과 같은지 확인해 맞춘다(구조 보정). 테마 CSS가 덮으면 `🚨 사이트 CSS` 로 알린다 |
+| 목차 위치 `tocPos` (2026-11-27) | `ok` (3줄 요약 바로 아래 · 첫 진행 표시 위) | 🟡 `wrong`·`none`이면 raw에서 `[ez-toc]`를 지우고 첫 `<p class="o1-step"` 바로 앞에 `[ez-toc]` 한 줄을 넣는다(구조 보정 — 진행 표시와 H2 사이에 목차가 끼면 '궁금증 1 / 3'이 목차 제목처럼 보인다, 사용자 지적) |
+| 진행 표시 `steps` · 예고 질문 줄 `nexts` (v2.1) | 본문 H2 수(보통 3) · **0** | 🟡 `nexts`가 있으면 그 `<p class="o1-next">`를 뺀다(구조 보정 — 소제목과 같은 말, 2026-11-27 사용자 반려). `steps` 불일치는 기록 |
+| 차트 `charts` · 표 `tables` (v2.1) | 수치 비교 글이면 차트 1 · 표는 0~1 | 🟡 3열 숫자 비교표가 있으면 기록(`Writer 소관 — 막대 차트로`) |
+| 소제목 색 `h2Color` (v2.1) | 테마색(검정 아님) | 🟡 H2 style의 `color`를 테마색으로 맞춘다(구조 보정) |
+| 형광펜 `marks` (v2.1) | 2 | 🟡 기록(`Writer 소관`) |
+| H2 두 줄 `h2TwoLine` · 세로줄 색 `h2Border` (v2.1) | 0 · 테마색 | 🟡 두 줄이면 기록(`Writer 소관 — 제목 줄이기`). 세로줄이 빨강(테마 기본)이면 H2 style에 `border-left`를 넣는다(구조 보정) |
+| 키워드 `kwCount` (v2.1) | 2~4 | 🟡 5회 이상이면 `Writer 소관 — 키워드 과다` 기록(5-3-C) |
+| 숫자 표현 `numCount` (v2.1) | 30 이하 | 🟡 기록(`Writer 소관 — 숫자 과다`) |
+| 표 `tables` · 본문 이미지 `bodyImgs` · 영상 `videos` (v2.1) | ≤2 · ≤2 · ≤1 | 🟡 초과분 중 **표와 같은 내용을 그린 그림·영상**은 Draft가 본문에서 뺀다(미디어 라이브러리는 그대로). 그 외는 기록 |
+| 증빙 `evidence` · `captured` · `dupCaptions` (v2.1) | ≤1 · 0 · 0 | 🟡 `Captured` → `확인` 한국어 캡션으로, 중복 캡션은 하나 삭제(구조 보정) |
+| H2 수 `h2Count` / FAQ 수 `faqCount` | 4~5 / 3 | 🟡 기록(`Writer 소관`) |
 | 첫 화면 답 `firstAnswerTop` · `firstStrong` | 844 미만 · true | 🟡 기록(`Writer 소관`) |
 | 증빙 판독 `evidence.shrink` | 2.5 이하 | 🟡 [4f] 📱 규격으로 재캡처, 불가하면 figcaption에 핵심 숫자 글자로 |
-| 본문 글자 `pFont` | 15px 이상 | 🟡 기록(테마 소관) |
+| 본문 글자 `pFont` | 17px (v2.1 — 종전 15px 이상) | 🟡 위 `pFont2` 행과 같이 처리 |
 | 읽기 소감 | 막힘 없이 끝까지 읽힘 | 걸린 곳을 화면 번호와 함께 기록 |
 
 - Draft가 고치는 것은 **구조뿐**이다 — 문단 나누기·합치기(문장 불변) · 래퍼 style · 표 래퍼·nowrap · figcaption 숫자. 문장·숫자·표 구성·분량은 Writer 소관이라 기록만 한다. **내용을 덧붙이지 않는다.**
 - 🔴 가 남으면 Draft일을 기록하지 않는다. 🟡 는 고치거나 기록하고 진행한다. 구조를 고쳤으면 ②를 다시 돌려 확인한다.
-- 기록(완료 알림 + Notion 기본 정보 표 `📱 모바일 점검` 행): `📱 390px: 화면 n · 가로넘침 0 · keepAll OK/NG · 4줄+ 문단 n · 숨은 표 n · H2 n · 첫 화면 답 Y/N · 소감 한 줄`
+- 기록(완료 알림 + Notion 기본 정보 표 `📱 모바일 점검` 행): `📱 390px: 화면 n · 글자 n · 키워드 n · 숫자 n · 표/이미지 n/n · 가로넘침 0 · keepAll OK/NG · 3줄요약 Y/N · 할일 n · 소감 한 줄`
 
 ### 5-7-B. 기존 발행 글 소급 보정 (2026-10-20 신설 — 5-4 소급 적용 원칙)
 
@@ -370,7 +407,7 @@ document.getElementById('mf-wrap').remove();
 1. 대상: `GET /wp-json/wp/v2/posts?status=publish&before=2026-10-16T00:00:00&orderby=date&order=desc&per_page=20` 에서 아직 `📱 소급 점검` 기록이 없는 글 중 **최근 발행순** 1편.
 2. 5-7 ①~④를 그대로 돌리고 읽는다.
 3. **구조 보정은 Draft가 바로 한다**(5-1 저장 순서 준수): 래퍼 `keep-all` 추가 · 히어로를 2-3b 그리드로 교체(기존 히어로 이미지 그대로) · 4줄 넘는 문단 분할 · 숫자 셀 nowrap · 스니펫 라벨 한국어화(`Core Fact→한 줄 답`, `Primary Insight→왜`, `Actionable Tip→오늘 할 일`) · 증빙 figcaption 숫자 · `wp-image-{ID}` 누락 보완.
-4. **내용 축약(분량·H2·FAQ 수·표 재구성)은 하지 않는다** — `Writer 소관` 으로 STEP 7과 Notion 반려/백로그에 `📱 소급: #{번호} {슬러그} — 화면 n · H2 n · 표 열 n · 요청: 축약` 한 줄을 남긴다. 사용자가 "다시 써"라고 지시한 글만 Writer가 재작성한다.
+4. **내용 축약(분량·H2·FAQ 수·표 재구성·새 뼈대로 다시 쓰기)은 하지 않는다** (v2.1: 새 포맷으로의 재작성도 Writer 소관이다) — `Writer 소관` 으로 STEP 7과 Notion 반려/백로그에 `📱 소급: #{번호} {슬러그} — 화면 n · H2 n · 표 열 n · 요청: 축약` 한 줄을 남긴다. 사용자가 "다시 써"라고 지시한 글만 Writer가 재작성한다.
 5. 보정 후 Rank Math 점수를 재확인해 **떨어지면 되돌린다**(5-3-B). 슬러그·제목·메타·내부 링크·제휴 박스는 건드리지 않는다.
 6. STEP 7 알림에 `📱 소급 보정: #{번호} {슬러그} 화면 a→b · 보정 k건 · SEO x→y` 한 줄.
 
@@ -485,7 +522,7 @@ document.getElementById('mf-wrap').remove();
 | **행정규칙 별표 캡처 실패** | **별표는 HTML 렌더링 없이 HWP 첨부로만 제공** | **법령 조문으로 대체. law.go.kr `lawService` iframe은 HTML 인라인 렌더링됨 (3회 검증)** |
 | **`upload_image` 후 파일이 안 올라감** | **file input에 넣기만 하고 submit이 안 됨** | **'업로드' submit 버튼을 좌표로 클릭한다 (ref 클릭 불충분)** |
 | **`resize_window` 가 안 먹음** | **이 환경은 `outerWidth`/`outerHeight` = 0** | **창 크기 대신 `zoom` + 오버레이로 프레임을 맞춘다** |
-| Keyword 밀도 경고 | 2.2% 초과 | 본문에서 keyword 2~3회 삭제 |
+| Keyword 밀도 경고 | (v2.1) 하한 미달은 사양 · 2.5% 초과·5회↑만 문제 | 하한: 기록만 · 과다: Writer 소관 보고(5-3-C) |
 | 한국어 슬러그 URL 깨짐 | 한국어 슬러그 | 슬러그는 반드시 영어 |
 | `await` 오류 | Console 직접 실행 | `.then()` 콜백으로 변환 |
 | 제목 배경 흰색 | WP Customizer `::before` 오버레이 | 추가 CSS에서 `::before background`를 `rgba(0,0,0,0.35)`으로 변경 |
@@ -495,6 +532,6 @@ document.getElementById('mf-wrap').remove();
 
 ---
 
-## Cowork 원라이너 (SEO 보정 기준)
+## Cowork 원라이너 (SEO 보정 기준 — v2.1)
 
-81점 미달 시(⚠️ 2026-10-16부터 `lengthContent`는 사양 — 분량을 늘려 점수를 맞추지 않는다): **Phase 5-3-B로 조치 가능 여부를 먼저 판정** → 조치 가능 항목이 있을 때만 REST로 HTML 수정 → Phase 5-1-B 순서로 저장·검증 → 재시도 1회. 조치 가능 항목이 없으면 **보정하지 말고** 서버 점수를 그대로 Notion에 기록.
+점수 목표 없음(Writer 5-1). Rank Math 점수는 기록만 한다 → 실패 항목 중 **5-3-B의 ✅ 기술 항목**(메타 설명·내부 링크·공감 한마디의 키워드)만 REST로 고친다 → Phase 5-1-B 순서로 저장·검증. 키워드·분량·짧은 문단·H2/alt 키워드 실패는 **사양으로 기록하고 손대지 않는다.** 그다음 5-7 📱 측정·읽기가 실제 합격 기준이다.

@@ -1,4 +1,4 @@
-# 0and1Life 자동 이미지 삽입 태스크 (v7.4 — 설명컷 중 막대 비교·단계 흐름은 HyperFrames 템플릿 경로(3-10 ⑨-HF) 우선, 실패하면 그 슬롯만 기존 SVG→MP4 경로 · v7.3 — Claude 제작컷은 인라인 SVG 금지, MP4(모션)·WebP(정적)로 렌더해 업로드 · v7.2 — Flow 모델은 Nano Banana Pro 우선(0크레딧일 때만) · v7.1 설명은 Claude 제작컷(모션·정적 SVG) 우선 · 촬영컷은 밝은 일상 톤 · 비용 0원)
+# 0and1Life 자동 이미지 삽입 태스크 (v7.5 — 네이버 모바일 포맷: 글당 이미지 총 3장(히어로 포함)·차트와 겹치는 설명컷 금지 · v7.4 — 설명컷 중 막대 비교·단계 흐름은 HyperFrames 템플릿 경로(3-10 ⑨-HF) 우선, 실패하면 그 슬롯만 기존 SVG→MP4 경로 · v7.3 — Claude 제작컷은 인라인 SVG 금지, MP4(모션)·WebP(정적)로 렌더해 업로드 · v7.2 — Flow 모델은 Nano Banana Pro 우선(0크레딧일 때만) · v7.1 설명은 Claude 제작컷(모션·정적 SVG) 우선 · 촬영컷은 밝은 일상 톤 · 비용 0원)
 
 > 🖥️ **실행 환경 공통(2026-11-18 새 PC 이전)** — 이 블록이 문서 안의 옛 경로·셸 전제보다 우선한다.
 > - **연결 폴더 루트 `CR`** = `get_device_info.connectedFolders` 첫 항목(현재 `C:\Users\USER\Documents\Claude`, 이전 PC는 `C:\Users\win\Documents\Claude`). 문서의 `{CR}`·`$HOME/mnt/Claude`·`~/mnt/Claude`는 모두 이 폴더를 가리킨다. 사용자 이름(`win`/`USER`)을 경로에 박아 쓰지 않는다.
@@ -10,14 +10,22 @@
 >   - 삭제는 어떤 모드에서도 문서가 허용한 것만, 브리지 모드에서는 할 수 없으므로 보고에 남긴다
 >   - 마지막 '실행 기록 한 줄'은 `{CR}\control_tower\runs\YYYY-MM.jsonl`을 스테이징해 클라우드에서 한 줄 덧붙이고(코드의 `root`를 스테이징 폴더로) `expectedMtimeMs`와 함께 같은 경로로 커밋한다(없으면 새로 만든다)
 
+> 📱 **v7.5 (2026-11-27) 네이버 모바일 포맷 상한 — 이 블록이 아래 문서의 장수·형식 규칙보다 우선한다.** 근거: 사용자 판정 "요즘 사람들이 들어와도 절대 안 읽을 길이·가독성"(#2846 — 결론을 첫 3문단·답 박스·요약표·애니메이션 인포그래픽으로 4번 반복, 공시표 캡처 2장 각 700px). Writer 지침 2-5: **본문 이미지는 히어로 외 2장까지(증빙 1 + 설명 1), 본문 영상은 0~1개, 표·차트와 같은 내용의 그림·영상은 넣지 않는다.**
+> 1. **총량 상한 5 → 3장(히어로 포함), 데코 목표 3 → 2장(히어로 + 본문 1).** STEP 2 공식이 `genCount = deco >= 2 ? 0 : max(0, min(2 - deco, 3 - evidence - deco - stock))` 로 바뀌었다. 증빙이 없는 글도 본문 데코는 1장 — 그림이 많을수록 휴대폰 화면 수만 늘어난다.
+> 2. **본문에 `div.o1-chart`(Writer가 HTML로 그린 막대 차트)나 숫자 `<table>`이 있으면, 그 숫자를 다시 그리는 설명컷(막대 비교·같은 수치의 표·계산 흐름)은 만들지 않는다.** 그 슬롯은 ① 차트에 없는 판단 기준(조건 분기 — 예: `48만원 미만 → 남음 / 48~81만원 → 다시 계산 / 81만원 초과 → 국내가 쌈`) ② 체크리스트 ③ 촬영컷 중 하나로 한다. 셋 다 맞지 않으면 비워 둔다.
+> 3. **설명컷은 정적(WebP)이 기본**, 모션(MP4)은 글당 1개까지이고 움직임이 이해를 돕는 경우(시간에 따라 쌓이는 금액 등)에만. 모션이 같은 그림을 정적으로 한 번 더 넣는 구조(`ol-motion` 영상 + 같은 내용 이미지)는 금지.
+> 4. **삽입 위치**: 📌 3줄 요약 박스(`.o1-summary`) 앞·안, `✅ 그래서 오늘 할 일` 박스(`.o1-todo`) 안, 진행 표시(`p.o1-step`)와 바로 다음 H2 사이, 목차 숏코드 `[ez-toc]`와 첫 진행 표시 사이에는 넣지 않는다. 섹션의 굵은 답 문단 뒤에 넣는다.
+> 5. **캡션은 한국어 한 줄**(`그림: … 직접 계산` / `{기관} {자료명} · YYYY-MM-DD 확인`). 영어 `Captured`·`Source:` 금지. 같은 캡션을 figure 안팎에 두 번 쓰지 않는다(#2846 실측 — `그림: …재구성`이 2번).
+> 6. 분류기(STEP 2)의 `Captured` 정규식은 **옛 글 판정용(레거시)** 으로 그대로 둔다 — 새 글은 `evidence-capture` 클래스·`evidence-` 파일명으로 잡힌다.
+
 ### 목적
 
-Notion 글 현황 테이블에서 오늘 날짜에 draft된 WordPress 글을 찾아, **데코 이미지(촬영컷+설명컷)가 3장 미만인 글**에 이미지를 채운다. 이미지는 두 종류다 (v7.0).
+Notion 글 현황 테이블에서 오늘 날짜에 draft된 WordPress 글을 찾아, **데코 이미지(촬영컷+설명컷)가 2장 미만인 글**(v7.5 — 종전 3장)에 이미지를 채운다. 이미지는 두 종류다 (v7.0).
 
 - **촬영컷(photo)**: 사람이 휴대폰으로 실제로 찍을 수 있는 장면. **Google Flow(Nano Banana Pro 우선 · 0크레딧일 때만, 아니면 Nano Banana 2)** 로 '실제로 찍은 사진'처럼 생성해 WebP로 업로드한다. 히어로는 항상 촬영컷이다.
 - **설명컷(motion)**: 수치 비교·계산 흐름·조건 분기·타임라인·체크리스트처럼 사진으로 찍을 수 없는 내용. **Claude가 직접 그려**(SVG를 설계 원본으로 사용) **모션은 MP4 + 포스터 WebP, 정적은 WebP로 렌더해 WP 미디어에 업로드**한 뒤 본문에 넣는다 (v7.3 — 인라인 SVG는 본문에 넣지 않는다).
 
-단, **증빙+데코+스톡 합계가 5장을 넘지 않는 범위**에서만 채운다 (생성 수를 3→2→1장으로 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다. **비용이 드는 도구(유료 모델·크레딧 차감 옵션·유료 생성 서비스)는 쓰지 않는다** (2026-10-02 사용자 지시).
+단, **증빙+데코+스톡 합계가 3장(히어로 포함)을 넘지 않는 범위**에서만 채운다 (v7.5 — 종전 5장. 생성 수를 2→1장으로 자동 감축). 기존에 무관한 스톡(Unsplash 등) 이미지가 들어가 있으면 함께 교체한다. **비용이 드는 도구(유료 모델·크레딧 차감 옵션·유료 생성 서비스)는 쓰지 않는다** (2026-10-02 사용자 지시).
 
 ### STEP 1: 대상 글 찾기 (v5.1 — WP 우선, Notion은 보조)
 
@@ -165,7 +173,8 @@ window._cls = window._postData.map(p => {
 
   deco += motion;                             // (v7.0) 설명컷도 데코 — 재실행 시 중복 삽입을 막는다
   // (v6.2) 스톡을 총량에 포함한다 — 스톡은 히어로로 교체되면서 데코가 되므로 상한 계산에 반드시 들어가야 한다
-  const genCount = deco >= 3 ? 0 : Math.max(0, Math.min(3 - deco, 5 - evidence - deco - stock));
+  // (v7.5) 네이버 모바일 포맷 — 데코 목표 2(히어로+본문 1), 총량 3. 종전: deco >= 3 ? 0 : min(3 - deco, 5 - evidence - deco - stock)
+  const genCount = deco >= 2 ? 0 : Math.max(0, Math.min(2 - deco, 3 - evidence - deco - stock));
   return {id: p.id, title: p.title.raw || p.title.rendered, status: p.status, date: p.date, fm: p.featured_media, slug: p.slug,
           evidence, stock, deco, motion, genCount, hasStockImg: stock > 0, unknown, detail};
 });
@@ -205,7 +214,7 @@ window._cls.map(c => c.id + ' st:' + c.status + ' fm:' + c.fm + ' ev:' + c.evide
 >
 > 그날은 이 결함을 실행 중에 발견해 손으로 3→2로 줄여 회피했다. v6.2부터는 공식이 알아서 맞춘다.
 
-⚠️ **자가 점검(생성 전 필수)**: `evidence + deco + stock + genCount + (hasStockImg ? 0 : 0)` 가 아니라, **최종 총량 = `evidence` + `deco` + `genCount` + `stock`** 로 센다 (스톡 자리는 히어로가 물려받으므로 개수가 유지된다). 이 값이 **5를 넘으면 생성에 들어가지 않는다** — `genCount` 를 그만큼 줄이고 STEP 8에 감축 사유를 남긴다.
+⚠️ **자가 점검(생성 전 필수)**: `evidence + deco + stock + genCount + (hasStockImg ? 0 : 0)` 가 아니라, **최종 총량 = `evidence` + `deco` + `genCount` + `stock`** 로 센다 (스톡 자리는 히어로가 물려받으므로 개수가 유지된다). 이 값이 **3을 넘으면 생성에 들어가지 않는다(v7.5 — 종전 5)** — `genCount` 를 그만큼 줄이고 STEP 8에 감축 사유를 남긴다.
 - **(v3.4 백포트) `status` 와 `date` 를 여기서 기록해 둔다.** STEP 7의 저장 POST에 원래 status를 동봉해야 상태 전환을 막을 수 있다.
 
 ```javascript
@@ -233,11 +242,12 @@ fetch('/wp-json/wp/v2/posts/POST_ID?context=edit&_fields=content', {   // (v3.4)
 ```
 
 ```javascript
-// (v3.4 백포트 · 필수) raw 건강 검진 — 블록 주석이 있고 ez-toc 흔적이 없어야 정상 원본이다
+// (v3.4 백포트 · 필수) raw 건강 검진 — 블록 주석이 있고 ez-toc 렌더링 흔적이 없어야 정상 원본이다
+// (2026-11-27) 목차 위치용 숏코드 `[ez-toc]` 는 정상 원본에 들어 있다 — 오염 판정은 렌더링 흔적(`ez-toc-` 접두 클래스·id)만 센다
 const c = window._rawContent;
 'len:' + (c ? c.length : 'NULL')
  + ' blocks:' + ((c || '').match(/<!-- wp:/g) || []).length
- + ' ezToc:'  + ((c || '').match(/ez-toc/g) || []).length
+ + ' ezToc:'  + ((c || '').match(/ez-toc-/g) || []).length
  + ' pTags:'  + ((c || '').match(/<p>/g) || []).length
 ```
 
@@ -251,7 +261,7 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 }).then(r => r.json()).then(d => { window._revs = d; });
 // 확인용 요약
 // window._revs.map(x => { const c = x.content.raw || ''; return x.id + ' | ' + x.modified + ' | len' + c.length
-//   + ' | wp:' + (c.match(/<!-- wp:/g)||[]).length + ' | ezToc' + (c.match(/ez-toc/g)||[]).length; }).join('\n')
+//   + ' | wp:' + (c.match(/<!-- wp:/g)||[]).length + ' | ezToc' + (c.match(/ez-toc-/g)||[]).length; }).join('\n')
 // → 조건을 만족하는 리비전의 content.raw 를 window._rawContent 로 삼아 STEP 4로 진행한다
 ```
 
@@ -291,7 +301,8 @@ fetch('/wp-json/wp/v2/posts/POST_ID/revisions?context=edit&per_page=20&_fields=i
 - 증빙 캡처 ±5%pt 구간에는 Claude 제작컷도 넣지 않는다 (STEP 4 배제 규칙 동일 적용)
 - 판정 결과를 STEP 4 삽입 순서대로 기록한다: `window._slotTypes = ['photo', 'motion', 'still']` — 코드에서 `motion` 은 `<video>` figure, `still` 은 일반 `<img>` figure로 삽입된다 (v7.3)
 - **Flow 생성 장수 = (hasStockImg ? 1 : 0) + photo 슬롯 수.** 이 값이 0이면 STEP 5·6을 건너뛰고 STEP 7로 간다
-- Claude 제작컷도 데코로 계산한다 — 총량 상한 5장(`evidence + deco + stock + genCount ≤ 5`)에 그대로 포함된다
+- Claude 제작컷도 데코로 계산한다 — 총량 상한 3장(`evidence + deco + stock + genCount ≤ 3`, v7.5)에 그대로 포함된다
+- (v7.5) 본문에 `div.o1-chart` 나 숫자 표가 있으면 같은 숫자의 막대·표·계산 흐름 설명컷은 만들지 않는다 — 맨 위 v7.5 블록 2번
 
 #### 3-2. 장면 설계 원칙 (v5.0 — 최우선. 정확성보다도 먼저 통과해야 한다)
 
@@ -478,7 +489,7 @@ window._featuredReason = "이유";
 
 **② 최소 실무 조건 2개**
 
-- figcaption에 **출처 + 확인일(`Captured YYYY-MM-DD` 또는 `Source: 브랜드 프레스킷, YYYY-MM-DD`)** 을 병기한다.
+- figcaption에 **출처 + 확인일을 한국어로** 병기한다 — `{출처} · YYYY-MM-DD 확인` 또는 `{브랜드} 보도자료 이미지 · YYYY-MM-DD` (v7.5 — 영어 `Captured`·`Source:` 금지).
 - **개인정보가 보이는 화면은 제외한다** — 이름·전화번호·주소·계정 ID·얼굴·차량번호. 피할 수 없으면 그 이미지는 포기한다.
 
 **③ 언제 넣는가 — 판단은 단순하다**
@@ -853,7 +864,7 @@ window._insertPoints = window._insertPoints.slice(0, window._insertN);
 
 (v3.2 백포트) 다만 **이미 이미지가 있는 글에 1~2장을 보충하는 경우**에는 기계적으로 도입부를 쓰지 말고, 기존 이미지들의 본문 내 위치(index)를 먼저 구해 **이미지가 가장 오래 비어 있는 구간**의 헤딩을 고른다. 보충의 목적은 개수 채우기가 아니라 공백 메우기다.
 
-ℹ️ **(v3.4 백포트) raw 위치와 렌더 후 화면 위치는 다르다.** ez-toc 목차는 렌더 시점에 첫 h2 앞으로 삽입되므로, raw에서 첫 h2 바로 앞에 넣은 이미지는 화면에서 **본문 도입 → 이미지 → 목차** 순으로 보인다. 이 배치는 정상이며 문제가 아니다. 최종 위치는 STEP 7.5에서 렌더 기준으로 실측한다.
+ℹ️ **(v3.4 백포트) raw 위치와 렌더 후 화면 위치는 다르다.** ez-toc 목차는 렌더 시점에 첫 h2 앞으로 삽입되므로, raw에서 첫 h2 바로 앞에 넣은 이미지는 화면에서 **본문 도입 → 이미지 → 목차** 순으로 보인다. 이 배치는 정상이며 문제가 아니다. **(2026-11-27) 네이버 모바일 포맷 글은 raw에 `[ez-toc]` 숏코드가 있어 목차가 그 자리(3줄 요약 바로 아래)에 고정된다 — 이미지를 `[ez-toc]`와 첫 `p.o1-step` 사이에 넣지 않는다.** 최종 위치는 STEP 7.5에서 렌더 기준으로 실측한다.
 
 ---
 
@@ -1375,7 +1386,7 @@ fetch('/wp-json/wp/v2/posts/POST_ID?context=edit&_fields=content,featured_media,
 const c = window._finalContent;
 'raw:' + (typeof c === 'string' ? 'ok len' + c.length : 'MISSING')
  + ' blocks:' + ((c||'').match(/<!-- wp:/g)||[]).length
- + ' ezToc:'  + ((c||'').match(/ez-toc/g)||[]).length
+ + ' ezToc:'  + ((c||'').match(/ez-toc-/g)||[]).length   // (2026-11-27) `[ez-toc]` 숏코드는 정상 — 렌더링 흔적만 센다
  + ' h2:'     + ((c||'').match(/<h2/g)||[]).length
  + ' status:' + window._origStatus + ' date:' + window._origDate + ' fm:' + window._curFeatured
 ```
@@ -1602,7 +1613,8 @@ window._evGuard = {
   evName:  cnt(before, /\/evidence-/g)      + '->' + cnt(after, /\/evidence-/g),       // 좌우 같아야 함
   pubSrc:  cnt(before, /go[-_.]kr/g)        + '->' + cnt(after, /go[-_.]kr/g),         // 좌우 같아야 함
   blocks:  cnt(before, /<!-- wp:/g)         + '->' + cnt(after, /<!-- wp:/g),          // 좌우 같아야 함
-  ezToc:   cnt(before, /ez-toc/g)           + '->' + cnt(after, /ez-toc/g),            // 양쪽 다 0이어야 함
+  ezToc:   cnt(before, /ez-toc-/g)          + '->' + cnt(after, /ez-toc-/g),           // 양쪽 다 0이어야 함 (렌더링 흔적)
+  tocSc:   cnt(before, /\[ez-toc\]/g)      + '->' + cnt(after, /\[ez-toc\]/g),       // (2026-11-27) 목차 숏코드 — 좌우 같아야 함(보통 1->1)
   h2:      cnt(before, /<h2/g)              + '->' + cnt(after, /<h2/g),               // 좌우 같아야 함
   h3:      cnt(before, /<h3/g)              + '->' + cnt(after, /<h3/g),               // 좌우 같아야 함
   table:   cnt(before, /<table/g)           + '->' + cnt(after, /<table/g),            // 좌우 같아야 함

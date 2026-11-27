@@ -130,7 +130,7 @@ curl -s -o /dev/null -w "WP %{http_code}\n" --max-time 20 -u "$U:$P" "https://0a
 [5-1] 백업 — `GET /wp-json/wp/v2/posts/{id}?context=edit` 응답(title·content.raw·modified·status·slug)을 `0and1life-revenue\backups\{slug}-{TODAY}.json` 에 저장. 저장 실패면 반영하지 않는다.
 
 [5-2] 블록 만들기 — **지침 2-10 템플릿 그대로**. python으로 `content.raw` 를 읽어:
-- 넣을 위치 = 지침 2-10 위치 규칙. `state.posts[slug].slot.h2` 문구를 가진 `<h2` 가 **정확히 1개**인지 assert → 그 H2 섹션의 끝(다음 `<h2` 직전, FAQ H2면 그 앞). 없거나 2개 이상이면 반영하지 않고 `hold · H2 위치 불명`.
+- 넣을 위치 = 지침 2-10 위치 규칙. `state.posts[slug].slot.h2` 문구를 가진 `<h2` 가 **정확히 1개**인지 assert → 그 H2 섹션의 끝(다음 `<h2` 직전, FAQ H2면 그 앞). **(2026-11-27 블로그 새 포맷)** 섹션 끝은 다음 중 **가장 먼저 나오는 것의 바로 앞**이다: `<p class="o1-step"`(다음 섹션의 진행 표시 `궁금증 n / N`) · `<div class="o1-todo"` · 다음 `<h2`. 진행 표시와 그 H2 사이, `o1-todo`·`o1-summary`·`o1-chart` 안에는 절대 넣지 않는다 — 사후 검사에서 상품 블록 바로 다음 형제가 `<h2`이고 그 앞 형제가 `p.o1-step`이면 위치 오류로 원복한다. 없거나 2개 이상이면 반영하지 않고 `hold · H2 위치 불명`.
 - 고지 한 줄 = 지침 2-10 고지 문구. 첫 `</figure>`(히어로) 직후에 **정확히 1번**. 이미 `o1-sc-note` 가 있으면 넣지 않는다.
 - 이미 `o1-sc-box` 가 2개 있으면 넣지 않는다(지침 2-10 글당 최대 2블록).
 - 기대값은 손으로 잡지 않고 **코드로 센다**: 기대 개수 = 백업 content의 태그 수 + 이번에 넣는 블록·고지 HTML 문자열에서 센 태그 수(`<div`·`<p`·`<a `·`<ul`·`<li`). `<img`·`<h2`·`<table`·`<figure`·`application/ld+json`·`wp:freeform` 은 변화 0이어야 한다(2026-09-24 CTR 루틴에서 기대값을 손으로 잡아 정상 반영을 원복한 사고가 있었다).

@@ -160,7 +160,7 @@ GET /wp-json/wp/v2/posts?slug={SLUG}&status=any&_fields=id,slug
 "자주 묻는 질문" 섹션에서 정규식 `<p><strong>Q\.\s*(.+?)<\/strong><br>(.+?)<\/p>` (dotall)로 Q/A 추출.
 2쌍 이상이면 FAQPage 스키마 JSON 생성:
 { "@context":"https://schema.org", "@type":"FAQPage", "mainEntity":[ {"@type":"Question","name":"{질문}","acceptedAnswer":{"@type":"Answer","text":"{답변}"}} ] }
-⚠️ **답변 텍스트는 첫 문장만 넣는다.** 전문을 넣으면 200어절을 넘고 Rank Math가 본문 문단으로 계산해 잡음이 된다. 스키마 유효성에는 영향 없다.
+⚠️ **(2026-11-27 개정) 답변 텍스트는 전문을 넣는다**(태그만 제거). 종전 "첫 문장만"은 Rank Math 점수용이었는데 점수 목표가 폐지됐고(Writer 5-1), 그 결과 스키마 답이 `네, 같아요.`처럼 잘려 검색 결과에 뜻 없는 답이 노출됐다(#2713 실측). Writer 2-5가 FAQ 답을 1~2문장으로 묶으므로 길어지지 않는다.
 Q/A가 1쌍 이하면 null.
 
 [4f] 발행 차단 관문 (⛔ 업로드 전 필수)
@@ -188,7 +188,8 @@ Q/A가 1쌍 이하면 null.
 - 업로드 경로: 샌드박스에 스크린샷 파일이 없으므로 `mcp__claude-in-chrome__upload_image` 로 `/wp-admin/media-new.php?browser-uploader=1` 의 `#async-upload` 에 넣고 **'업로드' submit 버튼을 좌표 클릭**한다 (ref 클릭만으로는 전송되지 않는 사례 확인). 이후 `GET /wp-json/wp/v2/media?per_page=2` 로 id·source_url 확인.
 - 파일명: `evidence-{SLUG}-{n}` — Image 루틴이 증빙과 생성 이미지를 구분하는 근거. webp 변환 불가 경로에서는 .jpg 허용하되 로그에 남긴다.
 - 삽입 마크업:
-  `<figure class="evidence-capture" style="margin:26px 0; border:1px solid #e2e8f0; border-radius:12px; padding:10px; background:#fafafa;"><img class="wp-image-{MEDIA_ID}" loading="lazy" decoding="async" style="width:100%;display:block;height:auto;border-radius:8px;" src="{URL}" alt="{Focus Keyword 포함 설명}" /><figcaption style="font-size:13px; color:#64748b; margin-top:8px;">{출처 기관 — 화면명 · Captured YYYY-MM-DD}</figcaption></figure>`
+  `<figure class="evidence-capture" style="margin:26px 0; border:1px solid #e2e8f0; border-radius:12px; padding:10px; background:#fafafa;"><img class="wp-image-{MEDIA_ID}" loading="lazy" decoding="async" style="width:100%;display:block;height:auto;border-radius:8px;" src="{URL}" alt="{캡처에 보이는 내용을 설명하는 문장}" /><figcaption style="font-size:13px; line-height:1.6; color:#6b7684; margin-top:6px;">{기관} {자료명} · {YYYY-MM-DD} 확인</figcaption></figure>`
+- (2026-11-27) **글당 1장 · 판단에 필요한 줄만 잘라서(390px 표시 높이 약 380px 이하) · 캡션은 한국어 — 영어 `Captured` 금지.** 기준은 지침서 `0and1Life-Draft.md` 5-4 삽입 마크업 표준.
 
 🚨 **(2026-09-08 신설) `class="wp-image-{MEDIA_ID}"` 를 반드시 넣는다. 이게 빠지면 증빙 캡처가 원본 그대로 전송된다.**
 WordPress의 `wp_filter_content_tags()` 는 **`wp-image-{ID}` 클래스가 붙은 `<img>` 에만** `srcset`·`sizes` 를 자동 주입한다. 클래스가 없으면 WP가 만들어 둔 300/768/1024px 리사이즈본이 **하나도 쓰이지 않고**, 본문 표시폭 728px 자리에 1568px 원본이 통째로 내려간다.
@@ -261,13 +262,14 @@ if (titleCb && !titleCb.checked) { nativeCheckSetter.call(titleCb, true); titleC
 ⚠️ **이 단계에서 저장하지 않는다.** [6d]까지 마친 뒤 [6h]에서 한 번만 저장한다 (저장 횟수를 줄여야 `<p>` 소실 위험이 준다).
 
 [6d] Rank Math SEO 설정 (JavaScript)
-⚠️ FOCUS_KEYWORD·SUB_KEYWORDS는 Notion 값 그대로 (재검색·수정 금지)
+⚠️ FOCUS_KEYWORD·SUB_KEYWORDS는 Notion 값 그대로 (재검색·수정 금지). 저장 후 `getKeywords()`가 **4개 미만**이면 STEP 7에 `⚠️ 키워드 세트 {n}개 — Writer 1-1 미달` 보고
 ⚠️ TOC 강제 인식을 **이 단계에서 미리** 넣는다. 이것만으로 TOC 항목은 통과한다.
 
 if (!wp.data.select('rank-math')) { await new Promise(r => setTimeout(r, 3000)); }
 if (!wp.data.select('rank-math')) { throw new Error('rank-math store not available'); }
 const rm = wp.data.dispatch('rank-math');
-const allKeywords = ['FOCUS_KEYWORD', ...'SUB_KEYWORDS_CSV'.split(',').map(k => k.trim())].join(', ');
+// (2026-11-27) 키워드 세트 4~5개 — 메인 → 블루오션 → 레드오션 (Writer 1-1). 옛 초안의 ' / ' 구분도 함께 나눈다
+const allKeywords = ['FOCUS_KEYWORD', ...'SUB_KEYWORDS_CSV'.split(/\s*[,\/]\s*/).map(k => k.trim()).filter(Boolean)].filter((k, i, a) => a.indexOf(k) === i).slice(0, 5).join(', ');
 rm.updateKeywords(allKeywords);
 rm.updateTitle('SEO_TITLE'); rm.updateSerpTitle('SEO_TITLE');
 rm.updateDescription('META_DESCRIPTION'); rm.updateSerpDescription('META_DESCRIPTION');
@@ -294,38 +296,32 @@ throw 발생 시 → [6e]~[6g] 클릭 폴백.
 POST /wp-json/wp/v2/posts/{WP_POST_ID} · {"content": "<!-- wp:freeform -->\n{HTML_BODY}\n<!-- /wp:freeform -->"}
 ⚠️ 실행 전 반드시 [6m-0] 탭 정리 절차를 먼저 거친다.
 
-[6j] SEO 점수 확인 및 보정
+[6j] SEO 점수 기록 및 기술 항목 보정 (2026-11-27 개정 — 점수 목표 폐지)
 
-에디터 새로고침 → wait 3초 → `wp.data.select('rank-math').getAnalysisScore()`. 목표 81점 이상이면 [6k]로.
+에디터 새로고침 → wait 3초 → `wp.data.select('rank-math').getAnalysisScore()` 값을 **기록만** 한다. 목표 점수는 없다(Writer 5-1). 0and1life 유입의 99%는 네이버이고, Rank Math의 길이·키워드 밀도·소제목 키워드 점수를 맞추려다 #2846처럼 결론 4번 반복·키워드 7회 글이 나왔다.
 
-**81점 미달 시 — 보정 전에 조치 가능 여부부터 판정한다.**
+⛔ **재분석 트리거를 돌리지 말 것.** 클라이언트 분석은 `getEditedPostContent()` 를 쓰는데 이 값은 freeform 직렬화에서 `<p>`가 소실된 상태라 구조적으로 불리하다 — 트리거를 돌리면 낮은 클라이언트 점수가 서버 점수를 덮어쓴다.
 
-⛔ **재분석 트리거를 반사적으로 돌리지 말 것.** 클라이언트 분석은 `getEditedPostContent()` 를 쓰는데 이 값은 freeform 직렬화에서 `<p>`가 소실된 상태라 구조적으로 불리하다 — 트리거를 돌리면 낮은 클라이언트 점수가 높은 서버 점수를 덮어쓴다.
-
-1) 패널을 열고 실패 항목을 뽑는다 (그룹이 접혀 있으면 6개만 렌더링된다 — 전부 펼친 뒤 읽을 것, 펼치면 20개):
+1) 패널을 열고 실패 항목을 뽑는다 (그룹이 접혀 있으면 6개만 렌더링된다 — 전부 펼친 뒤 읽을 것):
 const p = document.querySelector('.rank-math-sidebar-panel, .interface-complementary-area');
 p.querySelectorAll('.rank-math-collapsible-title, .components-button[aria-expanded="false"]').forEach(b=>{try{b.click()}catch(e){}});
 await new Promise(r=>setTimeout(r,1500));
 JSON.stringify([...p.querySelectorAll('[class*="seo-check-"]')].filter(n=>/test-fail/.test(n.className)).map(n=>(n.className.match(/seo-check-([A-Za-z]+)/)||[])[1]));
 
-2) 판정표
-⛔ 조치 불가: `keywordInPermalink` (슬러그 영문 정책 — 변경 금지, 로그에 '사양' 기록) · `hasContentAI` (PRO 전용) · `contentHasShortParagraphs` (구조적, 아래 참조) · `lengthContent` (2026-10-16 사양 — Writer 2-5 분량 900~1,300어절·모바일 가독성. 본문을 늘리지 않고 로그에 '사양(분량 상한)' 기록)
-✅ 조치 가능: `keywordIn10Percent` (도입 첫 문단 100자 안에 Focus Keyword) · `keywordInSubheadings` (H2 1개 이상에 포함) · `keywordInMetaDescription` (메타 150자 이내 + 키워드) · `linksHasInternal` (`/slug/` 상대경로 1개 이상) · `contentHasAssets` (이미지 1개 이상)
+2) 판정표 (지침서 `0and1Life-Draft.md` 5-3-B가 SSOT)
+⛔ 사양 — 손대지 않고 기록만: `keywordInPermalink` · `hasContentAI` · `contentHasShortParagraphs` · `lengthContent`(분량은 Writer 2-5 공백 제외 1,200~2,500자) · `keywordDensity` · `keywordInSubheadings` · `keywordInImageAlt`
+✅ 조치 — 기술 항목만: `keywordIn10Percent`(공감 한마디에 키워드가 자연스럽게 1회 — 문장 앞에 붙이지 않는다) · `keywordInMetaDescription`(메타 150자 이내 + 키워드로 시작) · `linksHasInternal`(공개 글 `/slug/` 1개 이상) · `contentHasAssets`(이미지 1개 이상)
 
-⛔ **`contentHasShortParagraphs` 는 문단을 쪼개도 해소되지 않는다.**
-Rank Math가 보는 `getEditedPostContent()` 에서 `<p>`가 소실돼 본문을 통짜 덩어리로 계산하기 때문이다. 저장본 raw가 정상이어도 실패한다.
-→ 이 항목이 뜨면 **보정을 시도하지 말고** "freeform 직렬화 구조적 한계 — 조치 불가"로 기록하고 넘어간다.
+3) ✅ 항목이 없으면 보정 없이 점수를 그대로 기록하고 [6k]로.
 
-3) **조치 가능 항목이 하나도 없으면 보정을 생략하고, 재분석 트리거도 돌리지 않고, 서버 저장 점수를 그대로 최종값으로 기록한다.**
+4) ✅ 항목이 있을 때만: [6m-0] 탭 정리 → REST로 해당 부분만 수정 → 8초 후 검증. **재시도 1회.**
 
-4) 조치 가능 항목이 있을 때만: [6m-0] 탭 정리 → REST로 HTML 수정 → 에디터 재오픈 → 재분석 트리거(GitHub 지침 Phase 5-2) → 저장 → 검증. **재시도는 1회.** 키워드 기계적 반복 삽입 금지.
-
-⛔ 절대 금지: core/heading 블록 추가 / 슬러그 한글화 / 키워드 반복 삽입 / **점수를 위한 본문 분량 추가**(문단·FAQ·설명 문장 덧붙이기 — Writer 2-5 모바일 가독성 규칙과 충돌)
+⛔ 절대 금지: core/heading 블록 추가 / 슬러그 한글화 / **키워드 삽입·반복** / **점수를 위한 본문 분량 추가**(문단·FAQ·설명 문장 덧붙이기)
 
 [6k] Notion SEO 점수 업데이트
 현황표 해당 행의 SEO 셀을 최종 점수로 교체한다. old_str은 실행 전 re-fetch로 현재 셀 원문을 확인해 구성하고, 같은 값이 여러 행에 있으면 작성일까지 포함해 범위를 확장한다.
 
-[6k-M] 📱 모바일 화면 점검·보정 (2026-10-16 신설 · 2026-10-18 개정 — 모바일 퍼스트 · [6l] 전 필수)
+[6k-M] 📱 모바일 화면 점검·보정 (2026-10-16 신설 · 2026-10-18 개정 · 2026-11-27 네이버 모바일 포맷 — [6l] 전 필수)
 근거: 네이버 서치어드바이저 최근 7일(10-11~17) 모바일 노출 1.3만·클릭 190 vs PC 노출 4.4천·클릭 78. 독자 4명 중 3명이 휴대폰이다.
 이 단계는 '기록'이 아니라 **'보정'**이다. 390px에서 읽기 불편한 **구조**는 Draft가 고치고 나서 [6l]로 간다. 문장·숫자·표 내용은 Writer 소관이라 기록만 한다.
 기준은 지침서 `0and1Life-Draft.md` Phase 5-7. `resize_window` 는 뷰포트에 반영되지 않으므로 미리보기(`/?p={WP_POST_ID}&preview=true`) 탭 위에 **390px iframe 프레임**을 띄워 측정·스크린샷한다.
@@ -335,7 +331,7 @@ Rank Math가 보는 `getEditedPostContent()` 에서 `<p>`가 소실돼 본문을
 const u = location.href.split('#')[0] + (location.search ? '&' : '?') + 'mf=' + Date.now();
 document.body.insertAdjacentHTML('beforeend', `<div id="mf-wrap" style="position:fixed;inset:0;z-index:2147483647;background:#e5e7eb;display:flex;justify-content:center;align-items:flex-start;padding-top:8px"><iframe id="mf" src="${u}" style="width:390px;height:844px;border:0;background:#fff;box-shadow:0 0 0 8px #111;border-radius:24px"></iframe></div>`);
 ```
-② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능) — 🟡 항목은 **위치까지** 뽑는다
+② 로드 후 측정 (같은 도메인이라 contentDocument 접근 가능) — 🟡 항목은 **위치까지** 뽑는다. **이어서 지침서 `0and1Life-Draft.md` 5-7 ②-b 스크립트(네이버 모바일 포맷 측정 — 글자 수·키워드·숫자·3줄 요약·오늘 할 일·진행 표시·`o1-next`·차트·형광펜·소제목 색)를 같은 프레임에서 그대로 실행한다.** `{FOCUS_KEYWORD}`는 Notion 기본 정보 표 값.
 ```js
 const d = document.getElementById('mf').contentDocument, w = d.defaultView;
 const R = d.querySelector('[id$="-report"]'), P0 = R.querySelector(':scope > p');
@@ -363,8 +359,9 @@ document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
 ④ 판정
 - 🔴 `overflowX` · `heroCut` → 구조 수정 후 재측정. 남으면 [6l] 금지.
 - 🔴 `keepAll`에 `break-all`이 하나라도 있는데 래퍼 style은 정상 → **사이트 CSS 사고**(2026-10-20 실측). 글을 고치지 말고 STEP 7에 `🚨 사이트 CSS break-all 재발` 기재, Draft일 기록 보류.
-- 🟡 **Draft가 고친다** (⑤): 래퍼에 `keep-all` 없음 · `longParas`(6줄 초과) 1건 이상 · 한 문장 문단이 20% 넘으면 연속된 것을 2~3개씩 합침(문장 불변) · `hiddenTables` 1건 이상 · `evidence.shrink > 2.5`(증빙 숫자가 폰에서 판독 불가)
-- 📝 기록만 (내용 소관 → Writer): `screens > 14` · `firstAnswerTop ≥ 844` · H2 7개 이상 · FAQ 5개 이상 · 한 문단에 숫자 3개 이상 · 4열 이상 표
+- 🔴 (2026-11-27) `screens > 12` · `chars > 3000` · 3줄 요약(`hasSummary`) 없음 · 오늘 할 일(`hasTodo`) 없음 → Draft일 기록 보류, `Writer 소관 — 네이버 모바일 포맷 미준수`로 반려 로그.
+- 🟡 **Draft가 고친다** (⑤): 래퍼에 `keep-all` 없음 · `longParas`(6줄 초과) 1건 이상 · 한 문장 문단 3개 이상 연속(`oneLinerRun ≥ 3`)이면 2~3개씩 합침(문장 불변) · `hiddenTables` 1건 이상 · `evidence.shrink > 2.5` · **(2026-11-27)** `o1-next`(섹션 끝 예고 질문 줄) 있으면 삭제 · 목차 위치 `tocPos`가 `ok`가 아니면 raw의 `[ez-toc]`를 지우고 첫 `<p class="o1-step"` 바로 앞에 `[ez-toc]` 한 줄을 넣는다(Easy TOC는 숏코드가 없으면 진행 표시와 첫 H2 사이에 목차를 끼운다) · H2 글자색이 테마색이 아니면 style `color`를 테마색으로 · H2에 `border-left` 없으면 추가 · 증빙 캡션의 `Captured` → `확인` 한국어 · 중복 캡션 하나 삭제 · **차트·표와 같은 수치를 다시 보여 주는 영상·그림**(`figure.ol-motion` 등)은 본문에서 뺀다(미디어 라이브러리는 그대로)
+- 📝 기록만 (내용 소관 → Writer): `screens` 10~12 · `chars` 2,500 초과 · `kwCount ≥ 5` · `numCount > 30` · 형광펜 2곳 아님 · 진행 표시 수 ≠ 본문 H2 수 · H2 두 줄 · H2 5개 이상(FAQ 포함 6개 이상) · FAQ 3개 아님 · 3열 숫자 비교표(막대 차트 대상) · 4열 이상 표
 ⑤ 보정 — **구조만**. 내용 추가 금지 · 문장 수정 금지 · FAQ `<p>` 분할 금지(스키마)
 - `longParas`: 해당 `<p>`를 문장 경계(`.` `?` `!` 뒤 공백)에서 2~3줄 단위로 나눈다. 나눌 경계가 없으면 기록만.
 - `keepAll`: 래퍼 `<div id="…-report">` style에 `word-break:keep-all; overflow-wrap:break-word;` 추가.
@@ -375,7 +372,7 @@ document.getElementById('mf').contentWindow.scrollTo(0, k * 760);
 ```js
 document.getElementById('mf-wrap').remove();
 ```
-- STEP 7 알림에 한 줄: `📱 390px: 화면 n · 가로넘침 0 · keepAll OK/NG · 4줄+ 문단 n→m · 숨은 표 n→m · 증빙 판독 OK/NG · 첫 화면 답 Y/N · 보정 k건 · 소감 한 줄`
+- STEP 7 알림에 한 줄: `📱 390px: 화면 n · 글자 n · 키워드 n · 숫자 n · 3줄요약 Y/N · 할일 n · 진행표시 n/H2 n · 목차 ok/wrong · 차트/표/이미지 n/n/n · 가로넘침 0 · keepAll OK/NG · 보정 k건 · 소감 한 줄`
 
 [6l] Draft일 기록 (STEP 6 전 과정 성공 시에만) · **[6k-M] 📱 모바일 점검 🔴 0건일 때만**
 ⚠️ 아래 중 하나라도 있었으면 공란으로 남긴다: Chrome 로그인 실패 / GP 레이아웃 미반영(재시도 후에도) / Rank Math 설정 throw 후 클릭 폴백까지 실패.
@@ -393,7 +390,7 @@ document.getElementById('mf-wrap').remove();
 현황표에서 주제가 인접한 기존 발행 글 2개를 고른다 (내부 링크를 이미 받고 있는 글 우선). 이번 글이 아웃바운드로 거는 두 글을 그대로 쓰면 상호 링크가 성립해 가장 안전하다.
 1) GET /wp-json/wp/v2/posts?slug={기존슬러그}&_fields=id
 2) GET /wp-json/wp/v2/posts/{id}?context=edit → content.raw
-3) "함께 읽으면 좋은 글" <ul>에 `<li><a href="/{신규슬러그}/">{신규 제목}</a></li>` 추가 (섹션이 없으면 `<p><strong>함께 읽으면 좋은 글</strong></p>\n<ul>...</ul>` 신설)
+3) "함께 읽으면 좋은 글" <ul>에 `<li><a href="/{신규슬러그}/">{신규 제목}</a></li>` 추가 (섹션이 없으면 `<p><strong>함께 읽으면 좋은 글</strong></p>\n<ul>...</ul>` 신설). **(2026-11-27) 위치는 `✅ 그래서 오늘 할 일` 박스 뒤 · FAQ 앞, 항목 3개까지.** 3줄 요약·본문 섹션 사이·마무리 박스(`trust-note`) 안에는 넣지 않는다 — 결론과 궁금증 흐름을 끊는다.
 4) 저장 전 여닫이 짝 검증 → POST. 실패 시 오류 로그만 남기고 발행은 유지.
    ⚠️ 짝 검증은 정규식 `<ul[\s>]` 로 센다 (`<ul style="...">` 때문에 단순 문자열 비교는 오탐)
    ⚠️ 전송 직전 `[ -f "$f" ]` 로 페이로드 파일 존재 확인
@@ -448,7 +445,7 @@ Writer 지침([0-6]) fetch 실패 | 저장소 루트 1회 → Chrome 1회 → �
 3단 검증 후에도 조항 결번 | [0-4] 조항을 직접 작성해 로컬 0and1Life-Draft.md 에 추가 → 즉시 적용해 배포 계속 → STEP 7·Notion에 전문 기록. 커밋·푸시는 사용자
 지침서 개정 이력이 루틴이 아는 버전보다 낮음 | 캐시 사본 의심 — 새 ?cb= 로 재조회 + Chrome 재확인. 캐시로 확인되면 상충 보고 금지
 Rank Math store 미등록 | 3초 대기 재시도 → 실패 시 클릭 폴백
-SEO 81점 미달 | [6j] 판정표로 조치 가능 여부 먼저 확인. 조치 가능 항목이 없으면 보정·트리거 없이 서버 점수 그대로 기록
+Rank Math 점수가 낮음 | (2026-11-27) 목표 점수 없음 — [6j] ✅ 기술 항목만 조치, 나머지는 사양으로 기록. 키워드·분량을 늘리지 않는다
 캡처 대상이 행정규칙 별표 | HTML 렌더링 불가 — 법령 조문으로 대체하고 경로 변경 사실 기록
 슬러그 중복이지만 GP/RankMath 미설정 | STEP 6부터 재개 ([4c] 참고)
 관문 반려 ([4f] 불통과) | 반려 로그 행 추가 + Draft일 공란 유지 + 다음 포스트 진행
