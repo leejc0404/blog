@@ -52,8 +52,13 @@ if (V.subtitle) {
 }
 const srcH = V.source ? Math.round(minF * 0.75) * 2.2 : 0;
 const area = H - y - srcH - Math.round(H * 0.06);
-const rowH = Math.min(Math.round(area / Math.max(items.length, 1)), Math.round(150 * S));
+// D 패스(2026-11-29, 가로 컷만): 행이 적으면 막대를 키워 빈 곳을 채우고(행 높이 상한 150→190), 남는 공간만 위아래로 나눈다.
+// 첫 행 강조 꼬리표는 위에 자리를 둔다. 세로 영상(W<H)은 예전 배치 그대로.
+const land = W >= H;
+const badgeTop = (land && V.highlight === 0 && V.badge) ? Math.round(Math.max(Math.round(minF * 0.8), Math.round(30 * S)) * 1.5) : 0;
+const rowH = Math.min(Math.round((area - badgeTop) / Math.max(items.length, 1)), Math.round((land ? 190 : 150) * S));
 const barH = Math.round(rowH * 0.5);
+if (land) y += Math.max(0, Math.round((area - items.length * rowH - badgeTop) / 2)) + badgeTop;
 const labW = Math.round(Math.min(W * 0.3, Math.max(...items.map((it) => HF.textW(it.label, Math.max(minF, Math.round(38 * S)), 700))) + 24));
 const maxV = Math.max(...items.map((it) => Math.abs(+it.value || 0)), 1e-9);
 const valRoom = Math.round(Math.max(...items.map((it) => HF.textW(it.text || "", Math.round(44 * S), 900))) + 28);

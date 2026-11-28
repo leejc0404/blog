@@ -10,8 +10,8 @@
   html, body { width: __W__px; height: __H__px; }
   .title { position: absolute; font-weight: 800; letter-spacing: -.03em; white-space: nowrap; }
   .subtitle { position: absolute; font-weight: 600; white-space: nowrap; }
-  .card { position: absolute; border-radius: 16px; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-  .num { font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; }
+  .card { position: absolute; border-radius: 16px; background: #fff; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; }
+  .num { flex-shrink: 0; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; }
   .lab { font-weight: 800; letter-spacing: -.02em; line-height: 1.2; word-break: keep-all; }
   .sub { font-weight: 600; line-height: 1.25; word-break: keep-all; }
   .conn { position: absolute; transform-origin: 0 50%; border-radius: 4px; }
@@ -48,13 +48,16 @@ const gap = Math.round(46 * S);
 const cw = Math.floor((W - padX * 2 - gap * (n - 1)) / n);
 const srcH = V.source ? Math.round(30 * S) * 2.4 : 0;
 const ch = Math.min(Math.round(H - y0 - srcH - H * 0.12), Math.round(cw * 1.1));
-const cy = y0 + Math.round(H * 0.05);
+// D 패스(2026-11-29): 카드 묶음(+경고 꼬리표)을 머리말과 출처 사이 세로 가운데에 둔다 · 카드 안은 위쪽 맞춤(번호 줄 정렬)
+const warnH = V.warn_text ? Math.round(20 * S) + Math.round(30 * S) * 1.6 : 0;
+const availTop = y0 + Math.round(H * 0.05), availBot = H - srcH - Math.round(H * 0.05);
+const cy = Math.max(availTop, Math.round(availTop + (availBot - availTop - ch - warnH) / 2));
 const cards = [], conns = [];
 steps.forEach((st, k) => {
   const x = padX + k * (cw + gap);
   const isWarn = V.warn === k;
   const card = HF.el("div", "card", { left: x + "px", top: cy + "px", width: cw + "px", height: ch + "px",
-    boxShadow: `0 0 0 ${Math.round(3 * S)}px ${T.line}`, padding: Math.round(18 * S) + "px" });
+    boxShadow: `0 0 0 ${Math.round(3 * S)}px ${T.line}`, padding: Math.round(18 * S) + "px", paddingTop: Math.round(24 * S) + "px" });
   const nsz = Math.round(54 * S);
   card.appendChild(HF.el("div", "num", { width: nsz + "px", height: nsz + "px", fontSize: Math.round(30 * S) + "px",
     background: isWarn ? T.accent : T.fg, marginBottom: Math.round(14 * S) + "px" }, String(k + 1)));
