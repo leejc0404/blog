@@ -208,6 +208,7 @@ window.opener.postMessage({dataUrl: url, filename: 'evidence-' + SLUG + '-' + N 
 - 정적 WebP가 기본이다. 모션 MP4는 글당 1개, 움직임이 이해를 도울 때만 쓴다. 인라인 SVG는 본문에 넣지 않는다.
 - 숫자·글자는 본문 그대로 쓰고, 최소 글자 크기와 줄당 약 24자를 지킨다. 업로드 전에 렌더 결과를 Read로 직접 본다.
 - 제작 절차(HF 템플릿 · SVG 규격 · 검증기 · 렌더 · 업로드) → 부록 §3-10.
+- 구도·대비·글자 계층은 **스킬 패스 D**(`{CR}\skills\ROUTINE-SKILLS.md`)로 점검한다 — 색·크기·글자 수는 위 규격과 테마가 우선.
 
 ### 3-D. Flow 촬영컷 (`photo`) — v8.0 사실감 규칙
 

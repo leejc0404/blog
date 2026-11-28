@@ -240,6 +240,9 @@ python3 tools/gsc_pull.py --site https://koreaplug.com/ --days 90 --out out/gsc
 - voice profile: casual~warm, 구어체 — 1인칭은 실제 수행한 행위에만
 - 균일 문장 길이·기계적 전환어·과잉 열정·engagement bait 제거. 수치·고유명사·링크·HTML 구조 보존
 
+**[5-2C] 스킬 패스 CE → SEO** (`{CR}\skills\ROUTINE-SKILLS.md` — 2026-11-28, [5-2] 직후)
+- 영문 본문에 CE(copy-editing), 이어서 SEO(첫 H2·FAQ 직답·인용될 한 문장·출처 점검). [5-0] 제목 후보 채택 때는 CW의 근거 검사를 함께 본다. H(한글 윤문)는 쓰지 않는다
+
 **[5-3] 문체 지문 대조 — 구조 항목만 (지침서 `2-6 ③`)**
 짧은 문장 우위(20단어 안팎) + 길이 혼합 / 기계적 전환어 0 / 실용 정보 선배치 / 단점·한계 최소 한 단락 / 마무리는 행동 지시 / `*Key points` 꼬리 없음 / 반박형 오프너 없음
 

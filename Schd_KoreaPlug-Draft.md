@@ -436,6 +436,7 @@ m['site-content-style']==='unboxed' && m['ast-banner-title-visibility']==='disab
 ### [6c] Rank Math 설정 — REST 경로 (1순위, 브라우저 불필요)
 
 기준은 **지침서 5-6**. 아래는 실행 방법이다.
+Schema 종류가 글과 맞는지·FAQ 스키마가 본문 FAQ와 일치하는지는 **스킬 패스 SEO**(`{CR}\skills\ROUTINE-SKILLS.md`)로 확인만 한다(2026-11-28 — 본문 수정·스키마 추가 없음).
 
 ⚠️ `wp.data.dispatch('rank-math').updateKeywords()/updateSerpTitle()/…` 은 **에러 없이 성공한 것처럼 보이지만 postmeta에 저장되지 않는다**. **JS dispatch 금지는 v10.6 이후에도 유효하다** — 열린 것은 REST `meta` 필드이지 JS 스토어가 아니다.
 

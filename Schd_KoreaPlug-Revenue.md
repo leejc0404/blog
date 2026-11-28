@@ -150,6 +150,7 @@ curl -s -o /dev/null -w "WP %{http_code}\n" -u "$U:$P" "https://koreaplug.com/wp
 - [x] A-{YYYYMMDD}-{nn} | {종류} | {slug}{ → 대표 slug} | 근거: {28일 노출·클릭, value_score, 중복 유사도, 진단 배치} | 사용자 작업: {있으면 한 줄}
 ```
 4. 배치 A·B·G 의 사이트 설정 항목은 `승인.md` 가 아니라 `adsense\checklist.md` 의 "사용자 작업" 표에 정확한 화면 경로와 함께 적는다.
+5. 제안 근거는 **스킬 패스 AN**(`{CR}\skills\ROUTINE-SKILLS.md` — seo-audit)으로 사실·가설·모자란 데이터를 나눠 적는다(2026-11-28).
 
 ### 1-3. 재신청 체크리스트 갱신
 
@@ -234,6 +235,7 @@ ls -la $S/queue $S/queue/_done $S/queue/_failed; tail -5 $S/episodes.csv; tail -
 3. **주제는 블로그에서 고른다.** 서치콘솔 28일 클릭이 있는 글 중 `queue\` · `queue\_done\` · `episodes.csv` 에 없는 글을 `대본만들기.md` 1장 기준(세 가지 관문)으로 검증한다. 웹 검색으로 (a) 외국인이 실제로 검색하는지 (b) 영어 자료가 부실한지 확인하고, 한국 공공데이터·지자체·국내 기사에서 영어권에 없는 사실을 최소 2개 찾는다. 숫자는 반드시 출처를 확인한다. `placements.csv` 에 상품 자리가 있는 글이면 우선한다.
 4. `job.{slug}.json` 을 만든다. `blog_url` 은 그 글 주소. `description` 끝에 블로그 링크를 둔다. `amazon\config.json` 의 `amazon_tag` 가 있고 그 글의 상품 자리가 `승인` 이면 설명란에 상품 줄과 고지 문구를 넣는다. 태그가 없으면 상품 줄을 넣지 않는다.
 5. `대본만들기.md` 5장 자가 점검을 하나씩 확인하고 `json.loads` 로 문법을 검증한다.
+   - 그 전에 **스킬 패스 SO**(`{CR}\skills\ROUTINE-SKILLS.md` — 영문 대본, H는 쓰지 않는다)로 훅·한 메시지를 점검하고, 6의 정보 카드 클립은 **스킬 패스 D**로 점검한다.
 6. (선택) `대본만들기.md` 7장대로 정보 카드·한글 읽기 HyperFrames 클립을 편당 최대 2개 만든다. 통과한 클립은 `device_commit_files` 로 `shorts\broll\` 에 **먼저** 넣고, 그 장면 첫 컷에 파일명과 `"seek": 0.0` 을 쓴다. 실패하면 일반 클립을 쓴다.
 7. `SendUserFile` 로 대본을 보낸 뒤 `device_commit_files` 로 `shorts\queue\` 에 넣는다.
 8. **영상 본편을 렌더하거나 업로드하지 않는다.** PC 의 `pipeline.py` 가 한다(예외: 6의 HF B-roll 클립).

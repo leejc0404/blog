@@ -162,6 +162,7 @@ GET /wp-json/wp/v2/posts?slug={SLUG}&status=any&_fields=id,slug
 { "@context":"https://schema.org", "@type":"FAQPage", "mainEntity":[ {"@type":"Question","name":"{질문}","acceptedAnswer":{"@type":"Answer","text":"{답변}"}} ] }
 ⚠️ **(2026-11-27 개정) 답변 텍스트는 전문을 넣는다**(태그만 제거). 종전 "첫 문장만"은 Rank Math 점수용이었는데 점수 목표가 폐지됐고(Writer 5-1), 그 결과 스키마 답이 `네, 같아요.`처럼 잘려 검색 결과에 뜻 없는 답이 노출됐다(#2713 실측). Writer 2-5가 FAQ 답을 1~2문장으로 묶으므로 길어지지 않는다.
 Q/A가 1쌍 이하면 null.
+생성한 FAQPage JSON은 **스킬 패스 SEO**(`{CR}\skills\ROUTINE-SKILLS.md`)의 스키마 확인만 한다 — 본문 FAQ와 질문·답 일치, 다른 스키마 추가 없음. 본문은 고치지 않는다.
 
 [4f] 발행 차단 관문 (⛔ 업로드 전 필수)
 

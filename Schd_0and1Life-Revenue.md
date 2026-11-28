@@ -212,6 +212,7 @@ J
 2. **상품 블록 현황** — `applied`·`ready`·`linking`·`searching`·`hold`·`skip` 수 · 이번 주 새로 넣은 글 · `applied` 글 링크 상태(STEP 5-4 링크 검사를 다시 1회).
 3. **쇼핑커넥트 실적** — `0and1life-revenue\inbox\` 에 사용자가 넣은 파일(CSV·XLSX·이미지)이 있으면 읽어 상품·글별 클릭·구매·수수료를 표로 옮긴다(이미지는 클라우드로 stage 해 Read). 없으면 표 대신 `🙋 쇼핑커넥트 실적 파일을 0and1life-revenue\inbox 에 넣어 주세요(브랜드커넥트 > 성과 화면 내보내기 또는 캡처)` 한 줄.
 4. **판단 재료** — 블록을 넣은 글과 안 넣은 글의 클릭 추이, 상품별 클릭 대비 구매(실적이 있을 때). 수치가 없으면 판단을 쓰지 않는다.
+   - 판단 문장은 **스킬 패스 AN**(`{CR}\skills\ROUTINE-SKILLS.md` — cro·analytics)으로 사실·가설·모자란 데이터를 나눠 쓴다.
 5. **오래된 블록** — `applied_at` 이 45일 지난 글은 STEP 6-3부터 다시 돌려 가격·품절을 갱신 대상으로 표시한다(`refresh: true`). 갱신 반영은 STEP 5와 같은 절차로 **기존 블록을 같은 위치에서 교체**한다(블록 수가 늘지 않게).
 6. `weekly_last = TODAY`.
 

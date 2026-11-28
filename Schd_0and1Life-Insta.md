@@ -194,6 +194,7 @@ curl -s "https://0and1life.com/wp-json/wp/v2/posts/{ID}?_fields=id,slug,title,da
 - `build_hf_vars.py` 구조(견본: `2026-10-11\samsung-bonus-tax-refund\build_hf_vars.py`): `scenes = [dict(dur, bg, amb, els=[dict(kind, lv, y, at, parts|text|rows…, sfx=[[시각, 효과음]])…])…]` · `V = dict(speed, series, foot, scenes)` · 장면 경계에 `whoosh`, 요소의 `sfx` 를 모아 `/speed` 한 큐를 `reel-final_timeline.json` 에 쓴다 — **효과음 큐는 반드시 이 값에서만 만든다**(싱크 구조 보장, I-3-4). `speed` 는 `M6` 이면 0.8, 다른 모드는 모드 행의 장면 길이가 나오게 정한다(보통 1.0, 길이는 `dur` 로 조정).
 - 요소 종류(템플릿 공통, `formats\F01·F04·F09·F02` 기준): `text`(lv 1~5 = 34·55·89·144·233, `parts`, `fx`, `split`, `glitch`, `pulse`, `shake`, `punch`) · `sticker` · `card`(`rows`) · `bar`(tease 띠) · `stamp` · `line`(밑줄·동그라미) · `burst` · `invert` · `arrow`(계정 행) · `lock` · `flap`(F09) · `seats`(F04) · `yesbut`(F02). `M2`·`M3` 은 `shake`·`glitch`·`burst`·`punch` 를 쓰지 않는다(I-2-0-E).
 - `caption.txt` 는 지침 I-4-1 순서 · `len(strip()) ≤ 480` · 첫 줄·첫 해시태그 = 핵심 검색어. 7번 줄에 보낼 사람과 꺼내 볼 순간.
+- **스킬 패스 SO → H** (`{CR}\skills\ROUTINE-SKILLS.md` — 2026-11-28): `script.json` 대본과 `caption.txt` 를 확정하기 전에 점검한다. 첫 장면·커버 화면은 **스킬 패스 D**. 대본을 고쳤으면 STEP 4.5-0 ③ 대본 시험을 다시 통과시킨다.
 - `hub_card.json`: `slug, title, date, category, thumb(STEP 9에서 채움), ig_url(""), points[2~3]` · (v3.11, `shop.used=true` 일 때만) `shop: {label: "{물건 종류} 보기", url: "{본문 블록과 같은 URL}"}`.
 - (v3.11, `shop.used=true` 일 때만) `caption.txt` ⑥ 바로 아래 한 줄: `🛒 {물건 종류}는 프로필 링크 → 맨 위 글 아래에 같이 뒀어요` — 상품명·가격·할인·"추천" 강조·URL 금지. 480자를 넘으면 이 줄부터 뺀다.
 
