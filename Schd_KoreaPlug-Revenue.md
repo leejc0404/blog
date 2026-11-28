@@ -251,7 +251,8 @@ ls -la $S/queue $S/queue/_done $S/queue/_failed; tail -5 $S/episodes.csv; tail -
 ### 7-1. 데이터 읽기 (크롬 — 자기 탭 그룹)
 
 1. **서치콘솔 28일 페이지 표** — `https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fkoreaplug.com%2F&breakdown=page&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION&start_date={LATEST−27}&end_date={LATEST}` (LATEST = TODAY−2일, 날짜는 YYYYMMDD). 7초 대기 후 `javascript_tool` 로 표를 읽어 900자씩 나눠 받는다. 반환 문자열에는 `.replace(/[=&?]/g,' ')` 를 붙인다(쿼리 문자열 차단 회피). 사이트 총 클릭·노출·CTR 과 글별 클릭을 `state.json.gsc.{TODAY}` 에 저장한다. 로그인 화면이면 `GSC 읽기 실패` 로 적고 다음으로 간다.
-2. **GA4 유입 경로** — KoreaPlug 속성(계정 a393066616 · 속성 p535142552)의 트래픽 획득 보고서(세션 소스/매체, 최근 7일)를 연다. `google / organic` 을 뺀 상위 소스(youtube.com, reddit, bing, direct 등)의 세션을 적는다. 화면 주소는 GA4 왼쪽 메뉴 `보고서 → 획득 → 트래픽 획득` 에서 날짜를 최근 7일로 맞춰 얻는다. 열리지 않으면 `GA4 미확인`.
+   - **1-b. 7일끼리 비교 (2026-11-29 추가 — 스킬 패스 AN)**: 같은 주소에서 `breakdown=page` 를 빼고 날짜만 바꿔 두 번 더 연다 — 최근 7일 `start_date={LATEST−6}&end_date={LATEST}`, 직전 7일 `start_date={LATEST−13}&end_date={LATEST−7}`. 각 화면 위쪽의 사이트 총 클릭·노출만 읽어 `state.json.gsc.{TODAY}.d7 = {cur:{clicks,impr}, prev:{clicks,impr}}` 에 둔다. 근거: 11-22 보고가 28일 클릭 +58%로 "크게 늘었다"고 썼지만, 같은 보고의 GA4 최근 7일은 직접 유입을 빼면 −22%·구글 자연 약 −30%였다 — 28일 합계는 지난 성수기를 품어 최근 흐름을 가린다.
+2. **GA4 유입 경로** — KoreaPlug 속성(계정 a393066616 · 속성 p535142552)의 트래픽 획득 보고서(세션 소스/매체)를 연다. 날짜는 **1-b 최근 7일과 같은 날짜**(`{LATEST−6}`~`{LATEST}` — GSC가 2일 늦으므로 GA4도 같은 날까지로 맞춘다)로 둔다. 전체 세션, **`google / organic` 세션**(1-b와 맞춰 보는 값), 그 밖의 상위 소스(youtube.com, reddit, bing, direct 등)의 세션을 적는다. 화면 주소는 GA4 왼쪽 메뉴 `보고서 → 획득 → 트래픽 획득` 에서 얻는다. 열리지 않으면 `GA4 미확인`.
 3. **유튜브** — `episodes.csv` 의 `youtube_id` 가 있는 영상과 `studio.youtube.com` 의 콘텐츠 목록(읽기만)에서 공개 여부·조회수·구독자 수를 읽는다. 로그인 화면이면 `유튜브 미확인`. 아무것도 누르지 않는다.
 4. 탭을 모두 닫는다.
 
@@ -274,6 +275,8 @@ ls -la $S/queue $S/queue/_done $S/queue/_failed; tail -5 $S/episodes.csv; tail -
 | 지표 | 지난주 | 이번 주 |
 |---|---|---|
 | 서치콘솔 28일 클릭 / 노출 / CTR | | |
+| 서치콘솔 최근 7일 클릭 / 노출 (직전 7일 → 최근 7일, 증감 %) | | |
+| GA4 같은 7일 — 전체 / google organic / 직접 세션 | | |
 | GA4 구글 외 유입 세션(7일) — 소스별 | | |
 
 ## 사용자 할 일
@@ -283,6 +286,7 @@ ls -la $S/queue $S/queue/_done $S/queue/_failed; tail -5 $S/episodes.csv; tail -
 {log.md 에서 이번 주 줄}
 ```
 지난주 값은 직전 `report-*.md` 에서 읽는다. 없으면 `–`.
+- **(2026-11-29 · 스킬 패스 AN)** 증감·비율은 같은 길이의 기간끼리만 계산하고 스크립트로 낸다(눈대중 금지). 28일 증감과 7일 증감의 **방향이 다르면** 한 줄 요약에 둘 다 쓴다(꼴: "28일 클릭 +{a}%, 그러나 최근 7일은 직전 7일보다 −{b}%"). 7일 값을 못 읽었으면 28일 값으로 "늘었다/줄었다"를 단정하지 않고 `7일 미확인`을 붙인다. 원인 설명("○○ 글이 견인")은 글별 전후 값이 있을 때만 사실로, 없으면 `가설:` 로 쓴다.
 
 ---
 
