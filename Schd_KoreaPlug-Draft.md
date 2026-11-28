@@ -365,6 +365,34 @@ HTML_CONTENT 에 아래 문자열이 있으면 업로드하지 않는다:
 
 **날짜 줄 처리 (2026-10-19 개정)**: HTML_CONTENT 히어로에 `Last updated … | … min read` 줄이 남아 있으면 **갱신하지 않고 그 줄을 지운다**(Writer v13.3 금지 템플릿 지문 — 종전의 '업로드 시점 월로 갱신'은 폐지). 실측: 10/18 발행 `yeot-korean-title-meaning` 에 "Last updated: August 2026 | 7 min read" 가 그대로 남았다. 갱신 사실이 필요하면 인트로 문장("checked on …")으로만 둔다.
 
+**7) FAQPage 스키마 생성 (자동 추가 — 2026-11-29 신설)**
+
+지침서 Writer `2-3`의 FAQ 마크업(`<p><strong>Q. 질문</strong><br>답</p>`)이 **2쌍 이상**이면 FAQPage JSON-LD를 HTML_CONTENT **맨 끝**에 붙인다. 근거: 지침서는 "Draft가 FAQ를 인식해 스키마를 만든다"고 적었지만 이 단계가 없어, 2026-11-29 기준 표준 FAQ가 있는 공개 글 56편 중 스키마가 있는 글은 손으로 넣은 4편뿐이었다. 그 4편 중 1편(seoul-bus-strike)은 본문 FAQ가 7개로 늘었는데 스키마는 5개로 남아 있었다 — 손으로 넣으면 본문과 어긋난다. 그래서 업로드할 때마다 본문에서 새로 만든다.
+
+```bash
+# HTML_CONTENT 를 html.txt 로 저장한 뒤 (Basic Auth 경로와 같은 작업 폴더)
+python3 - html.txt html.txt <<'PY'
+import html, json, re, sys
+h = open(sys.argv[1], encoding="utf-8").read()
+if "FAQPage" in h:
+    print("FAQ스키마 skip-exists"); sys.exit(0)            # 이미 있으면 두 번 넣지 않는다
+pairs = re.findall(r'<p[^>]*>\s*<strong>\s*Q\.\s*(.+?)</strong>\s*<br\s*/?>(.*?)</p>', h, re.S)
+clean = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s))).strip()
+qa = [(clean(q), clean(a)) for q, a in pairs if clean(q) and clean(a)]
+if len(qa) < 2:
+    print(f"FAQ스키마 skip-{len(qa)}pair"); sys.exit(0)
+data = {"@context": "https://schema.org", "@type": "FAQPage",
+        "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa]}
+js = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", r"<\/")
+open(sys.argv[2], "w", encoding="utf-8").write(h.rstrip() + '\n<script type="application/ld+json">' + js + "</script>\n")
+print(f"FAQ스키마 added-{len(qa)}")
+PY
+```
+
+- 질문은 `Q.` 뒤 글자, 답은 `<br>` 뒤 **전문**(태그만 제거 — 0and1Life Draft 4e 2026-11-27 개정과 같은 기준). 문장을 다듬거나 줄이지 않는다.
+- 결과(`added-N` · `skip-exists` · `skip-Npair`)를 오류 로그와 STEP 7 보고에 `FAQ스키마 {결과}` 로 남긴다. `skip-1pair`·`skip-0pair` 인데 본문에 FAQ H2가 있으면 마크업이 지침과 다른 것이므로 사유 코드 `구조-FAQ마크업` 으로 **기록만** 한다(업로드는 계속).
+- 이 스크립트는 본문 문장을 바꾸지 않고 끝에 `<script>` 한 줄만 더한다. 헤더·WPCode·광고 영역은 건드리지 않는다(STEP -1 무관).
+
 ### [5-1] 업로드
 
 POST `/wp-json/wp/v2/posts`
@@ -380,6 +408,8 @@ POST `/wp-json/wp/v2/posts`
 ```
 
 응답에서 WP_POST_ID 기록.
+
+- **(2026-11-29) FAQ 스키마 생존 확인** — [5-0] 7)이 `added-N` 이었으면 `GET /wp-json/wp/v2/posts/{WP_POST_ID}?context=edit&_fields=content` 의 `content.raw` 에서 `"FAQPage"` 가 정확히 1번 나오는지 본다. 0번이면 워드프레스가 `<script>` 를 걸러 낸 것이다(계정 권한 `unfiltered_html` 문제) — 다시 넣지 말고 오류 로그·STEP 7에 `🔴 FAQ스키마 제거됨` 으로 보고한다.
 
 > HTML_CONTENT가 길면(1만 자 이상) javascript_tool 한 번에 넣지 말고 `window.__A`, `window.__B` … 로 나눠 담은 뒤 이어붙여 POST한다. 템플릿 리터럴 안에 백틱·`${` 이 없는지 확인. **Basic Auth(curl) 경로를 쓰면 분할이 불필요하다** — `--data-binary @payload.json` 으로 한 번에 올린다.
 
@@ -436,7 +466,7 @@ m['site-content-style']==='unboxed' && m['ast-banner-title-visibility']==='disab
 ### [6c] Rank Math 설정 — REST 경로 (1순위, 브라우저 불필요)
 
 기준은 **지침서 5-6**. 아래는 실행 방법이다.
-Schema 종류가 글과 맞는지·FAQ 스키마가 본문 FAQ와 일치하는지는 **스킬 패스 SEO**(`{CR}\skills\ROUTINE-SKILLS.md`)로 확인만 한다(2026-11-28 — 본문 수정·스키마 추가 없음).
+Schema 종류가 글과 맞는지·FAQ 스키마가 본문 FAQ와 일치하는지는 **스킬 패스 SEO**(`{CR}\skills\ROUTINE-SKILLS.md`)로 확인만 한다(2026-11-28 — 본문 수정·스키마 추가 없음). FAQPage 스키마는 [5-0] 7)이 본문에서 만든다(2026-11-29) — 여기서는 그 결과가 본문 FAQ와 같은지만 본다.
 
 ⚠️ `wp.data.dispatch('rank-math').updateKeywords()/updateSerpTitle()/…` 은 **에러 없이 성공한 것처럼 보이지만 postmeta에 저장되지 않는다**. **JS dispatch 금지는 v10.6 이후에도 유효하다** — 열린 것은 REST `meta` 필드이지 JS 스토어가 아니다.
 
